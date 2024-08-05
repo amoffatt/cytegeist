@@ -18,12 +18,11 @@ public struct APIError : Error {
 }
 
 @Observable
-@MainActor
 public class APIQuery<T> {
-    public var isLoading:Bool = true
-    public var data:T? = nil
-    public var error:APIError?
-    public var viewPriority: Int = 1
+    public private(set) var isLoading:Bool = true
+    public private(set) var data:T? = nil
+    public private(set) var error:APIError?
+    public private(set) var viewPriority: Int = 1
     
     init() {
         
@@ -33,15 +32,18 @@ public class APIQuery<T> {
         viewPriority = 0
     }
     
+    @MainActor
     func progress(_ result:T) {
         data = result
     }
 
+    @MainActor
     func success(_ result:T) {
         data = result
         isLoading = false
     }
     
+    @MainActor
     func error(_ message:String, _ internalError:Error) {
         isLoading = false
         error = .init(message, internalError)
@@ -92,6 +94,7 @@ public class CytegeistCoreAPI {
                 
                 print("  ==> Data loaded. \(meta.eventCount) events, \(String(describing: meta.parameters?.count)) parameters")
                 guard let parameter = sample.parameter(named: parameterName) else {
+                    print(sample.meta.parameterLookup.debugDescription)
                     throw APIError("Parameter '\(parameterName) not found")
                 }
                 
@@ -114,16 +117,16 @@ public class CytegeistCoreAPI {
         return result
     }
     
-    public func metadata(sampleRef:SampleRef) -> APIQuery<FCSMetadata> {
-        let result = APIQuery<FCSMetadata>()
+    public func loadSample(sampleRef:SampleRef, includeData:Bool = true) -> APIQuery<FCSFile> {
+        let result = APIQuery<FCSFile>()
 
         Task.detached {
             do {
                 print("Loading data for '\(sampleRef.filename)'")
-                let sample = try self.loadSample(ref: sampleRef, includeData: false)
+                let sample = try self.loadSample(ref: sampleRef, includeData: includeData)
                 
                 await MainActor.run {
-                    result.success(sample.meta)
+                    result.success(sample)
                 }
                 
             } catch {

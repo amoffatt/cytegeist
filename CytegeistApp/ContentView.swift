@@ -9,8 +9,10 @@ import SwiftUI
 import RealityKit
 import CytegeistCore
 
+@MainActor
 struct ContentView: View {
     @State var showFCSSelector: Bool = false
+    @State var sample:SampleRef = SampleRef(url:DemoData.facsDivaSample0!)
     
     @State var core:CytegeistCoreAPI = CytegeistCoreAPI()
 
@@ -19,7 +21,8 @@ struct ContentView: View {
             //            Model3D(named: "Scene", bundle: realityKitContentBundle)
             //                .padding(.bottom, 50)
 
-            Text("Hello, world!")
+            Text("Sample Inspector")
+                .font(.headline)
 
             //            ToggleImmersiveSpaceButton()
             Button {
@@ -27,7 +30,8 @@ struct ContentView: View {
             } label: {
                 Text("Load FCS File")
             }
-            ChartView(core, sample:SampleRef(url:DemoData.sample0!), parameterName: "FSC-A")
+//            ChartView(core, sample:SampleRef(url:DemoData.facsDivaSample0!), parameterName: "FSC-A")
+            SampleInspectorView(core, sample: sample)
         }
         .padding()
         .fileImporter(
@@ -40,22 +44,22 @@ struct ContentView: View {
     func handleFCSFileSelected(result:Result<[URL], any Error>) {
         switch result {
         case .success(let urls):
-            importFCSFile(url: urls[0])
+            sample = SampleRef(url:urls[0])
 
         case .failure(let err):
             print("Error selecting FCS file: ", err)
         }
     }
 
-    func importFCSFile(url:URL) {
-        do {
-            let reader = FCSReader()
-            let fcsFile = try reader.readFCSFile(at: url)
-            print("FCS file events: \(fcsFile.meta.eventCount)")
-        } catch {
-            print("Error reading FCS File at '\(url): \(error)")
-        }
-    }
+//    func importFCSFile(url:URL) {
+//        do {
+//            let reader = FCSReader()
+//            let fcsFile = try reader.readFCSFile(at: url)
+//            print("FCS file events: \(fcsFile.meta.eventCount)")
+//        } catch {
+//            print("Error reading FCS File at '\(url): \(error)")
+//        }
+//    }
 }
 
 #Preview() {

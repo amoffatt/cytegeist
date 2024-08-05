@@ -23,7 +23,7 @@ public struct ChartView: View {
     public var body: some View {
         VStack {
             Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
-            HistogramView(data: core.histogram(sample: sample, parameterName: parameterName))
+            HistogramView(data: core.histogram(sampleRef: sample, parameterName: parameterName))
 //            Selector()
         }
         .frame(width: 400, height: 400)
@@ -33,7 +33,7 @@ public struct ChartView: View {
 #Preview {
     let core = CytegeistCoreAPI()
 //    return VStack { Text("Test world")}
-    let sample = SampleRef(url: DemoData.sample0!)
+    let sample = SampleRef(url: DemoData.facsDivaSample0!)
     let parameter = "FSC-H"
 //
     return ChartView(core, sample: sample, parameterName: parameter)

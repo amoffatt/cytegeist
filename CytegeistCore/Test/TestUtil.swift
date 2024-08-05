@@ -33,7 +33,7 @@ public class TestUtil {
             await MainActor.run {
                 var bins:[Int] = Array(repeating: 0, count: 256)
                 TestUtil.addNormalDistribution(to: &bins, amplitude: 8, mean: 0.3, stdDev: 0.2)
-                result.data = HistogramData(bins: bins, xAxis: LinearAxisNormalizer(min: 0, max: 200))
+                result.progress(HistogramData(bins: bins, xAxis: LinearAxisNormalizer(min: 0, max: 200)))
             }
             
             await sleep(2)
@@ -41,8 +41,7 @@ public class TestUtil {
             await MainActor.run {
                 var bins = result.data!.bins
                 TestUtil.addNormalDistribution(to: &bins, amplitude: 1.5, mean: 0.8, stdDev: 0.05)
-                result.data = HistogramData(bins: bins, xAxis: LinearAxisNormalizer(min: -10.1, max: 300))
-                result.isLoading = false
+                result.success(HistogramData(bins: bins, xAxis: LinearAxisNormalizer(min: -10.1, max: 300)))
             }
             
         }

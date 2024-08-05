@@ -10,6 +10,16 @@ import Foundation
 public typealias FCSParameterValueReader = (DataBufferReader) throws -> Float
 
 public struct FCSParameter {
+    public static func displayName(_ name:String, _ stain:String) -> String {
+        if name == stain {
+            return name
+        }
+        if stain.isEmpty {
+            return name
+        }
+        return "\(name) : \(stain)"
+    }
+    
     public let name: String
     public let stain: String
     public let displayName: String
@@ -44,9 +54,23 @@ public enum FCSDataType: String {
     case unicode = "U"
 }
 
+
+public struct StringField : Identifiable {
+    public var id:String { name }
+    
+    public let name:String
+    public let value:String
+    public init(_ name: String, _ value: String) {
+        self.name = name
+        self.value = value
+    }
+}
+
+
 public struct FCSMetadata {
     
-    public var text: [String: String] = [:]
+    public private(set) var keywords: [StringField] = []
+    public private(set) var keywordLookup: [String:String] = [:]
 
     public var eventCount: Int = 0
     public var dataType: FCSDataType = .integer
@@ -70,18 +94,72 @@ public struct FCSMetadata {
             })
         }
     }
+    
+    mutating public func addKeyword(_ name:String, _ value:String) {
+        guard keywordLookup[name] == nil else {
+            print("Keyword '\(name)' already found in file')")
+            return
+        }
+        keywords.append(.init(name, value))
+        keywordLookup[name] = value
+    }
 
 //    public var parameter
 }
 
-public struct SampleNumericData {
+public struct EventData: Identifiable {
+    public let id: Int
+    public let values: [Float]
+}
+
+public struct SampleNumericData: RandomAccessCollection {
+    public typealias Element = EventData
+    
+    public typealias Index = Int
+    
+    public typealias SubSequence = SampleNumericData
+    
+    public typealias Indices = Range<Int>
+    
+    public var startIndex: Int {
+        return parameterData.isEmpty ? 0 : parameterData[0].startIndex
+    }
+
+    public var endIndex: Int {
+        return parameterData.isEmpty ? 0 : parameterData[0].endIndex
+    }
+    
+    public var count:Int {
+        parameterData.isEmpty ? 0 : parameterData[0].count
+    }
+
+    // Subscript to access elements
+    public subscript(position: Int) -> EventData {
+        precondition(position >= startIndex && position < endIndex, "Index out of bounds")
+        let values = parameterData.map { $0[position] }
+        return EventData(id: position, values: values)
+    }
+    
+    public subscript(bounds: Range<Int>) -> SampleNumericData {
+        let slicedData = parameterData.map { Array($0[bounds]) }
+        return SampleNumericData(data: slicedData)
+    }
+    
+    public func index(after i: Int) -> Int {
+        return i + 1
+    }
+
+    public func index(before i: Int) -> Int {
+        return i - 1
+    }
+    
+    
     public let parameterData:[[Float]]
 //    public let parameterNames:[String]
     
-    init(data:[[Float]]) throws {
+    init(data:[[Float]]) {
         parameterData = data
     }
-    
     
 }
 
@@ -152,22 +230,21 @@ public class FCSReader {
         
         
         
-        var metadata:[String:String] = [:]
         let keyValuePairs = textString.splitWithDoubleEscaping(separator: separator)
         for i in stride(from: 0, to: keyValuePairs.count - 1, by: 2) {
             let key = keyValuePairs[i].trimmingCharacters(in: .whitespaces)
             let value = keyValuePairs[i + 1].trimmingCharacters(in: .whitespaces)
-            metadata[key] = value
+            fcs.addKeyword(key, value)
         }
+        let keywords = fcs.keywordLookup
         
-        fcs.text = metadata
         
         var dataRange = header.dataRange
         if dataRange.upperBound == 0 {
-            dataRange = dataRange.update(upperBound: Int(metadata["$ENDDATA"].nonNil))
+            dataRange = dataRange.update(upperBound: Int(keywords["$ENDDATA"].nonNil))
         }
         if dataRange.lowerBound == 0 {
-            dataRange = dataRange.update(lowerBound: Int(metadata["$BEGINDATA"].nonNil))
+            dataRange = dataRange.update(lowerBound: Int(keywords["$BEGINDATA"].nonNil))
         }
         header.dataRange = dataRange
 
@@ -180,19 +257,19 @@ public class FCSReader {
         // Parse data based on parameters
 //        var byteOffset = 0
 //        let eventCount = dataSegment.count / (fcsFile.parameters.reduce(0) { $0 + ($1.bits + 7) / 8 })
-        let eventCount = Int(metadata["$TOT"]!)!
+        let eventCount = Int(keywords["$TOT"]!)!
         fcs.eventCount = eventCount
-        fcs.system = metadata["$SYS"]!
-        fcs.cytometer = metadata["$CYT"].nonNil
-        fcs.date = metadata["$DATE"].nonNil
-        fcs.dataType = FCSDataType(rawValue: metadata["$DATATYPE"].nonNil)!
-        fcs.byteOrder = FCSByteOrder(rawValue: metadata["$BYTEORD"].nonNil)
+        fcs.system = keywords["$SYS"]!
+        fcs.cytometer = keywords["$CYT"].nonNil
+        fcs.date = keywords["$DATE"].nonNil
+        fcs.dataType = FCSDataType(rawValue: keywords["$DATATYPE"].nonNil)!
+        fcs.byteOrder = FCSByteOrder(rawValue: keywords["$BYTEORD"].nonNil)
         
         
         // Parse parameters
-        let parameterCount = Int(fcs.text["$PAR"]!)!
+        let parameterCount = Int(keywords["$PAR"]!)!
         let parameters:[FCSParameter] = try (1...parameterCount).map { n in
-            try self.readParameterInfo(metadata, n:n, dataType: fcs.dataType)
+            try self.readParameterInfo(keywords, n:n, dataType: fcs.dataType)
         }
         fcs.parameters = parameters
 
@@ -243,7 +320,7 @@ public class FCSReader {
         let bits = Int(metadata["$P\(n)B"]!)!
         let range = Double(metadata["$P\(n)R"]!)!
         let filter = metadata["$P\(n)F"].nonNil
-        let displayName = name == stain ? name : "\(name) : \(stain)"
+        let displayName = FCSParameter.displayName(name, stain)
         let normalizer = LinearAxisNormalizer(min:0, max:Float(range))
         let valueReader = try createParameterValueReader(dataType: dataType, bits: bits)
         

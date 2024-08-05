@@ -12,16 +12,49 @@ import SwiftUI
 public struct ParameterInspectorView: View {
     let core:CytegeistCoreAPI
     let sample:SampleRef
-    let parameterName:String
+    let parameter:FCSParameter
     
     public var body: some View {
-        VStack {
-            HistogramView(data: core.histogram(sample: sample, parameterName: parameterName))
-            Text(parameterName)
+        VStack() {
+            HStack {
+//                Table(displayFields()) {
+//                    TableColumn("Field", value:\.name)
+//                    TableColumn("Value", value:\.value)
+//                }
+                
+//                .tableColumnHeaders(.hidden)
+//                .font(.footnote)
+                Grid {
+                    ForEach(displayFields()) { field in
+                        GridRow {
+                            Text(field.name)
+                                .font(.body)
+                                .fontWeight(.bold)
+                                .frame(maxWidth:.infinity, alignment: .leading)
+                            Text(field.value)
+                                .font(.body)
+                                .frame(maxWidth:.infinity, alignment: .leading)
+                        }
+                    }
+                }
+                
+                HistogramView(data: core.histogram(sampleRef: sample, parameterName: parameter.name))
+            }
+            Text(parameter.displayName)
                 .font(.headline)
         }
         .padding()
         .background(Color.gray.opacity(0.2))
         .cornerRadius(10)
+    }
+    
+    private func displayFields() -> [StringField] {
+        [
+            .init("Name", parameter.name),
+            .init("Stain", parameter.stain),
+            .init("Filter", parameter.filter),
+            .init("Range", String(parameter.range)),
+            .init("Bits", String(parameter.bits)),
+        ]
     }
 }
