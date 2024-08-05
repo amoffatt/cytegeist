@@ -6,7 +6,7 @@
 //
 
 import XCTest
-import CytegeistLibrary
+import CytegeistCore
 
 final class CytegeistTests: XCTestCase {
 
@@ -44,7 +44,7 @@ final class CytegeistTests: XCTestCase {
         print("Testing FCS Reader...")
         let reader = FCSReader()
 
-        let testDataURL = Bundle(for: type(of: self)).url(forResource: "TestData", withExtension: nil)!
+        let testDataURL = Bundle(for: FCSReader.self).url(forResource: "TestData", withExtension: nil)!
         let fileManager = FileManager.default
         let enumerator = fileManager.enumerator(at: testDataURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
         var errors = 0
@@ -54,14 +54,14 @@ final class CytegeistTests: XCTestCase {
                 let filePath = fileURL.path
                 print("FCS File Path: \(filePath)")
                 do {
-                    try ExceptionCatcher.catchException {
-                        do {
+//                    try ExceptionCatcher.catchException {
+//                        do {
                             let fcsFile = try reader.readFCSFile(at: fileURL)
-                            print(" ==> Event Count: \(fcsFile.eventCount)")
-                        }catch {
-                            print(" ==> Caught file read error: \(error)")
-                        }
-                    }
+                    print(" ==> Event Count: \(fcsFile.meta.eventCount)")
+//                        }catch {
+//                            print(" ==> Caught file read error: \(error)")
+//                        }
+//                    }
                 } catch {
                     print(" ==> Error reading FCS file: \(error)")
                     errors += 1
