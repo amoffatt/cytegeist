@@ -5,6 +5,8 @@
 //  Created by Aaron Moffatt on 7/14/24.
 //
 
+import Foundation
+
 
 extension Collection where Element: AdditiveArithmetic {
     public func sum() -> Element {
@@ -52,6 +54,40 @@ public struct LinearAxisNormalizer : AxisNormalizer {
     public func unnormalize(_ x: Float) -> Float {
         clamp01(x) * span + min
     }
+}
+
+public struct LogAxisNormalizer: AxisNormalizer {
+    public let min: Float
+    
+    public let max: Float
+    
+    private let base:Float
+    private let logMin:Float
+    private let logMax:Float
+    private let logSpan:Float
+    
+
+    public init(min:Float, max:Float, base:Float = 10) {
+        self.min = min
+        self.max = max
+        self.base = base
+        logMin = log(min) / log(base)
+        logMax = log(max) / log(base)
+        logSpan = logMax - logMin
+    }
+    
+    public func normalize(_ x: Float) -> Float {
+        let clamped = clamp(x, min:min, max:max)
+        return (log(clamped) - logMin) / logSpan
+    }
+    
+    public func unnormalize(_ x: Float) -> Float {
+        let clamped = clamp01(x)
+        let logValue = (clamped * logSpan) + logMin
+        return pow(base, logValue)
+    }
+    
+    
 }
 
 

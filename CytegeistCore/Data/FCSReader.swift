@@ -27,6 +27,7 @@ public struct FCSParameter {
     public var bytes: Int { (bits + 7) / 8 }
     public let range: Double
     public let filter: String
+    public let displayInfo: String
     public let normalizer: AxisNormalizer
     public let valueReader: FCSParameterValueReader
 }
@@ -320,12 +321,14 @@ public class FCSReader {
         let bits = Int(metadata["$P\(n)B"]!)!
         let range = Double(metadata["$P\(n)R"]!)!
         let filter = metadata["$P\(n)F"].nonNil
+        let displayInfo = metadata["P\(n)DISPLAY"].nonNil
         let displayName = FCSParameter.displayName(name, stain)
-        let normalizer = LinearAxisNormalizer(min:0, max:Float(range))
+        let normalizer = createParameterNormalizer(max: Float(range), displayInfo: displayInfo)
         let valueReader = try createParameterValueReader(dataType: dataType, bits: bits)
         
         return FCSParameter(name: name, stain: stain, displayName: displayName,
                                 bits: bits, range: range, filter: filter,
+                                displayInfo: displayInfo,
                                 normalizer: normalizer,
                                 valueReader: valueReader
                                 )
@@ -333,6 +336,14 @@ public class FCSReader {
     
     private func error(_ description:String) -> Error {
         DataReaderError("FCSReaderError: \(description)")
+    }
+    
+    private func createParameterNormalizer(max:Float, displayInfo:String) -> AxisNormalizer {
+        if displayInfo == "LOG" && max > 1 {
+            return LogAxisNormalizer(min: 1, max: max)
+        }
+        
+        return LinearAxisNormalizer(min: 0, max: max)
     }
     
     private func createParameterValueReader(dataType:FCSDataType, bits:Int) throws -> FCSParameterValueReader {

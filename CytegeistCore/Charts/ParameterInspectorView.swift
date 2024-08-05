@@ -53,6 +53,7 @@ public struct ParameterInspectorView: View {
             .init("Name", parameter.name),
             .init("Stain", parameter.stain),
             .init("Filter", parameter.filter),
+            .init("Display", parameter.displayInfo),
             .init("Range", String(parameter.range)),
             .init("Bits", String(parameter.bits)),
         ]
