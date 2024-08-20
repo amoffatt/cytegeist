@@ -16,7 +16,7 @@ extension CGImage {
         return Image(nsImage: nsImage)
 #elseif canImport(UIKit)
         let uiImage = UIImage(cgImage: self)
-        return Image(uiImage: nsImage)
+        return Image(uiImage: uiImage)
 
 #else
         print("Error: Platform cannot convert CGImage to SwiftUI Image")

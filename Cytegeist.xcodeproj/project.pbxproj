@@ -32,13 +32,18 @@
 		B64173992C59A06F001AA2F4 /* UIViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = B64173982C59A06F001AA2F4 /* UIViews.swift */; };
 		B641739B2C59A888001AA2F4 /* Populations.swift in Sources */ = {isa = PBXBuildFile; fileRef = B641739A2C59A888001AA2F4 /* Populations.swift */; };
 		B641739D2C5C4E00001AA2F4 /* ParameterInspectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B641739C2C5C4E00001AA2F4 /* ParameterInspectorView.swift */; };
-		B641739F2C5C4EE0001AA2F4 /* SampleInspectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B641739E2C5C4EE0001AA2F4 /* SampleInspectorView.swift */; };
 		B65D82A92C44BE7100E4F0A2 /* RealityKitContent in Frameworks */ = {isa = PBXBuildFile; platformFilters = (xros, ); productRef = B65D82A82C44BE7100E4F0A2 /* RealityKitContent */; settings = {ATTRIBUTES = (Weak, ); }; };
 		B65D82AB2C44BE7100E4F0A2 /* CytegeistApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B65D82AA2C44BE7100E4F0A2 /* CytegeistApp.swift */; };
 		B65D82AD2C44BE7100E4F0A2 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B65D82AC2C44BE7100E4F0A2 /* ContentView.swift */; };
 		B65D82AF2C44BE7100E4F0A2 /* ImmersiveView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B65D82AE2C44BE7100E4F0A2 /* ImmersiveView.swift */; };
 		B65D82B12C44BE7200E4F0A2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B65D82B02C44BE7200E4F0A2 /* Assets.xcassets */; };
 		B65D82B42C44BE7200E4F0A2 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B65D82B32C44BE7200E4F0A2 /* Preview Assets.xcassets */; };
+		B68529692C74DBB500EF9EF4 /* ComputeCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = B68529682C74DBB500EF9EF4 /* ComputeCache.swift */; };
+		B685296D2C74DBD700EF9EF4 /* Colormaps.swift in Sources */ = {isa = PBXBuildFile; fileRef = B685296A2C74DBD700EF9EF4 /* Colormaps.swift */; };
+		B685296E2C74DBD700EF9EF4 /* GraphicsUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = B685296B2C74DBD700EF9EF4 /* GraphicsUtil.swift */; };
+		B685296F2C74DBD700EF9EF4 /* VectorUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = B685296C2C74DBD700EF9EF4 /* VectorUtil.swift */; };
+		B68529732C74DC1100EF9EF4 /* PairCharts.swift in Sources */ = {isa = PBXBuildFile; fileRef = B68529702C74DC1100EF9EF4 /* PairCharts.swift */; };
+		B68529742C74DC1100EF9EF4 /* SampleInspectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B68529712C74DC1100EF9EF4 /* SampleInspectorView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -112,7 +117,6 @@
 		B64173982C59A06F001AA2F4 /* UIViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIViews.swift; sourceTree = "<group>"; };
 		B641739A2C59A888001AA2F4 /* Populations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Populations.swift; sourceTree = "<group>"; };
 		B641739C2C5C4E00001AA2F4 /* ParameterInspectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParameterInspectorView.swift; sourceTree = "<group>"; };
-		B641739E2C5C4EE0001AA2F4 /* SampleInspectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleInspectorView.swift; sourceTree = "<group>"; };
 		B65D82A32C44BE7100E4F0A2 /* CytegeistApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CytegeistApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B65D82A72C44BE7100E4F0A2 /* RealityKitContent */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = RealityKitContent; sourceTree = "<group>"; };
 		B65D82AA2C44BE7100E4F0A2 /* CytegeistApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CytegeistApp.swift; sourceTree = "<group>"; };
@@ -121,6 +125,12 @@
 		B65D82B02C44BE7200E4F0A2 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B65D82B32C44BE7200E4F0A2 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		B65D82B52C44BE7200E4F0A2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		B68529682C74DBB500EF9EF4 /* ComputeCache.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ComputeCache.swift; sourceTree = "<group>"; };
+		B685296A2C74DBD700EF9EF4 /* Colormaps.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Colormaps.swift; sourceTree = "<group>"; };
+		B685296B2C74DBD700EF9EF4 /* GraphicsUtil.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GraphicsUtil.swift; sourceTree = "<group>"; };
+		B685296C2C74DBD700EF9EF4 /* VectorUtil.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VectorUtil.swift; sourceTree = "<group>"; };
+		B68529702C74DC1100EF9EF4 /* PairCharts.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PairCharts.swift; sourceTree = "<group>"; };
+		B68529712C74DC1100EF9EF4 /* SampleInspectorView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SampleInspectorView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -174,6 +184,9 @@
 		B610A5732C54269A0081C517 /* Util */ = {
 			isa = PBXGroup;
 			children = (
+				B685296A2C74DBD700EF9EF4 /* Colormaps.swift */,
+				B685296B2C74DBD700EF9EF4 /* GraphicsUtil.swift */,
+				B685296C2C74DBD700EF9EF4 /* VectorUtil.swift */,
 				B610A5702C54269A0081C517 /* CollectionUtil.swift */,
 				B610A5712C54269A0081C517 /* MathUtil.swift */,
 				B610A5722C54269A0081C517 /* StringUtils.swift */,
@@ -188,6 +201,7 @@
 		B63D162F2C55E50D00E81C2F /* CytegeistCore */ = {
 			isa = PBXGroup;
 			children = (
+				B68529722C74DC1100EF9EF4 /* UI */,
 				B63D16972C55EECA00E81C2F /* TestData */,
 				B64173902C58A88A001AA2F4 /* Test */,
 				B63EEE8E2C569BFA00E465C9 /* Core */,
@@ -213,7 +227,6 @@
 				B63D16A02C5620F900E81C2F /* ChartView.swift */,
 				B63D16A22C56214400E81C2F /* HistogramView.swift */,
 				B641739C2C5C4E00001AA2F4 /* ParameterInspectorView.swift */,
-				B641739E2C5C4EE0001AA2F4 /* SampleInspectorView.swift */,
 			);
 			path = Charts;
 			sourceTree = "<group>";
@@ -221,6 +234,7 @@
 		B63EEE8E2C569BFA00E465C9 /* Core */ = {
 			isa = PBXGroup;
 			children = (
+				B68529682C74DBB500EF9EF4 /* ComputeCache.swift */,
 				B63EEE8F2C569C7600E465C9 /* CytegeistCore.swift */,
 			);
 			path = Core;
@@ -285,6 +299,15 @@
 				B65D82B32C44BE7200E4F0A2 /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		B68529722C74DC1100EF9EF4 /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				B68529702C74DC1100EF9EF4 /* PairCharts.swift */,
+				B68529712C74DC1100EF9EF4 /* SampleInspectorView.swift */,
+			);
+			path = UI;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -464,9 +487,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B641739F2C5C4EE0001AA2F4 /* SampleInspectorView.swift in Sources */,
+				B68529732C74DC1100EF9EF4 /* PairCharts.swift in Sources */,
 				B63D169A2C55F52D00E81C2F /* ExceptionCatcher.m in Sources */,
 				B64173972C599B09001AA2F4 /* ThreadUtil.swift in Sources */,
+				B68529742C74DC1100EF9EF4 /* SampleInspectorView.swift in Sources */,
 				B641739D2C5C4E00001AA2F4 /* ParameterInspectorView.swift in Sources */,
 				B63EEE942C569D7300E465C9 /* Histogram.swift in Sources */,
 				B64173942C58AB2B001AA2F4 /* DemoData.swift in Sources */,
@@ -475,12 +499,16 @@
 				B63EEE922C569CB300E465C9 /* SampleRef.swift in Sources */,
 				B64173922C58A89A001AA2F4 /* TestUtil.swift in Sources */,
 				B64173992C59A06F001AA2F4 /* UIViews.swift in Sources */,
+				B685296E2C74DBD700EF9EF4 /* GraphicsUtil.swift in Sources */,
 				B63D16492C55E54500E81C2F /* CollectionUtil.swift in Sources */,
 				B641739B2C59A888001AA2F4 /* Populations.swift in Sources */,
 				B63D164A2C55E54500E81C2F /* MathUtil.swift in Sources */,
+				B685296D2C74DBD700EF9EF4 /* Colormaps.swift in Sources */,
 				B63D164B2C55E54500E81C2F /* StringUtils.swift in Sources */,
 				B63D164C2C55E54500E81C2F /* DataBufferReader.swift in Sources */,
 				B63EEE902C569C7700E465C9 /* CytegeistCore.swift in Sources */,
+				B68529692C74DBB500EF9EF4 /* ComputeCache.swift in Sources */,
+				B685296F2C74DBD700EF9EF4 /* VectorUtil.swift in Sources */,
 				B63D164D2C55E54500E81C2F /* FCSReader.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

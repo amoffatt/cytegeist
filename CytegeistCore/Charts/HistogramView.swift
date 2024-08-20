@@ -7,7 +7,6 @@
 
 import SwiftUI
 import Charts
-import AppKit
 
 struct HistogramView: View {
     let query:APIQuery<CachedHistogram<_1D>>

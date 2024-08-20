@@ -302,7 +302,7 @@ public struct HistogramData<D:Dim> {
 
     public init(bins: [Int], size: D.IntCoord, axes: D.Axes, countAxis: AxisNormalizer? = nil) {
         self.maxCount = bins.max() ?? 0
-        let binScaling = max(1, Double(maxCount) / 255.0)
+        let binScaling = Double(max(1, maxCount)) / 255.0
         self.bins = bins.map { UInt8(Double($0) / binScaling) }
         self.binScaling = binScaling
         
