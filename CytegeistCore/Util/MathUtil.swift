@@ -67,15 +67,17 @@ public struct AxisNormalizer: Hashable {
     }
     
     public static func log(min:Float, max:Float, base:Float = 10) -> AxisNormalizer {
-        let logMin = Darwin.log(min) / Darwin.log(base)
-        let logMax = Darwin.log(max) / Darwin.log(base)
+        let logBase = Darwin.log(base)
+        let logMin = Darwin.log(min) / logBase
+        let logMax = Darwin.log(max) / logBase
         let logSpan = logMax - logMin
 
         return .init(
             min, max, .log(base:base),
             normalize: {
                 let clamped = clamp($0, min:min, max:max)
-                return (Darwin.log(clamped) - logMin) / logSpan
+                let normalized = (Darwin.log(clamped) / logBase - logMin) / logSpan
+                return normalized
             },
             unnormalize: {
                 let clamped = clamp01($0)
