@@ -57,11 +57,11 @@ final class CytegeistTests: XCTestCase {
 //                    try ExceptionCatcher.catchException {
 //                        do {
                             let fcsFile = try reader.readFCSFile(at: fileURL)
-                    print(" ==> Event Count: \(fcsFile.meta.eventCount)")
-//                        }catch {
-//                            print(" ==> Caught file read error: \(error)")
-//                        }
-//                    }
+                            print(" ==> Event Count: \(fcsFile.meta.eventCount)")
+                        }catch {
+                            print(" ==> Caught file read error: \(error)")
+                        }
+                    }
                 } catch {
                     print(" ==> Error reading FCS file: \(error)")
                     errors += 1

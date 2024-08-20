@@ -23,9 +23,9 @@ public class TestUtil {
     
     
     @MainActor
-    public static func histogram() -> APIQuery<HistogramData> {
+    public static func histogram() -> APIQuery<CachedHistogram<_1D>> {
         
-        let result:APIQuery<HistogramData> = APIQuery()
+        let result:APIQuery<CachedHistogram<_1D>> = APIQuery()
         
         Task.detached {
             await sleep(2.0)
@@ -33,15 +33,24 @@ public class TestUtil {
             await MainActor.run {
                 var bins:[Int] = Array(repeating: 0, count: 256)
                 TestUtil.addNormalDistribution(to: &bins, amplitude: 8, mean: 0.3, stdDev: 0.2)
-                result.progress(HistogramData(bins: bins, xAxis: LinearAxisNormalizer(min: 0, max: 200)))
+                result.progress(
+                    .init(histogram:
+                        HistogramData(
+                            bins: bins,
+                            size: .init(bins.count),
+                            axes: .init(.linear(min: 0, max: 200))),
+                        view: nil
+                    )
+                )
             }
             
             await sleep(2)
             
             await MainActor.run {
-                var bins = result.data!.bins
-                TestUtil.addNormalDistribution(to: &bins, amplitude: 1.5, mean: 0.8, stdDev: 0.05)
-                result.success(HistogramData(bins: bins, xAxis: LinearAxisNormalizer(min: -10.1, max: 300)))
+                // AM DEBUGGING
+//                var bins = result.data!.bins
+//                TestUtil.addNormalDistribution(to: &bins, amplitude: 1.5, mean: 0.8, stdDev: 0.05)
+//                result.success(HistogramData(bins: bins, xAxis: LinearAxisNormalizer(min: -10.1, max: 300)))
             }
             
         }

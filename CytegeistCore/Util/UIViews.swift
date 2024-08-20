@@ -22,9 +22,23 @@ struct LoadingOverlay<Content: View>: View {
                     .edgesIgnoringSafeArea(.all)
                 ProgressView()
                     .progressViewStyle(CircularProgressViewStyle())
-                    .scaleEffect(3)
+                    .scaleEffect(1.5)
             }
         }
         .animation(.easeInOut, value: isLoading)
+    }
+}
+
+
+public struct Print: View {
+    let value: String
+    
+    public init(_ value: String) {
+        self.value = value
+    }
+    
+    public var body: some View {
+        print(value)
+        return EmptyView()
     }
 }

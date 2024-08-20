@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import CytegeistCore
 
 @main
 @MainActor
@@ -18,6 +19,11 @@ struct CytegeistApp: App {
             ContentView()
                 .environment(appModel)
         }
+        #if os(macOS)
+        Window("Pair Charts", id: "pair-charts") {
+            PairChartsPreview()
+        }
+        #endif
 
 //        ImmersiveSpace(id: appModel.immersiveSpaceID) {
 //            ImmersiveView()

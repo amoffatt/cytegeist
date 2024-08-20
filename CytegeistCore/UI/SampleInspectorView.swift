@@ -44,7 +44,7 @@ public struct SampleInspectorView: View {
             }
         }
         .onChange(of: sample.url, initial: true) {
-            query = core.loadSample(sampleRef: sample, includeData: true)
+            query = core.loadSample(.init(sampleRef: sample, includeData: true))
         }
     }
     
@@ -52,11 +52,8 @@ public struct SampleInspectorView: View {
         VStack {
             Text("Keywords")
                 .font(.title)
-            if let metadata = query?.data?.meta {
-                Table(metadata.keywords) {
-                    TableColumn("Name", value:\.name)
-                    TableColumn("Value", value:\.value)
-                }
+            if let keywords = query?.data?.meta.keywords {
+                KeywordsTable(keywords: keywords)
             }
         }
     }
@@ -91,6 +88,24 @@ public struct SampleInspectorView: View {
         }
     }
 }
+
+public struct KeywordsTable: View {
+    let keywords:[StringField]
+    @State var filter:String = ""
+    
+    public var body: some View {
+        let filtered = keywords.filter {
+            $0.name.localizedCaseInsensitiveContains(filter) ||
+            $0.value.localizedCaseInsensitiveContains(filter)
+        }
+        Table(filtered) {
+            TableColumn("Name", value:\.name)
+            TableColumn("Value", value:\.value)
+        }
+        .searchable(text:$filter)
+    }
+}
+    
 
 public struct ParameterGalleryView: View {
     let columns = [

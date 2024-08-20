@@ -12,18 +12,18 @@ public struct ChartView: View {
 //    todoFileQueryAPI() // ?
     let core: CytegeistCoreAPI
     @State var sample: SampleRef
-    @State var parameterName: String
+    @State var parameterNames: Tuple2<String>
     
-    public init(_ core: CytegeistCoreAPI, sample: SampleRef, parameterName: String) {
+    public init(_ core: CytegeistCoreAPI, sample: SampleRef, parameterNames: Tuple2<String>) {
         self.core = core
         self.sample = sample
-        self.parameterName = parameterName
+        self.parameterNames = parameterNames
     }
     
     public var body: some View {
         VStack {
-            Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
-            HistogramView(data: core.histogram(sampleRef: sample, parameterName: parameterName))
+            HistogramView(query: core.histogram(.init(population: .init(sample), axisNames: .init(parameterNames.x))))
+//            Histogram2DView(data: core.histogram2D(sampleRef: sample, parameterNames: parameterNames))
 //            Selector()
         }
         .frame(width: 400, height: 400)
@@ -34,7 +34,7 @@ public struct ChartView: View {
     let core = CytegeistCoreAPI()
 //    return VStack { Text("Test world")}
     let sample = SampleRef(url: DemoData.facsDivaSample0!)
-    let parameter = "FSC-H"
+    let parameters = Tuple2("FSC-A", "PacificBlue-A")
 //
-    return ChartView(core, sample: sample, parameterName: parameter)
+    return ChartView(core, sample: sample, parameterNames: parameters)
 }

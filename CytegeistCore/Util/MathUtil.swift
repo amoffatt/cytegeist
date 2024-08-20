@@ -23,70 +23,96 @@ public func clamp01<T:Numeric&Comparable>(_ x:T) -> T {
     clamp(x, min: 0, max: 1)
 }
 
-
-public protocol AxisNormalizer {
-    
-    var min: Float { get }
-    var max: Float { get }
-    
-    func normalize(_ x:Float) -> Float
-    func unnormalize(_ x:Float) -> Float
-}
-
-public struct LinearAxisNormalizer : AxisNormalizer {
-    
-    public static let unit:AxisNormalizer = LinearAxisNormalizer(min:0, max:1)
-    
-    public let min: Float
-    public let max: Float
-    public let span: Float
-    
-    public init(min: Float, max: Float) {
-        self.min = min
-        self.max = max
-        self.span = max - min
+extension UInt8 {
+    static func fromUnitFloat(_ value:Float) -> UInt8 {
+        UInt8(clamp01(value) * 255 + 0.5)
     }
     
-    public func normalize(_ x: Float) -> Float {
-        clamp01((x - min) / span)
-    }
-    
-    public func unnormalize(_ x: Float) -> Float {
-        clamp01(x) * span + min
+    // Convert to float in range 0...1
+    var unitFloat:Float {
+        Float(self) / 255.0
     }
 }
 
-public struct LogAxisNormalizer: AxisNormalizer {
-    public let min: Float
+
+
+//public protocol AxisNormalizer: Hashable, Equatable {
+//    
+//    var min: Float { get }
+//    var max: Float { get }
+//    
+//    func normalize(_ x:Float) -> Float
+//    func unnormalize(_ x:Float) -> Float
+//}
+
+public enum AxisScaleType: Hashable {
+    case linear
+    case log(base:Float)
+//    case biex(a:Float, b:Float)
+}
+
+public struct AxisNormalizer: Hashable {
+    public static func linear(min:Float, max:Float) -> AxisNormalizer {
+        let span = max - min
+        
+        return .init(
+            min, max, .linear,
+            normalize: {
+                clamp01(($0 - min) / span)
+            },
+            unnormalize: {
+                clamp01($0) * span + min
+            }
+        )
+    }
     
+    public static func log(min:Float, max:Float, base:Float = 10) -> AxisNormalizer {
+        let logMin = Darwin.log(min) / Darwin.log(base)
+        let logMax = Darwin.log(max) / Darwin.log(base)
+        let logSpan = logMax - logMin
+
+        return .init(
+            min, max, .log(base:base),
+            normalize: {
+                let clamped = clamp($0, min:min, max:max)
+                return (Darwin.log(clamped) - logMin) / logSpan
+            },
+            unnormalize: {
+                let clamped = clamp01($0)
+                let logValue = (clamped * logSpan) + logMin
+                return pow(base, logValue)
+            }
+        )
+    }
+
+    
+    
+    
+    public static func == (lhs: AxisNormalizer, rhs: AxisNormalizer) -> Bool {
+        lhs.min == rhs.min && lhs.max == rhs.max && lhs.type == rhs.type
+    }
+    
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(min)
+        hasher.combine(max)
+        hasher.combine(type)
+    }
+    
+    public let min: Float
     public let max: Float
     
-    private let base:Float
-    private let logMin:Float
-    private let logMax:Float
-    private let logSpan:Float
+    public let type:AxisScaleType
     
-
-    public init(min:Float, max:Float, base:Float = 10) {
+    public let normalize:(_ x:Float) -> Float
+    public let unnormalize:(_ x:Float) -> Float
+    
+    fileprivate init(_ min: Float, _ max: Float, _ type: AxisScaleType, normalize: @escaping (_: Float) -> Float, unnormalize: @escaping (_: Float) -> Float) {
         self.min = min
         self.max = max
-        self.base = base
-        logMin = log(min) / log(base)
-        logMax = log(max) / log(base)
-        logSpan = logMax - logMin
+        self.type = type
+        self.normalize = normalize
+        self.unnormalize = unnormalize
     }
-    
-    public func normalize(_ x: Float) -> Float {
-        let clamped = clamp(x, min:min, max:max)
-        return (log(clamped) - logMin) / logSpan
-    }
-    
-    public func unnormalize(_ x: Float) -> Float {
-        let clamped = clamp01(x)
-        let logValue = (clamped * logSpan) + logMin
-        return pow(base, logValue)
-    }
-    
     
 }
 

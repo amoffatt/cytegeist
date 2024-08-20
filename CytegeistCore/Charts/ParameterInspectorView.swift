@@ -38,7 +38,7 @@ public struct ParameterInspectorView: View {
                     }
                 }
                 
-                HistogramView(data: core.histogram(sampleRef: sample, parameterName: parameter.name))
+                HistogramView(query: core.histogram(.init(population: .init(sample), axisNames: .init(parameter.name))))
             }
             Text(parameter.displayName)
                 .font(.headline)

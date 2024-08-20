@@ -9,7 +9,8 @@ import Foundation
 
 public typealias FCSParameterValueReader = (DataBufferReader) throws -> Float
 
-public struct FCSParameter {
+public struct FCSParameter : Hashable {
+    
     public static func displayName(_ name:String, _ stain:String) -> String {
         if name == stain {
             return name
@@ -30,6 +31,14 @@ public struct FCSParameter {
     public let displayInfo: String
     public let normalizer: AxisNormalizer
     public let valueReader: FCSParameterValueReader
+    
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(name)
+    }
+    public static func == (lhs: FCSParameter, rhs: FCSParameter) -> Bool {
+        lhs.name == rhs.name
+    }
+
 }
 
 //public class FCSParameter {
@@ -108,73 +117,116 @@ public struct FCSMetadata {
 //    public var parameter
 }
 
+enum EventDataError : Error {
+    case inconsistentVariableLengths
+}
+
 public struct EventData: Identifiable {
     public let id: Int
     public let values: [Float]
 }
 
-public struct SampleNumericData: RandomAccessCollection {
-    public typealias Element = EventData
+public protocol BackedRandomAccessCollection: RandomAccessCollection where
+    Index == BackingCollection.Index,
+//    SubSequence == BackingCollection.SubSequence,
+    Indices == BackingCollection.Indices
+
+{
+    associatedtype BackingCollection:RandomAccessCollection
     
-    public typealias Index = Int
-    
-    public typealias SubSequence = SampleNumericData
-    
-    public typealias Indices = Range<Int>
-    
-    public var startIndex: Int {
-        return parameterData.isEmpty ? 0 : parameterData[0].startIndex
+    // RandomAccessCollection Indices will be provided by this internal collection
+    var _indexBacking:BackingCollection { get }
+
+}
+
+extension BackedRandomAccessCollection {
+    public var startIndex: Index {
+         _indexBacking.startIndex
     }
 
-    public var endIndex: Int {
-        return parameterData.isEmpty ? 0 : parameterData[0].endIndex
+    public var endIndex: Index {
+        _indexBacking.endIndex
     }
     
     public var count:Int {
-        parameterData.isEmpty ? 0 : parameterData[0].count
+        _indexBacking.count
     }
+    
+//    public subscript(position: Int) -> EventData {
+//        precondition(position >= startIndex && position < endIndex, "Index out of bounds")
+//        let values = data.map { $0[position] }
+//        return EventData(id: position, values: values)
+//    }
+//    
+//    public subscript(bounds: Range<Int>) -> EventDataTable {
+//        let slicedData = data.map { Array($0[bounds]) }
+//        return try! EventDataTable(data: slicedData)
+////        return slicedData
+//    }
+    
+    public func index(after i: Index) -> Index {
+        return _indexBacking.index(after: i)
+    }
+
+    public func index(before i: Index) -> Index {
+        return _indexBacking.index(before: i)
+    }
+}
+
+
+public struct EventDataTable: BackedRandomAccessCollection {
+    
+    public typealias Element = EventData
+    public typealias SubSequence = EventDataTable
+    
+    public var _indexBacking:[Float] { data.first ?? [] }
 
     // Subscript to access elements
     public subscript(position: Int) -> EventData {
         precondition(position >= startIndex && position < endIndex, "Index out of bounds")
-        let values = parameterData.map { $0[position] }
+        let values = data.map { $0[position] }
         return EventData(id: position, values: values)
     }
     
-    public subscript(bounds: Range<Int>) -> SampleNumericData {
-        let slicedData = parameterData.map { Array($0[bounds]) }
-        return SampleNumericData(data: slicedData)
-    }
-    
-    public func index(after i: Int) -> Int {
-        return i + 1
-    }
-
-    public func index(before i: Int) -> Int {
-        return i - 1
+    public subscript(bounds: Range<Int>) -> EventDataTable {
+        let slicedData = data.map { Array($0[bounds]) }
+        return try! EventDataTable(data: slicedData)
     }
     
     
-    public let parameterData:[[Float]]
+    public let data:[[Float]]
 //    public let parameterNames:[String]
     
-    init(data:[[Float]]) {
-        parameterData = data
+    init(data:[[Float]]) throws {
+        self.data = data
+        
+        if !data.isEmpty {
+            let length = data[0].count
+            
+            if !data.allSatisfy({ $0.count == length }) {
+                throw EventDataError.inconsistentVariableLengths
+            }
+        }
     }
     
 }
 
+public struct FCSParameterData {
+    public let meta:FCSParameter
+    public let data:[Float]
+}
+
 public struct FCSFile {
     public let meta:FCSMetadata
-    public let data:SampleNumericData?
+    public let data:EventDataTable?
     
-    public func parameter(named:String) -> (meta:FCSParameter, data:[Float])? {
+    public func parameter(named:String) -> FCSParameterData? {
         guard let data,
               let parameters = meta.parameters,
               let index = meta.parameterLookup[named] else {
             return nil
         }
-        return (parameters[index], data.parameterData[index])
+        return .init(meta:parameters[index], data:data.data[index])
     }
 }
 
@@ -292,7 +344,7 @@ public class FCSReader {
             data: includeData ? try readEventData(dataSegment: dataSegment, meta: fcs) : nil)
     }
     
-    private func readEventData(dataSegment:Data, meta:FCSMetadata) throws -> SampleNumericData {
+    private func readEventData(dataSegment:Data, meta:FCSMetadata) throws -> EventDataTable {
         let eventCount = meta.eventCount
         let parameters = meta.parameters!
         let parameterCount = parameters.count
@@ -312,7 +364,7 @@ public class FCSReader {
             }
         }
         
-        return SampleNumericData(data: parameterDataArray)
+        return try EventDataTable(data: parameterDataArray)
     }
     
     private func readParameterInfo(_ metadata:[String: String], n:Int, dataType:FCSDataType) throws -> FCSParameter {

@@ -8,6 +8,7 @@
 import SwiftUI
 import RealityKit
 import CytegeistCore
+import Charts
 
 @MainActor
 struct ContentView: View {
@@ -30,8 +31,10 @@ struct ContentView: View {
             } label: {
                 Text("Load FCS File")
             }
+            let scale = ScaleType.log
 //            ChartView(core, sample:SampleRef(url:DemoData.facsDivaSample0!), parameterName: "FSC-A")
             SampleInspectorView(core, sample: sample)
+//            ChartView(core, sample: sample, parameterNames: <#T##String#>)
         }
         .padding()
         .fileImporter(
