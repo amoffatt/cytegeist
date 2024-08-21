@@ -26,7 +26,7 @@
 		B641739D2C5C4E00001AA2F4 /* ParameterInspectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B641739C2C5C4E00001AA2F4 /* ParameterInspectorView.swift */; };
 		B65D82A92C44BE7100E4F0A2 /* RealityKitContent in Frameworks */ = {isa = PBXBuildFile; platformFilters = (xros, ); productRef = B65D82A82C44BE7100E4F0A2 /* RealityKitContent */; settings = {ATTRIBUTES = (Weak, ); }; };
 		B65D82AB2C44BE7100E4F0A2 /* CytegeistApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B65D82AA2C44BE7100E4F0A2 /* CytegeistApp.swift */; };
-		B65D82AD2C44BE7100E4F0A2 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B65D82AC2C44BE7100E4F0A2 /* ContentView.swift */; };
+		B65D82AD2C44BE7100E4F0A2 /* AaronTestContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B65D82AC2C44BE7100E4F0A2 /* AaronTestContentView.swift */; };
 		B65D82AF2C44BE7100E4F0A2 /* ImmersiveView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B65D82AE2C44BE7100E4F0A2 /* ImmersiveView.swift */; };
 		B65D82B12C44BE7200E4F0A2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B65D82B02C44BE7200E4F0A2 /* Assets.xcassets */; };
 		B65D82B42C44BE7200E4F0A2 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B65D82B32C44BE7200E4F0A2 /* Preview Assets.xcassets */; };
@@ -40,7 +40,7 @@
 		B6C9A3FF2C75A3F000DB6786 /* CytegeistLibrary.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = B6C9A3EB2C75A3EF00DB6786 /* CytegeistLibrary.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		B6C9A4062C75A46800DB6786 /* CollectionUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = B610A5702C54269A0081C517 /* CollectionUtil.swift */; };
 		B6C9A4072C75A46800DB6786 /* Colormaps.swift in Sources */ = {isa = PBXBuildFile; fileRef = B685296A2C74DBD700EF9EF4 /* Colormaps.swift */; };
-		B6C9A4082C75A46800DB6786 /* StringUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = B610A5722C54269A0081C517 /* StringUtils.swift */; };
+		B6C9A4082C75A46800DB6786 /* StringUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = B610A5722C54269A0081C517 /* StringUtil.swift */; };
 		B6C9A4092C75A46800DB6786 /* ThreadUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = B64173962C599B09001AA2F4 /* ThreadUtil.swift */; };
 		B6C9A40A2C75A46800DB6786 /* MathUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = B610A5712C54269A0081C517 /* MathUtil.swift */; };
 		B6C9A40B2C75A46800DB6786 /* GraphicsUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = B685296B2C74DBD700EF9EF4 /* GraphicsUtil.swift */; };
@@ -63,21 +63,27 @@
 		B6C9A4642C75D01300DB6786 /* SampleGallery.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4572C75D01300DB6786 /* SampleGallery.swift */; };
 		B6C9A4652C75D01300DB6786 /* SampleList.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4582C75D01300DB6786 /* SampleList.swift */; };
 		B6C9A4662C75D01300DB6786 /* Sidebar.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4592C75D01300DB6786 /* Sidebar.swift */; };
-		B6C9A4732C75D04900DB6786 /* Sample+ItemProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4672C75D04800DB6786 /* Sample+ItemProvider.swift */; };
-		B6C9A4742C75D04900DB6786 /* WorkspaceReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4682C75D04800DB6786 /* WorkspaceReader.swift */; };
-		B6C9A4752C75D04900DB6786 /* Gate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4692C75D04800DB6786 /* Gate.swift */; };
-		B6C9A4762C75D04900DB6786 /* FocusedValues+Experiment.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A46A2C75D04800DB6786 /* FocusedValues+Experiment.swift */; };
-		B6C9A4772C75D04900DB6786 /* Experiment.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A46B2C75D04800DB6786 /* Experiment.swift */; };
-		B6C9A4782C75D04900DB6786 /* GraphDef.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A46C2C75D04800DB6786 /* GraphDef.swift */; };
-		B6C9A4792C75D04900DB6786 /* Sample.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A46D2C75D04800DB6786 /* Sample.swift */; };
-		B6C9A47A2C75D04900DB6786 /* Matrix.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A46E2C75D04800DB6786 /* Matrix.swift */; };
-		B6C9A47B2C75D04900DB6786 /* AnalysisNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A46F2C75D04800DB6786 /* AnalysisNode.swift */; };
-		B6C9A47C2C75D04900DB6786 /* Sample+ImportImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4702C75D04800DB6786 /* Sample+ImportImage.swift */; };
-		B6C9A47D2C75D04900DB6786 /* Store+ReferenceFileDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4712C75D04900DB6786 /* Store+ReferenceFileDocument.swift */; };
-		B6C9A47E2C75D04900DB6786 /* Cytometer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4722C75D04900DB6786 /* Cytometer.swift */; };
 		B6C9A48B2C75D09A00DB6786 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4842C75D09A00DB6786 /* SettingsView.swift */; };
-		B6C9A48C2C75D09A00DB6786 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4852C75D09A00DB6786 /* ContentView.swift */; };
-		B6C9A48E2C75D24B00DB6786 /* TreeNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A48D2C75D24B00DB6786 /* TreeNode.swift */; };
+		B6C9A48C2C75D09A00DB6786 /* ProtoStartupScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4852C75D09A00DB6786 /* ProtoStartupScreen.swift */; };
+		B6C9A48F2C76621900DB6786 /* Store+ReferenceFileDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4712C75D04900DB6786 /* Store+ReferenceFileDocument.swift */; };
+		B6C9A4912C76723500DB6786 /* CodableUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4902C76723500DB6786 /* CodableUtil.swift */; };
+		B6C9A4932C76729000DB6786 /* InputUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4922C76729000DB6786 /* InputUtil.swift */; };
+		B6C9A4952C76736100DB6786 /* FormattingUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4942C76736100DB6786 /* FormattingUtil.swift */; };
+		B6C9A4962C7678FE00DB6786 /* TreeNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A48D2C75D24B00DB6786 /* TreeNode.swift */; };
+		B6C9A4972C7679BF00DB6786 /* FJWorkspaceReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4682C75D04800DB6786 /* FJWorkspaceReader.swift */; };
+		B6C9A49B2C767FAF00DB6786 /* CGLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A49A2C767FAF00DB6786 /* CGLayout.swift */; };
+		B6C9A49C2C7680EA00DB6786 /* FocusedValues+Experiment.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A46A2C75D04800DB6786 /* FocusedValues+Experiment.swift */; };
+		B6C9A49D2C7680EA00DB6786 /* Gate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4692C75D04800DB6786 /* Gate.swift */; };
+		B6C9A49E2C7680EA00DB6786 /* Experiment.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A46B2C75D04800DB6786 /* Experiment.swift */; };
+		B6C9A49F2C7680EA00DB6786 /* Sample+ItemProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4672C75D04800DB6786 /* Sample+ItemProvider.swift */; };
+		B6C9A4A02C7680EA00DB6786 /* Sample+ImportImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4702C75D04800DB6786 /* Sample+ImportImage.swift */; };
+		B6C9A4A12C7680EA00DB6786 /* GraphDef.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A46C2C75D04800DB6786 /* GraphDef.swift */; };
+		B6C9A4A22C7680EA00DB6786 /* Sample.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A46D2C75D04800DB6786 /* Sample.swift */; };
+		B6C9A4A32C7680EA00DB6786 /* Matrix.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A46E2C75D04800DB6786 /* Matrix.swift */; };
+		B6C9A4A42C7680EA00DB6786 /* AnalysisNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A46F2C75D04800DB6786 /* AnalysisNode.swift */; };
+		B6C9A4A52C7680EA00DB6786 /* Cytometer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4722C75D04900DB6786 /* Cytometer.swift */; };
+		B6C9A4A72C76814F00DB6786 /* SaveOpenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4A62C76814F00DB6786 /* SaveOpenView.swift */; };
+		B6C9A4AB2C7689A000DB6786 /* FileInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4AA2C7689A000DB6786 /* FileInfo.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -170,7 +176,7 @@
 		B610A56E2C54269A0081C517 /* FCSReader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FCSReader.swift; sourceTree = "<group>"; };
 		B610A5702C54269A0081C517 /* CollectionUtil.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CollectionUtil.swift; sourceTree = "<group>"; };
 		B610A5712C54269A0081C517 /* MathUtil.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MathUtil.swift; sourceTree = "<group>"; };
-		B610A5722C54269A0081C517 /* StringUtils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StringUtils.swift; sourceTree = "<group>"; };
+		B610A5722C54269A0081C517 /* StringUtil.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StringUtil.swift; sourceTree = "<group>"; };
 		B610A5792C542BB50081C517 /* DataBufferReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataBufferReader.swift; sourceTree = "<group>"; };
 		B63D162E2C55E50D00E81C2F /* CytegeistCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CytegeistCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B63D16352C55E50E00E81C2F /* CytegeistCoreTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CytegeistCoreTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -193,7 +199,7 @@
 		B65D82A32C44BE7100E4F0A2 /* CytegeistApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CytegeistApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B65D82A72C44BE7100E4F0A2 /* RealityKitContent */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = RealityKitContent; sourceTree = "<group>"; };
 		B65D82AA2C44BE7100E4F0A2 /* CytegeistApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CytegeistApp.swift; sourceTree = "<group>"; };
-		B65D82AC2C44BE7100E4F0A2 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		B65D82AC2C44BE7100E4F0A2 /* AaronTestContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AaronTestContentView.swift; sourceTree = "<group>"; };
 		B65D82AE2C44BE7100E4F0A2 /* ImmersiveView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImmersiveView.swift; sourceTree = "<group>"; };
 		B65D82B02C44BE7200E4F0A2 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B65D82B32C44BE7200E4F0A2 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
@@ -222,7 +228,7 @@
 		B6C9A4582C75D01300DB6786 /* SampleList.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SampleList.swift; sourceTree = "<group>"; };
 		B6C9A4592C75D01300DB6786 /* Sidebar.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Sidebar.swift; sourceTree = "<group>"; };
 		B6C9A4672C75D04800DB6786 /* Sample+ItemProvider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Sample+ItemProvider.swift"; sourceTree = "<group>"; };
-		B6C9A4682C75D04800DB6786 /* WorkspaceReader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WorkspaceReader.swift; sourceTree = "<group>"; };
+		B6C9A4682C75D04800DB6786 /* FJWorkspaceReader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FJWorkspaceReader.swift; sourceTree = "<group>"; };
 		B6C9A4692C75D04800DB6786 /* Gate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Gate.swift; sourceTree = "<group>"; };
 		B6C9A46A2C75D04800DB6786 /* FocusedValues+Experiment.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "FocusedValues+Experiment.swift"; sourceTree = "<group>"; };
 		B6C9A46B2C75D04800DB6786 /* Experiment.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Experiment.swift; sourceTree = "<group>"; };
@@ -234,8 +240,14 @@
 		B6C9A4712C75D04900DB6786 /* Store+ReferenceFileDocument.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Store+ReferenceFileDocument.swift"; sourceTree = "<group>"; };
 		B6C9A4722C75D04900DB6786 /* Cytometer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Cytometer.swift; sourceTree = "<group>"; };
 		B6C9A4842C75D09A00DB6786 /* SettingsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
-		B6C9A4852C75D09A00DB6786 /* ContentView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		B6C9A4852C75D09A00DB6786 /* ProtoStartupScreen.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProtoStartupScreen.swift; sourceTree = "<group>"; };
 		B6C9A48D2C75D24B00DB6786 /* TreeNode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TreeNode.swift; sourceTree = "<group>"; };
+		B6C9A4902C76723500DB6786 /* CodableUtil.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodableUtil.swift; sourceTree = "<group>"; };
+		B6C9A4922C76729000DB6786 /* InputUtil.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputUtil.swift; sourceTree = "<group>"; };
+		B6C9A4942C76736100DB6786 /* FormattingUtil.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormattingUtil.swift; sourceTree = "<group>"; };
+		B6C9A49A2C767FAF00DB6786 /* CGLayout.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CGLayout.swift; sourceTree = "<group>"; };
+		B6C9A4A62C76814F00DB6786 /* SaveOpenView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SaveOpenView.swift; sourceTree = "<group>"; };
+		B6C9A4AA2C7689A000DB6786 /* FileInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileInfo.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -310,11 +322,13 @@
 				B685296C2C74DBD700EF9EF4 /* VectorUtil.swift */,
 				B610A5702C54269A0081C517 /* CollectionUtil.swift */,
 				B610A5712C54269A0081C517 /* MathUtil.swift */,
-				B610A5722C54269A0081C517 /* StringUtils.swift */,
+				B610A5722C54269A0081C517 /* StringUtil.swift */,
 				B63D16992C55F52D00E81C2F /* ExceptionCatcher.m */,
 				B63D169D2C55F79700E81C2F /* ExceptionCatcher.h */,
 				B64173962C599B09001AA2F4 /* ThreadUtil.swift */,
-				B64173982C59A06F001AA2F4 /* UIViews.swift */,
+				B6C9A4902C76723500DB6786 /* CodableUtil.swift */,
+				B6C9A4922C76729000DB6786 /* InputUtil.swift */,
+				B6C9A4942C76736100DB6786 /* FormattingUtil.swift */,
 			);
 			path = Util;
 			sourceTree = "<group>";
@@ -322,7 +336,6 @@
 		B63D162F2C55E50D00E81C2F /* CytegeistCore */ = {
 			isa = PBXGroup;
 			children = (
-				B6C9A4302C75B66500DB6786 /* Experiment */,
 				B63D16972C55EECA00E81C2F /* TestData */,
 				B64173902C58A88A001AA2F4 /* Test */,
 				B63EEE8E2C569BFA00E465C9 /* Core */,
@@ -399,11 +412,16 @@
 		B65D82A52C44BE7100E4F0A2 /* CytegeistApp */ = {
 			isa = PBXGroup;
 			children = (
+				B6C9A4992C767AF900DB6786 /* 3rdPartyIntegration */,
+				B6C9A4982C767A1B00DB6786 /* FJWorkspace */,
 				B610A56C2C5421CA0081C517 /* AppModel.swift */,
 				B65D82AA2C44BE7100E4F0A2 /* CytegeistApp.swift */,
-				B65D82AC2C44BE7100E4F0A2 /* ContentView.swift */,
+				B65D82AC2C44BE7100E4F0A2 /* AaronTestContentView.swift */,
 				B65D82AE2C44BE7100E4F0A2 /* ImmersiveView.swift */,
 				B6C9A44B2C75CFCB00DB6786 /* Store.swift */,
+				B6C9A4712C75D04900DB6786 /* Store+ReferenceFileDocument.swift */,
+				B6C9A4302C75B66500DB6786 /* Experiment */,
+				B6C9A44F2C75D01300DB6786 /* Layouts */,
 				B6C9A45A2C75D01300DB6786 /* MainWindow */,
 				B68529722C74DC1100EF9EF4 /* UI */,
 				B65D82B02C44BE7200E4F0A2 /* Assets.xcassets */,
@@ -432,7 +450,8 @@
 		B68529722C74DC1100EF9EF4 /* UI */ = {
 			isa = PBXGroup;
 			children = (
-				B6C9A4852C75D09A00DB6786 /* ContentView.swift */,
+				B6C9A4A62C76814F00DB6786 /* SaveOpenView.swift */,
+				B6C9A4852C75D09A00DB6786 /* ProtoStartupScreen.swift */,
 				B6C9A4842C75D09A00DB6786 /* SettingsView.swift */,
 				B68529702C74DC1100EF9EF4 /* PairCharts.swift */,
 				B68529712C74DC1100EF9EF4 /* SampleInspectorView.swift */,
@@ -443,6 +462,9 @@
 		B6C9A3EC2C75A3EF00DB6786 /* CytegeistLibrary */ = {
 			isa = PBXGroup;
 			children = (
+				B6C9A4A92C76898F00DB6786 /* IO */,
+				B6C9A4A82C76820300DB6786 /* UI */,
+				B6C9A48D2C75D24B00DB6786 /* TreeNode.swift */,
 				B610A5732C54269A0081C517 /* Util */,
 				B6C9A3ED2C75A3EF00DB6786 /* CytegeistLibrary.h */,
 			);
@@ -467,7 +489,6 @@
 		B6C9A4302C75B66500DB6786 /* Experiment */ = {
 			isa = PBXGroup;
 			children = (
-				B6C9A48D2C75D24B00DB6786 /* TreeNode.swift */,
 				B6C9A46F2C75D04800DB6786 /* AnalysisNode.swift */,
 				B6C9A4722C75D04900DB6786 /* Cytometer.swift */,
 				B6C9A46B2C75D04800DB6786 /* Experiment.swift */,
@@ -478,25 +499,23 @@
 				B6C9A46D2C75D04800DB6786 /* Sample.swift */,
 				B6C9A4702C75D04800DB6786 /* Sample+ImportImage.swift */,
 				B6C9A4672C75D04800DB6786 /* Sample+ItemProvider.swift */,
-				B6C9A4712C75D04900DB6786 /* Store+ReferenceFileDocument.swift */,
-				B6C9A4682C75D04800DB6786 /* WorkspaceReader.swift */,
 			);
 			path = Experiment;
 			sourceTree = "<group>";
 		};
-		B6C9A44F2C75D01300DB6786 /* Layout Editor */ = {
+		B6C9A44F2C75D01300DB6786 /* Layouts */ = {
 			isa = PBXGroup;
 			children = (
 				B6C9A44D2C75D01300DB6786 /* CGLayoutView.swift */,
 				B6C9A44E2C75D01300DB6786 /* LayoutItemViews.swift */,
+				B6C9A49A2C767FAF00DB6786 /* CGLayout.swift */,
 			);
-			path = "Layout Editor";
+			path = Layouts;
 			sourceTree = "<group>";
 		};
 		B6C9A45A2C75D01300DB6786 /* MainWindow */ = {
 			isa = PBXGroup;
 			children = (
-				B6C9A44F2C75D01300DB6786 /* Layout Editor */,
 				B6C9A4502C75D01300DB6786 /* AnalysisList.swift */,
 				B6C9A4512C75D01300DB6786 /* DisplayModePicker.swift */,
 				B6C9A4522C75D01300DB6786 /* ExpansionState.swift */,
@@ -509,6 +528,37 @@
 				B6C9A4592C75D01300DB6786 /* Sidebar.swift */,
 			);
 			path = MainWindow;
+			sourceTree = "<group>";
+		};
+		B6C9A4982C767A1B00DB6786 /* FJWorkspace */ = {
+			isa = PBXGroup;
+			children = (
+				B6C9A4682C75D04800DB6786 /* FJWorkspaceReader.swift */,
+			);
+			path = FJWorkspace;
+			sourceTree = "<group>";
+		};
+		B6C9A4992C767AF900DB6786 /* 3rdPartyIntegration */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = 3rdPartyIntegration;
+			sourceTree = "<group>";
+		};
+		B6C9A4A82C76820300DB6786 /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				B64173982C59A06F001AA2F4 /* UIViews.swift */,
+			);
+			path = UI;
+			sourceTree = "<group>";
+		};
+		B6C9A4A92C76898F00DB6786 /* IO */ = {
+			isa = PBXGroup;
+			children = (
+				B6C9A4AA2C7689A000DB6786 /* FileInfo.swift */,
+			);
+			path = IO;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -759,32 +809,19 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B6C9A47D2C75D04900DB6786 /* Store+ReferenceFileDocument.swift in Sources */,
 				B68529732C74DC1100EF9EF4 /* PairCharts.swift in Sources */,
 				B68529742C74DC1100EF9EF4 /* SampleInspectorView.swift in Sources */,
-				B6C9A4782C75D04900DB6786 /* GraphDef.swift in Sources */,
-				B6C9A4742C75D04900DB6786 /* WorkspaceReader.swift in Sources */,
 				B641739D2C5C4E00001AA2F4 /* ParameterInspectorView.swift in Sources */,
-				B6C9A47E2C75D04900DB6786 /* Cytometer.swift in Sources */,
 				B63EEE942C569D7300E465C9 /* Histogram.swift in Sources */,
 				B64173942C58AB2B001AA2F4 /* DemoData.swift in Sources */,
 				B63EEE8C2C5624C000E465C9 /* HistogramView.swift in Sources */,
 				B63EEE8D2C5624C000E465C9 /* ChartView.swift in Sources */,
 				B63EEE922C569CB300E465C9 /* SampleRef.swift in Sources */,
 				B64173922C58A89A001AA2F4 /* CoreTestUtil.swift in Sources */,
-				B6C9A4762C75D04900DB6786 /* FocusedValues+Experiment.swift in Sources */,
 				B63D164C2C55E54500E81C2F /* DataBufferReader.swift in Sources */,
-				B6C9A47C2C75D04900DB6786 /* Sample+ImportImage.swift in Sources */,
 				B63EEE902C569C7700E465C9 /* CytegeistCore.swift in Sources */,
 				B68529692C74DBB500EF9EF4 /* ComputeCache.swift in Sources */,
-				B6C9A47A2C75D04900DB6786 /* Matrix.swift in Sources */,
-				B6C9A48E2C75D24B00DB6786 /* TreeNode.swift in Sources */,
-				B6C9A4752C75D04900DB6786 /* Gate.swift in Sources */,
-				B6C9A4772C75D04900DB6786 /* Experiment.swift in Sources */,
-				B6C9A47B2C75D04900DB6786 /* AnalysisNode.swift in Sources */,
 				B63D164D2C55E54500E81C2F /* FCSReader.swift in Sources */,
-				B6C9A4792C75D04900DB6786 /* Sample.swift in Sources */,
-				B6C9A4732C75D04900DB6786 /* Sample+ItemProvider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -807,16 +844,30 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B65D82AD2C44BE7100E4F0A2 /* ContentView.swift in Sources */,
+				B65D82AD2C44BE7100E4F0A2 /* AaronTestContentView.swift in Sources */,
+				B6C9A4A72C76814F00DB6786 /* SaveOpenView.swift in Sources */,
 				B6C9A48B2C75D09A00DB6786 /* SettingsView.swift in Sources */,
-				B6C9A48C2C75D09A00DB6786 /* ContentView.swift in Sources */,
+				B6C9A48C2C75D09A00DB6786 /* ProtoStartupScreen.swift in Sources */,
+				B6C9A49B2C767FAF00DB6786 /* CGLayout.swift in Sources */,
 				B6C9A4622C75D01300DB6786 /* MainView.swift in Sources */,
 				B610A56D2C5421CA0081C517 /* AppModel.swift in Sources */,
 				B6C9A45C2C75D01300DB6786 /* LayoutItemViews.swift in Sources */,
 				B6C9A45B2C75D01300DB6786 /* CGLayoutView.swift in Sources */,
+				B6C9A49C2C7680EA00DB6786 /* FocusedValues+Experiment.swift in Sources */,
+				B6C9A49D2C7680EA00DB6786 /* Gate.swift in Sources */,
+				B6C9A49E2C7680EA00DB6786 /* Experiment.swift in Sources */,
+				B6C9A49F2C7680EA00DB6786 /* Sample+ItemProvider.swift in Sources */,
+				B6C9A4A02C7680EA00DB6786 /* Sample+ImportImage.swift in Sources */,
+				B6C9A4A12C7680EA00DB6786 /* GraphDef.swift in Sources */,
+				B6C9A4A22C7680EA00DB6786 /* Sample.swift in Sources */,
+				B6C9A4A32C7680EA00DB6786 /* Matrix.swift in Sources */,
+				B6C9A4A42C7680EA00DB6786 /* AnalysisNode.swift in Sources */,
+				B6C9A4A52C7680EA00DB6786 /* Cytometer.swift in Sources */,
+				B6C9A4972C7679BF00DB6786 /* FJWorkspaceReader.swift in Sources */,
 				B6C9A4642C75D01300DB6786 /* SampleGallery.swift in Sources */,
 				B6C9A4612C75D01300DB6786 /* GatingView.swift in Sources */,
 				B6C9A4662C75D01300DB6786 /* Sidebar.swift in Sources */,
+				B6C9A48F2C76621900DB6786 /* Store+ReferenceFileDocument.swift in Sources */,
 				B6C9A4602C75D01300DB6786 /* ExperimentHistoryOutline.swift in Sources */,
 				B65D82AB2C44BE7100E4F0A2 /* CytegeistApp.swift in Sources */,
 				B6C9A4652C75D01300DB6786 /* SampleList.swift in Sources */,
@@ -833,10 +884,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B6C9A4952C76736100DB6786 /* FormattingUtil.swift in Sources */,
+				B6C9A4912C76723500DB6786 /* CodableUtil.swift in Sources */,
 				B6C9A4062C75A46800DB6786 /* CollectionUtil.swift in Sources */,
+				B6C9A4AB2C7689A000DB6786 /* FileInfo.swift in Sources */,
+				B6C9A4962C7678FE00DB6786 /* TreeNode.swift in Sources */,
 				B6C9A4072C75A46800DB6786 /* Colormaps.swift in Sources */,
-				B6C9A4082C75A46800DB6786 /* StringUtils.swift in Sources */,
+				B6C9A4082C75A46800DB6786 /* StringUtil.swift in Sources */,
 				B6C9A4092C75A46800DB6786 /* ThreadUtil.swift in Sources */,
+				B6C9A4932C76729000DB6786 /* InputUtil.swift in Sources */,
 				B6C9A40A2C75A46800DB6786 /* MathUtil.swift in Sources */,
 				B6C9A40B2C75A46800DB6786 /* GraphicsUtil.swift in Sources */,
 				B6C9A40C2C75A46800DB6786 /* VectorUtil.swift in Sources */,

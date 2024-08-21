@@ -17,10 +17,10 @@ struct CytegeistApp: App {
     
 
     var body: some Scene {
-        WindowGroup {
-            ContentView()
-                .environment(appModel)
-        }
+//        WindowGroup {
+//            AaronTestContentView()
+//                .environment(appModel)
+//        }
         
         
         

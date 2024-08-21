@@ -8,6 +8,26 @@
 import Foundation
 
 
+let DEBUG = true
+public func debug(_ s: String)
+{
+if (DEBUG)  {
+    print (s)
+}
+}
+public func debug(_ s: String, t: String)
+{
+if (DEBUG)  {
+    print (s, t)
+}
+}
+
+
+private let newline = "\n".data(using: .utf8)!
+private let comma = ",".data(using: .utf8)!
+
+
+
 public extension String {
     //    func substring(offset: Int, length: Int) -> String {
     //        guard offset >= 0, length > 0, offset < self.count else {
@@ -19,7 +39,15 @@ public extension String {
     //        return String(self[start..<end])
     //    }
     
-    public func substring(_ range: Range<Int>) -> String {
+    subscript(_ index: Int) -> Character? {
+        guard index >= 0, index < self.count else {
+            return nil
+        }
+        
+        return self[self.index(self.startIndex, offsetBy: index)]
+    }
+    
+    subscript(_ range: Range<Int>) -> String {
         guard let start = self.index(self.startIndex, offsetBy: range.lowerBound, limitedBy: self.endIndex),
               let end = self.index(self.startIndex, offsetBy: range.upperBound, limitedBy: self.endIndex),
               start <= end else {
@@ -28,12 +56,12 @@ public extension String {
         return String(self[start..<end])
     }
 
-    public func substring(offset: Int, length: Int) -> String {
+    func substring(offset: Int, length: Int) -> String {
         let end = offset + length
-        return self.substring(offset..<end)
+        return self[offset..<end]
     }
     
-    public func splitWithDoubleEscaping(separator:String) -> [String] {
+    func splitWithDoubleEscaping(separator:String) -> [String] {
         let escape = separator + separator
         
         let nested_split = self.split(separator:escape).map { x in
@@ -55,18 +83,18 @@ public extension String {
         return result
     }
     
-    public func trim(_ characters:CharacterSet = .whitespacesAndNewlines) -> String {
+    func trim(_ characters:CharacterSet = .whitespacesAndNewlines) -> String {
         self.trimmingCharacters(in: characters)
     }
     
 }
 
 public extension Optional where Wrapped == String {
-    public var nonNil:String { self ?? "" }
+    var nonNil:String { self ?? "" }
 }
 
 public extension Data {
-    public func string(_ encoding:String.Encoding) -> String? {
+    func string(_ encoding:String.Encoding) -> String? {
         String(data:self, encoding:encoding)
     }
 }

@@ -9,10 +9,14 @@ import SwiftUI
 import Charts
 import CytegeistLibrary
 
-struct HistogramView: View {
+public struct HistogramView: View {
     let query:APIQuery<CachedHistogram<_1D>>
     
-    var body: some View {
+    public init(query: APIQuery<CachedHistogram<_1D>>) {
+        self.query = query
+    }
+    
+    public var body: some View {
         LoadingOverlay(isLoading: query.isLoading) {
             VStack {
                 if let error = query.error {
@@ -36,10 +40,14 @@ struct HistogramView: View {
     
 }
 
-struct Histogram2DView: View {
+public struct Histogram2DView: View {
     let query:APIQuery<CachedHistogram<_2D>>
     
-    var body: some View {
+    public init(query: APIQuery<CachedHistogram<_2D>>) {
+        self.query = query
+    }
+    
+    public var body: some View {
         LoadingOverlay(isLoading: query.isLoading) {
             VStack {
                 if let error = query.error {

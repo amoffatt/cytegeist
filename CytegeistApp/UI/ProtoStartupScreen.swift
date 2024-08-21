@@ -6,8 +6,9 @@
 //
 
 import SwiftUI
+import CytegeistLibrary
 
-struct ContentView: View {
+struct ProtoStartupScreenView: View {
     @State private var showFCSImporter = false
     @State private var showWSImporter = false
     @Environment(\.openWindow) var openWindow

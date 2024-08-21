@@ -7,6 +7,8 @@
 
 import Foundation
 import Combine
+import CytegeistLibrary
+import CytegeistCore
 
 //-----------------------------------------------
 //@Observable
@@ -65,7 +67,7 @@ public class Experiment :  Codable, Identifiable
         
     }
   
-    func readFCSFile(_ url: URL) async
+    public func readFCSFile(_ url: URL) async
     {
         if  url.isDirectory
         {

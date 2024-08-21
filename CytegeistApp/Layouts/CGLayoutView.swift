@@ -9,16 +9,13 @@ import SwiftUI
 import UniformTypeIdentifiers.UTType
 import Combine
 import SwiftData
+import CytegeistCore
+import CytegeistLibrary
     
     
 //  https://gist.github.com/tarasis/f9bac6d98de5433f1ddbadaef02f9a29
 // https://swiftui-lab.com/drag-drop-with-swiftui/
 //https://www.codecademy.com/resources/docs/swiftui/drag-and-drop
-
-extension UTType {
-    static var fruit = UTType(exportedAs: "com.cytegeist.fruit")
-    static var population = UTType(exportedAs: "cytegeist.population")
-}
 
 //---------------------------------------------------------------------------
 // MAIN VIEW

@@ -6,7 +6,7 @@
 //  PROBABLY NOT NEEDED IN  CYTEGEIST:  Matrices are usually included in FCS files
 
 import Foundation
-
+import CytegeistLibrary
 
 
 //---------------------------------------------------------

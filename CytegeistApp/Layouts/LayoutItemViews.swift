@@ -7,6 +7,8 @@
 
 import SwiftUI
 import Charts
+import CytegeistCore
+import CytegeistLibrary
 
     // wrap the model in a view that can be styled and dragged
 struct LayoutItemWrappper: View, Identifiable {
@@ -108,13 +110,13 @@ struct CChartView : View {
         let sampleRef = SampleRef(url: DemoData.facsDivaSample0!)
         
         VStack {
-            ChartView_Penguins()
-//            HistogramView(data: core.histogram(sampleRef: sampleRef, parameterName: "FSC-A"))
+//            ChartView_Penguins()
+            HistogramView(query: core.histogram(.init(PopulationRequest(sampleRef), .init("FSC-A"))))
                 //            if editing {
                 //                TextField("Test Field", text: bindableText) .foregroundColor(.black)       //, selection: $selection
                 //                    .font(.headline).background(.black.opacity(0.8  )).frame(width: 120)
                 //            } else {
-            Text("Penguins")
+//            Text("Penguins")
             
         }  .frame(width: 100, height: 100)
             .padding()
@@ -132,27 +134,27 @@ struct CTableView : View {
     var parent: CGLayoutView
     let item: CTable
     let editing: Bool
-    @State var columnCustomization = TableColumnCustomization<User>()
-    @State var selection = Set<User.ID>()
-    @State var sortOrders = [KeyPathComparator(\User.name, order: .forward), KeyPathComparator(\User.score, order: .forward)]
+//    @State var columnCustomization = TableColumnCustomization<User>()
+//    @State var selection = Set<User.ID>()
+//    @State var sortOrders = [KeyPathComparator(\User.name, order: .forward), KeyPathComparator(\User.score, order: .forward)]
     
     var body: some View {
         VStack {
-            Table(selection: $selection, sortOrder: $sortOrders,  columnCustomization: $columnCustomization)
-            {
-                TableColumn("Marker", value:\.marker){ user in Text(user.marker)  }.customizationID("marker")
-                TableColumn("Score", value:\.score) { user in Text(String(user.score))  }.customizationID("score")
-                TableColumn("Number", value:\.number){ user in Text(String(user.number))  }.customizationID("number")
-            }
-        rows:
-            {
-                ForEach(users) { user in TableRow(user)  }
-            }.frame(width: 180, height: 120)
-                .border(.blue)
-                .fontWidth(Font.Width(8))
-                .allowsHitTesting(false)
-                .clipShape(Rectangle())
-                .border(.red, width: item.selected ? 3.0 : 0.0 )
+//            Table(selection: $selection, sortOrder: $sortOrders,  columnCustomization: $columnCustomization)
+//            {
+//                TableColumn("Marker", value:\.marker){ user in Text(user.marker)  }.customizationID("marker")
+//                TableColumn("Score", value:\.score) { user in Text(String(user.score))  }.customizationID("score")
+//                TableColumn("Number", value:\.number){ user in Text(String(user.number))  }.customizationID("number")
+//            }
+//        rows:
+//            {
+//                ForEach(users) { user in TableRow(user)  }
+//            }.frame(width: 180, height: 120)
+//                .border(.blue)
+//                .fontWidth(Font.Width(8))
+//                .allowsHitTesting(false)
+//                .clipShape(Rectangle())
+//                .border(.red, width: item.selected ? 3.0 : 0.0 )
         }
         .onAppear(perform:  {   item.position = CGPoint(x: 100, y: 200) })
         

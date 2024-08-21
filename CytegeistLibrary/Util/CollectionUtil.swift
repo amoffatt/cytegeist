@@ -22,6 +22,22 @@ extension Array where Element: Collection {
         }
         return true
     }
+    
+    func unflattening(dim: Int) -> [[Element]] {
+        let hasRemainder = !count.isMultiple(of: dim)
+        
+        var result = [[Element]]()
+        let size = count / dim
+        result.reserveCapacity(size + (hasRemainder ? 1 : 0))
+        for i in 0..<size {
+            result.append(Array(self[i*dim..<(i + 1) * dim]))
+        }
+        if hasRemainder {
+            result.append(Array(self[(size * dim)...]))
+        }
+        return result
+    }
+
 }
 
 extension RandomAccessCollection {

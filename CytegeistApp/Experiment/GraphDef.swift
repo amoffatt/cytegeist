@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 import UniformTypeIdentifiers
+import CytegeistLibrary
 
 enum XYZ : Codable, Transferable {    case x, y, z, na
     static var transferRepresentation: some TransferRepresentation {

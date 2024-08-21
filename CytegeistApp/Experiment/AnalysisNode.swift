@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 import UniformTypeIdentifiers.UTType
+import CytegeistLibrary
 
 
 //---------------------------------------------------------
@@ -28,23 +29,28 @@ import UniformTypeIdentifiers.UTType
        }
     }
 
+public extension UTType {
+    static var population = UTType(exportedAs: "cytegeist.population")
+}
+
 //---------------------------------------------------------
-class AnalysisNode : Codable, Transferable, Identifiable, Equatable
+public class AnalysisNode : Codable, Transferable, Identifiable, Equatable
 {
-    static func == (lhs: AnalysisNode, rhs: AnalysisNode) -> Bool {
+
+    public static func == (lhs: AnalysisNode, rhs: AnalysisNode) -> Bool {
          lhs.id == rhs.id
     }
     
-        var id = UUID()
-        var name = ""
-        var attributes = [String : String]()
-        var graphDef =  GraphDef()              // how this population wants to be shown
-        var gate =  Gate()                      // the predicate to filter ones parent
-        var statistics =  [Statistic]()         // what to report
-        var children: [AnalysisNode]?  =  [AnalysisNode]()        // subpopulations dependent on us
-        static var transferRepresentation: some TransferRepresentation {
-            CodableRepresentation(contentType: UTType.population)
-        }
+    public var id = UUID()
+    var name = ""
+    var attributes = [String : String]()
+    var graphDef =  GraphDef()              // how this population wants to be shown
+    var gate =  Gate()                      // the predicate to filter ones parent
+    var statistics =  [Statistic]()         // what to report
+    var children: [AnalysisNode]?  =  [AnalysisNode]()        // subpopulations dependent on us
+    public static var transferRepresentation: some TransferRepresentation {
+        CodableRepresentation(contentType: UTType.population)
+    }
 
         // addChild
         // removeChild

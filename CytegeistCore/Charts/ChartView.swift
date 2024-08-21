@@ -22,7 +22,7 @@ public struct ChartView: View {
     
     public var body: some View {
         VStack {
-            HistogramView(query: core.histogram(.init(population: .init(sample), axisNames: .init(parameterNames.x))))
+            HistogramView(query: core.histogram(.init(PopulationRequest(sample), .init(parameterNames.x))))
 //            Histogram2DView(data: core.histogram2D(sampleRef: sample, parameterNames: parameterNames))
 //            Selector()
         }

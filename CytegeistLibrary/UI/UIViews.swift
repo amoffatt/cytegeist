@@ -47,3 +47,9 @@ public struct Print: View {
         return EmptyView()
     }
 }
+
+public extension View {
+    func fillAvailableSpace() -> some View {
+        self.frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+}

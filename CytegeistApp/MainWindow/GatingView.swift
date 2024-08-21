@@ -8,6 +8,7 @@
 import SwiftUI
 import Charts
 import UniformTypeIdentifiers.UTType
+import CytegeistLibrary
 
 
 struct GatingView: View {
@@ -26,14 +27,14 @@ struct GatingView: View {
 //    var selectedSample: Sample
     var chart: some View {
         VStack {
-            Chart(insectData)
+            Chart()
             {
-                PointMark(
-                    x: .value("Wing Length", $0.wingLength),
-                    y: .value("Wing Width", $0.wingWidth)
-                )
-                .symbol(by: .value("Family", $0.family))
-                .shadow(color: .blue, radius: 5, x:0, y:0)
+//                PointMark(
+//                    x: .value("Wing Length", $0.wingLength),
+//                    y: .value("Wing Width", $0.wingWidth)
+//                )
+//                .symbol(by: .value("Family", $0.family))
+//                .shadow(color: .blue, radius: 5, x:0, y:0)
             }
             .chartOverlay { proxy in
                 GeometryReader { proxy in

@@ -11,7 +11,7 @@ import CytegeistCore
 import Charts
 
 @MainActor
-struct ContentView: View {
+struct AaronTestContentView: View {
     @State var showFCSSelector: Bool = false
     @State var sample:SampleRef = SampleRef(url:DemoData.facsDivaSample0!)
     
@@ -66,6 +66,6 @@ struct ContentView: View {
 }
 
 #Preview() {
-    ContentView()
+    AaronTestContentView()
         .environment(AppModel())
 }

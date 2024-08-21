@@ -7,20 +7,20 @@
 
 import Foundation
 
-class TreeNode
+public class TreeNode
 {
     public var value = ""
     public var attrib = [String: String]()
     public var children = [TreeNode]()
     public var text = ""
     
-    init(_   t: String )    {
+    public init(_   t: String )    {
         value = t
     }
-    func add(child: TreeNode) {
+    public func add(child: TreeNode) {
         children.append(child)
     }
-    var deepCount: Int {
+    public var deepCount: Int {
         1 + children.reduce(0) { $0 + $1.deepCount }
     }
     

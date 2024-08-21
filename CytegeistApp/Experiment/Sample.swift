@@ -6,6 +6,8 @@
 //
 
 import Foundation
+import CytegeistLibrary
+import CytegeistCore
 
 
 //---------------------------------------------------------
@@ -77,9 +79,9 @@ import Foundation
 
 //---------------------------------------------------------
 //@Observable
-class Sample : Identifiable, Codable
+public class Sample : Identifiable, Codable
 {
-    var id: UUID
+    public var id: UUID
     var uri:String  = "n/a"  // do we need to keep this outside attributes
     var sampleId = ""
     var variety: String
@@ -123,7 +125,7 @@ class Sample : Identifiable, Codable
         //-------------------------------------------------------------------------
     //read from JSON
     
-    required init(from decoder: any Decoder) throws {
+    public required init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         self.id = try container.decode(UUID.self, forKey: .id)
         self.uri = try container.decodeIfPresent(String.self, forKey: .uri) ?? ""

@@ -73,7 +73,7 @@ public class APIQuery<T> {
 public let defaultHistogramResolution:Int = 256
 
 @MainActor
-public class CytegeistCoreAPI {
+public class CytegeistCoreAPI : ObservableObject {
     private let fcsReader:FCSReader = .init()
     
     
@@ -240,7 +240,7 @@ public class CytegeistCoreAPI {
         let parameters = try _getParameters(from: sample, parameterNames: request.axisNames.values)
         let x = parameters[0]
         let h = HistogramData<_1D>(data: .init(x.data), size: request.size ?? .init(defaultHistogramResolution), axes: .init(x.meta.normalizer))
-        return .init(histogram: h, view: nil)
+        return CachedHistogram(h, view: nil)
     }
     
     nonisolated private func _histogram2D(_ request:HistogramRequest<_2D>, sample:FCSFile) throws -> CachedHistogram<_2D> {
@@ -256,7 +256,7 @@ public class CytegeistCoreAPI {
             throw APIError("Could not create 2D image")
         }
         
-        return CachedHistogram(histogram: h, view: AnyView(image.resizable()))
+        return CachedHistogram(h, view: AnyView(image.resizable()))
     }
 
 }
@@ -300,13 +300,24 @@ public struct HistogramRequest<D:Dim> : Hashable {
 //    public let raw:String
     
     public let axisNames:D.Strings
-    public let size:D.IntCoord? = nil
+    public let size:D.IntCoord?
+    
+    public init(_ population: PopulationRequest, _ axisNames: D.Strings, size:D.IntCoord? = nil) {
+        self.population = population
+        self.axisNames = axisNames
+        self.size = size
+    }
 }
 
 
 public struct CachedHistogram<D:Dim> {
     public let histogram:HistogramData<D>
     public let view:AnyView?
+    
+    public init(_ histogram: HistogramData<D>, view: AnyView? =  nil) {
+        self.histogram = histogram
+        self.view = view
+    }
 }
 
 

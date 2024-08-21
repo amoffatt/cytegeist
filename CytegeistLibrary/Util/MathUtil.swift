@@ -35,6 +35,14 @@ public extension UInt8 {
 }
 
 
+public struct PValue  : Codable  //ClosedRange<Double> { (0.0...1.0) }       // 0...1 restricted float
+{
+    var  p: Double  //ClosedRange<Double> { (0.0...1.0) }
+    public init(_ value: Double)
+    {
+        p = value
+    }
+}
 
 //public protocol AxisNormalizer: Hashable, Equatable {
 //    

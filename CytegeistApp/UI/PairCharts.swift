@@ -21,8 +21,8 @@ struct PairChartView: View {
                 
                 Histogram2DView(query: core.histogram2D(
                     .init(
-                        population: .init(sampleRef),
-                        axisNames: parameters.map { $0.name }
+                        PopulationRequest(sampleRef),
+                        parameters.map { $0.name }
                     )
                 ))
                     .frame(width: 200, height: 200)

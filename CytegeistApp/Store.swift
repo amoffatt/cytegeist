@@ -6,6 +6,26 @@
 //
 
 import Foundation
+import CytegeistLibrary
+import CytegeistCore
+
+
+
+// switch between table and gallery views
+enum ViewMode: String, CaseIterable, Identifiable {
+    var id: Self { self }
+    case gallery
+    case table
+}
+
+    // switch between table and gallery views
+enum ReportMode: String, CaseIterable, Identifiable {
+    var id: Self { self }
+    case gating
+    case table
+    case layout
+}
+
 
 final class Store: ObservableObject {
     var experiments: [Experiment] = []
@@ -61,8 +81,8 @@ final class Store: ObservableObject {
     
     func onFCSPicked(_result: Result<[URL], any Error>)
     {
-        do {
-            Task {
+        Task {
+            do {
                 try print("FCSPicked urls: ", _result.get())
                 for url in try _result.get()
                 {
@@ -72,9 +92,9 @@ final class Store: ObservableObject {
                     url.stopAccessingSecurityScopedResource()     // release access
                 }
             }
-        }
-        catch let error as NSError {
-            debug("Ooops! Something went wrong: \(error)")
+            catch let error as NSError {
+                debug("Ooops! Something went wrong: \(error)")
+            }
         }
     }
     

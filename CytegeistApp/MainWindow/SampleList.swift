@@ -7,6 +7,7 @@
 
 import Foundation
 import UniformTypeIdentifiers
+import CytegeistLibrary
 /*
 See LICENSE folder for this sample’s licensing information.
 
@@ -159,7 +160,7 @@ struct SampleList: View {
 //                        print (data)
                         if let url = URL(dataRepresentation: data, relativeTo: nil) {
                             let theInfo = "File: \(url.lastPathComponent) \nPath: \(url.path)\n"
-                            let theSizes = FileInfo().reportSizes(url: url)
+                            let theSizes = FileInfo.reportSizes(url: url)
                             DispatchQueue.main.async {
                                 fileInfo.append(theInfo + theSizes)
                                 process(url)

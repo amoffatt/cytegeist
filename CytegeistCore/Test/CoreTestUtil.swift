@@ -35,7 +35,7 @@ public class TestUtil {
                 var bins:[Int] = Array(repeating: 0, count: 256)
                 TestUtil.addNormalDistribution(to: &bins, amplitude: 8, mean: 0.3, stdDev: 0.2)
                 result.progress(
-                    .init(histogram:
+                    CachedHistogram(
                         HistogramData(
                             bins: bins,
                             size: .init(bins.count),

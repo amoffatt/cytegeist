@@ -6,6 +6,8 @@
 //
 
 import Foundation
+import CytegeistLibrary
+
 //--------------------------------------------------------
 class Gate : Codable, Hashable
 {
@@ -113,7 +115,7 @@ class Gate : Codable, Hashable
     
     public func testMembership(inNumber: Double) -> PValue
     {
-        return PValue(value: 1.0)
+        return PValue(1.0)
     }
 }
 
