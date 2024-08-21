@@ -23,7 +23,6 @@
 		B64173922C58A89A001AA2F4 /* CoreTestUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = B64173912C58A89A001AA2F4 /* CoreTestUtil.swift */; };
 		B64173942C58AB2B001AA2F4 /* DemoData.swift in Sources */ = {isa = PBXBuildFile; fileRef = B64173932C58AB2B001AA2F4 /* DemoData.swift */; };
 		B64173952C58B0AA001AA2F4 /* TestData in Resources */ = {isa = PBXBuildFile; fileRef = B63D16972C55EECA00E81C2F /* TestData */; };
-		B641739B2C59A888001AA2F4 /* Populations.swift in Sources */ = {isa = PBXBuildFile; fileRef = B641739A2C59A888001AA2F4 /* Populations.swift */; };
 		B641739D2C5C4E00001AA2F4 /* ParameterInspectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B641739C2C5C4E00001AA2F4 /* ParameterInspectorView.swift */; };
 		B65D82A92C44BE7100E4F0A2 /* RealityKitContent in Frameworks */ = {isa = PBXBuildFile; platformFilters = (xros, ); productRef = B65D82A82C44BE7100E4F0A2 /* RealityKitContent */; settings = {ATTRIBUTES = (Weak, ); }; };
 		B65D82AB2C44BE7100E4F0A2 /* CytegeistApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B65D82AA2C44BE7100E4F0A2 /* CytegeistApp.swift */; };
@@ -51,31 +50,34 @@
 		B6C9A40F2C75A46800DB6786 /* ExceptionCatcher.h in Headers */ = {isa = PBXBuildFile; fileRef = B63D169D2C55F79700E81C2F /* ExceptionCatcher.h */; };
 		B6C9A4112C75A59200DB6786 /* CytegeistLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B6C9A3EB2C75A3EF00DB6786 /* CytegeistLibrary.framework */; platformFilters = (ios, macos, ); };
 		B6C9A4122C75A59200DB6786 /* CytegeistLibrary.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = B6C9A3EB2C75A3EF00DB6786 /* CytegeistLibrary.framework */; platformFilters = (ios, macos, ); settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		B6C9A4242C75B58800DB6786 /* CGLayoutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4162C75B58700DB6786 /* CGLayoutView.swift */; };
-		B6C9A4252C75B58800DB6786 /* LayoutItemViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4172C75B58700DB6786 /* LayoutItemViews.swift */; };
-		B6C9A4262C75B58800DB6786 /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4182C75B58700DB6786 /* MainView.swift */; };
-		B6C9A4272C75B58800DB6786 /* AnalysisList.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A41A2C75B58700DB6786 /* AnalysisList.swift */; };
-		B6C9A4282C75B58800DB6786 /* DisplayModePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A41B2C75B58700DB6786 /* DisplayModePicker.swift */; };
-		B6C9A4292C75B58800DB6786 /* ExpansionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A41C2C75B58700DB6786 /* ExpansionState.swift */; };
-		B6C9A42A2C75B58800DB6786 /* ExperimentHistoryOutline.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A41D2C75B58700DB6786 /* ExperimentHistoryOutline.swift */; };
-		B6C9A42B2C75B58800DB6786 /* GatingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A41E2C75B58700DB6786 /* GatingView.swift */; };
-		B6C9A42C2C75B58800DB6786 /* ReportModePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A41F2C75B58700DB6786 /* ReportModePicker.swift */; };
-		B6C9A42D2C75B58800DB6786 /* SampleGallery.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4202C75B58700DB6786 /* SampleGallery.swift */; };
-		B6C9A42E2C75B58800DB6786 /* SampleList.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4212C75B58700DB6786 /* SampleList.swift */; };
-		B6C9A42F2C75B58800DB6786 /* Sidebar.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4222C75B58700DB6786 /* Sidebar.swift */; };
-		B6C9A4322C75B68700DB6786 /* Store.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4312C75B68700DB6786 /* Store.swift */; };
-		B6C9A43F2C75B69D00DB6786 /* Experiment.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4332C75B69C00DB6786 /* Experiment.swift */; };
-		B6C9A4402C75B69D00DB6786 /* Matrix.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4342C75B69C00DB6786 /* Matrix.swift */; };
-		B6C9A4412C75B69D00DB6786 /* Sample+ItemProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4352C75B69D00DB6786 /* Sample+ItemProvider.swift */; };
-		B6C9A4422C75B69D00DB6786 /* GraphDef.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4362C75B69D00DB6786 /* GraphDef.swift */; };
-		B6C9A4432C75B69D00DB6786 /* Cytometer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4372C75B69D00DB6786 /* Cytometer.swift */; };
-		B6C9A4442C75B69D00DB6786 /* Gate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4382C75B69D00DB6786 /* Gate.swift */; };
-		B6C9A4452C75B69D00DB6786 /* Store+ReferenceFileDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4392C75B69D00DB6786 /* Store+ReferenceFileDocument.swift */; };
-		B6C9A4462C75B69D00DB6786 /* WorkspaceReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A43A2C75B69D00DB6786 /* WorkspaceReader.swift */; };
-		B6C9A4472C75B69D00DB6786 /* Sample.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A43B2C75B69D00DB6786 /* Sample.swift */; };
-		B6C9A4482C75B69D00DB6786 /* FocusedValues+Experiment.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A43C2C75B69D00DB6786 /* FocusedValues+Experiment.swift */; };
-		B6C9A4492C75B69D00DB6786 /* Sample+ImportImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A43D2C75B69D00DB6786 /* Sample+ImportImage.swift */; };
-		B6C9A44A2C75B69D00DB6786 /* AnalysisNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A43E2C75B69D00DB6786 /* AnalysisNode.swift */; };
+		B6C9A44C2C75CFCB00DB6786 /* Store.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A44B2C75CFCB00DB6786 /* Store.swift */; };
+		B6C9A45B2C75D01300DB6786 /* CGLayoutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A44D2C75D01300DB6786 /* CGLayoutView.swift */; };
+		B6C9A45C2C75D01300DB6786 /* LayoutItemViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A44E2C75D01300DB6786 /* LayoutItemViews.swift */; };
+		B6C9A45D2C75D01300DB6786 /* AnalysisList.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4502C75D01300DB6786 /* AnalysisList.swift */; };
+		B6C9A45E2C75D01300DB6786 /* DisplayModePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4512C75D01300DB6786 /* DisplayModePicker.swift */; };
+		B6C9A45F2C75D01300DB6786 /* ExpansionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4522C75D01300DB6786 /* ExpansionState.swift */; };
+		B6C9A4602C75D01300DB6786 /* ExperimentHistoryOutline.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4532C75D01300DB6786 /* ExperimentHistoryOutline.swift */; };
+		B6C9A4612C75D01300DB6786 /* GatingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4542C75D01300DB6786 /* GatingView.swift */; };
+		B6C9A4622C75D01300DB6786 /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4552C75D01300DB6786 /* MainView.swift */; };
+		B6C9A4632C75D01300DB6786 /* ReportModePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4562C75D01300DB6786 /* ReportModePicker.swift */; };
+		B6C9A4642C75D01300DB6786 /* SampleGallery.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4572C75D01300DB6786 /* SampleGallery.swift */; };
+		B6C9A4652C75D01300DB6786 /* SampleList.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4582C75D01300DB6786 /* SampleList.swift */; };
+		B6C9A4662C75D01300DB6786 /* Sidebar.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4592C75D01300DB6786 /* Sidebar.swift */; };
+		B6C9A4732C75D04900DB6786 /* Sample+ItemProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4672C75D04800DB6786 /* Sample+ItemProvider.swift */; };
+		B6C9A4742C75D04900DB6786 /* WorkspaceReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4682C75D04800DB6786 /* WorkspaceReader.swift */; };
+		B6C9A4752C75D04900DB6786 /* Gate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4692C75D04800DB6786 /* Gate.swift */; };
+		B6C9A4762C75D04900DB6786 /* FocusedValues+Experiment.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A46A2C75D04800DB6786 /* FocusedValues+Experiment.swift */; };
+		B6C9A4772C75D04900DB6786 /* Experiment.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A46B2C75D04800DB6786 /* Experiment.swift */; };
+		B6C9A4782C75D04900DB6786 /* GraphDef.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A46C2C75D04800DB6786 /* GraphDef.swift */; };
+		B6C9A4792C75D04900DB6786 /* Sample.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A46D2C75D04800DB6786 /* Sample.swift */; };
+		B6C9A47A2C75D04900DB6786 /* Matrix.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A46E2C75D04800DB6786 /* Matrix.swift */; };
+		B6C9A47B2C75D04900DB6786 /* AnalysisNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A46F2C75D04800DB6786 /* AnalysisNode.swift */; };
+		B6C9A47C2C75D04900DB6786 /* Sample+ImportImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4702C75D04800DB6786 /* Sample+ImportImage.swift */; };
+		B6C9A47D2C75D04900DB6786 /* Store+ReferenceFileDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4712C75D04900DB6786 /* Store+ReferenceFileDocument.swift */; };
+		B6C9A47E2C75D04900DB6786 /* Cytometer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4722C75D04900DB6786 /* Cytometer.swift */; };
+		B6C9A48B2C75D09A00DB6786 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4842C75D09A00DB6786 /* SettingsView.swift */; };
+		B6C9A48C2C75D09A00DB6786 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4852C75D09A00DB6786 /* ContentView.swift */; };
+		B6C9A48E2C75D24B00DB6786 /* TreeNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A48D2C75D24B00DB6786 /* TreeNode.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -187,7 +189,6 @@
 		B64173932C58AB2B001AA2F4 /* DemoData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoData.swift; sourceTree = "<group>"; };
 		B64173962C599B09001AA2F4 /* ThreadUtil.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreadUtil.swift; sourceTree = "<group>"; };
 		B64173982C59A06F001AA2F4 /* UIViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIViews.swift; sourceTree = "<group>"; };
-		B641739A2C59A888001AA2F4 /* Populations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Populations.swift; sourceTree = "<group>"; };
 		B641739C2C5C4E00001AA2F4 /* ParameterInspectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParameterInspectorView.swift; sourceTree = "<group>"; };
 		B65D82A32C44BE7100E4F0A2 /* CytegeistApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CytegeistApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B65D82A72C44BE7100E4F0A2 /* RealityKitContent */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = RealityKitContent; sourceTree = "<group>"; };
@@ -207,31 +208,34 @@
 		B6C9A3ED2C75A3EF00DB6786 /* CytegeistLibrary.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CytegeistLibrary.h; sourceTree = "<group>"; };
 		B6C9A3F22C75A3F000DB6786 /* CytegeistLibraryTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CytegeistLibraryTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B6C9A3F92C75A3F000DB6786 /* CytegeistLibraryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CytegeistLibraryTests.swift; sourceTree = "<group>"; };
-		B6C9A4162C75B58700DB6786 /* CGLayoutView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CGLayoutView.swift; sourceTree = "<group>"; };
-		B6C9A4172C75B58700DB6786 /* LayoutItemViews.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LayoutItemViews.swift; sourceTree = "<group>"; };
-		B6C9A4182C75B58700DB6786 /* MainView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
-		B6C9A41A2C75B58700DB6786 /* AnalysisList.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AnalysisList.swift; sourceTree = "<group>"; };
-		B6C9A41B2C75B58700DB6786 /* DisplayModePicker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DisplayModePicker.swift; sourceTree = "<group>"; };
-		B6C9A41C2C75B58700DB6786 /* ExpansionState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ExpansionState.swift; sourceTree = "<group>"; };
-		B6C9A41D2C75B58700DB6786 /* ExperimentHistoryOutline.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ExperimentHistoryOutline.swift; sourceTree = "<group>"; };
-		B6C9A41E2C75B58700DB6786 /* GatingView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GatingView.swift; sourceTree = "<group>"; };
-		B6C9A41F2C75B58700DB6786 /* ReportModePicker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReportModePicker.swift; sourceTree = "<group>"; };
-		B6C9A4202C75B58700DB6786 /* SampleGallery.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SampleGallery.swift; sourceTree = "<group>"; };
-		B6C9A4212C75B58700DB6786 /* SampleList.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SampleList.swift; sourceTree = "<group>"; };
-		B6C9A4222C75B58700DB6786 /* Sidebar.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Sidebar.swift; sourceTree = "<group>"; };
-		B6C9A4312C75B68700DB6786 /* Store.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Store.swift; path = "../../../adam-cytegeist/filereader/Cytometry/Store.swift"; sourceTree = "<group>"; };
-		B6C9A4332C75B69C00DB6786 /* Experiment.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Experiment.swift; path = "../../../../adam-cytegeist/filereader/Cytometry/Experiment.swift"; sourceTree = "<group>"; };
-		B6C9A4342C75B69C00DB6786 /* Matrix.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Matrix.swift; path = "../../../../adam-cytegeist/filereader/Cytometry/Matrix.swift"; sourceTree = "<group>"; };
-		B6C9A4352C75B69D00DB6786 /* Sample+ItemProvider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = "Sample+ItemProvider.swift"; path = "../../../../adam-cytegeist/filereader/Cytometry/Sample+ItemProvider.swift"; sourceTree = "<group>"; };
-		B6C9A4362C75B69D00DB6786 /* GraphDef.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = GraphDef.swift; path = "../../../../adam-cytegeist/filereader/Cytometry/GraphDef.swift"; sourceTree = "<group>"; };
-		B6C9A4372C75B69D00DB6786 /* Cytometer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Cytometer.swift; path = "../../../../adam-cytegeist/filereader/Cytometry/Cytometer.swift"; sourceTree = "<group>"; };
-		B6C9A4382C75B69D00DB6786 /* Gate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Gate.swift; path = "../../../../adam-cytegeist/filereader/Cytometry/Gate.swift"; sourceTree = "<group>"; };
-		B6C9A4392C75B69D00DB6786 /* Store+ReferenceFileDocument.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = "Store+ReferenceFileDocument.swift"; path = "../../../../adam-cytegeist/filereader/Cytometry/Store+ReferenceFileDocument.swift"; sourceTree = "<group>"; };
-		B6C9A43A2C75B69D00DB6786 /* WorkspaceReader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = WorkspaceReader.swift; path = "../../../../adam-cytegeist/filereader/Cytometry/WorkspaceReader.swift"; sourceTree = "<group>"; };
-		B6C9A43B2C75B69D00DB6786 /* Sample.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Sample.swift; path = "../../../../adam-cytegeist/filereader/Cytometry/Sample.swift"; sourceTree = "<group>"; };
-		B6C9A43C2C75B69D00DB6786 /* FocusedValues+Experiment.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = "FocusedValues+Experiment.swift"; path = "../../../../adam-cytegeist/filereader/Cytometry/FocusedValues+Experiment.swift"; sourceTree = "<group>"; };
-		B6C9A43D2C75B69D00DB6786 /* Sample+ImportImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = "Sample+ImportImage.swift"; path = "../../../../adam-cytegeist/filereader/Cytometry/Sample+ImportImage.swift"; sourceTree = "<group>"; };
-		B6C9A43E2C75B69D00DB6786 /* AnalysisNode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AnalysisNode.swift; path = "../../../../adam-cytegeist/filereader/Cytometry/AnalysisNode.swift"; sourceTree = "<group>"; };
+		B6C9A44B2C75CFCB00DB6786 /* Store.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Store.swift; sourceTree = "<group>"; };
+		B6C9A44D2C75D01300DB6786 /* CGLayoutView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CGLayoutView.swift; sourceTree = "<group>"; };
+		B6C9A44E2C75D01300DB6786 /* LayoutItemViews.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LayoutItemViews.swift; sourceTree = "<group>"; };
+		B6C9A4502C75D01300DB6786 /* AnalysisList.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AnalysisList.swift; sourceTree = "<group>"; };
+		B6C9A4512C75D01300DB6786 /* DisplayModePicker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DisplayModePicker.swift; sourceTree = "<group>"; };
+		B6C9A4522C75D01300DB6786 /* ExpansionState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ExpansionState.swift; sourceTree = "<group>"; };
+		B6C9A4532C75D01300DB6786 /* ExperimentHistoryOutline.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ExperimentHistoryOutline.swift; sourceTree = "<group>"; };
+		B6C9A4542C75D01300DB6786 /* GatingView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GatingView.swift; sourceTree = "<group>"; };
+		B6C9A4552C75D01300DB6786 /* MainView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
+		B6C9A4562C75D01300DB6786 /* ReportModePicker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReportModePicker.swift; sourceTree = "<group>"; };
+		B6C9A4572C75D01300DB6786 /* SampleGallery.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SampleGallery.swift; sourceTree = "<group>"; };
+		B6C9A4582C75D01300DB6786 /* SampleList.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SampleList.swift; sourceTree = "<group>"; };
+		B6C9A4592C75D01300DB6786 /* Sidebar.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Sidebar.swift; sourceTree = "<group>"; };
+		B6C9A4672C75D04800DB6786 /* Sample+ItemProvider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Sample+ItemProvider.swift"; sourceTree = "<group>"; };
+		B6C9A4682C75D04800DB6786 /* WorkspaceReader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WorkspaceReader.swift; sourceTree = "<group>"; };
+		B6C9A4692C75D04800DB6786 /* Gate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Gate.swift; sourceTree = "<group>"; };
+		B6C9A46A2C75D04800DB6786 /* FocusedValues+Experiment.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "FocusedValues+Experiment.swift"; sourceTree = "<group>"; };
+		B6C9A46B2C75D04800DB6786 /* Experiment.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Experiment.swift; sourceTree = "<group>"; };
+		B6C9A46C2C75D04800DB6786 /* GraphDef.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GraphDef.swift; sourceTree = "<group>"; };
+		B6C9A46D2C75D04800DB6786 /* Sample.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Sample.swift; sourceTree = "<group>"; };
+		B6C9A46E2C75D04800DB6786 /* Matrix.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Matrix.swift; sourceTree = "<group>"; };
+		B6C9A46F2C75D04800DB6786 /* AnalysisNode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AnalysisNode.swift; sourceTree = "<group>"; };
+		B6C9A4702C75D04800DB6786 /* Sample+ImportImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Sample+ImportImage.swift"; sourceTree = "<group>"; };
+		B6C9A4712C75D04900DB6786 /* Store+ReferenceFileDocument.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Store+ReferenceFileDocument.swift"; sourceTree = "<group>"; };
+		B6C9A4722C75D04900DB6786 /* Cytometer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Cytometer.swift; sourceTree = "<group>"; };
+		B6C9A4842C75D09A00DB6786 /* SettingsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		B6C9A4852C75D09A00DB6786 /* ContentView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		B6C9A48D2C75D24B00DB6786 /* TreeNode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TreeNode.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -294,7 +298,6 @@
 				B610A5792C542BB50081C517 /* DataBufferReader.swift */,
 				B63EEE912C569CB300E465C9 /* SampleRef.swift */,
 				B63EEE932C569D7300E465C9 /* Histogram.swift */,
-				B641739A2C59A888001AA2F4 /* Populations.swift */,
 			);
 			path = Data;
 			sourceTree = "<group>";
@@ -400,9 +403,9 @@
 				B65D82AA2C44BE7100E4F0A2 /* CytegeistApp.swift */,
 				B65D82AC2C44BE7100E4F0A2 /* ContentView.swift */,
 				B65D82AE2C44BE7100E4F0A2 /* ImmersiveView.swift */,
-				B6C9A4312C75B68700DB6786 /* Store.swift */,
+				B6C9A44B2C75CFCB00DB6786 /* Store.swift */,
+				B6C9A45A2C75D01300DB6786 /* MainWindow */,
 				B68529722C74DC1100EF9EF4 /* UI */,
-				B6C9A4232C75B58700DB6786 /* MainWindow */,
 				B65D82B02C44BE7200E4F0A2 /* Assets.xcassets */,
 				B65D82B52C44BE7200E4F0A2 /* Info.plist */,
 				B65D82B22C44BE7200E4F0A2 /* Preview Content */,
@@ -429,6 +432,8 @@
 		B68529722C74DC1100EF9EF4 /* UI */ = {
 			isa = PBXGroup;
 			children = (
+				B6C9A4852C75D09A00DB6786 /* ContentView.swift */,
+				B6C9A4842C75D09A00DB6786 /* SettingsView.swift */,
 				B68529702C74DC1100EF9EF4 /* PairCharts.swift */,
 				B68529712C74DC1100EF9EF4 /* SampleInspectorView.swift */,
 			);
@@ -459,51 +464,51 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		B6C9A4192C75B58700DB6786 /* Layout Editor */ = {
+		B6C9A4302C75B66500DB6786 /* Experiment */ = {
 			isa = PBXGroup;
 			children = (
-				B6C9A4162C75B58700DB6786 /* CGLayoutView.swift */,
-				B6C9A4172C75B58700DB6786 /* LayoutItemViews.swift */,
+				B6C9A48D2C75D24B00DB6786 /* TreeNode.swift */,
+				B6C9A46F2C75D04800DB6786 /* AnalysisNode.swift */,
+				B6C9A4722C75D04900DB6786 /* Cytometer.swift */,
+				B6C9A46B2C75D04800DB6786 /* Experiment.swift */,
+				B6C9A46A2C75D04800DB6786 /* FocusedValues+Experiment.swift */,
+				B6C9A4692C75D04800DB6786 /* Gate.swift */,
+				B6C9A46C2C75D04800DB6786 /* GraphDef.swift */,
+				B6C9A46E2C75D04800DB6786 /* Matrix.swift */,
+				B6C9A46D2C75D04800DB6786 /* Sample.swift */,
+				B6C9A4702C75D04800DB6786 /* Sample+ImportImage.swift */,
+				B6C9A4672C75D04800DB6786 /* Sample+ItemProvider.swift */,
+				B6C9A4712C75D04900DB6786 /* Store+ReferenceFileDocument.swift */,
+				B6C9A4682C75D04800DB6786 /* WorkspaceReader.swift */,
+			);
+			path = Experiment;
+			sourceTree = "<group>";
+		};
+		B6C9A44F2C75D01300DB6786 /* Layout Editor */ = {
+			isa = PBXGroup;
+			children = (
+				B6C9A44D2C75D01300DB6786 /* CGLayoutView.swift */,
+				B6C9A44E2C75D01300DB6786 /* LayoutItemViews.swift */,
 			);
 			path = "Layout Editor";
 			sourceTree = "<group>";
 		};
-		B6C9A4232C75B58700DB6786 /* MainWindow */ = {
+		B6C9A45A2C75D01300DB6786 /* MainWindow */ = {
 			isa = PBXGroup;
 			children = (
-				B6C9A4182C75B58700DB6786 /* MainView.swift */,
-				B6C9A4192C75B58700DB6786 /* Layout Editor */,
-				B6C9A41A2C75B58700DB6786 /* AnalysisList.swift */,
-				B6C9A41B2C75B58700DB6786 /* DisplayModePicker.swift */,
-				B6C9A41C2C75B58700DB6786 /* ExpansionState.swift */,
-				B6C9A41D2C75B58700DB6786 /* ExperimentHistoryOutline.swift */,
-				B6C9A41E2C75B58700DB6786 /* GatingView.swift */,
-				B6C9A41F2C75B58700DB6786 /* ReportModePicker.swift */,
-				B6C9A4202C75B58700DB6786 /* SampleGallery.swift */,
-				B6C9A4212C75B58700DB6786 /* SampleList.swift */,
-				B6C9A4222C75B58700DB6786 /* Sidebar.swift */,
+				B6C9A44F2C75D01300DB6786 /* Layout Editor */,
+				B6C9A4502C75D01300DB6786 /* AnalysisList.swift */,
+				B6C9A4512C75D01300DB6786 /* DisplayModePicker.swift */,
+				B6C9A4522C75D01300DB6786 /* ExpansionState.swift */,
+				B6C9A4532C75D01300DB6786 /* ExperimentHistoryOutline.swift */,
+				B6C9A4542C75D01300DB6786 /* GatingView.swift */,
+				B6C9A4552C75D01300DB6786 /* MainView.swift */,
+				B6C9A4562C75D01300DB6786 /* ReportModePicker.swift */,
+				B6C9A4572C75D01300DB6786 /* SampleGallery.swift */,
+				B6C9A4582C75D01300DB6786 /* SampleList.swift */,
+				B6C9A4592C75D01300DB6786 /* Sidebar.swift */,
 			);
-			name = MainWindow;
-			path = "../../../adam-cytegeist/filereader/MainWindow";
-			sourceTree = "<group>";
-		};
-		B6C9A4302C75B66500DB6786 /* Experiment */ = {
-			isa = PBXGroup;
-			children = (
-				B6C9A43E2C75B69D00DB6786 /* AnalysisNode.swift */,
-				B6C9A4372C75B69D00DB6786 /* Cytometer.swift */,
-				B6C9A4332C75B69C00DB6786 /* Experiment.swift */,
-				B6C9A43C2C75B69D00DB6786 /* FocusedValues+Experiment.swift */,
-				B6C9A4382C75B69D00DB6786 /* Gate.swift */,
-				B6C9A4362C75B69D00DB6786 /* GraphDef.swift */,
-				B6C9A4342C75B69C00DB6786 /* Matrix.swift */,
-				B6C9A43B2C75B69D00DB6786 /* Sample.swift */,
-				B6C9A43D2C75B69D00DB6786 /* Sample+ImportImage.swift */,
-				B6C9A4352C75B69D00DB6786 /* Sample+ItemProvider.swift */,
-				B6C9A4392C75B69D00DB6786 /* Store+ReferenceFileDocument.swift */,
-				B6C9A43A2C75B69D00DB6786 /* WorkspaceReader.swift */,
-			);
-			path = Experiment;
+			path = MainWindow;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -754,32 +759,32 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B6C9A43F2C75B69D00DB6786 /* Experiment.swift in Sources */,
+				B6C9A47D2C75D04900DB6786 /* Store+ReferenceFileDocument.swift in Sources */,
 				B68529732C74DC1100EF9EF4 /* PairCharts.swift in Sources */,
 				B68529742C74DC1100EF9EF4 /* SampleInspectorView.swift in Sources */,
+				B6C9A4782C75D04900DB6786 /* GraphDef.swift in Sources */,
+				B6C9A4742C75D04900DB6786 /* WorkspaceReader.swift in Sources */,
 				B641739D2C5C4E00001AA2F4 /* ParameterInspectorView.swift in Sources */,
-				B6C9A4422C75B69D00DB6786 /* GraphDef.swift in Sources */,
-				B6C9A44A2C75B69D00DB6786 /* AnalysisNode.swift in Sources */,
-				B6C9A4472C75B69D00DB6786 /* Sample.swift in Sources */,
+				B6C9A47E2C75D04900DB6786 /* Cytometer.swift in Sources */,
 				B63EEE942C569D7300E465C9 /* Histogram.swift in Sources */,
-				B6C9A4442C75B69D00DB6786 /* Gate.swift in Sources */,
-				B6C9A4452C75B69D00DB6786 /* Store+ReferenceFileDocument.swift in Sources */,
-				B6C9A4432C75B69D00DB6786 /* Cytometer.swift in Sources */,
 				B64173942C58AB2B001AA2F4 /* DemoData.swift in Sources */,
 				B63EEE8C2C5624C000E465C9 /* HistogramView.swift in Sources */,
 				B63EEE8D2C5624C000E465C9 /* ChartView.swift in Sources */,
-				B6C9A4462C75B69D00DB6786 /* WorkspaceReader.swift in Sources */,
-				B6C9A4412C75B69D00DB6786 /* Sample+ItemProvider.swift in Sources */,
 				B63EEE922C569CB300E465C9 /* SampleRef.swift in Sources */,
 				B64173922C58A89A001AA2F4 /* CoreTestUtil.swift in Sources */,
-				B641739B2C59A888001AA2F4 /* Populations.swift in Sources */,
+				B6C9A4762C75D04900DB6786 /* FocusedValues+Experiment.swift in Sources */,
 				B63D164C2C55E54500E81C2F /* DataBufferReader.swift in Sources */,
-				B6C9A4402C75B69D00DB6786 /* Matrix.swift in Sources */,
-				B6C9A4492C75B69D00DB6786 /* Sample+ImportImage.swift in Sources */,
+				B6C9A47C2C75D04900DB6786 /* Sample+ImportImage.swift in Sources */,
 				B63EEE902C569C7700E465C9 /* CytegeistCore.swift in Sources */,
 				B68529692C74DBB500EF9EF4 /* ComputeCache.swift in Sources */,
-				B6C9A4482C75B69D00DB6786 /* FocusedValues+Experiment.swift in Sources */,
+				B6C9A47A2C75D04900DB6786 /* Matrix.swift in Sources */,
+				B6C9A48E2C75D24B00DB6786 /* TreeNode.swift in Sources */,
+				B6C9A4752C75D04900DB6786 /* Gate.swift in Sources */,
+				B6C9A4772C75D04900DB6786 /* Experiment.swift in Sources */,
+				B6C9A47B2C75D04900DB6786 /* AnalysisNode.swift in Sources */,
 				B63D164D2C55E54500E81C2F /* FCSReader.swift in Sources */,
+				B6C9A4792C75D04900DB6786 /* Sample.swift in Sources */,
+				B6C9A4732C75D04900DB6786 /* Sample+ItemProvider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -803,21 +808,23 @@
 			buildActionMask = 2147483647;
 			files = (
 				B65D82AD2C44BE7100E4F0A2 /* ContentView.swift in Sources */,
-				B6C9A42C2C75B58800DB6786 /* ReportModePicker.swift in Sources */,
-				B6C9A42F2C75B58800DB6786 /* Sidebar.swift in Sources */,
-				B6C9A4252C75B58800DB6786 /* LayoutItemViews.swift in Sources */,
+				B6C9A48B2C75D09A00DB6786 /* SettingsView.swift in Sources */,
+				B6C9A48C2C75D09A00DB6786 /* ContentView.swift in Sources */,
+				B6C9A4622C75D01300DB6786 /* MainView.swift in Sources */,
 				B610A56D2C5421CA0081C517 /* AppModel.swift in Sources */,
-				B6C9A42D2C75B58800DB6786 /* SampleGallery.swift in Sources */,
+				B6C9A45C2C75D01300DB6786 /* LayoutItemViews.swift in Sources */,
+				B6C9A45B2C75D01300DB6786 /* CGLayoutView.swift in Sources */,
+				B6C9A4642C75D01300DB6786 /* SampleGallery.swift in Sources */,
+				B6C9A4612C75D01300DB6786 /* GatingView.swift in Sources */,
+				B6C9A4662C75D01300DB6786 /* Sidebar.swift in Sources */,
+				B6C9A4602C75D01300DB6786 /* ExperimentHistoryOutline.swift in Sources */,
 				B65D82AB2C44BE7100E4F0A2 /* CytegeistApp.swift in Sources */,
-				B6C9A42B2C75B58800DB6786 /* GatingView.swift in Sources */,
-				B6C9A42A2C75B58800DB6786 /* ExperimentHistoryOutline.swift in Sources */,
-				B6C9A4242C75B58800DB6786 /* CGLayoutView.swift in Sources */,
-				B6C9A4322C75B68700DB6786 /* Store.swift in Sources */,
-				B6C9A42E2C75B58800DB6786 /* SampleList.swift in Sources */,
-				B6C9A4282C75B58800DB6786 /* DisplayModePicker.swift in Sources */,
-				B6C9A4272C75B58800DB6786 /* AnalysisList.swift in Sources */,
-				B6C9A4292C75B58800DB6786 /* ExpansionState.swift in Sources */,
-				B6C9A4262C75B58800DB6786 /* MainView.swift in Sources */,
+				B6C9A4652C75D01300DB6786 /* SampleList.swift in Sources */,
+				B6C9A4632C75D01300DB6786 /* ReportModePicker.swift in Sources */,
+				B6C9A45E2C75D01300DB6786 /* DisplayModePicker.swift in Sources */,
+				B6C9A45D2C75D01300DB6786 /* AnalysisList.swift in Sources */,
+				B6C9A45F2C75D01300DB6786 /* ExpansionState.swift in Sources */,
+				B6C9A44C2C75CFCB00DB6786 /* Store.swift in Sources */,
 				B65D82AF2C44BE7100E4F0A2 /* ImmersiveView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

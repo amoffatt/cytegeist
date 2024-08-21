@@ -13,6 +13,8 @@ import CytegeistCore
 struct CytegeistApp: App {
 
     @State private var appModel = AppModel()
+//    @StateObject  var store = Store()
+    
 
     var body: some Scene {
         WindowGroup {
@@ -24,15 +26,15 @@ struct CytegeistApp: App {
         
         #if os(macOS)
         
-        Window("Navigation", id: "nav")
-        {
-            ProtoNavView(selectedExperimentID: $store.selectedExperiment)
-                .environmentObject(store)
-        }
-        Settings {
-            SettingsView()
-                .environmentObject(store)
-        }
+//        Window("Navigation", id: "nav")
+//        {
+//            MainView(selectedExperimentID: $store.selectedExperiment)
+//                .environmentObject(store)
+//        }
+//        Settings {
+//            SettingsView()
+//                .environmentObject(store)
+//        }
         
         Window("Pair Charts", id: "pair-charts") {
             PairChartsPreview()
