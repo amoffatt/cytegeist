@@ -9,11 +9,16 @@ import Foundation
 import SwiftUI
 
 
-struct LoadingOverlay<Content: View>: View {
+public struct LoadingOverlay<Content: View>: View {
     let isLoading: Bool
     let content: () -> Content
 
-    var body: some View {
+    public init(isLoading: Bool, content: @escaping () -> Content) {
+        self.isLoading = isLoading
+        self.content = content
+    }
+    
+    public var body: some View {
         ZStack {
             content()
             

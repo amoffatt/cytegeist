@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import CytegeistLibrary
 
 public typealias FCSParameterValueReader = (DataBufferReader) throws -> Float
 
@@ -125,54 +126,6 @@ public struct EventData: Identifiable {
     public let id: Int
     public let values: [Float]
 }
-
-public protocol BackedRandomAccessCollection: RandomAccessCollection where
-    Index == BackingCollection.Index,
-//    SubSequence == BackingCollection.SubSequence,
-    Indices == BackingCollection.Indices
-
-{
-    associatedtype BackingCollection:RandomAccessCollection
-    
-    // RandomAccessCollection Indices will be provided by this internal collection
-    var _indexBacking:BackingCollection { get }
-
-}
-
-extension BackedRandomAccessCollection {
-    public var startIndex: Index {
-         _indexBacking.startIndex
-    }
-
-    public var endIndex: Index {
-        _indexBacking.endIndex
-    }
-    
-    public var count:Int {
-        _indexBacking.count
-    }
-    
-//    public subscript(position: Int) -> EventData {
-//        precondition(position >= startIndex && position < endIndex, "Index out of bounds")
-//        let values = data.map { $0[position] }
-//        return EventData(id: position, values: values)
-//    }
-//    
-//    public subscript(bounds: Range<Int>) -> EventDataTable {
-//        let slicedData = data.map { Array($0[bounds]) }
-//        return try! EventDataTable(data: slicedData)
-////        return slicedData
-//    }
-    
-    public func index(after i: Index) -> Index {
-        return _indexBacking.index(after: i)
-    }
-
-    public func index(before i: Index) -> Index {
-        return _indexBacking.index(before: i)
-    }
-}
-
 
 public struct EventDataTable: BackedRandomAccessCollection {
     

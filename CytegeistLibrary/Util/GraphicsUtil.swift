@@ -9,7 +9,7 @@ import Foundation
 import SwiftUI
 
 
-extension CGImage {
+public extension CGImage {
     var image:Image? {
 #if canImport(AppKit)
         let nsImage = NSImage(cgImage: self, size: .init(width: width, height: height))

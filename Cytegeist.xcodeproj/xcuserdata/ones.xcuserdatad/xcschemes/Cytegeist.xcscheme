@@ -39,6 +39,17 @@
                ReferencedContainer = "container:Cytegeist.xcodeproj">
             </BuildableReference>
          </TestableReference>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "B6C9A3F12C75A3F000DB6786"
+               BuildableName = "CytegeistLibraryTests.xctest"
+               BlueprintName = "CytegeistLibraryTests"
+               ReferencedContainer = "container:Cytegeist.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction

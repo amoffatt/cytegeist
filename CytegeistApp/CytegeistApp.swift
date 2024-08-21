@@ -19,9 +19,28 @@ struct CytegeistApp: App {
             ContentView()
                 .environment(appModel)
         }
+        
+        
+        
         #if os(macOS)
+        
+        Window("Navigation", id: "nav")
+        {
+            ProtoNavView(selectedExperimentID: $store.selectedExperiment)
+                .environmentObject(store)
+        }
+        Settings {
+            SettingsView()
+                .environmentObject(store)
+        }
+        
         Window("Pair Charts", id: "pair-charts") {
             PairChartsPreview()
+        }
+        
+        Window("SaveOpenView", id: "SaveOpen")
+        {
+            SaveOpenView()
         }
         #endif
 

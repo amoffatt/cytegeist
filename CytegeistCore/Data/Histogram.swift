@@ -7,8 +7,7 @@
 
 import Foundation
 import SwiftUI
-
-
+import CytegeistLibrary
 
 //public protocol Dim {
 //    associatedtype ArraySize:NDArraySize

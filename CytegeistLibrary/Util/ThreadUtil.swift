@@ -17,7 +17,7 @@ public func sleep(_ seconds:Float) async {
 }
 
 
-public actor Semaphore {
+public actor CGSemaphore {
     private var waiters: [CheckedContinuation<Void, Never>] = []
 
     public init() {

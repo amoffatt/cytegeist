@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftUI
+import CytegeistLibrary
 
 
 fileprivate class ComputeHandle<Request, Data> {
@@ -17,7 +18,7 @@ fileprivate class ComputeHandle<Request, Data> {
     var error:Error? = nil
     var lastRequested:Date = Date()
     
-    let semaphore:Semaphore = .init()
+    let semaphore:CGSemaphore = .init()
 
     init(_ request: Request) {
         self.request = request

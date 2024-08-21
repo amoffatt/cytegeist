@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import CytegeistLibrary
 
 public class TestUtil {
     

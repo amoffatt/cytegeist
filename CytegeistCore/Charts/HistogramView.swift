@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Charts
+import CytegeistLibrary
 
 struct HistogramView: View {
     let query:APIQuery<CachedHistogram<_1D>>
