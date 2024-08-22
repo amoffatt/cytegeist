@@ -8,7 +8,7 @@
 import Foundation
 
 
-public struct SampleRef: Hashable {
+public struct SampleRef: Codable, Hashable {
     public let url:URL
     
     public var filename:String { url.lastPathComponent }

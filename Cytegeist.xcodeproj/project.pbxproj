@@ -88,6 +88,8 @@
 		B6C9A4B22C76F13A00DB6786 /* TableUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4B12C76F13A00DB6786 /* TableUtil.swift */; };
 		B6C9A4B42C77CA5400DB6786 /* ChartDefs.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4B32C77CA5400DB6786 /* ChartDefs.swift */; };
 		B6C9A4B62C77D57500DB6786 /* FJGatingExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4B52C77D57500DB6786 /* FJGatingExtensions.swift */; };
+		B6C9A4B82C77D9AA00DB6786 /* ChartAxisView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4B72C77D9AA00DB6786 /* ChartAxisView.swift */; };
+		B6C9A4BA2C77DB3700DB6786 /* AxisNormalizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4B92C77DB3700DB6786 /* AxisNormalizer.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -256,6 +258,8 @@
 		B6C9A4B12C76F13A00DB6786 /* TableUtil.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableUtil.swift; sourceTree = "<group>"; };
 		B6C9A4B32C77CA5400DB6786 /* ChartDefs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartDefs.swift; sourceTree = "<group>"; };
 		B6C9A4B52C77D57500DB6786 /* FJGatingExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FJGatingExtensions.swift; sourceTree = "<group>"; };
+		B6C9A4B72C77D9AA00DB6786 /* ChartAxisView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartAxisView.swift; sourceTree = "<group>"; };
+		B6C9A4B92C77DB3700DB6786 /* AxisNormalizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AxisNormalizer.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -319,6 +323,7 @@
 				B63EEE912C569CB300E465C9 /* SampleRef.swift */,
 				B63EEE932C569D7300E465C9 /* Histogram.swift */,
 				B6C9A4AF2C76E2CD00DB6786 /* FCS.swift */,
+				B6C9A4B92C77DB3700DB6786 /* AxisNormalizer.swift */,
 			);
 			path = Data;
 			sourceTree = "<group>";
@@ -371,6 +376,7 @@
 				B63D16A22C56214400E81C2F /* HistogramView.swift */,
 				B641739C2C5C4E00001AA2F4 /* ParameterInspectorView.swift */,
 				B6C9A4B32C77CA5400DB6786 /* ChartDefs.swift */,
+				B6C9A4B72C77D9AA00DB6786 /* ChartAxisView.swift */,
 			);
 			path = Charts;
 			sourceTree = "<group>";
@@ -830,8 +836,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				B68529732C74DC1100EF9EF4 /* PairCharts.swift in Sources */,
+				B6C9A4B82C77D9AA00DB6786 /* ChartAxisView.swift in Sources */,
 				B6C9A4B42C77CA5400DB6786 /* ChartDefs.swift in Sources */,
 				B68529742C74DC1100EF9EF4 /* SampleInspectorView.swift in Sources */,
+				B6C9A4BA2C77DB3700DB6786 /* AxisNormalizer.swift in Sources */,
 				B641739D2C5C4E00001AA2F4 /* ParameterInspectorView.swift in Sources */,
 				B63EEE942C569D7300E465C9 /* Histogram.swift in Sources */,
 				B64173942C58AB2B001AA2F4 /* DemoData.swift in Sources */,

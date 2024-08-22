@@ -23,12 +23,21 @@ struct GatingView: View {
     @State public var mouseTranslation = CGPoint.zero
     @State private var isHovering = false
     @State private var offset = CGSize.zero
+//    @State var population: AnalysisNode
+    @State var sample: Sample
+    @State var chartDef: ChartDef = ChartDef()
+    
 
 
 //    var selectedSample: Sample
     var chart: some View {
         VStack {
-//            ChartView(population: PopulationRequest)
+            if let sampleRef = sample.ref {
+                ChartView(population: PopulationRequest(sampleRef), config: chartDef)
+            }
+            else {
+                Text("No sample file reference")
+            }
 //            Chart()
 //            {
 ////                PointMark(

@@ -69,7 +69,7 @@ public struct _1D : Dim {
     }
     
     public static func pointToNDIndex(point: Tuple1<Float>, axes: Tuple1<AxisNormalizer>, arraySize:Tuple1<Int>) -> Tuple1<Int> {
-        let bin = axes.x.normalize(point.x) * Float(arraySize.x)
+        let bin = axes.x.normalize(Double(point.x)) * Double(arraySize.x)
         return .init(Int(bin))
     }
 
@@ -102,8 +102,8 @@ public struct _2D : Dim {
     }
     
     public static func pointToNDIndex(point: Tuple2<Float>, axes: Tuple2<AxisNormalizer>, arraySize:Tuple2<Int>) -> Tuple2<Int> {
-        let binX = axes.x.normalize(point.x) * Float(arraySize.x)
-        let binY = axes.y.normalize(point.y) * Float(arraySize.y)
+        let binX = axes.x.normalize(Double(point.x)) * Double(arraySize.x)
+        let binY = axes.y.normalize(Double(point.y)) * Double(arraySize.y)
         return .init(Int(binX), Int(binY))
     }
 }
@@ -329,7 +329,7 @@ public struct HistogramData<D:Dim> {
 fileprivate func defaultCountAxis(maxCount:Int?) -> AxisNormalizer {
 //        var maxValue = max(1, bins.max() ?? 1)
     let maxCount = max(1, maxCount ?? 0)
-    return .linear(min: 0, max: Float(maxCount))
+    return .linear(min: 0, max: Double(maxCount))
 }
 
 

@@ -90,30 +90,21 @@ public class Sample : Identifiable, Codable, Hashable
     }
     
     public var id: UUID
-    var uri:String  = "n/a"  // do we need to keep this outside attributes
+    var ref:SampleRef? = nil
     var sampleId = ""
-    var variety: String
-    var plantingDepth: Float?
-    var daysToMaturity: Int = 0
-    var datePlanted:Date? = Date()
-    var harvestDate:Date?  = Date()
-    var favorite: Bool = false
-    var lastWateredOn = Date()
-    var wateringFrequency: Int?
     
     
     
-        var attributes: [String: String] = [:]
-        var dimensions = [CDimension]()
+    var attributes = AttributeStore()
+    var dimensions = [CDimension]()
     //    var matrix = CMatrix()
     //    var membership =  [String : PValue]()
     //    var validity = SampleValidityCheck ()
     var tree = AnalysisNode()
     var imageURL: URL?
-    var data = Data()
     @CodableIgnored
     @ObservationIgnored
-    var fcsFile:FCSFile?
+    var fcsFile:FCSMetadata?
     var cellCount: Int = 0
  
     var tubeName:  String = ""
@@ -162,47 +153,23 @@ public class Sample : Identifiable, Codable, Hashable
         //-------------------------------------------------------------------------
    init(
         id: UUID,
-        variety: String,
-        plantingDepth: Float? = nil,
-        daysToMaturity: Int = 0,
-        datePlanted: Date = Date(),
-        favorite: Bool = false,
-        lastWateredOn: Date = Date(),
-        wateringFrequency: Int? = 5,
-        fcsFile: FCSFile? = nil
+        fcs: FCSMetadata? = nil
     ) {
         self.id = id
-        self.variety = variety
-        self.plantingDepth = plantingDepth
-        self.daysToMaturity = daysToMaturity
-        self.datePlanted = datePlanted
-        self.favorite = favorite
-        self.lastWateredOn = lastWateredOn
-        self.wateringFrequency = wateringFrequency
         self.fcsFile = fcsFile
-        print("Sample \(variety) ")
+        print("Sample \(id) ")
     }
  
-    convenience init()
+    convenience init(fcs: FCSMetadata)
     {
-        self.init(id: UUID(), variety: "New Sample")
+        self.init(id: UUID(), fcs: fcs)
     }
     
-    convenience init(fcs: FCSFile)
-    {
-        self.init(id: UUID(), variety: "New Sample From FCS")
-        fcsFile = fcs
-    }
-    
-    convenience init(_ xml: TreeNode)
-    {
-        assert(xml.value == "Sample")
-        self.init()
-        variety = "NEW-SAMPLE"
-        wateringFrequency = 2
-        plantingDepth = 1.8
-            //}
-    }
+//    convenience init(_ xml: TreeNode)
+//    {
+//        assert(xml.value == "Sample")
+//        self.init()
+//    }
         //-------------------------------------------------------------------------
         //  iniitialize based on a new FCS File added
     func setUp()
@@ -211,7 +178,10 @@ public class Sample : Identifiable, Codable, Hashable
 //        assert(!fcsFile.meta.isEmpty)
 //        assert(!fcsFile.data.isEmpty)
         
-        let keys = fcsFile!.meta.keywordLookup
+        guard let keys = fcsFile?.keywordLookup else {
+            print("No metadata for FCS file loaded")
+            return
+        }
         
         attributes.merge(keys,  uniquingKeysWith: +)
         

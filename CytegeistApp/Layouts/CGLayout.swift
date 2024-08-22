@@ -5,6 +5,7 @@
 import SwiftUI
 import Charts
 import CytegeistLibrary
+import CytegeistCore
 
 @Observable
 class CGLayoutModel : Codable

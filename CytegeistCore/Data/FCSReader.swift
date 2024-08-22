@@ -94,6 +94,7 @@ public struct FCSMetadata {
     public var _parameters: [FCSParameter]?
     public var parameterLookup:[String:Int] = [:]
     
+    
     public var parameters: [FCSParameter]? {
         get { _parameters }
         set {
@@ -106,6 +107,13 @@ public struct FCSMetadata {
         }
     }
     
+    public func parameter(named: String) -> FCSParameter? {
+        if let parameters, let index = parameterLookup[named] {
+            return parameters.get(index: index)
+        }
+        return nil
+    }
+
     mutating public func addKeyword(_ name:String, _ value:String) {
         guard keywordLookup[name] == nil else {
             print("Keyword '\(name)' already found in file')")
@@ -328,7 +336,7 @@ public class FCSReader {
         let filter = metadata["$P\(n)F"].nonNil
         let displayInfo = metadata["P\(n)DISPLAY"].nonNil
         let displayName = FCSParameter.displayName(name, stain)
-        let normalizer = createParameterNormalizer(max: Float(range), displayInfo: displayInfo)
+        let normalizer = createParameterNormalizer(max: range, displayInfo: displayInfo)
         let valueReader = try createParameterValueReader(dataType: dataType, bits: bits)
         
         return FCSParameter(name: name, stain: stain, displayName: displayName,
@@ -343,7 +351,7 @@ public class FCSReader {
         DataReaderError("FCSReaderError: \(description)")
     }
     
-    private func createParameterNormalizer(max:Float, displayInfo:String) -> AxisNormalizer {
+    private func createParameterNormalizer(max:Double, displayInfo:String) -> AxisNormalizer {
         if displayInfo == "LOG" && max > 1 {
             return .log(min: 1, max: max)
         }
