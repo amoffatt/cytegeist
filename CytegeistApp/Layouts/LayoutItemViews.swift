@@ -103,7 +103,7 @@ struct CChartView : View {
     let item: CChart
     let editing: Bool
     
-    @EnvironmentObject var core:CytegeistCoreAPI
+    @Environment(CytegeistCoreAPI.self) var core:CytegeistCoreAPI
     
     var body: some View {
             //        let bindableText:Binding<String> = .init(get: { item.value }, set: { item.value = $0 } )

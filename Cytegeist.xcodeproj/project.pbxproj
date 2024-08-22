@@ -76,7 +76,7 @@
 		B6C9A49E2C7680EA00DB6786 /* Experiment.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A46B2C75D04800DB6786 /* Experiment.swift */; };
 		B6C9A49F2C7680EA00DB6786 /* Sample+ItemProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4672C75D04800DB6786 /* Sample+ItemProvider.swift */; };
 		B6C9A4A02C7680EA00DB6786 /* Sample+ImportImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4702C75D04800DB6786 /* Sample+ImportImage.swift */; };
-		B6C9A4A12C7680EA00DB6786 /* GraphDef.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A46C2C75D04800DB6786 /* GraphDef.swift */; };
+		B6C9A4A12C7680EA00DB6786 /* FJChartDefExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A46C2C75D04800DB6786 /* FJChartDefExtensions.swift */; };
 		B6C9A4A22C7680EA00DB6786 /* Sample.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A46D2C75D04800DB6786 /* Sample.swift */; };
 		B6C9A4A32C7680EA00DB6786 /* Matrix.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A46E2C75D04800DB6786 /* Matrix.swift */; };
 		B6C9A4A42C7680EA00DB6786 /* AnalysisNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A46F2C75D04800DB6786 /* AnalysisNode.swift */; };
@@ -86,6 +86,8 @@
 		B6C9A4AE2C76A77800DB6786 /* DateUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4AD2C76A77800DB6786 /* DateUtil.swift */; };
 		B6C9A4B02C76E2CD00DB6786 /* FCS.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4AF2C76E2CD00DB6786 /* FCS.swift */; };
 		B6C9A4B22C76F13A00DB6786 /* TableUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4B12C76F13A00DB6786 /* TableUtil.swift */; };
+		B6C9A4B42C77CA5400DB6786 /* ChartDefs.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4B32C77CA5400DB6786 /* ChartDefs.swift */; };
+		B6C9A4B62C77D57500DB6786 /* FJGatingExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4B52C77D57500DB6786 /* FJGatingExtensions.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -233,7 +235,7 @@
 		B6C9A4692C75D04800DB6786 /* Gate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Gate.swift; sourceTree = "<group>"; };
 		B6C9A46A2C75D04800DB6786 /* FocusedValues+Experiment.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "FocusedValues+Experiment.swift"; sourceTree = "<group>"; };
 		B6C9A46B2C75D04800DB6786 /* Experiment.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Experiment.swift; sourceTree = "<group>"; };
-		B6C9A46C2C75D04800DB6786 /* GraphDef.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GraphDef.swift; sourceTree = "<group>"; };
+		B6C9A46C2C75D04800DB6786 /* FJChartDefExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FJChartDefExtensions.swift; sourceTree = "<group>"; };
 		B6C9A46D2C75D04800DB6786 /* Sample.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Sample.swift; sourceTree = "<group>"; };
 		B6C9A46E2C75D04800DB6786 /* Matrix.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Matrix.swift; sourceTree = "<group>"; };
 		B6C9A46F2C75D04800DB6786 /* AnalysisNode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AnalysisNode.swift; sourceTree = "<group>"; };
@@ -252,6 +254,8 @@
 		B6C9A4AD2C76A77800DB6786 /* DateUtil.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateUtil.swift; sourceTree = "<group>"; };
 		B6C9A4AF2C76E2CD00DB6786 /* FCS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FCS.swift; sourceTree = "<group>"; };
 		B6C9A4B12C76F13A00DB6786 /* TableUtil.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableUtil.swift; sourceTree = "<group>"; };
+		B6C9A4B32C77CA5400DB6786 /* ChartDefs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartDefs.swift; sourceTree = "<group>"; };
+		B6C9A4B52C77D57500DB6786 /* FJGatingExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FJGatingExtensions.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -366,6 +370,7 @@
 				B63D16A02C5620F900E81C2F /* ChartView.swift */,
 				B63D16A22C56214400E81C2F /* HistogramView.swift */,
 				B641739C2C5C4E00001AA2F4 /* ParameterInspectorView.swift */,
+				B6C9A4B32C77CA5400DB6786 /* ChartDefs.swift */,
 			);
 			path = Charts;
 			sourceTree = "<group>";
@@ -498,7 +503,6 @@
 				B6C9A46B2C75D04800DB6786 /* Experiment.swift */,
 				B6C9A46A2C75D04800DB6786 /* FocusedValues+Experiment.swift */,
 				B6C9A4692C75D04800DB6786 /* Gate.swift */,
-				B6C9A46C2C75D04800DB6786 /* GraphDef.swift */,
 				B6C9A46E2C75D04800DB6786 /* Matrix.swift */,
 				B6C9A46D2C75D04800DB6786 /* Sample.swift */,
 				B6C9A4702C75D04800DB6786 /* Sample+ImportImage.swift */,
@@ -538,6 +542,8 @@
 			isa = PBXGroup;
 			children = (
 				B6C9A4682C75D04800DB6786 /* FJWorkspaceReader.swift */,
+				B6C9A46C2C75D04800DB6786 /* FJChartDefExtensions.swift */,
+				B6C9A4B52C77D57500DB6786 /* FJGatingExtensions.swift */,
 			);
 			path = FJWorkspaces;
 			sourceTree = "<group>";
@@ -824,6 +830,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B68529732C74DC1100EF9EF4 /* PairCharts.swift in Sources */,
+				B6C9A4B42C77CA5400DB6786 /* ChartDefs.swift in Sources */,
 				B68529742C74DC1100EF9EF4 /* SampleInspectorView.swift in Sources */,
 				B641739D2C5C4E00001AA2F4 /* ParameterInspectorView.swift in Sources */,
 				B63EEE942C569D7300E465C9 /* Histogram.swift in Sources */,
@@ -872,8 +879,9 @@
 				B6C9A49E2C7680EA00DB6786 /* Experiment.swift in Sources */,
 				B6C9A49F2C7680EA00DB6786 /* Sample+ItemProvider.swift in Sources */,
 				B6C9A4A02C7680EA00DB6786 /* Sample+ImportImage.swift in Sources */,
-				B6C9A4A12C7680EA00DB6786 /* GraphDef.swift in Sources */,
+				B6C9A4A12C7680EA00DB6786 /* FJChartDefExtensions.swift in Sources */,
 				B6C9A4A22C7680EA00DB6786 /* Sample.swift in Sources */,
+				B6C9A4B62C77D57500DB6786 /* FJGatingExtensions.swift in Sources */,
 				B6C9A4A32C7680EA00DB6786 /* Matrix.swift in Sources */,
 				B6C9A4A42C7680EA00DB6786 /* AnalysisNode.swift in Sources */,
 				B6C9A4A52C7680EA00DB6786 /* Cytometer.swift in Sources */,

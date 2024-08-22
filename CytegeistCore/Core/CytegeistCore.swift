@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftUI
+import CytegeistLibrary
 
 public struct APIError : Error {
     public let message: String
@@ -73,7 +74,8 @@ public class APIQuery<T> {
 public let defaultHistogramResolution:Int = 256
 
 @MainActor
-public class CytegeistCoreAPI : ObservableObject {
+@Observable
+public class CytegeistCoreAPI {
     private let fcsReader:FCSReader = .init()
     
     
@@ -237,14 +239,14 @@ public class CytegeistCoreAPI : ObservableObject {
     }
     
     nonisolated private func _histogram(_ request:HistogramRequest<_1D>, sample:FCSFile) throws -> CachedHistogram<_1D> {
-        let parameters = try _getParameters(from: sample, parameterNames: request.axisNames.values)
+        let parameters = try _getParameters(from: sample, parameterNames: request.variableNames.values)
         let x = parameters[0]
         let h = HistogramData<_1D>(data: .init(x.data), size: request.size ?? .init(defaultHistogramResolution), axes: .init(x.meta.normalizer))
         return CachedHistogram(h, view: nil)
     }
     
     nonisolated private func _histogram2D(_ request:HistogramRequest<_2D>, sample:FCSFile) throws -> CachedHistogram<_2D> {
-        let parameters = try _getParameters(from: sample, parameterNames: request.axisNames.values)
+        let parameters = try _getParameters(from: sample, parameterNames: request.variableNames.values)
         let x = parameters[0]
         let y = parameters[1]
         let h = HistogramData<_2D>(
@@ -261,18 +263,60 @@ public class CytegeistCoreAPI : ObservableObject {
 
 }
 
-public struct SampleRequest : Hashable {
+public struct SampleRequest : Identifiable, Hashable {
+    public let id: String
     let sampleRef:SampleRef
     let includeData:Bool
     
     public init(sampleRef:SampleRef, includeData:Bool) {
+        self.id = "\(includeData) \(sampleRef.url.absoluteString)"
         self.sampleRef = sampleRef
         self.includeData = includeData
     }
 }
 
+public struct GateRequest : Hashable {
+    public static func == (lhs: GateRequest, rhs: GateRequest) -> Bool {
+        lhs.repr == rhs.repr
+    }
+    
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(repr)
+    }
+    
+    public let repr: String
+    let variableNames: [String]
+    let filter: (EventData) -> PValue
+    
+    public init(repr:String, variableNames: [String], filter: @escaping (EventData) -> PValue) {
+        self.repr = repr
+        self.variableNames = variableNames
+        self.filter = filter
+    }
+}
+
+
+//public indirect enum ParentPopulation: Identifiable, Hashable {
+//    public var id: String {
+//        switch self {
+//        case .sample(let value):
+//            return value.sampleRef.url.absoluteString
+//        case .population(let value):
+//            return value.id
+//        }
+//    }
+//    
+//    case sample(SampleRequest)
+//    case population(PopulationRequest)
+//}
+
+
+
 public struct PopulationRequest : Hashable {
+    public let id: String
+//    let parent: ParentPopulation
     let sample: SampleRequest
+    let gates: [GateRequest]
     
     // TODO add gate lineage
     
@@ -281,6 +325,14 @@ public struct PopulationRequest : Hashable {
     
     public init(_ sampleRef: SampleRef) {
         self.sample = .init(sampleRef:sampleRef, includeData:true)
+        self.id = sample.id
+        self.gates = []
+    }
+    
+    public init(id:String, sample: SampleRef, gates: [GateRequest]) {
+        self.id = id
+        self.sample = .init(sampleRef: sample, includeData: true)
+        self.gates = gates
     }
 }
 
@@ -299,12 +351,12 @@ public struct HistogramRequest<D:Dim> : Hashable {
     
 //    public let raw:String
     
-    public let axisNames:D.Strings
+    public let variableNames:D.Strings
     public let size:D.IntCoord?
     
-    public init(_ population: PopulationRequest, _ axisNames: D.Strings, size:D.IntCoord? = nil) {
+    public init(_ population: PopulationRequest, _ variableNames: D.Strings, size:D.IntCoord? = nil) {
         self.population = population
-        self.axisNames = axisNames
+        self.variableNames = variableNames
         self.size = size
     }
 }

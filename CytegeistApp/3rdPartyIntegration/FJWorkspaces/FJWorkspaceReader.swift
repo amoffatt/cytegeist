@@ -1,5 +1,6 @@
 import Foundation
 import CytegeistLibrary
+import CytegeistCore
 
 
 //---------------------------------------------------------
@@ -39,7 +40,7 @@ class WorkspaceReader {
             for entry in attributeDict {
                 node.attrib[entry.key] = entry.value
             }
-//            print ("Pushing ", elementName, parentStack.count)
+            //            print ("Pushing ", elementName, parentStack.count)
             parentStack[parentStack.endIndex-1].add(child: node)        //add the new node to parent's children
             parentStack.append(node)             // PUSH OUR NODE onto the parentStack
         }
@@ -47,16 +48,59 @@ class WorkspaceReader {
         func parser(_ parser: XMLParser, didEndElement elementName: String, namespaceURI: String?, qualifiedName qName: String?)
         {
             parentStack.removeLast() // POP
-//            print("Parsed  \(elementName) \(parentStack.count) ")
+            //            print("Parsed  \(elementName) \(parentStack.count) ")
         }
         
         //CDATA PROCESSING  -- only affects us in Table/Layout Headers and Footers
         func parser( foundCharacters string: String) {
-           let s = string.trimmingCharacters(in: .whitespacesAndNewlines)
+            let s = string.trimmingCharacters(in: .whitespacesAndNewlines)
             if !s.isEmpty {
                 print ("CDATA " + s)
                 parentStack[parentStack.endIndex-1].attrib["CDATA"] = s
             }
         }
     }
+}
+
+
+extension AnalysisNode {
+    convenience init(fjxml: TreeNode)
+    {
+        self.init()
+        
+        extraAttributes.merge(fjxml.attrib, uniquingKeysWith: +)
+        if let gs = fjxml.findChild(value: "Graph")
+        {
+            graphDef = ChartDef(fjxml:gs)
+        }
+        if let g = fjxml.findChild(value: "Gate")
+        {
+            gate = Gate(fjxml: g)
+        }
+        for stat in fjxml.children where (stat.value == "Statistic")
+        {
+            statistics.append( Statistic(fjxml: stat))
+        }
+        if let kids = fjxml.findChild(value: "Subpopulations")
+        {
+            addChild(AnalysisNode(fjxml:kids))
+        }
+    }
+    
+}
+
+
+struct Criterion : Codable
+{
+    var attributes = [String : String]()
+    init(fjxml: TreeNode)
+    {
+    }
+}
+
+extension Statistic {
+    init(fjxml: TreeNode)
+    {
+        extraAttributes.merge(fjxml.attrib, uniquingKeysWith: +)
+   }
 }

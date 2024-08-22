@@ -242,12 +242,12 @@ public class Experiment :  Codable, Identifiable, Equatable
 
     struct CGroup  : Codable
     {
-        var attributes = [String : String]()
+        var attributes = AttributeStore()
        var name = ""
         var annotation = ""
         var criteria = [Criterion]()
         var members = [Sample]()
-        var graph = GraphDef()
+        var graph = ChartDef()
         
 //        init(from decoder: any Decoder) throws {
 //
@@ -257,20 +257,20 @@ public class Experiment :  Codable, Identifiable, Equatable
         {
             
         }
-        init(_ xml: TreeNode)
+        init(fjxml: TreeNode)
         {
-            attributes.merge(xml.attrib, uniquingKeysWith: +)
-            if let grop = xml.findChild(value: "Group")
+            attributes.merge(fjxml.attrib, uniquingKeysWith: +)
+            if let grop = fjxml.findChild(value: "Group")
             {
                  for node in grop.children where node.value == "Criteria"
                 {
-                    criteria.append(Criterion(xml: node))
+                    criteria.append(Criterion(fjxml: node))
                 }
                 print ("Group Criteria: " , criteria.count)
            }
-            if let grph = xml.findChild(value: "Graph")
+            if let grph = fjxml.findChild(value: "Graph")
             {
-                graph = GraphDef(grph)
+                graph = ChartDef(fjxml:grph)
                 print ("Graph: " , grph.value)
             }
         }
@@ -282,13 +282,7 @@ public class Experiment :  Codable, Identifiable, Equatable
         }
     }
 
-    struct Criterion : Codable
-    {
-        var attributes = [String : String]()
-        init(xml: TreeNode)
-        {
-        }
-    }
+
 extension URL {
     var isDirectory: Bool {
         (try? resourceValues(forKeys: [.isDirectoryKey]))?.isDirectory == true

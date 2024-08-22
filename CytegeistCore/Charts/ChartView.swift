@@ -10,19 +10,20 @@ import SwiftUI
 public struct ChartView: View {
 //    todofileRef() //?
 //    todoFileQueryAPI() // ?
-    let core: CytegeistCoreAPI
-    @State var sample: SampleRef
-    @State var parameterNames: Tuple2<String>
+    @Environment(CytegeistCoreAPI.self) var core: CytegeistCoreAPI
+//    @State var sample: SampleRef
+    let population: PopulationRequest
+//    @State var parameterNames: Tuple2<String>
     
-    public init(_ core: CytegeistCoreAPI, sample: SampleRef, parameterNames: Tuple2<String>) {
-        self.core = core
-        self.sample = sample
-        self.parameterNames = parameterNames
+    public init(population: PopulationRequest, chart:ChartDef) {
+//        self.sample = sample
+        self.population = population
+//        self.parameterNames = parameterNames
     }
     
     public var body: some View {
         VStack {
-            HistogramView(query: core.histogram(.init(PopulationRequest(sample), .init(parameterNames.x))))
+//            HistogramView(query: core.histogram(.init(population, .init(parameterNames.x))))
 //            Histogram2DView(data: core.histogram2D(sampleRef: sample, parameterNames: parameterNames))
 //            Selector()
         }
@@ -30,11 +31,13 @@ public struct ChartView: View {
     }
 }
 
-#Preview {
-    let core = CytegeistCoreAPI()
-//    return VStack { Text("Test world")}
-    let sample = SampleRef(url: DemoData.facsDivaSample0!)
-    let parameters = Tuple2("FSC-A", "PacificBlue-A")
-//
-    return ChartView(core, sample: sample, parameterNames: parameters)
-}
+//#Preview {
+//    let core = CytegeistCoreAPI()
+////    return VStack { Text("Test world")}
+//    let sample = SampleRef(url: DemoData.facsDivaSample0!)
+//    let population = PopulationRequest(sample)
+//    let parameters = Tuple2("FSC-A", "PacificBlue-A")
+///
+//    return ChartView(population: population, parameterNames: parameters)
+//        .environment(core)
+//}

@@ -7,10 +7,13 @@
 
 import Foundation
 
+
+public typealias AttributeStore = [String:String]
+
 public class TreeNode
 {
     public var value = ""
-    public var attrib = [String: String]()
+    public var attrib = AttributeStore()
     public var children = [TreeNode]()
     public var text = ""
     
@@ -31,7 +34,7 @@ public class TreeNode
         })
     }
     
-    public func findChildren(value: String) -> [TreeNode]?    {
+    public func findChildren(value: String) -> [TreeNode]    {
         return children.filter( {    $0.value == value    } )
     }
 }

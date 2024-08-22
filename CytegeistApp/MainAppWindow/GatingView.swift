@@ -9,6 +9,7 @@ import SwiftUI
 import Charts
 import UniformTypeIdentifiers.UTType
 import CytegeistLibrary
+import CytegeistCore
 
 
 struct GatingView: View {
@@ -27,32 +28,33 @@ struct GatingView: View {
 //    var selectedSample: Sample
     var chart: some View {
         VStack {
-            Chart()
-            {
-//                PointMark(
-//                    x: .value("Wing Length", $0.wingLength),
-//                    y: .value("Wing Width", $0.wingWidth)
-//                )
-//                .symbol(by: .value("Family", $0.family))
-//                .shadow(color: .blue, radius: 5, x:0, y:0)
-            }
-            .chartOverlay { proxy in
-                GeometryReader { proxy in
-                    ZStack(alignment: .topLeading){
-                        
-                        gateRadius(siz: proxy.size)
-                        gateRange(siz: proxy.size)
-                        gateRect(siz: proxy.size)
-                        gateEllipse(siz: proxy.size)
-                        crosshair(location: mouseLocation, size: proxy.size )
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
-                            .gesture(gateDrag)
-                    }
-                }
-            }
-            .padding(40)
-            .allowsHitTesting(true)
-            .opacity(mode == ReportMode.gating ? 1.0 : 0.0)
+//            ChartView(population: PopulationRequest)
+//            Chart()
+//            {
+////                PointMark(
+////                    x: .value("Wing Length", $0.wingLength),
+////                    y: .value("Wing Width", $0.wingWidth)
+////                )
+////                .symbol(by: .value("Family", $0.family))
+////                .shadow(color: .blue, radius: 5, x:0, y:0)
+//            }
+//            .overlay { proxy in
+//                GeometryReader { proxy in
+//                    ZStack(alignment: .topLeading){
+//                        
+//                        gateRadius(siz: proxy.size)
+//                        gateRange(siz: proxy.size)
+//                        gateRect(siz: proxy.size)
+//                        gateEllipse(siz: proxy.size)
+//                        crosshair(location: mouseLocation, size: proxy.size )
+//                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+//                            .gesture(gateDrag)
+//                    }
+//                }
+//            }
+//            .padding(40)
+//            .allowsHitTesting(true)
+//            .opacity(mode == ReportMode.gating ? 1.0 : 0.0)
         }
         
     }

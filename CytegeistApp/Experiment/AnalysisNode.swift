@@ -9,12 +9,13 @@ import Foundation
 import SwiftUI
 import UniformTypeIdentifiers.UTType
 import CytegeistLibrary
+import CytegeistCore
 
 
 //---------------------------------------------------------
     struct Statistic : Codable, Hashable
     {
-        var attributes = [String : String]()
+        var extraAttributes = AttributeStore()
         // operation  (.median, .cv, )
         // parameters ($3,  ["APC"] )
         // currentValue  (.undefined)
@@ -23,10 +24,6 @@ import CytegeistLibrary
         {
             
         }
-        init(xml: TreeNode)
-        {
-            attributes.merge(xml.attrib, uniquingKeysWith: +)
-       }
     }
 
 public extension UTType {
@@ -44,11 +41,12 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Equatable
     
     public var id = UUID()
     var name = ""
-    var attributes = [String : String]()
-    var graphDef =  GraphDef()              // how this population wants to be shown
+    var graphDef =  ChartDef()              // how this population wants to be shown
     var gate =  Gate()                      // the predicate to filter ones parent
     var statistics =  [Statistic]()         // what to report
     var children: [AnalysisNode]?  =  [AnalysisNode]()        // subpopulations dependent on us
+    var extraAttributes = AttributeStore()
+    
     public static var transferRepresentation: some TransferRepresentation {
         CodableRepresentation(contentType: UTType.population)
     }
@@ -68,27 +66,6 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Equatable
         }
     }
 
-    
-    init(_ xml: TreeNode)
-        {
-            attributes.merge(xml.attrib, uniquingKeysWith: +)
-          if let gs = xml.findChild(value: "Graph")
-            {
-              graphDef = GraphDef(gs)
-            }
-            if let g = xml.findChild(value: "Gate")
-            {
-                gate = Gate(xml: g)
-            }
-            for stat in xml.children where (stat.value == "Statistic")
-            {
-                statistics.append( Statistic(xml: stat))
-            }
-            if let kids = xml.findChild(value: "Subpopulations")
-            {
-                addChild(AnalysisNode(kids))
-            }
-        }
     
         func addChild(_ node:AnalysisNode) {
             if children == nil {
