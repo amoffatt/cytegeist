@@ -10,9 +10,9 @@ import CytegeistCore
 
 @main
 @MainActor
-struct CytegeistApp: App {
+struct CytegeistApp: SwiftUI.App {
 
-    @State private var appModel = AppModel()
+    @State private var appModel = App()
 //    @StateObject  var store = Store()
     
 
@@ -23,14 +23,13 @@ struct CytegeistApp: App {
 //        }
         
         
-        
         #if os(macOS)
         
-//        Window("Navigation", id: "nav")
-//        {
-//            MainView(selectedExperimentID: $store.selectedExperiment)
-//                .environmentObject(store)
-//        }
+        Window("Navigation", id: "nav")
+        {
+            MainAppView()
+                .environment(appModel)
+        }
 //        Settings {
 //            SettingsView()
 //                .environmentObject(store)

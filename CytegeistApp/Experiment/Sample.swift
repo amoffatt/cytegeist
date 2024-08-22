@@ -78,9 +78,17 @@ import CytegeistCore
   }
 
 //---------------------------------------------------------
-//@Observable
-public class Sample : Identifiable, Codable
+@Observable
+public class Sample : Identifiable, Codable, Hashable
 {
+    public static func == (lhs: Sample, rhs: Sample) -> Bool {
+        lhs.id == rhs.id
+    }
+    
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+    
     public var id: UUID
     var uri:String  = "n/a"  // do we need to keep this outside attributes
     var sampleId = ""
@@ -126,28 +134,29 @@ public class Sample : Identifiable, Codable
     //read from JSON
     
     public required init(from decoder: any Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        self.id = try container.decode(UUID.self, forKey: .id)
-        self.uri = try container.decodeIfPresent(String.self, forKey: .uri) ?? ""
-//        self.file = try container.decodeIfPresent(FCSFile.self, forKey: .file) ?? .empty
-        self.sampleId = try container.decodeIfPresent(String.self, forKey: .sampleId) ?? ""
-        self.variety = try container.decode(String.self, forKey: .variety)
-        self.plantingDepth = try container.decodeIfPresent(Float.self, forKey: .plantingDepth)
-        self.daysToMaturity = try container.decode(Int.self, forKey: .daysToMaturity)
-        self.datePlanted = try container.decodeIfPresent(Date.self, forKey: .datePlanted)
-        self.harvestDate = try container.decodeIfPresent(Date.self, forKey: .harvestDate)
-        self.favorite = try container.decode(Bool.self, forKey: .favorite)
-        self.lastWateredOn = try container.decode(Date.self, forKey: .lastWateredOn)
-        self.wateringFrequency = try container.decodeIfPresent(Int.self, forKey: .wateringFrequency)
-        //        self.attributes = try container.decode([String : String].self, forKey: .attributes)
-        //        self.dimensions = try container.decode([CDimension].self, forKey: .dimensions)
-        //        self.matrix = try container.decode(CMatrix.self, forKey: .matrix)
-        //        self.membership = try container.decode([String : PValue].self, forKey: .membership)
-        //        self.validity = try container.decode(SampleValidityCheck.self, forKey: .validity)
-        //        self.tree = try container.decode(AnalysisTree.self, forKey: .tree)
-        self.imageURL = try container.decodeIfPresent(URL.self, forKey: .imageURL)
-        //        self.data = try container.decode(Data.self, forKey: .data)
-        //        self.fcsFile = try container.decode(FCSFile.self, forKey: .fcsFile)
+        fatalError("AM: Implement decoding")
+//        let container = try decoder.container(keyedBy: CodingKeys.self)
+//        self.id = try container.decode(UUID.self, forKey: .id)
+//        self.uri = try container.decodeIfPresent(String.self, forKey: .uri) ?? ""
+////        self.file = try container.decodeIfPresent(FCSFile.self, forKey: .file) ?? .empty
+//        self.sampleId = try container.decodeIfPresent(String.self, forKey: .sampleId) ?? ""
+//        self.variety = try container.decode(String.self, forKey: .variety)
+//        self.plantingDepth = try container.decodeIfPresent(Float.self, forKey: .plantingDepth)
+//        self.daysToMaturity = try container.decode(Int.self, forKey: .daysToMaturity)
+//        self.datePlanted = try container.decodeIfPresent(Date.self, forKey: .datePlanted)
+//        self.harvestDate = try container.decodeIfPresent(Date.self, forKey: .harvestDate)
+//        self.favorite = try container.decode(Bool.self, forKey: .favorite)
+//        self.lastWateredOn = try container.decode(Date.self, forKey: .lastWateredOn)
+//        self.wateringFrequency = try container.decodeIfPresent(Int.self, forKey: .wateringFrequency)
+//        //        self.attributes = try container.decode([String : String].self, forKey: .attributes)
+//        //        self.dimensions = try container.decode([CDimension].self, forKey: .dimensions)
+//        //        self.matrix = try container.decode(CMatrix.self, forKey: .matrix)
+//        //        self.membership = try container.decode([String : PValue].self, forKey: .membership)
+//        //        self.validity = try container.decode(SampleValidityCheck.self, forKey: .validity)
+//        //        self.tree = try container.decode(AnalysisTree.self, forKey: .tree)
+//        self.imageURL = try container.decodeIfPresent(URL.self, forKey: .imageURL)
+//        //        self.data = try container.decode(Data.self, forKey: .data)
+//        //        self.fcsFile = try container.decode(FCSFile.self, forKey: .fcsFile)
     }
     
         //-------------------------------------------------------------------------

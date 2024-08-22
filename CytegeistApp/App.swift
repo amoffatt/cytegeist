@@ -27,11 +27,21 @@ enum ReportMode: String, CaseIterable, Identifiable {
 }
 
 
-final class Store: ObservableObject {
+@Observable
+final class App {
+    
+    let immersiveSpaceID = "ImmersiveSpace"
+    enum ImmersiveSpaceState {
+        case closed
+        case inTransition
+        case open
+    }
+    var immersiveSpaceState = ImmersiveSpaceState.closed
+    
     var experiments: [Experiment] = []
     var selectedExperiment: Experiment.ID?
-    @Published var mode: ViewMode = .table
-    @Published var reportMode: ReportMode = .gating
+    var mode: ViewMode = .table
+    var reportMode: ReportMode = .gating
     
 //    private var applicationSupportDirectory: URL {
 //        FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
@@ -112,7 +122,7 @@ final class Store: ObservableObject {
     
     func readFCSFile(_ url:URL) async
     {
-        let exp = getSelectedExperiment()
+        let exp = getSelectedExperiment(createIfNil: true)!
         await exp.readFCSFile(url)
     }
 
@@ -147,22 +157,46 @@ final class Store: ObservableObject {
     }
     
         //-------------------------------------------------------------------------
-   func getSelectedExperiment() -> Experiment
+    
+    /// If no experiment is selected, will return nil, unless:
+    /// If autoselect is true, will selected and eturn the most recently modified experiment
+    /// if createIfNil is true, will create a new experiment if none already exist
+    @discardableResult
+    func getSelectedExperiment(autoselect:Bool = false, createIfNil:Bool = false) -> Experiment?
     {
-        if let exp = experiments.first(where: { $0.id == selectedExperiment}) {
+        if let selectedExperiment {
+            if let exp = experiments.first(where: { $0.id == selectedExperiment}) {
+                return exp
+            }
+        }
+        if autoselect, let recent = recentExperiments.first {
+            selectedExperiment = recent.id
+            return recent
+        }
+        if createIfNil {
+            let exp = recentExperiments.first ?? createNewExperiment()
+            selectedExperiment = exp.id
             return exp
         }
-        let exp = createNewExperiment()
-        selectedExperiment = exp.id
-        
-        return exp
-//        ?? .placeholder
+        return nil
     }
     
+    @discardableResult
     func createNewExperiment() -> Experiment {
         let exp = Experiment()
+        let names = experiments.map { $0.name }
+        exp.name = exp.name.generateUnique(existing: names)
         experiments.append(exp)
+        selectedExperiment = exp.id
         return exp
+    }
+    
+    func removeExperiment(_ experiment:Experiment) {
+        experiments.removeAll { $0.id == experiment.id }
+        if selectedExperiment == experiment.id {
+            selectedExperiment = experiments.sorted(by: \.modifiedDate).first?.id
+        }
+        
     }
     
     
@@ -191,13 +225,30 @@ final class Store: ObservableObject {
 
 
 
-extension Store {
-
-    func experiments(in year: Int) -> [Experiment] {
-        experiments.filter({ $0.year == year })
+extension App {
+    
+    func experimentsModified(year: Int) -> [Experiment] {
+        experiments.filter({ $0.modifiedDate[.year] == year })
+    }
+    
+    var recentExperiments:[Experiment] {
+        experiments.sorted(by: \.modifiedDate)
+    }
+    
+    var experimentsByYearCreated:[(year:Int, experiments:[Experiment])] {
+        let calender = Calendar.current
+        let grouped = Dictionary(grouping: experiments, by: { $0.modifiedDate[.year] })
+        return grouped
+            // sort years
+            .sorted { $0.key < $1.key }
+            // Sort experiments within group
+            .map { (year, experiments) in
+                (year, experiments.sorted { $0.modifiedDate < $1.modifiedDate })
+            }
     }
 
-    var currentYear: Int { 2021 }
-
-    var previousYears: ClosedRange<Int> { (2018...2021) }
+//    var currentYear: Int { 2021 }
+//
+//    var previousYears: ClosedRange<Int> { (2018...2021) }
 }
+

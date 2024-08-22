@@ -74,5 +74,11 @@ public extension CGPoint {
 }
 
 public extension CGSize {
+    init(_ size: Float) {
+        self.init(width:Double(size), height:Double(size))
+    }
+    init(_ width: Float, _ height: Float) {
+        self.init(width:Double(width), height:Double(height))
+    }
     var asPoint:CGPoint { .init(x:width, y:height) }
 }

@@ -8,7 +8,7 @@ The store extension file support.
 import SwiftUI
 import UniformTypeIdentifiers
 
-extension Store: ReferenceFileDocument {
+extension App: ReferenceFileDocument {
     typealias Snapshot = [Experiment]
 
     static var readableContentTypes = [UTType.commaSeparatedText]
@@ -40,14 +40,14 @@ extension Store: ReferenceFileDocument {
 
 extension Experiment {
     fileprivate func append(to csvData: inout Data) {
-        if let data = name.data(using: .utf8) {
+        if let data = name.utf8Data {
             csvData.append(data)
             csvData.append(comma)
         } else {
             csvData.append(comma)
         }
-        let yearString = year == nil ? "" : numberFormatter.string(from: year! as NSNumber)!
-        if let data = yearString.data(using: .utf8) {
+        let yearString = numberFormatter.string(from: NSNumber(value: self.modifiedDate[.year])).nonNil
+        if let data = yearString.utf8Data {
             csvData.append(data)
             csvData.append(comma)
         } else {

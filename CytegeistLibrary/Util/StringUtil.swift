@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import CryptoKit
 
 
 let DEBUG = true
@@ -38,6 +39,9 @@ public extension String {
     //        let end = self.index(self.startIndex, offsetBy: endOffset)
     //        return String(self[start..<end])
     //    }
+    
+    ///  UTF8 encoded data of this string
+    var utf8Data:Data? { self.data(using: .utf8) }
     
     subscript(_ index: Int) -> Character? {
         guard index >= 0, index < self.count else {
@@ -87,6 +91,19 @@ public extension String {
         self.trimmingCharacters(in: characters)
     }
     
+    func generateUnique(existing: any Collection<String>) -> String {
+        var uniqueName = self
+        var counter = 1
+        
+        while existing.contains(uniqueName) {
+            uniqueName = "\(self) - \(counter)"
+            counter += 1
+        }
+        
+        return uniqueName
+    }
+    
+
 }
 
 public extension Optional where Wrapped == String {
@@ -98,3 +115,5 @@ public extension Data {
         String(data:self, encoding:encoding)
     }
 }
+
+

@@ -67,5 +67,5 @@ struct AaronTestContentView: View {
 
 #Preview() {
     AaronTestContentView()
-        .environment(AppModel())
+        .environment(App())
 }

@@ -15,7 +15,7 @@ public extension RandomAccessCollection {
     }
 }
 
-extension Array where Element: Collection {
+public extension Array where Element: Collection {
     func allSameLength() -> Bool {
         if let firstLength = self.first?.count {
             return self.allSatisfy { $0.count == firstLength }
@@ -37,8 +37,14 @@ extension Array where Element: Collection {
         }
         return result
     }
-
 }
+
+public extension Collection {
+    func sorted<T: Comparable>(by keyPath: KeyPath<Element, T>) -> [Element] {
+        return self.sorted { $0[keyPath: keyPath] < $1[keyPath: keyPath] }
+    }
+}
+
 
 extension RandomAccessCollection {
     /// Clamps index to the range of the collection.
@@ -135,3 +141,16 @@ extension BackedRandomAccessCollection {
 }
 
 
+
+public struct BoolComparator: SortComparator {
+
+   public func compare(_ lhs: Bool, _ rhs: Bool) -> ComparisonResult {
+       switch (lhs, rhs) {
+       case (true, false):    return order == .forward ? .orderedDescending : .orderedAscending
+       case (false, true):    return order == .forward ? .orderedAscending : .orderedDescending
+       default: return .orderedSame
+       }
+   }
+
+   public var order: SortOrder = .forward
+}

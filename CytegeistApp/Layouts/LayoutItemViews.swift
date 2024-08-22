@@ -111,12 +111,12 @@ struct CChartView : View {
         
         VStack {
 //            ChartView_Penguins()
-            HistogramView(query: core.histogram(.init(PopulationRequest(sampleRef), .init("FSC-A"))))
+//            HistogramView(query: core.histogram(.init(PopulationRequest(sampleRef), .init("FSC-A"))))
                 //            if editing {
                 //                TextField("Test Field", text: bindableText) .foregroundColor(.black)       //, selection: $selection
                 //                    .font(.headline).background(.black.opacity(0.8  )).frame(width: 120)
                 //            } else {
-//            Text("Penguins")
+            Text("Penguins")
             
         }  .frame(width: 100, height: 100)
             .padding()

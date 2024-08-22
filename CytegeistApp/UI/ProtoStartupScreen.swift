@@ -12,7 +12,7 @@ struct ProtoStartupScreenView: View {
     @State private var showFCSImporter = false
     @State private var showWSImporter = false
     @Environment(\.openWindow) var openWindow
-    @StateObject var store: Store
+    @State var app: App = App()
         //  @Environment var selectedExperiment: Experiment
     
     var body: some View {
@@ -33,7 +33,7 @@ struct ProtoStartupScreenView: View {
                         isPresented: $showFCSImporter,
                         allowedContentTypes: [.item] ,  // TODO filter to .fcs extension
                         allowsMultipleSelection: true
-                    ){ result in  store.onFCSPicked(_result: result) }
+                    ){ result in  app.onFCSPicked(_result: result) }
                       
                     Button("Read Workspace", systemImage: "xmark.circle",
                            action: { showWSImporter = true })

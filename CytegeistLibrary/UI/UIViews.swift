@@ -9,6 +9,7 @@ import Foundation
 import SwiftUI
 
 
+
 public struct LoadingOverlay<Content: View>: View {
     let isLoading: Bool
     let content: () -> Content
@@ -53,3 +54,69 @@ public extension View {
         self.frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
+
+
+
+//Button("Open FCS Files", systemImage: "plus", action: { showFCSImporter = true } )
+
+//public struct IconButton : View{
+//    let name:String
+//    let icon:String
+//    let action: () -> Void
+//    
+//    public init(_ name: String, icon: String, action: @escaping () -> Void) {
+//        self.name = name
+//        self.icon = icon
+//        self.action = action
+//    }
+//    
+//    public var body: some View {
+//        Button(name, systemImage: icon, action:action)
+//    }
+//}
+
+
+
+public struct Icon {
+    public static let
+    add = Icon("plus", scaling:1.4),
+    delete = Icon("trash")
+    
+    let systemImage:String
+    let scaling: Float
+    
+    public init(_ systemImage: String, scaling: Float = 1) {
+        self.systemImage = systemImage
+        self.scaling = scaling
+    }
+}
+
+public typealias Action = () -> Void
+
+public class Buttons {
+    public static func icon(_ name:LocalizedStringKey, _ icon:Icon, action: @escaping Action) -> some View {
+        Button(name, systemImage: icon.systemImage, action: action)
+            .scaleEffect(CGSize(icon.scaling))
+            .labelStyle(.iconOnly)
+            .buttonStyle(PlainButtonStyle())
+    }
+    
+//    public static func normal(_ name:LocalizedStringKey, _ icon:Icon, action: @escaping Action) -> some View {
+//        Button(action: action) {
+//            Label(name) {
+//                Image(systemName: icon.systemImage)
+//                    .scaleEffect(CGSize(icon.scaling))
+//            }
+//        }
+//    }
+
+    public static func toolbar(_ name:LocalizedStringKey, _ icon:Icon, action: @escaping Action) -> some View {
+        Button(name, systemImage: icon.systemImage, action: action)
+    }
+
+    
+//    public static func
+    
+}
+
+

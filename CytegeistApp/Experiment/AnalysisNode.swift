@@ -34,6 +34,7 @@ public extension UTType {
 }
 
 //---------------------------------------------------------
+@Observable
 public class AnalysisNode : Codable, Transferable, Identifiable, Equatable
 {
 

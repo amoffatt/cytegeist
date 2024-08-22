@@ -175,7 +175,7 @@ struct CGLayoutView: View {
                 from:CGPoint(x: 0,      y: location.y),
                 to:CGPoint(x: viewportSize.width-20, y: location.y))
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .fillAvailableSpace()
         .opacity(dragValue == nil && isMouseHoveringBackdrop ? 0.25 : 0.0)
         .allowsHitTesting(false)
     }

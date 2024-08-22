@@ -14,9 +14,10 @@ struct DisplayModePicker: View {
         Picker("Display Mode", selection: $mode) {
             ForEach(ViewMode.allCases) { viewMode in
                 viewMode.label
+                    .labelStyle(.iconOnly)
             }
         }
-        .pickerStyle(SegmentedPickerStyle())
+        .pickerStyle(.segmented)
     }
 }
 

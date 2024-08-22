@@ -11,18 +11,23 @@ import CytegeistLibrary
 import CytegeistCore
 
 //-----------------------------------------------
-//@Observable
-public class Experiment :  Codable, Identifiable
+@Observable
+public class Experiment :  Codable, Identifiable, Equatable
 {
+    public static func == (lhs: Experiment, rhs: Experiment) -> Bool {
+        lhs.id == rhs.id
+    }
+    
     public var id = UUID()
     
     var version:String? = "0.01"
-    var creationDate:String? = Date.now.formatted()
+    var creationDate:Date = Date.now
+    var modifiedDate:Date = Date.now
 //    var curGroup:String? = "All Samples"
-    var year:Int? = 2021
     var name = "All Samples"
 
     var samples:[Sample] = [Sample]()
+    var selectedSamples = Set<Sample.ID>()
     var groups = [CGroup]()
     var tables = [TableSchema]()
     var layouts = [CGLayoutModel]()
@@ -34,14 +39,17 @@ public class Experiment :  Codable, Identifiable
     //    var _scripts: [String]          // ignore
     //    var _history: [String]          // ignore
     required public init(from decoder: any Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        self.id = try container.decode(UUID.self, forKey: .id)
-        self.version = try container.decodeIfPresent(String.self, forKey: .version)
-        self.creationDate = try container.decodeIfPresent(String.self, forKey: .creationDate)
-//        self.curGroup = try container.decodeIfPresent(String.self, forKey: .curGroup)
-        self.year = try container.decodeIfPresent(Int.self, forKey: .year)
-        self.name = try container.decode(String.self, forKey: .name)
-        self.samples = try container.decode([Sample].self, forKey: .samples)
+        fatalError("Implement decoding")        // TODO AM Write class macro and property wrapper to handle properties with default values
+        
+//        let container = try decoder.container(keyedBy: CodingKeys.self)
+//        self.id = try container.decode(UUID.self, forKey: .id)
+//        self.version = try container.decodeIfPresent(String.self, forKey: .version)
+//        self.creationDate = try container.decodeIfPresent(String.self, forKey: .creationDate)
+////        self.curGroup = try container.decodeIfPresent(String.self, forKey: .curGroup)
+//        self.year = try container.decodeIfPresent(Int.self, forKey: .year)
+//        self.name = try container.decode(String.self, forKey: .name)
+//        self.samples = try container.decode([Sample].self, forKey: .samples)
+        
 //        if let groups = try container.decodeIfPresent([CGroup].self, forKey: .groups) {
 //            self.groups = groups
 //        }
@@ -50,11 +58,10 @@ public class Experiment :  Codable, Identifiable
     }
     
 
-    init(year: Int = 3, name: String = "Untitled", version: String = "" )
+    init(name: String = "Untitled", version: String = "" )
     {
    print("Experiment \(name) ")
         self.name = name
-        self.year = year
         self.version = version
     }
     
