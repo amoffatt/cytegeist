@@ -87,7 +87,7 @@ public class Experiment :  Codable, Identifiable, Equatable
         let reader = FCSReader()
         do  {
             let fcs = try reader.readFCSFile(at: url,includeData: false)
-            addSample(Sample(fcs: fcs))
+            addSample(Sample(fcs: fcs.meta))
         }
         catch let err as NSError {
             debug("Ooops! Something went wrong: \(err)")

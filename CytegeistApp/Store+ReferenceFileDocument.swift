@@ -58,46 +58,46 @@ extension Experiment {
 
 extension Sample {
     fileprivate func append(to csvData: inout Data) {
-        if let data = variety.data(using: .utf8) {
-            csvData.append(data)
-            csvData.append(comma)
-        } else {
-            csvData.append(comma)
-        }
-        if let data = numberFormatter.string(from: (plantingDepth ?? 0) as NSNumber)?.data(using: .utf8) {
-            csvData.append(data)
-            csvData.append(comma)
-        } else {
-            csvData.append(comma)
-        }
-        if let data = numberFormatter.string(from: daysToMaturity as NSNumber)?.data(using: .utf8) {
-            csvData.append(data)
-            csvData.append(comma)
-        } else {
-            csvData.append(comma)
-        }
-        let datePlantedString = datePlanted == nil ? "" : dateFormatter.string(from: datePlanted!)
-        if let data = datePlantedString.data(using: .utf8) {
-            csvData.append(data)
-            csvData.append(comma)
-        } else {
-            csvData.append(comma)
-        }
-        if let data = favorite.description.data(using: .utf8) {
-            csvData.append(data)
-            csvData.append(comma)
-        } else {
-            csvData.append(comma)
-        }
-        if let data = dateFormatter.string(from: lastWateredOn).data(using: .utf8) {
-            csvData.append(data)
-            csvData.append(comma)
-        } else {
-            csvData.append(comma)
-        }
-        if let data = numberFormatter.string(from: (wateringFrequency ?? 0) as NSNumber)?.data(using: .utf8) {
-            csvData.append(data)
-        }
+//        if let data = variety.data(using: .utf8) {
+//            csvData.append(data)
+//            csvData.append(comma)
+//        } else {
+//            csvData.append(comma)
+//        }
+//        if let data = numberFormatter.string(from: (plantingDepth ?? 0) as NSNumber)?.data(using: .utf8) {
+//            csvData.append(data)
+//            csvData.append(comma)
+//        } else {
+//            csvData.append(comma)
+//        }
+//        if let data = numberFormatter.string(from: daysToMaturity as NSNumber)?.data(using: .utf8) {
+//            csvData.append(data)
+//            csvData.append(comma)
+//        } else {
+//            csvData.append(comma)
+//        }
+//        let datePlantedString = datePlanted == nil ? "" : dateFormatter.string(from: datePlanted!)
+//        if let data = datePlantedString.data(using: .utf8) {
+//            csvData.append(data)
+//            csvData.append(comma)
+//        } else {
+//            csvData.append(comma)
+//        }
+//        if let data = favorite.description.data(using: .utf8) {
+//            csvData.append(data)
+//            csvData.append(comma)
+//        } else {
+//            csvData.append(comma)
+//        }
+//        if let data = dateFormatter.string(from: lastWateredOn).data(using: .utf8) {
+//            csvData.append(data)
+//            csvData.append(comma)
+//        } else {
+//            csvData.append(comma)
+//        }
+//        if let data = numberFormatter.string(from: (wateringFrequency ?? 0) as NSNumber)?.data(using: .utf8) {
+//            csvData.append(data)
+//        }
     }
 }
 

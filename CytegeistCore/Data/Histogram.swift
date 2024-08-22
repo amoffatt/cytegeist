@@ -400,7 +400,7 @@ fileprivate func defaultCountAxis(maxCount:Int?) -> AxisNormalizer {
 //    }
 //    
 //
-//    func bin(bin1d:Int) -> Tuple2<Int> {
+//    func bin(bin1d:Int) -> Tuple2<Int> {s
 //        return Tuple2(bin1d % resolution.x, bin1d / resolution.x)
 //    }
 //    

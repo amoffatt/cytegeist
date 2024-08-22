@@ -160,7 +160,7 @@ public class Sample : Identifiable, Codable, Hashable
         print("Sample \(id) ")
     }
  
-    convenience init(fcs: FCSMetadata)
+    convenience init(fcs: FCSMetadata? = nil)
     {
         self.init(id: UUID(), fcs: fcs)
     }

@@ -44,7 +44,7 @@ struct SampleGallery: View {
             VStack {
                 GalleryImage(sample: sample, size: size)
                     .background(selectionBackground)
-                Text(verbatim: sample.variety)
+                Text(verbatim: sample.tubeName)
                     .font(.callout)
             }
             .frame(width: size)

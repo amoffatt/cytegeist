@@ -24,7 +24,7 @@ struct GatingView: View {
     @State private var isHovering = false
     @State private var offset = CGSize.zero
 //    @State var population: AnalysisNode
-    @State var sample: Sample
+    @State var sample: Sample? = nil
     @State var chartDef: ChartDef = ChartDef()
     
 
@@ -32,7 +32,7 @@ struct GatingView: View {
 //    var selectedSample: Sample
     var chart: some View {
         VStack {
-            if let sampleRef = sample.ref {
+            if let sampleRef = sample?.ref {
                 ChartView(population: PopulationRequest(sampleRef), config: chartDef)
             }
             else {
