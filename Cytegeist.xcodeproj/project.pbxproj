@@ -90,6 +90,7 @@
 		B6C9A4B62C77D57500DB6786 /* FJGatingExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4B52C77D57500DB6786 /* FJGatingExtensions.swift */; };
 		B6C9A4B82C77D9AA00DB6786 /* ChartAxisView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4B72C77D9AA00DB6786 /* ChartAxisView.swift */; };
 		B6C9A4BA2C77DB3700DB6786 /* AxisNormalizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4B92C77DB3700DB6786 /* AxisNormalizer.swift */; };
+		DC05A3D12C798EC900C08BBF /* Smoothing.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC05A3D02C798EC900C08BBF /* Smoothing.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -260,6 +261,7 @@
 		B6C9A4B52C77D57500DB6786 /* FJGatingExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FJGatingExtensions.swift; sourceTree = "<group>"; };
 		B6C9A4B72C77D9AA00DB6786 /* ChartAxisView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartAxisView.swift; sourceTree = "<group>"; };
 		B6C9A4B92C77DB3700DB6786 /* AxisNormalizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AxisNormalizer.swift; sourceTree = "<group>"; };
+		DC05A3D02C798EC900C08BBF /* Smoothing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Smoothing.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -386,6 +388,7 @@
 			children = (
 				B68529682C74DBB500EF9EF4 /* ComputeCache.swift */,
 				B63EEE8F2C569C7600E465C9 /* CytegeistCore.swift */,
+				DC05A3D02C798EC900C08BBF /* Smoothing.swift */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -835,6 +838,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DC05A3D12C798EC900C08BBF /* Smoothing.swift in Sources */,
 				B68529732C74DC1100EF9EF4 /* PairCharts.swift in Sources */,
 				B6C9A4B82C77D9AA00DB6786 /* ChartAxisView.swift in Sources */,
 				B6C9A4B42C77CA5400DB6786 /* ChartDefs.swift in Sources */,

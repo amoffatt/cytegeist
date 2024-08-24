@@ -281,6 +281,7 @@ public struct HistogramData<D:Dimensions> {
 //    public typealias Axes = AxesTuple
     
     public let bins:[UInt8]
+    public let smoothedBins:[UInt8]
     public let maxCount: Int
     
     public let axes:D.Axes
@@ -317,7 +318,7 @@ public struct HistogramData<D:Dimensions> {
             let point = D.value(in: data, at: i)
             let ndBin = D.pointToNDIndex(point: point, axes: axes, arraySize: size)
             let bin = D.inlineArrayIndex(ndIndex:ndBin, arraySize: size)
-            bins[bin] += 1
+            bins[bin] += 1              // TODO pValue??
         }
         
         self.init(bins:bins, size:size, axes:axes, countAxis:countAxis)
@@ -333,7 +334,14 @@ fileprivate func defaultCountAxis(maxCount:Int?) -> AxisNormalizer {
 }
 
 
-
+func smooth()
+{
+//    for i in 0..<size  {
+//        for j in 0..<size  {
+//            kernelSmooth(i,j)
+//        }
+//    }
+}
 
 
 //public struct Histogram2DData {
