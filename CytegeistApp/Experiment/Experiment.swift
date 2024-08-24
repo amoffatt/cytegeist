@@ -43,30 +43,9 @@ public class Experiment :  Codable, Identifiable, Equatable
         _core = CytegeistCoreAPI()
         return _core!
     }
-    //        var columns : [TableColumn]     // the layout of the workspace window
-    
-    //    var _cytometers: [Cytometer]     // ignore
-    //    var _matrices: [Matrix]          // ignore
-    //    var _exports: [String]           // ignore
-    //    var _scripts: [String]          // ignore
-    //    var _history: [String]          // ignore
     required public init(from decoder: any Decoder) throws {
         fatalError("Implement decoding")        // TODO AM Write class macro and property wrapper to handle properties with default values
         
-//        let container = try decoder.container(keyedBy: CodingKeys.self)
-//        self.id = try container.decode(UUID.self, forKey: .id)
-//        self.version = try container.decodeIfPresent(String.self, forKey: .version)
-//        self.creationDate = try container.decodeIfPresent(String.self, forKey: .creationDate)
-////        self.curGroup = try container.decodeIfPresent(String.self, forKey: .curGroup)
-//        self.year = try container.decodeIfPresent(Int.self, forKey: .year)
-//        self.name = try container.decode(String.self, forKey: .name)
-//        self.samples = try container.decode([Sample].self, forKey: .samples)
-        
-//        if let groups = try container.decodeIfPresent([CGroup].self, forKey: .groups) {
-//            self.groups = groups
-//        }
-//        self.tables = try container.decodeIfPresent([TableSchema].self, forKey: .tables)
-//        self.layouts = try container.decodeIfPresent([LayoutSchema].self, forKey: .layouts)
     }
     
 
@@ -148,86 +127,8 @@ public class Experiment :  Codable, Identifiable, Equatable
 //    }
 
     
-    public init(ws: TreeNode )
-    {
-        print ("Experiment's Tree Count: ", ws.deepCount)
-//        let ws = ws.children.first
-   //        let samps = ws?.findChild(value: "SampleList")
-   //        let gps = ws?.findChild(value: "Groups")
-   //        let tabls = ws?.findChild(value: "TableEditor")
-   //        let lays = ws?.findChild(value: "LayoutEditor")
-   ///
-//   /        if let s = samps  { self.processSamples(s)   }
-//        if let g = gps    { self.processGroups(g)    }
-//        if let t = tabls  { self.processTables(t)    }
-//        if let l = lays  { self.processLayouts(l)    }
-//        print ("Samples: \(samples.count) Groups: \(groups.count) Tables: \(tables.count) Layouts: \(layouts.count) ")
-        
-    }
     
-    
-//    func processSamples(_ xml: TreeNode)
-//    {
-//        for node in xml.children where node.value == "Sample"  {
-//            samples.append(Sample(node))
-//        }
-//        print("SampleList: ", samples.count)
-//    }
-//    func processGroups(_ xml: TreeNode)
-//    {
-//        for node in xml.children where node.value == "GroupNode"  {
-//            groups.append(CGroup(node))
-//        }
-//        print("Groups: ", groups.count)
-//    }
-//    func processTables(_ xml: TreeNode)
-//    {
-//        for node in xml.children where  node.value == "Table" {
-//            tables.append(TableSchema(node))
-//        }
-//        print("Tables: ", tables.count)
-//    }
-//    func processLayouts(_ xml: TreeNode)
-//    {
-//        for node in xml.children where  node.value == "Layout" {
-//            layouts.append(LayoutSchema(node))
-//        }
-//        print("Layouts: ", layouts.count)
-//    }
-//    
-//    func processMatrices(_ xml: TreeNode)
-//    {
-//        //IGNORE
-//    }
-//    func processCytometers(_ xml: TreeNode)
-//    {
-//        //IGNORE
-//    }
-//    
-    //---------------------------------------------------------
-//    var numberOfPlantsNeedingWater: Int {
-//        let result = samples.reduce(0) { count, sample in count + (sample.needsWater ? 1 : 0) }
-//        print("\(name) has \(result)")
-//        for sample in samples {
-//            print("- \(sample)")
-//        }
-//        return result
-//    }
-//    
-//    mutating func water(_ samplesToWater: Set<Sample.ID>) {
-//        for (index, sample) in samples.enumerated() {
-//            if samplesToWater.contains(sample.id) {
-//                samples[index].lastWateredOn = Date()
-//            }
-//        }
-//    }
-//    
-//    mutating func remove(_ plants: Set<Sample.ID>) {
-//        self.plants.removeAll(where: { samples.contains($0.id) })
-//    }
-//    
-//    var displayYear: String  = safeString(self.year)
-    
+ 
     subscript(sampleId: Sample.ID?) -> Sample? {
         get {
             if let id = sampleId {

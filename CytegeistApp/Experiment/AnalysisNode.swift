@@ -76,13 +76,7 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Equatable
     }
 
 
-//struct AnalysisNode: Identifiable, Codable, Transferable {
-//
-//    var id = UUID()
-//    var name: String
-//    var image: String?
-//    var children: [AnalysisNode]?
-//}
+
     //-------------------------------------------------------------------------------
     // hardcoded data for an outline group
 
