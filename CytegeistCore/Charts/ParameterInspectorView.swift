@@ -12,7 +12,7 @@ import SwiftUI
 public struct ParameterInspectorView: View {
     let core:CytegeistCoreAPI
     let sample:SampleRef
-    let parameter:FCSParameter
+    let parameter:CDimension
     
     public var body: some View {
         VStack() {
@@ -38,7 +38,7 @@ public struct ParameterInspectorView: View {
                     }
                 }
                 
-                HistogramView(query: core.histogram(.init(PopulationRequest(sample), .init(parameter.name))))
+                HistogramView(query: core.histogram(.init(.sample(sample), .init(parameter.name))))
             }
             Text(parameter.displayName)
                 .font(.headline)

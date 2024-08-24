@@ -14,7 +14,7 @@ public enum AxisScaleType: Hashable {
 //    case biex(a:Float, b:Float)
 }
 
-public struct AxisNormalizer: Hashable {
+public struct AxisNormalizer: Hashable, Codable {
     public static func linear(min:Double, max:Double) -> AxisNormalizer {
         let span = max - min
         
@@ -120,6 +120,14 @@ public struct AxisNormalizer: Hashable {
         self.normalize = normalize
         self.unnormalize = unnormalize
         self.tickMarks = ticks
+    }
+    
+    public init(from decoder: any Decoder) throws {
+        fatalError()
+    }
+    
+    public func encode(to encoder: any Encoder) throws {
+        fatalError()
     }
     
 }

@@ -16,7 +16,7 @@ import CytegeistLibrary
 //    static var dimensions:Int { get }
 //}
 
-public protocol Dim<Axes, Strings, IntCoord, FloatCoord, Data> where
+public protocol Dimensions<Axes, Strings, IntCoord, FloatCoord, Data> where
 Axes:Tuple<AxisNormalizer>,
 Strings:Tuple<String>,
 IntCoord:Tuple<Int>,
@@ -43,7 +43,7 @@ Data:Tuple<[Float]>
 
 
 
-public struct _1D : Dim {
+public struct X : Dimensions {
     
     public typealias Axes = Tuple1<AxisNormalizer>
     public typealias Strings = Tuple1<String>
@@ -76,7 +76,7 @@ public struct _1D : Dim {
 }
 
 
-public struct _2D : Dim {
+public struct XY : Dimensions {
     public typealias Axes = Tuple2<AxisNormalizer>
     public typealias Strings = Tuple2<String>
     public typealias IntCoord = Tuple2<Int>
@@ -277,7 +277,7 @@ public struct Tuple3<Value> {
 //    associatedtype D
 //}
 
-public struct HistogramData<D:Dim> {
+public struct HistogramData<D:Dimensions> {
 //    public typealias Axes = AxesTuple
     
     public let bins:[UInt8]
@@ -416,7 +416,7 @@ fileprivate func defaultCountAxis(maxCount:Int?) -> AxisNormalizer {
 //}
 
 
-extension HistogramData<_2D> {
+extension HistogramData<XY> {
     func toImage(colormap:Colormap) -> Image? {
         // TODO OPTIMIZE
         // Set pixels with UInt32 array instead of UInt8

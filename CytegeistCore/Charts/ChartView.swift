@@ -8,8 +8,17 @@
 import SwiftUI
 
 fileprivate enum ChartDataRequest {
-    case histogram1D(query:APIQuery<CachedHistogram<_1D>>, axis:AxisDef, variable: FCSParameter)
-    case histogram2D(APIQuery<CachedHistogram<_2D>>)
+    
+    case histogram1D(query:APIQuery<CachedHistogram<X>>, axis:AxisDef, variable: CDimension)
+    case histogram2D(query:APIQuery<CachedHistogram<XY>>, axes:Tuple2<AxisDef>, variables:Tuple2<CDimension>)
+    
+    @MainActor
+    func dispose() {
+        switch self {
+        case .histogram1D(query: let q): q.query.dispose()
+        case .histogram2D(query: let q): q.query.dispose()
+        }
+    }
 }
 
 public struct ChartView: View {
@@ -37,7 +46,6 @@ public struct ChartView: View {
                 EmptyView()
             case .histogram1D(let query, let axis, let variable):
                     VStack {
-//                        let variableName = axis.name
                         HistogramView(query: query)
                         ChartAxisView(label: axis.label, normalizer: variable.normalizer)
                     }
@@ -57,7 +65,7 @@ public struct ChartView: View {
         }
     }
     
-    var sampleRef: SampleRef { population.sample.sampleRef }
+    var sampleRef: SampleRef { population.sample }
     
     var stateHash: Int {
         var stateHash = Hasher()
@@ -68,11 +76,13 @@ public struct ChartView: View {
     }
     
     @MainActor func updateSampleQuery() {
-        let sample = population.sample.sampleRef
-        sampleQuery = core.loadSample(.init(sampleRef: sample, includeData: false))
+        sampleQuery?.dispose()
+        let sample = SampleRequest(population.sample, includeData: false)
+        sampleQuery = core.loadSample(sample)
     }
             
     @MainActor func updateChartQuery()  {
+        chartQuery?.dispose()
         if let meta = sampleQuery?.data?.meta {
             if config.yAxis == nil,
                let axis = config.xAxis,

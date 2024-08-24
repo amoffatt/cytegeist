@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 
+@MainActor
 public struct SampleInspectorView: View {
     let core: CytegeistCoreAPI
     let sample: SampleRef
@@ -44,7 +45,7 @@ public struct SampleInspectorView: View {
             }
         }
         .onChange(of: sample.url, initial: true) {
-            query = core.loadSample(.init(sampleRef: sample, includeData: true))
+            query = core.loadSample(.init(sample))
         }
     }
     
@@ -116,7 +117,7 @@ public struct ParameterGalleryView: View {
     
     let core: CytegeistCoreAPI
     let sample: SampleRef
-    let parameters: [FCSParameter]
+    let parameters: [CDimension]
     
     public var body: some View {
         

@@ -33,7 +33,7 @@ struct GatingView: View {
     var chart: some View {
         VStack {
             if let sampleRef = sample?.ref {
-                ChartView(population: PopulationRequest(sampleRef), config: chartDef)
+                ChartView(population: .sample(sampleRef), config: chartDef)
             }
             else {
                 Text("No sample file reference")

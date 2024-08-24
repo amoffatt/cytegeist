@@ -18,7 +18,7 @@ fileprivate class ComputeHandle<Request, Data> {
     var error:Error? = nil
     var lastRequested:Date = Date()
     
-    let semaphore:CGSemaphore = .init()
+    let semaphore:CSemaphore = .init()
 
     init(_ request: Request) {
         self.request = request

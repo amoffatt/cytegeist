@@ -43,12 +43,12 @@ extension SampleList
 
 extension TableColumnField<Sample> {
     init(keyword: String) {
-        self.init(keyword, \.attributes[keyword].nonNil )
+        self.init(keyword, \.self[keyword] )
     }
 }
 
 extension Sample {
-    var eventCountString: String { String(cellCount) }
+    var eventCountString: String { String(eventCount) }
 }
 
 
@@ -181,7 +181,7 @@ struct SampleList: View {
         .importsItemProviders(selectedSamples.isEmpty ? [] : Sample.importImageTypes) { providers in
             Sample.importImageFromProviders(providers) { url in
                 for sampleID in selectedSamples {
-                    experiment[sampleID].imageURL = url
+                    experiment[sampleID]?.imageURL = url
                 }
             }
             

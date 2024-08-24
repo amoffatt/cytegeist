@@ -15,70 +15,14 @@ import CytegeistCore
 //
 // is biexDimension a subclass or does it include a transform
   
-  struct CDimension : Codable, Hashable
-  {
-      var attributes = [String : String]()
-      var label = "unnamed parameter";
-      var auto = true;
-      var transform = 1
-
-      var bits = "bits";
-      var name = "unnamed";
-      var stain = "stain";
-      var display = "display";
-      var range = "range";
-
-
-      init (name: String )
-      {
-          self.name = name
-      }
-      
-      init (name: String, stain: String, display: String, bits: String, range: String)
-      {
-          self.name = name
-          self.stain = stain
-          self.display = display
-          self.bits = bits
-          self.range = range
-      }
-      
-     init(xml: TreeNode)
-      {
-          attributes.merge(xml.attrib, uniquingKeysWith: +)
-          self.name = attributes["name"] ?? "NA"
-          self.label = attributes["label"] ?? "NA"
-          self.auto = attributes["auto"] == "1"
-    }
-     enum transfunction
-      {
-          case lin
-          case log
-          case biex
-      }
-      
-      var negDecades = 0
-      var width = -100
-      var posDecades = 4.4771212547
-      
-      var min = 0
-      var max = 300000
-      var gain = "1"
-      
-      
-      func hash(into hasher: inout Hasher) {
-          ///        hasher.combine(x)
-          ///         hasher.combine(y)
-      }
-      
-      static func == (lhs: CDimension, rhs: CDimension) -> Bool {
-          lhs.name == rhs.name;
-      }
-      
-  }
+public enum SampleError : Error {
+    case noRef
+    case queryError(Error)
+}
 
 //---------------------------------------------------------
 @Observable
+//@MainActor
 public class Sample : Identifiable, Codable, Hashable
 {
     public static func == (lhs: Sample, rhs: Sample) -> Bool {
@@ -89,38 +33,44 @@ public class Sample : Identifiable, Codable, Hashable
         hasher.combine(id)
     }
     
-    public var id: UUID
-    var ref:SampleRef? = nil
+    public var id = UUID()
     var sampleId = ""
     
+    var ref:SampleRef? = nil
+    
+    @CodableIgnored
+    @ObservationIgnored
+    var error:Error? = nil
     
     
-    var attributes = AttributeStore()
-    var dimensions = [CDimension]()
+//    var attributes = AttributeStore()
+//    var dimensions = [CDimension]()
     //    var matrix = CMatrix()
     //    var membership =  [String : PValue]()
     //    var validity = SampleValidityCheck ()
     var tree = AnalysisNode()
     var imageURL: URL?
-    @CodableIgnored
-    @ObservationIgnored
-    var fcsFile:FCSMetadata?
-    var cellCount: Int = 0
- 
-    var tubeName:  String = ""
-    var experimentName:  String = ""
-    var date: String = ""
-    var btime:  String = ""
-    var filename:  String = ""
-    var creator:  String = ""
-    var apply:  String = ""
-    var threshold:  String = ""
-    var src:  String = ""
-    var sys:  String = ""
-    var cytometer:  String = ""
-    var setup1:  String = "s"
-    var stained : [String : String] = [:]       // dictionary of dimension names and stains
+    var meta:FCSMetadata?
     
+//    var keywords:AttributeStore { meta?.keywordLookup ?? [:] }
+    subscript(_ keyword:String) -> String { (meta?.keywordLookup[keyword]).nonNil }
+
+    var eventCount: Int { meta?.eventCount ?? 0 }
+ 
+    var tubeName: String { self["TUBE NAME"] }
+    var experimentName:  String { self["EXPERIMENT NAME"] }
+    var date: String { self["$DATE"] }
+    var btime:  String = ""//{ meta?.keywordLookup["$BTIM"] ?? "" }
+    var filename:  String { self["$FIL"] }
+    var creator:  String { self["CREATOR"] }
+    var apply:  String { self["APPLY COMPENSATION"] }
+    var threshold:  String { self["THRESHOLD"] }
+    var src:  String { self["$SRC"] }
+    var sys:  String { self["$SYS"] }
+    var cytometer:  String { self["$CYT"] }
+    var setup1:  String { self["CST SETUP STATUS"] }
+
+
         //-------------------------------------------------------------------------
     //read from JSON
     
@@ -152,74 +102,75 @@ public class Sample : Identifiable, Codable, Hashable
     
         //-------------------------------------------------------------------------
    init(
-        id: UUID,
-        fcs: FCSMetadata? = nil
+//        id: UUID,
+        ref: SampleRef
     ) {
-        self.id = id
-        self.fcsFile = fcsFile
-        print("Sample \(id) ")
+//        self.id = id
+        self.ref = ref
+        print("Sample \(ref)")
     }
  
-    convenience init(fcs: FCSMetadata? = nil)
-    {
-        self.init(id: UUID(), fcs: fcs)
-    }
-    
 //    convenience init(_ xml: TreeNode)
 //    {
 //        assert(xml.value == "Sample")
 //        self.init()
 //    }
+    
+    private func handleError(_ error:SampleError) {
+        print("Error: cannot load sample: \(error.localizedDescription)")
+        self.error = error
+    }
         //-------------------------------------------------------------------------
         //  iniitialize based on a new FCS File added
-    func setUp()
+    func setUp(core:CytegeistCoreAPI)
     {
         debug("in SetUp")
-//        assert(!fcsFile.meta.isEmpty)
-//        assert(!fcsFile.data.isEmpty)
         
-        guard let keys = fcsFile?.keywordLookup else {
-            print("No metadata for FCS file loaded")
+        guard let ref else {
+            handleError(.noRef)
             return
         }
         
-        attributes.merge(keys,  uniquingKeysWith: +)
-        
-        cellCount = Int(keys["$TOT"]! ) ?? 1000
-        tubeName = keys["TUBE NAME"] ?? " "
-        experimentName = keys["EXPERIMENT NAME"] ?? " "
-        date = keys["$DATE"] ?? ""
-        btime = keys["$BTIM"] ?? " "
-        filename = keys["$FIL"] ?? " "
-        creator = keys["CREATOR"] ?? " "
-        apply = keys["APPLY COMPENSATION"] ?? " "
-        setup1 = keys["CST SETUP STATUS"] ?? " "
-        threshold = keys["THRESHOLD"] ?? " "
-        src = keys["$SRC"] ?? " "
-        sys = keys["$SYS"] ?? " "
-        cytometer = keys["$CYT"] ?? " "
-
-        debug("build dimension columns")
-        let nDims = Int(keys["$PAR"]!) ?? 0
-        if ( nDims > 0) {
-            print("\(nDims)")
-            for i in 1...nDims
-            {
-                let prefix = "$P\(i)"
-                let otherPrefix = "P\(i)"
-                let name = keys[prefix+"N"] ?? ""
-                let stain = keys[prefix+"S"] ?? ""
-                let display = keys[otherPrefix+"DISPLAY"] ?? ""
-                let bits = keys[prefix+"B"] ?? ""
-                let range = keys[prefix+"R"] ?? ""
-                print(prefix, name, stain, display, bits, range)
-                let dimension = CDimension( name: name, stain: stain,display:  display, bits: bits, range: range)
-                dimensions.append(dimension)
+        Task {
+            do {
+                meta = try await core.loadSample(SampleRequest(ref, includeData: false)).getResult().meta
+                btime = meta?.keywordLookup["$BTIM"] ?? "" 
+                print("Loaded metadata")
+            } catch {
+                handleError(.queryError(error))
             }
         }
-        dimensions.filter({  $0.stain.count > 0 }).makeIterator().forEach { dim in
-            stained[dim.name] = dim.stain
-        }
+//        assert(!fcsFile.meta.isEmpty)
+//        assert(!fcsFile.data.isEmpty)
+        
+//        guard let keys = meta?.keywordLookup else {
+//            print("No metadata for FCS file loaded")
+//            return
+//        }
+        
+//        attributes.merge(keys,  uniquingKeysWith: +)
+        
+//        debug("build dimension columns")
+//        let nDims = Int(keys["$PAR"]!) ?? 0
+//        if ( nDims > 0) {
+//            print("\(nDims)")
+//            for i in 1...nDims
+//            {
+//                let prefix = "$P\(i)"
+//                let otherPrefix = "P\(i)"
+//                let name = keys[prefix+"N"] ?? ""
+//                let stain = keys[prefix+"S"] ?? ""
+//                let display = keys[otherPrefix+"DISPLAY"] ?? ""
+//                let bits = keys[prefix+"B"] ?? ""
+//                let range = keys[prefix+"R"] ?? ""
+//                print(prefix, name, stain, display, bits, range)
+//                let dimension = CDimension( name: name, stain: stain,display:  display, bits: bits, range: range)
+//                dimensions.append(dimension)
+//            }
+//        }
+//        dimensions.filter({  $0.stain.count > 0 }).makeIterator().forEach { dim in
+//            stained[dim.name] = dim.stain
+//        }
    //       print(stained)
         
 

@@ -10,9 +10,9 @@ import Charts
 import CytegeistLibrary
 
 public struct HistogramView: View {
-    let query:APIQuery<CachedHistogram<_1D>>
+    let query:APIQuery<CachedHistogram<X>>
     
-    public init(query: APIQuery<CachedHistogram<_1D>>) {
+    public init(query: APIQuery<CachedHistogram<X>>) {
         self.query = query
     }
     
@@ -41,9 +41,9 @@ public struct HistogramView: View {
 }
 
 public struct Histogram2DView: View {
-    let query:APIQuery<CachedHistogram<_2D>>
+    let query:APIQuery<CachedHistogram<XY>>
     
-    public init(query: APIQuery<CachedHistogram<_2D>>) {
+    public init(query: APIQuery<CachedHistogram<XY>>) {
         self.query = query
     }
     

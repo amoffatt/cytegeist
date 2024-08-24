@@ -48,9 +48,10 @@ extension Gate {
             let dim2 = dim.children.first
             assert(dim2!.value == "data-type:fcs-dimension")
             let dimName = dim2!.attrib["data-type:name"]!
-            if !dimName.isEmpty {
-                dims.append(CDimension(name: dimName))
-            }
+            fatalError("TODO")
+//            if !dimName.isEmpty {
+//                dims.append(CDimension(name: dimName))
+//            }
         }
         return dims
     }

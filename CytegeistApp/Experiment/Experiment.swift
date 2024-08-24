@@ -31,6 +31,18 @@ public class Experiment :  Codable, Identifiable, Equatable
     var groups = [CGroup]()
     var tables = [TableSchema]()
     var layouts = [CGLayoutModel]()
+    
+    @ObservationIgnored
+    @CodableIgnored
+    var _core:CytegeistCoreAPI? = nil
+    /// Lazilly created
+    var core:CytegeistCoreAPI {
+        if let _core {
+            return _core
+        }
+        _core = CytegeistCoreAPI()
+        return _core!
+    }
     //        var columns : [TableColumn]     // the layout of the workspace window
     
     //    var _cytometers: [Cytometer]     // ignore
@@ -69,8 +81,7 @@ public class Experiment :  Codable, Identifiable, Equatable
     public func addSample(_ sample: Sample)
     {
         samples.append(sample)
-        sample.setUp()
-        print("Added Sample: \(sample.tubeName) collected on   \(sample.date) Count: \(samples.count) to experiment \(id)")
+//        print("Added Sample: \(sample.tubeName) collected on   \(sample.date) Count: \(samples.count) to experiment \(id)")
         
     }
   
@@ -84,10 +95,10 @@ public class Experiment :  Codable, Identifiable, Equatable
             return
         }
         
-        let reader = FCSReader()
         do  {
-            let fcs = try reader.readFCSFile(at: url,includeData: false)
-            addSample(Sample(fcs: fcs.meta))
+            let sample = Sample(ref: SampleRef(url: url))
+            sample.setUp(core:core)
+            addSample(sample)
         }
         catch let err as NSError {
             debug("Ooops! Something went wrong: \(err)")
@@ -217,19 +228,19 @@ public class Experiment :  Codable, Identifiable, Equatable
 //    
 //    var displayYear: String  = safeString(self.year)
     
-    subscript(sampleId: Sample.ID?) -> Sample {
+    subscript(sampleId: Sample.ID?) -> Sample? {
         get {
             if let id = sampleId {
                 return samples.first(where: { $0.id == id })!
             }
-            return Sample()
+            return nil
         }
         
-        set(newValue) {
-            if let index = samples.firstIndex(where: { $0.id == newValue.id }) {
-                samples[index] = newValue
-            }
-        }
+//        set(newValue) {
+//            if let index = samples.firstIndex(where: { $0.id == newValue.id }) {
+//                samples[index] = newValue
+//            }
+//        }
     }
 }
 

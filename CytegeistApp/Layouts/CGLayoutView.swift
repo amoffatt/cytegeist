@@ -88,7 +88,7 @@ struct CGLayoutView: View {
                     layoutModel.addItem( CText(value: "new text item!"))
                     isFocused = true
                 }
-                .environment(CytegeistCoreAPI())
+                .environment(core)
     }
     
     func layoutBackdrop() -> some View {

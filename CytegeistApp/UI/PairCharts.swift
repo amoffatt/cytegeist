@@ -11,7 +11,7 @@ import SwiftUI
 struct PairChartView: View {
     let core: CytegeistCoreAPI
     let sampleRef: SampleRef
-    let parameters: Tuple2<FCSParameter>
+    let parameters: Tuple2<CDimension>
     
     var body: some View {
         VStack {
@@ -21,7 +21,7 @@ struct PairChartView: View {
                 
                 Histogram2DView(query: core.histogram2D(
                     .init(
-                        PopulationRequest(sampleRef),
+                        .sample(sampleRef),
                         parameters.map { $0.name }
                     )
                 ))
@@ -38,9 +38,9 @@ public struct PairChartsView: View {
     
     let core: CytegeistCoreAPI
     let sampleRef: SampleRef
-    let parameters: ArraySlice<FCSParameter>
+    let parameters: ArraySlice<CDimension>
     
-    init<C:Collection>(core: CytegeistCoreAPI, sampleRef: SampleRef, parameters: C) where C.Element == FCSParameter {
+    init<C:Collection>(core: CytegeistCoreAPI, sampleRef: SampleRef, parameters: C) where C.Element == CDimension {
         self.core = core
         self.sampleRef = sampleRef
         self.parameters = ArraySlice(parameters)
@@ -100,7 +100,7 @@ public struct PairChartsPreview: View {
         }
         .onAppear {
 //            query = core.histogram(sampleRef: sampleRef, parameterName: "FSC-A")
-            query = core.loadSample(.init(sampleRef: sampleRef, includeData: false))
+            query = core.loadSample(.init(sampleRef, includeData: false))
         }
 
     }

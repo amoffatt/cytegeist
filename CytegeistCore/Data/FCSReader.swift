@@ -10,7 +10,7 @@ import CytegeistLibrary
 
 public typealias FCSParameterValueReader = (DataBufferReader) throws -> Float
 
-public struct FCSParameter : Hashable {
+public struct CDimension : Hashable, Codable {
     
     public static func displayName(_ name:String, _ stain:String) -> String {
         if name == stain {
@@ -31,13 +31,38 @@ public struct FCSParameter : Hashable {
     public let filter: String
     public let displayInfo: String
     public let normalizer: AxisNormalizer
+    
+    
     public let valueReader: FCSParameterValueReader
     
     public func hash(into hasher: inout Hasher) {
         hasher.combine(name)
     }
-    public static func == (lhs: FCSParameter, rhs: FCSParameter) -> Bool {
+    public static func == (lhs: CDimension, rhs: CDimension) -> Bool {
         lhs.name == rhs.name
+    }
+    
+    public init(name: String, stain: String, displayName: String,
+                bits: Int, range: Double, filter: String,
+                displayInfo: String, normalizer: AxisNormalizer,
+                valueReader: @escaping FCSParameterValueReader) {
+        self.name = name
+        self.stain = stain
+        self.displayName = displayName
+        self.bits = bits
+        self.range = range
+        self.filter = filter
+        self.displayInfo = displayInfo
+        self.normalizer = normalizer
+        self.valueReader = valueReader
+    }
+    
+    public init(from decoder: any Decoder) throws {
+        fatalError()
+    }
+    
+    public func encode(to encoder: any Encoder) throws {
+        fatalError()
     }
 
 }
@@ -52,12 +77,12 @@ public struct FCSParameter : Hashable {
 //    }
 //}
 
-public enum FCSByteOrder: String {
+public enum FCSByteOrder: String, Hashable, Codable {
     case bigEndian = "4,3,2,1"
     case littleEndian = "1,2,3,4"
 }
 
-public enum FCSDataType: String {
+public enum FCSDataType: String, Hashable, Codable {
     case integer = "I"
     case float = "F"
     case double = "D"
@@ -66,7 +91,7 @@ public enum FCSDataType: String {
 }
 
 
-public struct StringField : Identifiable {
+public struct StringField : Identifiable, Hashable, Codable {
     public var id:String { name }
     
     public let name:String
@@ -78,7 +103,7 @@ public struct StringField : Identifiable {
 }
 
 
-public struct FCSMetadata {
+public struct FCSMetadata: Hashable, Codable {
     
     public private(set) var keywords: [StringField] = []
     public private(set) var keywordLookup: [String:String] = [:]
@@ -91,11 +116,11 @@ public struct FCSMetadata {
     public var cytometer: String = ""
 
     
-    public var _parameters: [FCSParameter]?
+    public var _parameters: [CDimension]?
     public var parameterLookup:[String:Int] = [:]
     
     
-    public var parameters: [FCSParameter]? {
+    public var parameters: [CDimension]? {
         get { _parameters }
         set {
             _parameters = newValue
@@ -107,7 +132,7 @@ public struct FCSMetadata {
         }
     }
     
-    public func parameter(named: String) -> FCSParameter? {
+    public func parameter(named: String) -> CDimension? {
         if let parameters, let index = parameterLookup[named] {
             return parameters.get(index: index)
         }
@@ -173,7 +198,7 @@ public struct EventDataTable: BackedRandomAccessCollection {
 }
 
 public struct FCSParameterData {
-    public let meta:FCSParameter
+    public let meta:CDimension
     public let data:[Float]
 }
 
@@ -282,7 +307,7 @@ public class FCSReader {
         
         // Parse parameters
         let parameterCount = Int(keywords["$PAR"]!)!
-        let parameters:[FCSParameter] = try (1...parameterCount).map { n in
+        let parameters:[CDimension] = try (1...parameterCount).map { n in
             try self.readParameterInfo(keywords, n:n, dataType: fcs.dataType)
         }
         fcs.parameters = parameters
@@ -328,18 +353,18 @@ public class FCSReader {
         return try EventDataTable(data: parameterDataArray)
     }
     
-    private func readParameterInfo(_ metadata:[String: String], n:Int, dataType:FCSDataType) throws -> FCSParameter {
+    private func readParameterInfo(_ metadata:[String: String], n:Int, dataType:FCSDataType) throws -> CDimension {
         let name = metadata["$P\(n)N"]?.trim() ?? "P\(n)"
         let stain = metadata["$P\(n)S"].nonNil.trim()
         let bits = Int(metadata["$P\(n)B"]!)!
         let range = Double(metadata["$P\(n)R"]!)!
         let filter = metadata["$P\(n)F"].nonNil
         let displayInfo = metadata["P\(n)DISPLAY"].nonNil
-        let displayName = FCSParameter.displayName(name, stain)
+        let displayName = CDimension.displayName(name, stain)
         let normalizer = createParameterNormalizer(max: range, displayInfo: displayInfo)
         let valueReader = try createParameterValueReader(dataType: dataType, bits: bits)
         
-        return FCSParameter(name: name, stain: stain, displayName: displayName,
+        return CDimension(name: name, stain: stain, displayName: displayName,
                                 bits: bits, range: range, filter: filter,
                                 displayInfo: displayInfo,
                                 normalizer: normalizer,

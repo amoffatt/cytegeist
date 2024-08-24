@@ -20,36 +20,78 @@ public struct APIError : Error {
 }
 
 @Observable
-public class APIQuery<T> {
-    public private(set) var isLoading:Bool = true
-    public private(set) var data:T? = nil
-    public private(set) var error:APIError?
-    public private(set) var viewPriority: Int = 1
+@MainActor
+public class BaseAPIQuery {
+    public fileprivate(set) var isLoading:Bool = true
+    public fileprivate(set) var error:APIError?
+    public fileprivate(set) var viewPriority: Int = 1
+    
+    // TODO use to determine when related data should be uncached
+    public private(set) var disposeTime: Date? = nil
     
     init() {
-        
     }
-    
+
     public func dispose() {
         viewPriority = 0
+        disposeTime = Date.now
     }
+}
+
+
+@Observable
+@MainActor
+public class APIQuery<T> : BaseAPIQuery {
+    public private(set) var data:T? = nil
+    private var _semaphore:CSemaphore? = nil
     
-    @MainActor
+    
     func progress(_ result:T) {
         data = result
     }
 
-    @MainActor
     func success(_ result:T) {
         data = result
         isLoading = false
+        releaseSemaphore()
     }
     
-    @MainActor
     func error(_ message:String, _ internalError:Error) {
         isLoading = false
         error = .init(message, internalError)
         print("APIQuery error: \(message): \(internalError)")
+        releaseSemaphore()
+    }
+    
+    private func releaseSemaphore() {
+        Task {
+            await _semaphore?.release()
+        }
+    }
+    
+    
+    public func getResult() async throws -> T {
+        if let error {
+            throw error
+        }
+        
+        if !isLoading {
+            assert(data != nil)
+            return data!        // Should not be null here
+        }
+        
+        if _semaphore == nil {
+            _semaphore = .init()
+        }
+        
+        await _semaphore!.wait()
+        
+        if let error {
+            throw error
+        }
+        
+        assert(data != nil)
+        return data!
     }
 }
 
@@ -80,34 +122,40 @@ public class CytegeistCoreAPI {
     
     
     private var sampleCache:ComputeCache<SampleRequest, FCSFile>! = nil;
-    private var histogram1DCache:ComputeCache<HistogramRequest<_1D>, CachedHistogram<_1D>>! = nil
-    private var histogram2DCache:ComputeCache<HistogramRequest<_2D>, CachedHistogram<_2D>>! = nil
+    private var histogram1DCache:ComputeCache<HistogramRequest<X>, CachedHistogram<X>>! = nil
+    private var histogram2DCache:ComputeCache<HistogramRequest<XY>, CachedHistogram<XY>>! = nil
 
-    public init() {
+    nonisolated public init() {
+    }
+    
+    public func ensureCachesCreated() {
+        if sampleCache != nil {
+            return
+        }
+        
         sampleCache = .init { r in
             try self._loadSample(r)
         }
         
         histogram1DCache = .init { r in
-            let sample = try await self.sampleCache.get(r.population.sample)
+            let sample = try await self.sampleCache.get(.init(r.population.sample))
             // TODO add population request here
             return try self._histogram(r, sample:sample)
         }
         
         histogram2DCache = .init { r in
-            let sample = try await self.sampleCache.get(r.population.sample)
+            let sample = try await self.sampleCache.get(.init(r.population.sample))
             return try self._histogram2D(r, sample:sample)
         }
-
     }
     
-    public func histogram(_ request:HistogramRequest<_1D>) -> APIQuery<CachedHistogram<_1D>> {
+    public func histogram(_ request:HistogramRequest<X>) -> APIQuery<CachedHistogram<X>> {
         query(request) { r in
             try await self.histogram1DCache.get(r)
         }
     }
     
-    public func histogram2D(_ request:HistogramRequest<_2D>) -> APIQuery<CachedHistogram<_2D>> {
+    public func histogram2D(_ request:HistogramRequest<XY>) -> APIQuery<CachedHistogram<XY>> {
         query(request) { r in
             try await self.histogram2DCache.get(request)
         }
@@ -135,7 +183,8 @@ public class CytegeistCoreAPI {
     
     private func query<Request, Data>(_ request:Request, compute: @escaping (Request) async throws -> Data) -> APIQuery<Data> {
         let result:APIQuery<Data> = APIQuery()
-
+        ensureCachesCreated()
+        
         Task.detached {
             do {
                 print("Computing query \(request)")
@@ -238,18 +287,18 @@ public class CytegeistCoreAPI {
         }
     }
     
-    nonisolated private func _histogram(_ request:HistogramRequest<_1D>, sample:FCSFile) throws -> CachedHistogram<_1D> {
+    nonisolated private func _histogram(_ request:HistogramRequest<X>, sample:FCSFile) throws -> CachedHistogram<X> {
         let parameters = try _getParameters(from: sample, parameterNames: request.variableNames.values)
         let x = parameters[0]
-        let h = HistogramData<_1D>(data: .init(x.data), size: request.size ?? .init(defaultHistogramResolution), axes: .init(x.meta.normalizer))
+        let h = HistogramData<X>(data: .init(x.data), size: request.size ?? .init(defaultHistogramResolution), axes: .init(x.meta.normalizer))
         return CachedHistogram(h, view: nil)
     }
     
-    nonisolated private func _histogram2D(_ request:HistogramRequest<_2D>, sample:FCSFile) throws -> CachedHistogram<_2D> {
+    nonisolated private func _histogram2D(_ request:HistogramRequest<XY>, sample:FCSFile) throws -> CachedHistogram<XY> {
         let parameters = try _getParameters(from: sample, parameterNames: request.variableNames.values)
         let x = parameters[0]
         let y = parameters[1]
-        let h = HistogramData<_2D>(
+        let h = HistogramData<XY>(
             data: .init(x.data, y.data),
             size: request.size ?? .init(defaultHistogramResolution, defaultHistogramResolution),
             axes: .init(x.meta.normalizer, y.meta.normalizer))
@@ -268,7 +317,7 @@ public struct SampleRequest : Identifiable, Hashable {
     let sampleRef:SampleRef
     let includeData:Bool
     
-    public init(sampleRef:SampleRef, includeData:Bool) {
+    public init(_ sampleRef:SampleRef, includeData:Bool = true) {
         self.id = "\(includeData) \(sampleRef.url.absoluteString)"
         self.sampleRef = sampleRef
         self.includeData = includeData
@@ -312,32 +361,56 @@ public struct GateRequest : Hashable {
 
 
 
-public struct PopulationRequest : Hashable {
-    public let id: String
-//    let parent: ParentPopulation
-    let sample: SampleRequest
-    let gates: [GateRequest]
+public indirect enum PopulationRequest: Hashable {
+//    public var id: String {
+//        switch self {
+//            
+//        case .sample(let sample):
+//            sample.id
+//        case .gated(parent: let parent, gate: let gate):
+//            
+//        case .merge(parents: let parents):
+//            
+//        }
+//    }
     
-    // TODO add gate lineage
+    case sample(_ sample: SampleRef)
+    case gated(_ parent: PopulationRequest, gate:GateRequest)
+    case merge(_ parents: [PopulationRequest])
     
-    // Each PopulationRequest as one gate with parent population?
-    // How to handle OR gates?
-    
-    public init(_ sampleRef: SampleRef) {
-        self.sample = .init(sampleRef:sampleRef, includeData:true)
-        self.id = sample.id
-        self.gates = []
-    }
-    
-    public init(id:String, sample: SampleRef, gates: [GateRequest]) {
-        self.id = id
-        self.sample = .init(sampleRef: sample, includeData: true)
-        self.gates = gates
+    var sample: SampleRef {
+        fatalError()
     }
 }
 
 
-public struct HistogramRequest<D:Dim> : Hashable {
+//public struct PopulationRequest : Hashable {
+//    public let id: String
+//    public let info: PopulationType
+////    let parent: ParentPopulation
+//    let sample: SampleRequest
+////    let parent: ParentPopulation
+//    
+//    // TODO add gate lineage
+//    
+//    // Each PopulationRequest as one gate with parent population?
+//    // How to handle OR gates?
+//    
+//    public init(_ sampleRef: SampleRef) {
+//        self.sample = .init(sampleRef)
+//        self.id = sample.id
+//        self.gates = []
+//    }
+//    
+//    public init(id:String, sample: SampleRef, gates: [GateRequest]) {
+//        self.id = id
+//        self.sample = .init(sample)
+//        self.gates = gates
+//    }
+//}
+
+
+public struct HistogramRequest<D:Dimensions> : Hashable {
 //    public static func == (lhs: HistogramRequest<D>, rhs: HistogramRequest<D>) -> Bool {
 //        lhs.population == rhs.population && lhs.axisNames == rhs.axisNames
 //    }
@@ -362,7 +435,7 @@ public struct HistogramRequest<D:Dim> : Hashable {
 }
 
 
-public struct CachedHistogram<D:Dim> {
+public struct CachedHistogram<D:Dimensions> {
     public let histogram:HistogramData<D>
     public let view:AnyView?
     

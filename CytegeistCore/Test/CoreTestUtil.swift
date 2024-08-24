@@ -24,9 +24,9 @@ public class TestUtil {
     
     
     @MainActor
-    public static func histogram() -> APIQuery<CachedHistogram<_1D>> {
+    public static func histogram() -> APIQuery<CachedHistogram<X>> {
         
-        let result:APIQuery<CachedHistogram<_1D>> = APIQuery()
+        let result:APIQuery<CachedHistogram<X>> = APIQuery()
         
         Task.detached {
             await sleep(2.0)
