@@ -112,7 +112,7 @@ func smoothInPlace(srcMatrix: [Double],  inRows: Int, inCols: Int, hiRes: Bool)
             {
                 matrixElements = matrixSize(binCt);
                 smoothMatrix = localSmoothMatrix;
-                smoothingMatrix(binCt, Double(2.4), localSmoothMatrix, matrixElements)
+                smoothingMatrix(bins: binCt,nDevs: Double(2.4), matrixElements: matrixElements, hiRes: hiRes)
             }
             
             destMatrix[row * matrixCols + col] += smoothMatrix[0] * smoothMatrix[0] * binCt;    // 0,0 point
@@ -149,7 +149,7 @@ func smoothInPlace(srcMatrix: [Double],  inRows: Int, inCols: Int, hiRes: Bool)
         }
         
         if (gReflect) {
-            ReflectMargins(destMatrix: destMatrix,inRows: inRows, inCols: inCols, margin: radius);
+            reflectMargins(destMatrix: destMatrix,inRows: inRows, inCols: inCols, margin: radius);
         }
             // copy the destMatrix back onto srcMatrix
         for row in radius ..< (radius + inRows) {
@@ -163,7 +163,7 @@ func smoothInPlace(srcMatrix: [Double],  inRows: Int, inCols: Int, hiRes: Bool)
 
 
 
-func ReflectMargins(destMatrix: [Double], inRows: Int , inCols: Int , margin:  Int)
+func reflectMargins(destMatrix: [Double], inRows: Int , inCols: Int , margin:  Int)
 {
         // reflect smoothed events outside of the matrix back in.
         // reflect such that the axis of reflection is the outside edge of the
@@ -208,13 +208,17 @@ func ReflectMargins(destMatrix: [Double], inRows: Int , inCols: Int , margin:  I
     //----------------------------------------------------------------------------------
     // Same algorithm exactly as Smooth, just do it in one dimension only
 
-func SmoothHistogram(srcBins: [Double], destBins: [Double], inNBins: Int, hiRes: Bool)
+func smoothHistogram(srcBins: [Double], inNBins: Int, hiRes: Bool) -> [Double]
 {
     let mIdxOffset = hiRes ? kMatricesToBuild : 0
     let radius:Int = hiRes ?  radHighRes : radLowRes
 
     let matrixBins = inNBins + 2 * radius
-   var destMatrix = [Double]()
+    var destMatrix = [Double]()
+    var smoothMatrix = [Double]()
+    var matrixElements: Int
+    var destBins = [Double]()
+    
     for bin in radius ..< radius + inNBins
     {
         let binCt = srcBins[bin - radius]
@@ -222,15 +226,14 @@ func SmoothHistogram(srcBins: [Double], destBins: [Double], inNBins: Int, hiRes:
         
         if binCt <= Double(kMatricesToBuild)
         {
-            let i = binCt;
-            let smoothMatrix = gSmoothingMatrices[i+mIdxOffset];
-            let matrixElements = gSmoothingMatrixSize[i+mIdxOffset];
+            let i = Int(binCt)
+            smoothMatrix = gSmoothingMatrices[i+mIdxOffset]
+            matrixElements = gSmoothingMatrixSize[i+mIdxOffset]
         }
         else                                            // not precomputed
         {
-            let matrixElements = matrixSize(binCt, hiRes);
-            let smoothMatrix = localSmoothMatrix;
-            SmoothingMatrix(binCt, Double(2.4) localSmoothMatrix, matrixElements);
+            matrixElements = matrixSize(bins: Int(binCt),hiRes: hiRes)
+            smoothMatrix = smoothingMatrix(bins: binCt, nDevs: Double(2.4) , matrixElements: matrixElements, hiRes: hiRes)
         }
         
         destMatrix[bin] += smoothMatrix[0] * binCt;    // 0 point
@@ -241,7 +244,7 @@ func SmoothHistogram(srcBins: [Double], destBins: [Double], inNBins: Int, hiRes:
             destMatrix[bin - i] += k3;
         }
         
-        if (gReflect)
+        if gReflect
         {
             for i in 1 ..< radius
             {
@@ -256,4 +259,5 @@ func SmoothHistogram(srcBins: [Double], destBins: [Double], inNBins: Int, hiRes:
             destBins[bin-radius] = destMatrix[bin]
         }
     }
+    return destBins
 }
