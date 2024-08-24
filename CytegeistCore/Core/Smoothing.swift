@@ -13,251 +13,253 @@ let gSmoothingLowresolution = 64
 let gSmoothingHighresolution = 256
 let kMaxRadHigh = 13.5 // was 9;
 let kMaxRadLow = 6
-var gSmoothingInitialized = false
-var gSmoothingMatrices = [[Double]]  ()      //kMatricesToBuild*2+1
-var gSmoothingMatrixSize = [Int] () //kMatricesToBuild*2+1
 let gReflect = true
 
 let kMatricesToBuild = 256;
-    //------------------------------------------------------------------------
-func buildAllSmoothingMatrices()
+ 
+var initialized = false
+var kernels = [[Double]]  ()      //kMatricesToBuild*2+1
+var kernelSizes = [Int] () //kMatricesToBuild*2+1
+
+struct Smoother
 {
-    if gSmoothingInitialized   { return }
-    for idxM in 1 ... kMatricesToBuild          // low res
+        //------------------------------------------------------------------------
+    func matrixSize( bins: Int, hiRes: Bool) -> Int
     {
-        let binCt = idxM;
-        let matrixElements = matrixSize(bins: binCt, hiRes: false);
-        gSmoothingMatrixSize[idxM] = matrixElements;
-        gSmoothingMatrices[idxM] = smoothingMatrix(bins: Double(binCt), nDevs: Double(2.4), matrixElements: matrixElements, hiRes: <#Bool#>);
+        let radius = hiRes ?  radHighRes : radLowRes;
+        let sq = sqrt(Double(bins))
+        return  Int(Double(radius) / sqrt(sq) + 0.9999);
     }
-    
-    for idxM  in 1 ... kMatricesToBuild           // high res
+        //------------------------------------------------------------------------
+    func buildAllSmoothingMatrices()
     {
-        let binCt = idxM;
-        let matrixElements = matrixSize(bins: binCt,hiRes: true);
-        gSmoothingMatrixSize[idxM+kMatricesToBuild] = matrixElements;
-        gSmoothingMatrices[idxM+kMatricesToBuild] = smoothingMatrix(bins: Double(binCt), nDevs: Double(2.4), 
-                                                                    matrixElements: matrixElements, hiRes: <#Bool#>);
-    }
-    gSmoothingInitialized = true;
-}
-
-    //------------------------------------------------------------------------
-func matrixSize( bins: Int, hiRes: Bool) -> Int
-{
-     
-    let radius = hiRes ?  radHighRes : radLowRes;
-    let sq = sqrt(Double(bins))
-    return  Int(Double(radius) / sqrt(sq) + 0.9999);
-}
-
-    //------------------------------------------------------------------------
-func smoothingMatrix(bins: Double, nDevs : Double,  matrixElements: Int, hiRes: Bool) -> [Double]
-{
-    let radius = hiRes ?  radHighRes : radLowRes;
-    let sq = sqrt(bins);
-    let x = nDevs/Double(radius)
-    let factor = -0.5 * sq * x * x
-    var matrix = [Double]()
-    
-    for i in 0...matrixElements {
-        matrix.append(exp(factor * Double(i * i)));
+        if initialized   { return }
+        for idx in 1 ... kMatricesToBuild          // low res
+        {
+            let binCt = idx;
+            let nElements = matrixSize(bins: binCt, hiRes: false);
+            kernelSizes[idx] = nElements;
+            kernels[idx] = smoothingMatrix(bins: Double(binCt), mxSize: nElements, hiRes: false);
+        }
+        
+        for idx  in kMatricesToBuild + 1 ... 2 * kMatricesToBuild           // high res
+        {
+            let binCt = idx;
+            let nElements = matrixSize(bins: binCt,hiRes: true);
+            kernelSizes[idx] = nElements;
+            kernels[idx] = smoothingMatrix(bins: Double(binCt),  mxSize: nElements, hiRes: true);
+        }
+        initialized = true;
     }
     
-    var matrixTotal = 0.0;
-    for i in -matrixElements...matrixElements {
-        for j in -matrixElements...matrixElements {
-            matrixTotal += matrix[abs(i)] * matrix[abs(j)];
-        }}
     
-    matrixTotal = sqrt(matrixTotal);
-    
-    for i in 0...matrixElements {
-        matrix[i]  /= matrixTotal;
-    }
-    return matrix
-}
-    //------------------------------------------------------------------------
-
-
-func smoothInPlace(srcMatrix: [Double],  inRows: Int, inCols: Int, hiRes: Bool)
-{
-    let mIdxOffset = hiRes ? kMatricesToBuild : 0;
-    let radius:Int = hiRes ?  radHighRes : radLowRes;
-    let matrixCols = inCols + 2 * radius;
-    let matrixSize = (inRows + 2 * radius) * matrixCols;
-    
-    var localSmoothMatrix = [Double]()
-    var destMatrix = [Double]()
-    for ii in 0 ..< matrixSize {
-        destMatrix.append(0.0)
-    }
-    
-    for row in radius ..< radius + inRows  {
-        for col in radius ..< radius + inCols {
-            
-            var smoothMatrix: [Double]
-            var matrixElements: Int
-            let i1 = (row - radius) * inCols + (col - radius);
-            let binCt = srcMatrix[i1];
-            if (binCt == 0.0)   { continue }
-            
-            if binCt <= Double(kMatricesToBuild)
-            {
-                let i = binCt
-                smoothMatrix = gSmoothingMatrices[i+mIdxOffset]
-                matrixElements = gSmoothingMatrixSize[i+mIdxOffset]
-            }
-            else                                            // not precomputed
-            {
-                matrixElements = matrixSize(binCt);
-                smoothMatrix = localSmoothMatrix;
-                smoothingMatrix(bins: binCt,nDevs: Double(2.4), matrixElements: matrixElements, hiRes: hiRes)
-            }
-            
-            destMatrix[row * matrixCols + col] += smoothMatrix[0] * smoothMatrix[0] * binCt;    // 0,0 point
-            
-            for i in 1 ..< matrixElements
-            {
-                let k3 = smoothMatrix[0] * smoothMatrix[i] * binCt;                    // 0,y and x,0 points
-                let i1 = (row + i) * matrixCols + (col    );
-                let i2 = (row - i) * matrixCols + (col    );
-                let i3 = (row    ) * matrixCols + (col + i);
-                let i4 = (row    ) * matrixCols + (col - i);
-                destMatrix[i1] += k3;
-                destMatrix[i2] += k3;
-                destMatrix[i3] += k3;
-                destMatrix[i4] += k3;
-            }
-            
-            for i in 1 ... matrixElements                                               // all other points
-            {
-                let k2 = smoothMatrix[i] * binCt;
-                for j in 1 ... matrixElements
-                {
-                    let k3 = k2 * smoothMatrix[j]
-                    let i1 = (row + j) * matrixCols + (col + i)
-                    let i2 = (row - j) * matrixCols + (col + i)
-                    let i3 = (row + j) * matrixCols + (col - i)
-                    let i4 = (row - j) * matrixCols + (col - i)
-                    destMatrix[i1] += k3;
-                    destMatrix[i2] += k3;
-                    destMatrix[i3] += k3;
-                    destMatrix[i4] += k3;
-                }
+        //------------------------------------------------------------------------
+    func smoothingMatrix(bins: Double, mxSize: Int, hiRes: Bool) -> [Double]
+    {
+        let radius = hiRes ?  radHighRes : radLowRes;
+        let sq = sqrt(bins);
+        let nDevs = 2.4
+        let x = nDevs/Double(radius)
+        let factor = -0.5 * sq * x * x
+        var matrix = [Double]()
+        
+        for i in 0...mxSize {
+            matrix.append(exp(factor * Double(i * i)));
+        }
+        
+        var matrixTotal = 0.0;
+        for i in -mxSize...mxSize {
+            for j in -mxSize...mxSize {
+                matrixTotal += matrix[abs(i)] * matrix[abs(j)];
             }
         }
         
-        if (gReflect) {
-            reflectMargins(destMatrix: destMatrix,inRows: inRows, inCols: inCols, margin: radius);
+        let rootTotal = sqrt(matrixTotal);
+        
+        for i in 0...mxSize {
+            matrix[i]  /= rootTotal;
         }
-            // copy the destMatrix back onto srcMatrix
-        for row in radius ..< (radius + inRows) {
-            for col in radius ..< radius + inCols    {
-                let idx = (row-radius) * inCols + (col-radius);
-                srcMatrix[idx] = destMatrix[row * matrixCols + col];
+        return matrix
+    }
+        //------------------------------------------------------------------------
+    
+    func smoothInPlace(srcMatrix: inout [Double],  inRows: Int, inCols: Int, hiRes: Bool)
+    {
+        let mIdxOffset:Int = hiRes ? kMatricesToBuild : 0;
+        let radius:Int = hiRes ?  radHighRes : radLowRes;
+        let matrixCols = inCols + 2 * radius;
+        let matrixArea = (inRows + 2 * radius) * matrixCols;
+        
+        var localSmoothMatrix = [Double]()
+        var destMatrix = [Double]()
+        for ii in 0 ..< matrixArea {
+            destMatrix.append(0.0)
+        }
+        
+        for row in radius ..< radius + inRows  {
+            for col in radius ..< radius + inCols {
+                
+                var smoothMatrix: [Double]
+                var nElements: Int
+                let i1 = (row - radius) * inCols + (col - radius);
+                let binCt = srcMatrix[i1];
+                if (binCt == 0.0)   { continue }
+                
+                if binCt <= Double(kMatricesToBuild)
+                {
+                    let i = Int(binCt) + mIdxOffset
+                    nElements = kernelSizes[i]
+                    smoothMatrix = kernels[i]
+               }
+                else                                            // not precomputed
+                {
+                    nElements = matrixSize(bins: Int(binCt), hiRes: hiRes)
+                    smoothMatrix = smoothingMatrix(bins: binCt, mxSize: nElements, hiRes: hiRes)
+                }
+                
+                destMatrix[row * matrixCols + col] += smoothMatrix[0] * smoothMatrix[0] * binCt;    // 0,0 point
+                
+                for i in 1 ..< nElements
+                {
+                    let k3 = smoothMatrix[0] * smoothMatrix[i] * binCt                  // 0,y and x,0 points
+                    let i1 = (row + i) * matrixCols + (col    )
+                    let i2 = (row - i) * matrixCols + (col    )
+                    let i3 = (row    ) * matrixCols + (col + i)
+                    let i4 = (row    ) * matrixCols + (col - i)
+                    destMatrix[i1] += k3
+                    destMatrix[i2] += k3
+                    destMatrix[i3] += k3
+                    destMatrix[i4] += k3
+                }
+                
+                for i in 1 ... nElements                                               // all other points
+                {
+                    let k2 = smoothMatrix[i] * binCt
+                    for j in 1 ... nElements
+                    {
+                        let k3 = k2 * smoothMatrix[j]
+                        let i1 = (row + j) * matrixCols + (col + i)
+                        let i2 = (row - j) * matrixCols + (col + i)
+                        let i3 = (row + j) * matrixCols + (col - i)
+                        let i4 = (row - j) * matrixCols + (col - i)
+                        destMatrix[i1] += k3
+                        destMatrix[i2] += k3
+                        destMatrix[i3] += k3
+                        destMatrix[i4] += k3
+                    }
+                }
+            }
+            
+            if (gReflect) {
+                reflectMargins(destMatrix: &destMatrix,inRows: inRows, inCols: inCols, margin: radius)
+            }
+                // copy the destMatrix back onto srcMatrix
+            for row in radius ..< (radius + inRows) {
+                for col in radius ..< radius + inCols    {
+                    let idx = (row-radius) * inCols + (col-radius);
+                    srcMatrix[idx] = destMatrix[row * matrixCols + col];
+                }
             }
         }
     }
-}
-
-
-
-func reflectMargins(destMatrix: [Double], inRows: Int , inCols: Int , margin:  Int)
-{
+    
+    
         // reflect smoothed events outside of the matrix back in.
         // reflect such that the axis of reflection is the outside edge of the
         // extreme pixel, so that the first pixel outside is added to the extreme-most pixel.
     
-    let colsInMatrix = inCols + margin + margin;
-    let rightEdge = inCols + margin;                                // the edges of the part to be kept
-    let topEdge = inRows + margin;
-    
-    for row in 0 ..< margin       {                                   // reflect entire bottom edge
-        for col in 0 ..< rightEdge + margin    {
-            let i = (margin-1+(margin-row)) * colsInMatrix + col;
-            let j = row * colsInMatrix + col;
-            destMatrix[i] += destMatrix[j];
-        }
-    }
-    
-    for row in topEdge+1 ..< topEdge + margin  {                                   // reflect entire bottom edge
-        for col in 0 ..< rightEdge + margin    {
-            let i = (topEdge+1-(row-topEdge)) * colsInMatrix + col;
-            let j = row * colsInMatrix + col;
-            destMatrix[i] += destMatrix[j];
-        }
-    }
-
-    for col in 0 ..< margin       {                                   // reflect entire bottom edge
-        for row in margin ..< topEdge    {
-            let i = row * colsInMatrix +  (margin-1+(margin-col));
-            let j = row * colsInMatrix + col;
-            destMatrix[i] += destMatrix[j];
-        }
-    }
-    
-    for col in rightEdge + 1 ..< rightEdge + margin       {                                   // reflect entire bottom
-        for row in margin ..< topEdge    {
-            let  i = row * colsInMatrix +  (rightEdge+1-(col-rightEdge));
-            let j = row * colsInMatrix + col;
-            destMatrix[i] += destMatrix[j];
-        }
-    }
-}
-    //----------------------------------------------------------------------------------
-    // Same algorithm exactly as Smooth, just do it in one dimension only
-
-func smoothHistogram(srcBins: [Double], inNBins: Int, hiRes: Bool) -> [Double]
-{
-    let mIdxOffset = hiRes ? kMatricesToBuild : 0
-    let radius:Int = hiRes ?  radHighRes : radLowRes
-
-    let matrixBins = inNBins + 2 * radius
-    var destMatrix = [Double]()
-    var smoothMatrix = [Double]()
-    var matrixElements: Int
-    var destBins = [Double]()
-    
-    for bin in radius ..< radius + inNBins
+    func reflectMargins(destMatrix: inout [Double], inRows: Int , inCols: Int , margin:  Int)
     {
-        let binCt = srcBins[bin - radius]
-        if binCt == 0.0 { continue }
+        let colsInMatrix = inCols + margin + margin;
+        let rightEdge = inCols + margin;                                // the edges of the part to be kept
+        let topEdge = inRows + margin;
         
-        if binCt <= Double(kMatricesToBuild)
-        {
-            let i = Int(binCt)
-            smoothMatrix = gSmoothingMatrices[i+mIdxOffset]
-            matrixElements = gSmoothingMatrixSize[i+mIdxOffset]
-        }
-        else                                            // not precomputed
-        {
-            matrixElements = matrixSize(bins: Int(binCt),hiRes: hiRes)
-            smoothMatrix = smoothingMatrix(bins: binCt, nDevs: Double(2.4) , matrixElements: matrixElements, hiRes: hiRes)
-        }
-        
-        destMatrix[bin] += smoothMatrix[0] * binCt;    // 0 point
-        for i in 1 ..< matrixElements        // points to either side
-        {
-            let k3 = smoothMatrix[i] * binCt;
-            destMatrix[bin + i] += k3;
-            destMatrix[bin - i] += k3;
-        }
-        
-        if gReflect
-        {
-            for i in 1 ..< radius
-            {
-                let leftEdge = radius;
-                let rightEdge = radius + inNBins;
-                destMatrix[leftEdge + i - 1] += destMatrix[leftEdge - i];
-                destMatrix[rightEdge - i + 1] += destMatrix[rightEdge + i];
+        for row in 0 ..< margin       {                                   // reflect entire bottom edge
+            for col in 0 ..< rightEdge + margin    {
+                let i = (margin-1+(margin-row)) * colsInMatrix + col;
+                let j = row * colsInMatrix + col;
+                destMatrix[i] += destMatrix[j];
             }
         }
-            // copy the destMatrix back onto srcMatrix
-        for bin in radius ..< radius + inNBins {
-            destBins[bin-radius] = destMatrix[bin]
+        
+        for row in topEdge+1 ..< topEdge + margin  {                                   // reflect entire bottom edge
+            for col in 0 ..< rightEdge + margin    {
+                let i = (topEdge+1-(row-topEdge)) * colsInMatrix + col;
+                let j = row * colsInMatrix + col;
+                destMatrix[i] += destMatrix[j];
+            }
+        }
+        
+        for col in 0 ..< margin       {                                   // reflect entire bottom edge
+            for row in margin ..< topEdge    {
+                let i = row * colsInMatrix +  (margin-1+(margin-col));
+                let j = row * colsInMatrix + col;
+                destMatrix[i] += destMatrix[j];
+            }
+        }
+        
+        for col in rightEdge + 1 ..< rightEdge + margin       {                                   // reflect entire bottom
+            for row in margin ..< topEdge    {
+                let  i = row * colsInMatrix +  (rightEdge+1-(col-rightEdge));
+                let j = row * colsInMatrix + col;
+                destMatrix[i] += destMatrix[j];
+            }
         }
     }
-    return destBins
+        //----------------------------------------------------------------------------------
+        // Same algorithm as Smooth, in one dimension only
+    
+    func smoothHistogram(srcBins: [Double], inNBins: Int, hiRes: Bool) -> [Double]
+    {
+        let mIdxOffset = hiRes ? kMatricesToBuild : 0
+        let radius:Int = hiRes ?  radHighRes : radLowRes
+        
+        let matrixBins = inNBins + 2 * radius
+        var destMatrix = [Double]()
+        var smoothMatrix = [Double]()
+        var nElements: Int
+        var destBins = [Double]()
+        
+        for bin in radius ..< radius + inNBins
+        {
+            let binCt = srcBins[bin - radius]
+            if binCt == 0.0 { continue }
+            
+            if binCt <= Double(kMatricesToBuild)
+            {
+                let i = Int(binCt)+mIdxOffset
+                nElements = kernelSizes[i]
+                smoothMatrix = kernels[i]
+            }
+            else                                            // not precomputed
+            {
+                nElements = matrixSize(bins: Int(binCt),hiRes: hiRes)
+                smoothMatrix = smoothingMatrix(bins: binCt , mxSize: nElements, hiRes: hiRes)
+            }
+            
+            destMatrix[bin] += smoothMatrix[0] * binCt;    // 0 point
+            for i in 1 ..< nElements        // points to either side
+            {
+                let k3 = smoothMatrix[i] * binCt;
+                destMatrix[bin + i] += k3;
+                destMatrix[bin - i] += k3;
+            }
+            
+            if gReflect
+            {
+                for i in 1 ..< radius
+                {
+                    let leftEdge = radius;
+                    let rightEdge = radius + inNBins;
+                    destMatrix[leftEdge + i - 1] += destMatrix[leftEdge - i];
+                    destMatrix[rightEdge - i + 1] += destMatrix[rightEdge + i];
+                }
+            }
+                // copy the destMatrix back onto srcMatrix
+            for bin in radius ..< radius + inNBins {
+                destBins[bin-radius] = destMatrix[bin]
+            }
+        }
+        return destBins
+    }
 }

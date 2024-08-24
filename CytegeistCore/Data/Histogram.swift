@@ -309,6 +309,7 @@ public struct HistogramData<D:Dimensions> {
         self.axes = axes
         self.size = size
         self.countAxis = countAxis ?? defaultCountAxis(maxCount: maxCount)
+        self.smoothedBins = self.bins // TODO
     }
     
     public init(data: D.Data, size: D.IntCoord, axes: D.Axes, countAxis: AxisNormalizer? = nil) {
