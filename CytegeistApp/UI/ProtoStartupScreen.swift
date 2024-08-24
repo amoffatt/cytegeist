@@ -78,9 +78,9 @@ struct ProtoStartupScreenView: View {
     {
         let reader = WorkspaceReader()
         do {
-            let ws = try await  reader.readWorkspaceFile(at: url)
-            let _ = Experiment(ws: ws )
-            print("WS of length: ", ws.text.count)
+//            let ws = try await  reader.readWorkspaceFile(at: url)
+//            let _ = Experiment(ws: ws )
+//            print("WS of length: ", ws.text.count)
         }
         catch let error as NSError {
             debug("Ooops! Something went wrong: \(error)")

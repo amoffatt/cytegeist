@@ -106,7 +106,7 @@ extension Gate {
         //        if let l = lays  { self.processLayouts(l)    }
         //        print ("Samples: \(samples.count) Groups: \(groups.count) Tables: \(tables.count) Layouts: \(layouts.count) ")
     
-}
+
 
 
     //    func processSamples(_ xml: TreeNode)

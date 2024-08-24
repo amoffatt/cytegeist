@@ -16,18 +16,22 @@ enum ListSection: String, Identifiable, Hashable {
 }
 
 struct MainAppSidebar: View {
-
+    
     @Environment(App.self) var app: App
     @SceneStorage("expansionState") var expansionState = ExpansionState()
     @State var lastSelectedSection:ListSection = .current
-//    @State var selection: SidebarSelection? = nil
+        //    @State var selection: SidebarSelection? = nil
     @State var showDeleteConfirmation: Bool = false
+    @State var groupName = "My Group"
+    @State var keyword = "key"
+    @State var value = "value"
+    @State var  groupColor = Color.red
     
-
+    
     var body: some View {
         
-        // AM Important: Selection needs to differentiate the same experiment between
-        // different sections in order to support SwiftUI renaming behavior
+            // AM Important: Selection needs to differentiate the same experiment between
+            // different sections in order to support SwiftUI renaming behavior
         let selection:Binding<SidebarSelection?> = .init {
             let s = app.getSelectedExperiment().map {
                 SidebarSelection(lastSelectedSection, $0.id)
@@ -37,37 +41,72 @@ struct MainAppSidebar: View {
             lastSelectedSection = $0?.section ?? .current
             app.selectedExperiment = $0?.experiment
         }
-
-        List(selection: selection) {
-//            SidebarLabel(experiment: e)
-            DisclosureGroup(isExpanded: $expansionState[-1]) {
-                ForEach(app.recentExperiments) { experiment in
-                    SidebarLabel(experiment: experiment, section: .current)  //
-//                        .badge(experiment.numberOfPlantsNeedingWater)
+        VStack {
+            HStack 
+            { Button("All Samples", action: allSamples)
+                Spacer()
+            }
+            HStack {
+                Button("Controls", action: controls)
+                Button("Tests", action: tests)
+                Spacer()
+            }
+            Section("Panels")
+            {
+                Button("Make Panel", action: makePanel)
+            }
+            Section("My Groups") {
+                    //                DisclosureGroup("Groups", isExpanded: $expansionState[app.currentYear]) {
+                if let experiment = app.getSelectedExperiment() {
+                    ForEach(experiment.groups) { group in
+                        SidebarLabel2(group: group)  //
+                    }
+                } }
+            
+            List(selection: selection) {
+                    //            SidebarLabel(experiment: e)
+                DisclosureGroup(isExpanded: $expansionState[-1]) {
+                    ForEach(app.recentExperiments) { experiment in
+                        SidebarLabel(experiment: experiment, section: .current)  //
+                                                                                 //                        .badge(experiment.numberOfPlantsNeedingWater)
+                    }
+                } label: {
+                    Label("Current Experiments", systemImage: "chart.bar.doc.horizontal")
                 }
-            } label: {
-                Label("Current Experiments", systemImage: "chart.bar.doc.horizontal")
+                
+                Section("History") {
+                    ExperimentHistoryOutline(expansionState: $expansionState)
+                }
             }
-
-            Section("History") {
-                ExperimentHistoryOutline(expansionState: $expansionState)
+            Spacer()
+            HStack
+            {
+                Button("Add", systemImage: "plus", action: addGroup).bold()
+                TextField("Name", text: $groupName).frame(width: 80)
+                ColorPicker("", selection: $groupColor, supportsOpacity: false).frame(width: 20, height: 20)
             }
+            HStack {
+                TextField("Key", text: $keyword).frame(width: 80)
+                TextField("Value", text: $value).frame(width: 80)
+            }
+            Spacer(minLength: 10)
         }
+        
         .frame(minWidth: 200, idealWidth: 350, maxWidth: 1200)
-//        .toolbar {
-//        }
+            //        .toolbar {
+            //        }
         .safeAreaInset(edge: .top) {
             
             HStack(spacing: 16) {
                 Spacer()
-                //            ToolbarItem {
+                    //            ToolbarItem {
                 Buttons.icon("New Experiment", .add) {
                     app.createNewExperiment()
                 }
-                //                EmptyView().padding()
+                    //                EmptyView().padding()
                 
-                //            Spacer(minLength: 10)
-                //            }
+                    //            Spacer(minLength: 10)
+                    //            }
                 Buttons.icon("Delete Experiment", .delete) {
                     showDeleteConfirmation = true
                 }
@@ -78,14 +117,38 @@ struct MainAppSidebar: View {
         }
         .confirmationDialog(
             "Delete experiment '\(app.getSelectedExperiment()?.name ?? "<no selection>")' ?", isPresented: $showDeleteConfirmation) {
-            Button("Delete", role: .destructive) {
-                if let selected = app.getSelectedExperiment() {
-                    app.removeExperiment(selected)
+                Button("Delete", role: .destructive) {
+                    if let selected = app.getSelectedExperiment() {
+                        app.removeExperiment(selected)
+                    }
                 }
             }
-        }
+    }
+    func addGroup()
+    {
+        app.getSelectedExperiment()!.groups.append(
+            CGroup(name: groupName, color: groupColor, keyword: keyword, value: value))
+        print (app.getSelectedExperiment()!.groups.count)
+            //        showAlert = true
+    }
+    func makePanel()
+    {
+        
+    }
+    func allSamples()
+    {
+        print ("allSamples")
+    }
+    func controls()
+    {
+        print ("controls")
+    }
+    func tests()
+    {
+        print ("tests")
     }
 }
+
 
 struct SidebarSelection : Identifiable, Hashable, Equatable {
     var id: String { "\(section) - \(experiment)"}
@@ -114,5 +177,14 @@ struct SidebarLabel: View, Identifiable {
         TextField(text: $experiment.name) {}
             .tag(id)
             .id(id)
+    }
+}
+
+struct SidebarLabel2: View {
+    var group: CGroup
+    
+    var body: some View {
+        let name = group.name
+        Label(name, systemImage: "leaf")
     }
 }

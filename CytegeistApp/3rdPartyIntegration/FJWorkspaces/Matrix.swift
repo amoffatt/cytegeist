@@ -208,3 +208,24 @@ public struct SpillOverMatrix
     //        }
     //        self.tables = try container.decodeIfPresent([TableSchema].self, forKey: .tables)
     //        self.layouts = try container.decodeIfPresent([LayoutSchema].self, forKey: .layouts)
+
+//
+//CGROUP
+//
+//init(fjxml: TreeNode)
+//{
+//    attributes.merge(fjxml.attrib, uniquingKeysWith: +)
+//    if let grop = fjxml.findChild(value: "Group")
+//    {
+//        for node in grop.children where node.value == "Criteria"
+//        {
+//            criteria.append(Criterion(fjxml: node))
+//        }
+//        print ("Group Criteria: " , criteria.count)
+//    }
+//    if let grph = fjxml.findChild(value: "Graph")
+//    {
+//        graph = ChartDef(fjxml:grph)
+//        print ("Graph: " , grph.value)
+//    }
+//}

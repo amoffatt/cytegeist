@@ -9,6 +9,7 @@ import Foundation
 import Combine
 import CytegeistLibrary
 import CytegeistCore
+import SwiftUI
 
 //-----------------------------------------------
 @Observable
@@ -151,48 +152,45 @@ public class Experiment :  Codable, Identifiable, Equatable
 //}
 //}
 //---------------------------------------------------------
-
-    struct CGroup  : Codable
-    {
-        var attributes = AttributeStore()
-       var name = ""
-        var annotation = ""
-        var criteria = [Criterion]()
-        var members = [Sample]()
-        var graph = ChartDef()
-        
-//        init(from decoder: any Decoder) throws {
-//
-//        }
-
-        init()
-        {
-            
-        }
-        init(fjxml: TreeNode)
-        {
-            attributes.merge(fjxml.attrib, uniquingKeysWith: +)
-            if let grop = fjxml.findChild(value: "Group")
-            {
-                 for node in grop.children where node.value == "Criteria"
-                {
-                    criteria.append(Criterion(fjxml: node))
-                }
-                print ("Group Criteria: " , criteria.count)
-           }
-            if let grph = fjxml.findChild(value: "Graph")
-            {
-                graph = ChartDef(fjxml:grph)
-                print ("Graph: " , grph.value)
-            }
-        }
-        
-        init(name: String = "GROUP", annotation: String = "", criteria: [Criterion]) {
-            self.name = name
-            self.annotation = annotation
-            self.criteria = criteria
-        }
+@propertyWrapper
+public struct CodableIgnored<T>: Codable {
+    public var wrappedValue: T?
+    
+    public init(wrappedValue: T?) {
+        self.wrappedValue = wrappedValue
     }
+    
+    public init(from decoder: Decoder) throws {
+        self.wrappedValue = nil
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+            // Do nothing
+    }
+}
+
+
+struct CGroup : Identifiable, Codable
+{
+        //        var attributes = [String : String]()
+        //        var annotation = ""
+        //        var criteria = [Criterion]()
+        //        var members = [Sample]()
+        //        var graph = GraphDef()
+    var id = UUID()
+    var name = ""
+    var keyword: String?
+    var value: String?
+    @CodableIgnored
+    var color: Color?
+    
+    init(name: String = "name", color: Color?, keyword: String?, value:  String?) {
+        self.name = name
+        self.color = color
+        self.keyword = keyword
+        self.value = value
+    }
+}
 
 
 extension URL {
