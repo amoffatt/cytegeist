@@ -197,7 +197,7 @@ struct SampleList: View {
         }
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
-                Button("Open FCS Files", systemImage: "plus") { showFCSImporter = true }
+                Buttons.toolbar("Open FCS Files", .add) { showFCSImporter = true }
 //                Buttons.icon("Open FCS Files", .add, action: { showFCSImporter = true } )
 //                    .buttonStyle(DefaultButtonStyle())
             }

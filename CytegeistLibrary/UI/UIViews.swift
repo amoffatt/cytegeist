@@ -98,7 +98,7 @@ public class Buttons {
         Button(name, systemImage: icon.systemImage, action: action)
             .scaleEffect(CGSize(icon.scaling))
             .labelStyle(.iconOnly)
-            .buttonStyle(PlainButtonStyle())
+            .buttonStyle(.plain)
     }
     
 //    public static func normal(_ name:LocalizedStringKey, _ icon:Icon, action: @escaping Action) -> some View {
