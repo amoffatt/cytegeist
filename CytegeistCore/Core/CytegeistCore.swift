@@ -9,14 +9,26 @@ import Foundation
 import SwiftUI
 import CytegeistLibrary
 
-public struct APIError : Error {
-    public let message: String
-    public let internalError: Error?
-    
-    init(_ message: String, _ internalError: Error? = nil) {
-        self.message = message
-        self.internalError = internalError
+public enum APIError : Error {
+    var message: String {
+        switch self {
+        case .creatingChart(let cause):
+            "Error creating chart: \(cause)"
+        case .parameterNotFound(let name):
+            "Parameter '\(name) not found"
+        case .creatingImage:
+            "Could not create 2D image"
+        case .noDataComputed:
+            "No data computed"
+        case .noSampleDataLoaded:
+            "No sample data loaded"
+        }
     }
+    case creatingChart(_ cause:Error)
+    case parameterNotFound(_ name:String)
+    case creatingImage
+    case noDataComputed
+    case noSampleDataLoaded
 }
 
 @Observable
@@ -56,10 +68,10 @@ public class APIQuery<T> : BaseAPIQuery {
         releaseSemaphore()
     }
     
-    func error(_ message:String, _ internalError:Error) {
+    func error(_ error:APIError) {
         isLoading = false
-        error = .init(message, internalError)
-        print("APIQuery error: \(message): \(internalError)")
+        self.error = error
+        print("APIQuery error: \(error.message)")
         releaseSemaphore()
     }
     
@@ -121,7 +133,10 @@ public class CytegeistCoreAPI {
     private let fcsReader:FCSReader = .init()
     
     
+    // AM TODO: store all caches in a dictionary, add BaseComputeCache class, and
+    // lazily create them via a cached<DataType>() method
     private var sampleCache:ComputeCache<SampleRequest, FCSFile>! = nil;
+    private var populationCache:ComputeCache<PopulationRequest, CPopulationData>! = nil
     private var histogram1DCache:ComputeCache<HistogramRequest<X>, CachedHistogram<X>>! = nil
     private var histogram2DCache:ComputeCache<HistogramRequest<XY>, CachedHistogram<XY>>! = nil
 
@@ -133,20 +148,24 @@ public class CytegeistCoreAPI {
             return
         }
         
-        sampleCache = .init { r in
-            try self._loadSample(r)
-        }
+        sampleCache = .init(compute:_loadSample)
+//        { r in
+//            try self._loadSample(r)
+//        }
         
-        histogram1DCache = .init { r in
-            let sample = try await self.sampleCache.get(.init(r.population.sample))
-            // TODO add population request here
-            return try self._histogram(r, sample:sample)
-        }
+        populationCache = .init(compute:_population)
+//        { r in
+//            try await self._population(r)
+//        }
         
-        histogram2DCache = .init { r in
-            let sample = try await self.sampleCache.get(.init(r.population.sample))
-            return try self._histogram2D(r, sample:sample)
-        }
+        histogram1DCache = .init(compute:_histogram)
+//        { r in
+//            return try await self._histogram(r)
+//        }
+        
+        histogram2DCache = .init(compute:_histogram2D)
+//            return try await self._histogram2D(r)
+//        }
     }
     
     public func histogram(_ request:HistogramRequest<X>) -> APIQuery<CachedHistogram<X>> {
@@ -159,26 +178,6 @@ public class CytegeistCoreAPI {
         query(request) { r in
             try await self.histogram2DCache.get(request)
         }
-
-//        return sampleDataQuery(sampleRef: sampleRef, parameterNames: parameterNames.values) { parameters in
-//            let data = HistogramData<_2D>(
-//                data: .init(
-//                    parameters[0].data,
-//                    parameters[1].data
-//                ),
-//                size: .init(resolution, resolution),
-//                axes: .init(
-//                    parameters[0].meta.normalizer,
-//                    parameters[1].meta.normalizer
-//                )
-//            )
-//            
-//            guard let image = data.toImage(colormap: .jet) else {
-//                throw APIError("Could not create 2D image")
-//            }
-//            
-//            return CachedHistogram(histogram: data, view: AnyView(image.resizable()))
-//        }
     }
     
     private func query<Request, Data>(_ request:Request, compute: @escaping (Request) async throws -> Data) -> APIQuery<Data> {
@@ -198,7 +197,7 @@ public class CytegeistCoreAPI {
             } catch {
                 print("Error creating histogram: \(error)")
                 await MainActor.run {
-                    result.error("Error creating chart", error)
+                    result.error(.creatingChart(error))
                 }
             }
         }
@@ -277,25 +276,51 @@ public class CytegeistCoreAPI {
         try self.fcsReader.readFCSFile(at: request.sampleRef.url, includeData: request.includeData)
     }
     
-    nonisolated private func _getParameters(from sample:FCSFile, parameterNames:[String]) throws -> [FCSParameterData] {
+    nonisolated private func _getParameters(from population:CPopulationData, parameterNames:[String]) throws -> [FCSParameterData] {
         try parameterNames.map { name in
-            guard let parameter = sample.parameter(named: name) else {
-                print(sample.meta.parameterLookup.debugDescription)
-                throw APIError("Parameter '\(name) not found")
+            guard let parameter = population.parameter(named: name) else {
+                print(population.meta.parameterLookup.debugDescription)
+                throw APIError.parameterNotFound(name)
             }
             return parameter
         }
     }
     
-    nonisolated private func _histogram(_ request:HistogramRequest<X>, sample:FCSFile) throws -> CachedHistogram<X> {
-        let parameters = try _getParameters(from: sample, parameterNames: request.variableNames.values)
+    nonisolated private func _population(_ request: PopulationRequest) async throws -> CPopulationData {
+        switch request {
+        case .sample(let sample):
+            let data = try await self.sampleCache.get(.init(sample))
+            return data
+        case .gated(let parent, let gate):
+            let parentData = try await self.populationCache.get(parent)
+//            let gatedData = applyGate(data: parentData, gate: gate)
+            // AM DEBUGGING
+            let gatedData = parentData //parentData.and()
+            return gatedData
+            
+        case .union(_, union: let union):
+            fatalError("Union gates not implemented")
+        }
+    }
+    
+//    nonisolated private func applyGate(data:EventDataTable, gate:GateRequest) -> EventDataTable {
+////        gate.variableNames
+//        // AM DEBUGGING add gate filter logic
+//        return data
+//        
+//    }
+    
+    nonisolated private func _histogram(_ request:HistogramRequest<X>) async throws -> CachedHistogram<X> {
+        let population = try await self.populationCache.get(request.population)
+        let parameters = try _getParameters(from: population, parameterNames: request.variableNames.values)
         let x = parameters[0]
         let h = HistogramData<X>(data: .init(x.data), size: request.size ?? .init(defaultHistogramResolution), axes: .init(x.meta.normalizer))
         return CachedHistogram(h, view: nil)
     }
     
-    nonisolated private func _histogram2D(_ request:HistogramRequest<XY>, sample:FCSFile) throws -> CachedHistogram<XY> {
-        let parameters = try _getParameters(from: sample, parameterNames: request.variableNames.values)
+    nonisolated private func _histogram2D(_ request:HistogramRequest<XY>) async throws -> CachedHistogram<XY> {
+        let population = try await self.populationCache.get(request.population)
+        let parameters = try _getParameters(from: population, parameterNames: request.variableNames.values)
         let x = parameters[0]
         let y = parameters[1]
         let h = HistogramData<XY>(
@@ -304,7 +329,7 @@ public class CytegeistCoreAPI {
             axes: .init(x.meta.normalizer, y.meta.normalizer))
         
         guard let image = h.toImage(colormap: .jet) else {
-            throw APIError("Could not create 2D image")
+            throw APIError.creatingImage
         }
         
         return CachedHistogram(h, view: AnyView(image.resizable()))
@@ -376,10 +401,14 @@ public indirect enum PopulationRequest: Hashable {
     
     case sample(_ sample: SampleRef)
     case gated(_ parent: PopulationRequest, gate:GateRequest)
-    case merge(_ parents: [PopulationRequest])
+    case union(_ parent: PopulationRequest, union: [PopulationRequest])
     
-    var sample: SampleRef {
-        fatalError()
+    func getSample() -> SampleRef {
+        switch self {
+        case .sample(let s): return s
+        case .gated( let parent, _): return parent.getSample()
+        case .union(let parent, _): return parent.getSample()
+        }
     }
 }
 

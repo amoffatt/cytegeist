@@ -65,7 +65,7 @@ public struct ChartView: View {
         }
     }
     
-    var sampleRef: SampleRef { population.sample }
+    var sampleRef: SampleRef? { population.getSample() }
     
     var stateHash: Int {
         var stateHash = Hasher()
@@ -77,7 +77,7 @@ public struct ChartView: View {
     
     @MainActor func updateSampleQuery() {
         sampleQuery?.dispose()
-        let sample = SampleRequest(population.sample, includeData: false)
+        let sample = SampleRequest(population.getSample(), includeData: false)
         sampleQuery = core.loadSample(sample)
     }
             

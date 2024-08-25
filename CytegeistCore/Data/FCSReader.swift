@@ -202,17 +202,51 @@ public struct FCSParameterData {
     public let data:[Float]
 }
 
-public struct FCSFile {
-    public let meta:FCSMetadata
-    public let data:EventDataTable?
+public protocol CPopulationData {
+    var meta:FCSMetadata { get }
+    var data:EventDataTable? { get }
+    func probability(of index: Int) -> PValue
+}
+
+public extension CPopulationData {
     
-    public func parameter(named:String) -> FCSParameterData? {
+    func parameter(named:String) -> FCSParameterData? {
         guard let data,
               let parameters = meta.parameters,
               let index = meta.parameterLookup[named] else {
             return nil
         }
         return .init(meta:parameters[index], data:data.data[index])
+    }
+    
+    func and(filter:() -> PValue) -> CPopulationData {
+        // AM DEBUGGING
+        fatalError()
+    }
+}
+
+public struct FCSFile : CPopulationData {
+    public let meta:FCSMetadata
+    public let data:EventDataTable?
+    
+    public func probability(of index: Int) -> PValue {
+        .init(1.0)
+    }
+}
+
+public struct PopulationData : CPopulationData {
+    public let meta:FCSMetadata
+    public let data:EventDataTable?
+    public let probabilities: [PValue]
+    
+    init(meta: FCSMetadata, data: EventDataTable, probabilities: [PValue]) {
+        self.meta = meta
+        self.data = data
+        self.probabilities = probabilities
+    }
+    
+    public func probability(of index: Int) -> PValue {
+        probabilities[index]
     }
 }
 

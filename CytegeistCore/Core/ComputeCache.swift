@@ -82,7 +82,7 @@ public actor ComputeCache<Request:Hashable, Data> {
             return
         }
         
-        for i in maxCacheItems...finishedHandles.count {
+        for _ in maxCacheItems...finishedHandles.count {
             let oldest = finishedHandles.min {
                 $0.lastRequested > $1.lastRequested
             }
@@ -103,7 +103,7 @@ public actor ComputeCache<Request:Hashable, Data> {
         }
         
         guard let data = handle.data else {
-            throw APIError("Error: No data computed")
+            throw APIError.noDataComputed
         }
         
         return data
