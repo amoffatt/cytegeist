@@ -64,6 +64,16 @@ public class Experiment :  Codable, Identifiable, Equatable
 //        print("Added Sample: \(sample.tubeName) collected on   \(sample.date) Count: \(samples.count) to experiment \(id)")
         
     }
+    
+    public var focusedSample: Sample? {
+        // AM TODO currently will be a random item when multiple selected.
+        // should be the first in selection, or most recently clicked sample
+        self[selectedSamples.first]
+    }
+    
+    public func clearSampleSelection() {
+        selectedSamples.removeAll()
+    }
   
     public func readFCSFile(_ url: URL) async
     {

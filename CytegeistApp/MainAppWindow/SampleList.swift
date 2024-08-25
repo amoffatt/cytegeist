@@ -61,7 +61,6 @@ struct SampleList: View {
     
     @SceneStorage("viewMode") private var mode: ViewMode = .table
     @State var searchText: String = ""
-    @State private var selectedSamples = Set<Sample.ID>()
     @State var sortOrder: [KeyPathComparator<Sample>] = [    .init(\.id, order: SortOrder.forward) ]
     @State private var draggedItem: String?
     @State private var showFCSImporter = false
@@ -79,6 +78,8 @@ struct SampleList: View {
         .init(keyword: FCSKeys.setup),
         .init(keyword: FCSKeys.creator),
     ]
+    
+    var selection:Set<Sample.ID> { experiment.selectedSamples }
 //    @StateObject var store: Store
 
 //    let colMap = [ ["Name", .tubeName], ["FIL", .experimentName], ["CYT", .cytometer], ["BTIM", .btime],
@@ -100,8 +101,9 @@ struct SampleList: View {
     
     var table: some View
     {
+        @Bindable var experiment = experiment
         
-        return Table(filteredSamples, selection: $selectedSamples, sortOrder: $sortOrder, columnCustomization: $columnCustomization) {
+        return Table(filteredSamples, selection: $experiment.selectedSamples, sortOrder: $sortOrder, columnCustomization: $columnCustomization) {
             TableColumnForEach(columns) { column in
                 column.defaultColumn()
                     .customizationID(column.name)
@@ -116,11 +118,11 @@ struct SampleList: View {
 //            TableColumn("$Creator", value: \.creator)       { sample in Text(sample.creator)  }.customizationID("creator")
         }
         .onDeleteCommand {
-            experiment.samples.removeAll { selectedSamples.contains($0.id) }
-            selectedSamples.removeAll()
+            experiment.samples.removeAll { experiment.selectedSamples.contains($0.id) }
+            experiment.selectedSamples.removeAll()
         }
         .onChange(of: experiment.id) {
-            selectedSamples.removeAll()
+            experiment.selectedSamples.removeAll()
         }
 //        rows: {
 //            ForEach(samples) { sample in
@@ -138,7 +140,7 @@ struct SampleList: View {
     }
     
     var footer: some View {
-        let selectedText = selectedSamples.isEmpty ? "" : " (\(selectedSamples.count) selected)"
+        let selectedText = selection.isEmpty ? "" : " (\(selection.count) selected)"
         return HStack {
             Spacer()
             Text("\(filteredSamples.count) samples \(selectedText)")
@@ -170,7 +172,7 @@ struct SampleList: View {
         }
         .onDrop(of: ["public.file-url"], delegate: dropDelegate)
 //        .focusedSceneValue(\.experiment, experiment)
-        .focusedSceneValue(\.selection, $selectedSamples)
+//        .focusedSceneValue(\.selection, $selectedSamples)
 //        .toolbar {
 //            ToolbarItem(placement: .navigation) {
 //            }
@@ -178,9 +180,9 @@ struct SampleList: View {
 
         .navigationTitle($experiment.name)
         //        .navigationSubtitle("\(experiment.creationDate)")
-        .importsItemProviders(selectedSamples.isEmpty ? [] : Sample.importImageTypes) { providers in
+        .importsItemProviders(selection.isEmpty ? [] : Sample.importImageTypes) { providers in
             Sample.importImageFromProviders(providers) { url in
-                for sampleID in selectedSamples {
+                for sampleID in selection {
                     experiment[sampleID]?.imageURL = url
                 }
             }

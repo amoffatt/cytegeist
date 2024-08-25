@@ -24,9 +24,14 @@ struct GatingView: View {
     @State private var isHovering = false
     @State private var offset = CGSize.zero
 //    @State var population: AnalysisNode
-    @State var sample: Sample? = nil
-    @State var chartDef: ChartDef = ChartDef()
+    @State var chartDef: ChartDef = {
+        var c = ChartDef()
+        c.xAxis = .init(variableName:"FSC-A")
+        return c
+    }()
     
+    var sample: Sample?
+
 
 
 //    var selectedSample: Sample
@@ -34,6 +39,23 @@ struct GatingView: View {
         VStack {
             if let sampleRef = sample?.ref {
                 ChartView(population: .sample(sampleRef), config: chartDef)
+                    .overlay {
+                        GeometryReader { proxy in
+                            ZStack(alignment: .topLeading){
+                                
+                                gateRadius(siz: proxy.size)
+                                gateRange(siz: proxy.size)
+                                gateRect(siz: proxy.size)
+                                gateEllipse(siz: proxy.size)
+                                crosshair(location: mouseLocation, size: proxy.size )
+                                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                    .gesture(gateDrag)
+                            }
+                        }
+                    }
+                    .padding(40)
+                    .allowsHitTesting(true)
+                    .opacity(mode == ReportMode.gating ? 1.0 : 0.0)
             }
             else {
                 Text("No sample file reference")
@@ -47,23 +69,6 @@ struct GatingView: View {
 ////                .symbol(by: .value("Family", $0.family))
 ////                .shadow(color: .blue, radius: 5, x:0, y:0)
 //            }
-//            .overlay { proxy in
-//                GeometryReader { proxy in
-//                    ZStack(alignment: .topLeading){
-//                        
-//                        gateRadius(siz: proxy.size)
-//                        gateRange(siz: proxy.size)
-//                        gateRect(siz: proxy.size)
-//                        gateEllipse(siz: proxy.size)
-//                        crosshair(location: mouseLocation, size: proxy.size )
-//                            .frame(maxWidth: .infinity, maxHeight: .infinity)
-//                            .gesture(gateDrag)
-//                    }
-//                }
-//            }
-//            .padding(40)
-//            .allowsHitTesting(true)
-//            .opacity(mode == ReportMode.gating ? 1.0 : 0.0)
         }
         
     }
@@ -99,8 +104,8 @@ struct GatingView: View {
  
 
     var body: some View {
+        VStack {
         Text("GatingView")
-        Group{
 //            Text("Gating Prototype")
             chart
 

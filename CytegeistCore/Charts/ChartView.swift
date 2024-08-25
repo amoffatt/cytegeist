@@ -49,6 +49,7 @@ public struct ChartView: View {
                         HistogramView(query: query)
                         ChartAxisView(label: axis.label, normalizer: variable.normalizer)
                     }
+                    .background(.blue)
             default:
                 EmptyView()
 //                }
@@ -56,30 +57,46 @@ public struct ChartView: View {
                 //            Selector()
             }
         }
-        .frame(width: 400, height: 400)
-        .onChange(of: stateHash) {
-            updateChartQuery()
-        }
-        .onChange(of: sampleRef) {
-            updateSampleQuery()
-        }
+        
+        .onChange(of: population.getSample(), initial: true, updateSampleQuery)
+        
+        .onChange(of: population, initial: true, updateChartQuery)
+        .onChange(of: config, updateChartQuery)
+        .onChange(of: sampleQuery?.data?.meta, updateChartQuery)
     }
     
-    var sampleRef: SampleRef? { population.getSample() }
+//    var sampleRef: SampleRef? { population.getSample() }
     
-    var stateHash: Int {
-        var stateHash = Hasher()
-        stateHash.combine(sampleRef)
-        stateHash.combine(population)
-        stateHash.combine(config)
-        return stateHash.finalize()
-    }
+//    var stateHash: Int {
+//        var stateHash = Hasher()
+//        stateHash.combine(sampleRef)
+//        stateHash.combine(population)
+//        stateHash.combine(config)
+//        return stateHash.finalize()
+//    }
     
     @MainActor func updateSampleQuery() {
         sampleQuery?.dispose()
         let sample = SampleRequest(population.getSample(), includeData: false)
         sampleQuery = core.loadSample(sample)
     }
+    
+//    todo()
+    // Do we
+    // 1) update the query's data when parent populations change?
+        // No. because the chart view will be the one requesting the updated populations,
+        // so it already knows about the change and is the one sending the query
+    // 2) So
+        //      a) what to store in the cache
+        //      b) who is checking for population change?
+        //      c) where/how do we track who depends on what evaluated population, so we know when it can be thrown away
+        //      d) when a parent changes, does the populations own hash/repr value change?
+        //      e) if it does, how do we avoid deleting unchanged parents of the changed parent
+        //      f)
+    
+        // a cached population should be stored under the repr/hash of it and all it's ancestors
+        //  That way, when a population changes, the children will all start recomputations on
+        // everything *up to* the one that changed
             
     @MainActor func updateChartQuery()  {
         chartQuery?.dispose()

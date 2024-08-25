@@ -30,6 +30,8 @@ public struct HistogramView: View {
                             y: .value("Count", histogram.normalizedCount(bin: .init(bin)))
                         )
                     }
+                    .chartXAxis(.hidden)
+                    .chartYAxis(.hidden)
                 }
             }
             .onDisappear {

@@ -41,10 +41,10 @@ public struct AxisDef : Hashable, Codable//, Transferable
     public var label:String
     public var auto:Bool
 
-    public init(name: String = "", label: String = "", auto: Bool = true)
+    public init(variableName: String = "", label: String = "", auto: Bool = true)
     {
-        self.name = name
-        self.label = label
+        self.name = variableName
+        self.label = label.isEmpty ? variableName : label
         self.auto = auto
     }
 

@@ -20,6 +20,9 @@ public struct LoadingOverlay<Content: View>: View {
     }
     
     public var body: some View {
+        // Delay fade in so indicator doesn't appear if loading only takes a moment
+        let ease:Animation = isLoading ? .easeInOut.delay(0.5) : .easeInOut
+        
         ZStack {
             content()
             
@@ -31,7 +34,7 @@ public struct LoadingOverlay<Content: View>: View {
                     .scaleEffect(1.5)
             }
         }
-        .animation(.easeInOut, value: isLoading)
+        .animation(ease, value: isLoading)
     }
 }
 

@@ -12,7 +12,8 @@ struct MainAppView : View {
    
     @Environment(App.self) var app: App
 
-    @State  var mode =  ReportMode.layout
+    var mode:ReportMode { app.reportMode }
+    
 //    @State private var path = [Int]()
     @State private var  cols = [TColumn]()
         //----------------------------------------------------------------------------------
@@ -104,6 +105,7 @@ struct MainAppView : View {
     
 
     var body: some View {
+        @Bindable var app = app
         
         // AM Note: If we need to support Pre-macOS13, see https://developer.apple.com/documentation/swiftui/migrating-to-new-navigation-types
         NavigationSplitView {
@@ -128,30 +130,49 @@ struct MainAppView : View {
                     }
                 }
                 .frame(minWidth: 250, idealWidth: 800, maxWidth: .infinity)
+                .fillAvailableSpace()
                 
-                AnalysisList()                  // sidebar
-                    .frame(minWidth: 250, idealWidth: 600, maxWidth: .infinity)
+                AnalysisList()
+                    .frame(minWidth: 250, idealWidth: 600, maxWidth: .infinity, maxHeight: .infinity)
+                    .fillAvailableSpace()
             }
             .navigationSplitViewColumnWidth(min: 600, ideal: 1600, max: .infinity)
         }
         detail: {
-//            NavigationSplitView {           //Nested split view
-//                }
-//            detail: {
-            Group {
-                if mode == .table        {   tableBuilder     }
-                else if mode == .gating  {   GatingView()     }
-                else                     {   LayoutPasteboard(mode: mode)   }
-                //            }
+            if let experiment = app.getSelectedExperiment() {
+                VStack {        // AM: VStack leads to better compile error messages than Group when the below code breaks (!?)
+                    switch mode {
+                    case .table: tableBuilder
+                    case .gating: gatingBuilder(experiment)
+                    case .layout: LayoutPasteboard(mode: mode)
+                    }
+                    
+                }
+                .environment(experiment.core)
+                .navigationSplitViewColumnWidth(min: 300, ideal: 1200, max: .infinity)
+                .toolbar {
+                    ReportModePicker(mode: $app.reportMode)
+                }
             }
-            .navigationSplitViewColumnWidth(min: 300, ideal: 1200, max: .infinity)
-            .toolbar {
-                ReportModePicker(mode: $mode)
+            else {
+                Text("Select an Experiment")
             }
             
          }
         .onAppear {
             app.getSelectedExperiment(autoselect: true, createIfNil: true)
+        }
+    }
+
+//    func getFocusedPopulation() -> (Sample?, AnalysisNode?) {
+//        
+//    }
+    
+    func gatingBuilder(_ exp: Experiment) -> some View {
+        VStack {
+            if let sample = exp.focusedSample {
+                GatingView(sample: sample)
+            }
         }
     }
 }
