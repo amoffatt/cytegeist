@@ -75,6 +75,7 @@ public struct Histogram2DView: View {
 //                            )
 //                        )
                     }
+                    .fillAvailableSpace()
                     .background(.clear)
                     .chartBackground { proxy in
                         VStack {

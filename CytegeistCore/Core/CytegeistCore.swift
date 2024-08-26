@@ -308,7 +308,7 @@ public class CytegeistCoreAPI {
     
     nonisolated private func _histogram(_ request:HistogramRequest<X>) async throws -> CachedHistogram<X> {
         let population = try await self.populationCache.get(request.population)
-        let parameters = try _getParameters(from: population, parameterNames: request.variableNames.values)
+        let parameters = try _getParameters(from: population, parameterNames: request.dims.values)
         
         let x = parameters[0]
         // AM DEBUGGING
@@ -322,7 +322,7 @@ public class CytegeistCoreAPI {
     
     nonisolated private func _histogram2D(_ request:HistogramRequest<XY>) async throws -> CachedHistogram<XY> {
         let population = try await self.populationCache.get(request.population)
-        let parameters = try _getParameters(from: population, parameterNames: request.variableNames.values)
+        let parameters = try _getParameters(from: population, parameterNames: request.dims.values)
         let x = parameters[0]
         let y = parameters[1]
         let h = HistogramData<XY>(
@@ -334,7 +334,7 @@ public class CytegeistCoreAPI {
             throw APIError.creatingImage
         }
         
-        return CachedHistogram(h, view: AnyView(image.resizable()))
+        return CachedHistogram(h, view: AnyView(image.resizable().scaleEffect(y: -1)))
     }
 
 }
@@ -455,12 +455,12 @@ public struct HistogramRequest<D:Dimensions> : Hashable {
     
 //    public let raw:String
     
-    public let variableNames:D.Strings
+    public let dims:D.Strings
     public let size:D.IntCoord?
     
-    public init(_ population: PopulationRequest, _ variableNames: D.Strings, size:D.IntCoord? = nil) {
+    public init(_ population: PopulationRequest, _ dims: D.Strings, size:D.IntCoord? = nil) {
         self.population = population
-        self.variableNames = variableNames
+        self.dims = dims
         self.size = size
     }
 }

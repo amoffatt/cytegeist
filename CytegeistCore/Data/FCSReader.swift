@@ -152,7 +152,7 @@ public struct FCSMetadata: Hashable, Codable {
 }
 
 enum EventDataError : Error {
-    case inconsistentVariableLengths
+    case inconsistentDimLengths
 }
 
 public typealias ValueType = Double
@@ -193,7 +193,7 @@ public struct EventDataTable: BackedRandomAccessCollection {
             let length = data[0].count
             
             if !data.allSatisfy({ $0.count == length }) {
-                throw EventDataError.inconsistentVariableLengths
+                throw EventDataError.inconsistentDimLengths
             }
         }
     }

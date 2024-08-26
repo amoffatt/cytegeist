@@ -59,7 +59,8 @@ struct GatingView: View {
     
     @State var chartDef: ChartDef = {
         var c = ChartDef()
-        c.xAxis = .init(variableName:"FSC-A")
+        c.xAxis = .init(dim:"FSC-A")
+        c.yAxis = .init(dim:"SSC-A")
         return c
     }()
     
