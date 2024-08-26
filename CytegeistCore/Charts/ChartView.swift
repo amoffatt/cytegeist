@@ -21,19 +21,22 @@ fileprivate enum ChartDataRequest {
     }
 }
 
-public struct ChartView: View {
+public struct ChartView<Overlay>: View where Overlay:View {
     @Environment(CytegeistCoreAPI.self) var core: CytegeistCoreAPI
     
     let population: PopulationRequest
     let config: ChartDef
+    let chartOverlay:() -> Overlay
     
     @State var sampleQuery: APIQuery<FCSFile>? = nil
     @State fileprivate var chartQuery: ChartDataRequest? = nil
     @State var errorMessage:String = ""
     
-    public init(population: PopulationRequest, config:ChartDef) {
+    
+    public init(population: PopulationRequest, config:ChartDef, overlay:@escaping () -> Overlay = { EmptyView() }){
         self.population = population
         self.config = config
+        self.chartOverlay = overlay
     }
     
     public var body: some View {
@@ -50,6 +53,7 @@ public struct ChartView: View {
             case .histogram1D(let query, let axis, let dim):
                     VStack {
                         HistogramView(query: query)
+                            .overlay(chartOverlay())
                         ChartAxisView(label: axis.label, normalizer: dim.normalizer)
                     }
             case .histogram2D(let query, let axes, let dims):
@@ -63,6 +67,7 @@ public struct ChartView: View {
 //                    GridRow {
                     HStack(spacing: 0) {
                         Histogram2DView(query: query)
+                            .overlay(chartOverlay())
                             .fillAvailableSpace()
 //                        Rectangle()
 //                            .fill(.blue)
@@ -154,6 +159,7 @@ public struct ChartView: View {
                 } else if yDim == nil {
                     errorMessage = "Y axis dimension not in dataset"
                 } else {
+                    print("Creating chart for \(population.name)")
                     chartQuery = .histogram2D(
                         query: core.histogram2D(.init(population,
                                                       .init(xAxis.name, yAxis.name))),

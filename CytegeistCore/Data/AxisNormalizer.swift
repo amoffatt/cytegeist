@@ -174,3 +174,11 @@ func niceNumber(_ x: Double, round: Bool) -> Double {
     
     return nf * pow(10, exp)
 }
+
+public extension CGPoint {
+    func unnormalize(_ normalizers:Tuple2<AxisNormalizer?>) -> CGPoint {
+        .init(x:normalizers.x?.unnormalize(x) ?? x,
+              y:normalizers.y?.unnormalize(y) ?? y)
+    }
+}
+

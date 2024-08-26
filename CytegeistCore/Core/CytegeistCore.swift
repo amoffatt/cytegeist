@@ -294,14 +294,18 @@ public class CytegeistCoreAPI {
         case .sample(let sample):
             let data = try await self.sampleCache.get(.init(sample))
             return data
-        case .gated(let parent, let gate):
+        case .gated(let parent, let gate, let invert, _):
             let parentData = try await self.populationCache.get(parent)
                 if let gate {
-                    return try parentData.multiply(filterDims: gate.dimNames, filter: gate.filter)
+                    let f:(EventData) -> PValue = invert
+                    ? { gate.probability(of:$0).inverted }
+                    : gate.probability
+                    
+                    return try parentData.multiply(filterDims: gate.dims, filter: f)
                 }
                 return parentData
                 
-            case .union(_, union: let union):
+            case .union(_, _):
             fatalError("Union gates not implemented")
         }
     }
@@ -325,8 +329,17 @@ public class CytegeistCoreAPI {
         let parameters = try _getParameters(from: population, parameterNames: request.dims.values)
         let x = parameters[0]
         let y = parameters[1]
+        
+            // AM DEBUGGING
+        let selectX = x.data.enumerated().filter { i, x in
+            population.probability(of: i).p > 0.5
+        }.map { $0.element }
+        let selectY = y.data.enumerated().filter { i, x in
+            population.probability(of: i).p > 0.5
+        }.map { $0.element }
+
         let h = HistogramData<XY>(
-            data: .init(x.data, y.data),
+            data: .init(selectX, selectY),
             size: request.size ?? .init(defaultHistogramResolution, defaultHistogramResolution),
             axes: .init(x.meta.normalizer, y.meta.normalizer))
         
@@ -351,25 +364,25 @@ public struct SampleRequest : Identifiable, Hashable {
     }
 }
 
-public struct GateRequest : Hashable {
-    public static func == (lhs: GateRequest, rhs: GateRequest) -> Bool {
-        lhs.repr == rhs.repr
-    }
-    
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(repr)
-    }
-    
-    public let repr: String
-    let dimNames: [String]
-    let filter: (EventData) -> PValue
-    
-    public init(repr:String, dimNames: [String], filter: @escaping (EventData) -> PValue) {
-        self.repr = repr
-        self.dimNames = dimNames
-        self.filter = filter
-    }
-}
+//public struct GateRequest : Hashable {
+//    public static func == (lhs: GateRequest, rhs: GateRequest) -> Bool {
+//        lhs.repr == rhs.repr
+//    }
+//    
+//    public func hash(into hasher: inout Hasher) {
+//        hasher.combine(repr)
+//    }
+//    
+//    public let repr: String
+//    let dimNames: [String]
+//    let filter: (EventData) -> PValue
+//    
+//    public init(repr:String, dimNames: [String], filter: @escaping (EventData) -> PValue) {
+//        self.repr = repr
+//        self.dimNames = dimNames
+//        self.filter = filter
+//    }
+//}
 
 
 //public indirect enum ParentPopulation: Identifiable, Hashable {
@@ -389,6 +402,32 @@ public struct GateRequest : Hashable {
 
 
 public indirect enum PopulationRequest: Hashable {
+    public static func == (lhs: PopulationRequest, rhs: PopulationRequest) -> Bool {
+        switch (lhs, rhs) {
+            case (.sample(let lhsSample), .sample(let rhsSample)):
+                return lhsSample == rhsSample
+            case (.gated(let lhsParent, let lhsGate, let lhsInvert, _), .gated(let rhsParent, let rhsGate, let rhsInvert, _)):
+                return lhsParent == rhsParent && lhsGate?.isEqualTo(rhsGate) ?? false && lhsInvert == rhsInvert
+            case (.union(let lhsParents), .union(let rhsParents)):
+//                return lhsParents.sorted() == rhsParents.sorted() // Compare sorted parents for order independence
+                fatalError()
+            default:
+                return false
+        }
+    }
+    
+    public func hash(into hasher: inout Hasher) {
+        switch self {
+            case .sample(let sample):
+                sample.hash(into: &hasher)
+            case .gated(let parent, let gate, let invert, _):
+                parent.hash(into: &hasher)
+                gate?.hash(into: &hasher)
+                invert.hash(into: &hasher)
+            case .union(_, union: let union):
+                fatalError()
+        }
+    }
 //    public var id: String {
 //        switch self {
 //            
@@ -401,14 +440,25 @@ public indirect enum PopulationRequest: Hashable {
 //        }
 //    }
     
+    public var name: String {
+        switch self {
+        case .sample(let sampleRef):
+            sampleRef.url.absoluteString
+        case .gated(_, _, _, let name):
+            name
+        case .union(let parents):
+            "Union"
+        }
+    }
+
     case sample(_ sample: SampleRef)
-    case gated(_ parent: PopulationRequest, gate:GateRequest?)
+    case gated(_ parent: PopulationRequest, gate:(any GateDef)?, invert:Bool, name:String)
     case union(_ parent: PopulationRequest, union: [PopulationRequest])
     
     func getSample() -> SampleRef {
         switch self {
         case .sample(let s): return s
-        case .gated( let parent, _): return parent.getSample()
+        case .gated( let parent, _, _, _): return parent.getSample()
         case .union(let parent, _): return parent.getSample()
         }
     }

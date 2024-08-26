@@ -60,7 +60,6 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable, Equat
         CodableRepresentation(contentType: UTType.population)
     }
     
-        // addChild
         // removeChild
         // gate.clear()
         // graphDef.edit
@@ -123,15 +122,7 @@ public class PopulationNode : AnalysisNode {
         guard let parent = parent else {
             throw AnalysisNodeError.noSampleRef
         }
-        let gateRequest = gate?.createRequest()
         
-        return .gated(try parent.createRequest(), gate: gateRequest)
+        return .gated(try parent.createRequest(), gate: gate?.spec, invert: gate?.invert ?? false, name: name)
     }
 }
-
-
-
-    //-------------------------------------------------------------------------------
-    // hardcoded data for an outline group
-
-//let root = [ AnalysisNode(name: "All Cells") ]

@@ -75,9 +75,10 @@ struct GatingView: View {
             set: { _ in self.candidateGate = nil }
         )
         
-        return ChartView(population: request, config: chartDef)
-            .overlay {
+        return ChartView(population: request, config: chartDef) {
+            VStack {
                 GeometryReader { proxy in
+                    let size = proxy.size
                     ZStack(alignment: .topLeading){
                         
                         gateRadius(siz: proxy.size)
@@ -88,7 +89,11 @@ struct GatingView: View {
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
                             .gesture(gateDrag(areaSize: proxy.size))
                     }
+//                    .frame(width:size.width, height:size.height)
+                    .border(.green.opacity(0.8))
                 }
+            }
+            .fillAvailableSpace()
             }
             .padding(40)
             .allowsHitTesting(true)
@@ -104,15 +109,15 @@ struct GatingView: View {
 //        
 //    }
     
-    var axisNormalizers: (x:AxisNormalizer?, y:AxisNormalizer?) {
+    var axisNormalizers: Tuple2<AxisNormalizer?> {
         guard let sample = population?.getSample() else {
-            return (nil, nil)
+            return .init(nil, nil)
         }
         
         let xAxis = chartDef.xAxis?.name
         let yAxis = chartDef.yAxis?.name
         
-        return (
+        return .init(
             sample.meta?.parameter(named: xAxis.nonNil)?.normalizer,
             sample.meta?.parameter(named: yAxis.nonNil)?.normalizer
         )
@@ -121,33 +126,57 @@ struct GatingView: View {
     
     func makeGate(_ start: CGPoint, _ location: CGPoint, areaPixelSize:CGSize)
     {
-        var minX:Double = .nan, maxX:Double = .nan
-        var minY:Double, maxY: Double
+        var start = (start / areaPixelSize)
+        var end = (location / areaPixelSize)
         
+        // Invert view space coordinates
+        start.y = 1 - start.y
+        end.y = 1 - end.y
+
         let normalizers = axisNormalizers
-        if let xAxis = normalizers.x {
-            
-            minX = min(start.x, location.x) / areaPixelSize.width
-            maxX = max(start.x, location.x) / areaPixelSize.width
-            minX = xAxis.unnormalize(minX)
-            maxX = xAxis.unnormalize(maxX)
-        }
+        var rect = CGRect(
+            from: start.unnormalize(normalizers),
+            to: end.unnormalize(normalizers)
+        )
+        
+//        if let xAxis = normalizers.x {
+//            
+//            minX = min(start.x, location.x) / areaPixelSize.width
+//            maxX = max(start.x, location.x) / areaPixelSize.width
+//            minX = xAxis.unnormalize(minX)
+//            maxX = xAxis.unnormalize(maxX)
+//        }
         
             // TODO delete
         let candidateGateName = ""
         
+        guard let xDim = chartDef.xAxis?.name else {
+            print("No x axis for gate")
+            return
+        }
+        
+
         switch curTool
         {
-            case .range:        addRangeGate(candidateGateName, minX, maxX)
-            case .split:        add2RangeGates(candidateGateName, x: maxX)
-            case .rectangle:    addRectGate(candidateGateName, start: start, location)
+            case .range:        addRangeGate(candidateGateName, xDim, rect.minX, rect.maxX); return
+            case .split:        add2RangeGates(candidateGateName, xDim, rect.maxX); return
+            default: break
+        }
+        
+        guard let yDim = chartDef.yAxis?.name else {
+            print("No y axis for gate")
+            return
+        }
+        let dims = Tuple2(xDim, yDim)
+
+        switch curTool {
+            case .rectangle:    addRectGate(candidateGateName, dims, rect)
             case .ellipse:      addEllipseGate(candidateGateName, start, location)
                     //            case .quads:        addQuadGates(gateName, start, location)
                     //            case .polygon:      addPolygonGate(gateName, start, location)
                     //            case .spline:       addSplineGate(gateName, start, location)
             case .radius:       addRadialGate(candidateGateName, start, distance(start, location))
-            default: print("no curTool")
-                
+            default: break
         }
     }
     func addGate(_ gate: Gate)
@@ -268,38 +297,33 @@ struct GatingView: View {
             }
     }
     
-    func addRangeGate(_ newName: String, _ min: CGFloat, _ max: CGFloat)
+    func addRangeGate(_ newName: String, _ dim:String, _ min: CGFloat, _ max: CGFloat)
     {
-        guard let axis = chartDef.xAxis else {
-            print("No x axis for gate")
-            return
-        }
-        
-        let gate = Gate(spec: RangeGateDef(chartDef.xAxis?.name ?? "", min, max),
+        let gate = Gate(spec: RangeGateDef(dim, min, max),
                         color: Color.yellow, opacity: 0.6)
         addGate(gate)
     }
     
-    func add2RangeGates(_ name: String,x: CGFloat)
+    func add2RangeGates(_ name: String, _ dim:String, _ x: CGFloat)
     {
-        addGate(Gate(spec: BifurGateDef(x), color: Color.yellow, opacity: 0.2))
+//        addGate(Gate(spec: BifurGateDef(x), color: Color.yellow, opacity: 0.2))
             //        addGate(Gate(spec: RangeGateDef(,0, x), color: Color.yellow, opacity: 0.2))
             //        addGate(Gate(spec: RangeGateDef(x, 2 * x), color: Color.red, opacity: 0.2))         // TODO MAX value
     }
     
-    func addRectGate(_ name: String, start: CGPoint, _ location: CGPoint)
+    func addRectGate(_ name: String, _ dims:Tuple2<String>, _ rect: CGRect)
     {
-        addGate(Gate(spec: RectGateDef(start.x, start.y, location.x, location.y ), color: Color.blue, opacity: 0.1))
+        addGate(Gate(spec: RectGateDef(dims, rect), color: Color.blue, opacity: 0.1))
     }
     
     func addRadialGate(_ newName: String,_ start: CGPoint, _ radius: CGFloat)
     {
-        addGate(Gate(spec: RadialGateDef(start, radius), color: Color.brown, opacity: 0.2))
+//        addGate(Gate(spec: RadialGateDef(start, radius), color: Color.brown, opacity: 0.2))
     }
     
     func addEllipseGate(_ name: String,_ start: CGPoint, _ location: CGPoint)
     {
-        addGate(Gate(spec: EllipsoidGateDef(start, location), color: Color.brown, opacity: 0.2))
+//        addGate(Gate(spec: EllipsoidGateDef(start, location), color: Color.brown, opacity: 0.2))
     }
 
     
@@ -315,8 +339,6 @@ let DEBUG = false
         let end = mouseLocation.x
         let startY = startLocation.y
         let endY = mouseLocation.y
-        let width =  end - start
-        let height = endY - startY
         let startLocation = startLocation
         let translation = mouseLocation - startLocation
         return Rectangle()
@@ -359,7 +381,6 @@ let DEBUG = false
     }
     func gateRadius(siz: CGSize ) -> some View {
         let startLocation = startLocation
-        let translation = mouseLocation - startLocation
         return Group
         {
             Path { path in

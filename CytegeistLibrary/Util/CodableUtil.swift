@@ -42,3 +42,13 @@ extension KeyedEncodingContainer {
             // Do nothing
     }
 }
+
+
+public extension Hasher {
+    mutating func combineMany(_ values: any Hashable...) {
+        for x in values {
+            self.combine(x)
+        }
+                    
+    }
+}

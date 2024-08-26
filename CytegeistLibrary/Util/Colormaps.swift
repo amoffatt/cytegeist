@@ -59,7 +59,7 @@ public struct Colormap {
 
 extension Colormap {
     public static let jet = Colormap(colors: [
-        Color(red: 0, green: 0, blue: 0.5),
+        Color(red: 0, green: 0, blue: 0.5, opacity: 0.0),
         Color(red: 0, green: 0, blue: 1),
         Color(red: 0, green: 0.5, blue: 1),
         Color(red: 0, green: 1, blue: 1),

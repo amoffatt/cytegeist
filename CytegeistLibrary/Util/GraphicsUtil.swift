@@ -71,6 +71,14 @@ public extension CGPoint {
     static func + (a: CGPoint, b: CGSize) -> CGPoint {
         return CGPoint(x: a.x+b.width, y: a.y+b.height)
     }
+    
+    static func * (a: CGPoint, b: CGSize) -> CGPoint {
+        return CGPoint(x: a.x * b.width, y: a.y * b.height)
+    }
+    
+    static func / (a: CGPoint, b: CGSize) -> CGPoint {
+        return CGPoint(x: a.x / b.width, y: a.y / b.height)
+    }
 }
 
 public extension CGSize {
@@ -81,4 +89,20 @@ public extension CGSize {
         self.init(width:Double(width), height:Double(height))
     }
     var asPoint:CGPoint { .init(x:width, y:height) }
+}
+
+public extension CGRect {
+    init(from:CGPoint, to:CGPoint) {
+        let x = sort(from.x, to.x)
+        let y = sort(from.y, to.y)
+        self.init(origin: .init(x:x.0, y:y.0), size: .init(width:x.1 - x.0, height:y.1 - y.0))
+    }
+    
+//    static func * (a: CGRect, b: CGSize) -> CGPoint {
+//        return CGRect(origin: a.origin * b, size: )
+//    }
+//    
+//    static func / (a: CGPoint, b: CGSize) -> CGPoint {
+//        return CGPoint(x: a.x / b.width, y: a.y / b.height)
+//    }
 }

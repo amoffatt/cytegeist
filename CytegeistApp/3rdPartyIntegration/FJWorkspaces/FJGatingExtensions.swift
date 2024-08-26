@@ -11,10 +11,10 @@ import CytegeistCore
 
 extension Gate {
     
-    convenience init(fjxml: TreeNode)
+    init(fjxml: TreeNode)
     {
         self.init()
-        extraAttributes.merge(fjxml.attrib, uniquingKeysWith: +)
+//        extraAttributes.merge(fjxml.attrib, uniquingKeysWith: +)
         
         for node in fjxml.children
         {

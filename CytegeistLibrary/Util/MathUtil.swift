@@ -23,6 +23,13 @@ public func clamp01<T:Numeric&Comparable>(_ x:T) -> T {
     clamp(x, min: 0, max: 1)
 }
 
+public func sort<T:Comparable>(_ a:T, _ b:T) -> (T, T) {
+    if a > b {
+        return (b, a)
+    }
+    return (a, b)
+}
+
 public extension UInt8 {
     static func fromUnitFloat(_ value:Float) -> UInt8 {
         UInt8(clamp01(value) * 255 + 0.5)
@@ -34,6 +41,14 @@ public extension UInt8 {
     }
 }
 
+public extension Comparable {
+//    func in(range: ClosedRange<Self>) -> Bool {
+//        range.contains(self)
+////        self < r
+////        ? range.lowerBound
+////        : self > max ? max : x
+//    }
+}
 
 public struct PValue : Codable  //ClosedRange<Double> { (0.0...1.0) }       // 0...1 restricted float
 {
