@@ -5,19 +5,41 @@
 //  Created by Adam Treister on 8/10/24.
 //
 
+import Foundation
 import SwiftUI
+
+
 
 
     //-------------------------------------------------------------------------------
 struct AnalysisList: View {
+    @Environment(Experiment.self) var experiment
+    
  
-    @State var selection = Set<AnalysisNode.ID>()
     var body: some View {
+//        @Bindable var experiment = experiment
+        
+        
         VStack {
-            
-            Text("Analysis Tree").frame(width: 150)
-            List(selection: $selection) {
-                OutlineGroup(sections, children: \.children) {  item in
+            if let sample = experiment.focusedSample {
+                let tree = sample.getTree()
+                list(sample, tree)
+            }
+            else {
+                Text("Select a sample")
+            }
+        }
+    }
+    
+//    @State var selection:AnalysisNodeSelection = .init()
+    
+    func list(_ sample:Sample, _ tree:AnalysisNode) -> some View {
+        @Bindable var selection = experiment.selectedAnalysisNodes
+        
+        return VStack {
+            Text("Analysis Tree for \(sample.tubeName): selected: \(selection.nodes.debugDescription)").frame(width: 150)
+            List(selection: $selection.nodes) {
+                OutlineGroup(tree, children: \.children) {  item in
                     HStack {
                         Image(systemName: "lightbulb")  //item.image)
                             .resizable()
@@ -34,6 +56,7 @@ struct AnalysisList: View {
                             .foregroundStyle(.orange)
                             .frame(minWidth: 350, minHeight: 30)
                     }
+                    .tag(item)
                 }
             }
         }

@@ -48,7 +48,7 @@ public class Sample : Identifiable, Codable, Hashable
     //    var matrix = CMatrix()
     //    var membership =  [String : PValue]()
     //    var validity = SampleValidityCheck ()
-    var tree = AnalysisNode()
+    
     var imageURL: URL?
     var meta:FCSMetadata?
     
@@ -80,10 +80,8 @@ public class Sample : Identifiable, Codable, Hashable
     
         //-------------------------------------------------------------------------
    init(
-//        id: UUID,
         ref: SampleRef
     ) {
-//        self.id = id
         self.ref = ref
         print("Sample \(ref)")
     }
@@ -119,6 +117,14 @@ public class Sample : Identifiable, Codable, Hashable
             }
         }
         print("sample validity check")
+    }
+    
+    private var _tree:AnalysisNode?
+    func getTree() -> AnalysisNode {
+        if _tree == nil {
+            _tree = SampleNode(self)
+        }
+        return _tree!
     }
 
  

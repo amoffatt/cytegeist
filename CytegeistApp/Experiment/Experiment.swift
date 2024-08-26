@@ -11,6 +11,13 @@ import CytegeistLibrary
 import CytegeistCore
 import SwiftUI
 
+@Observable
+class AnalysisNodeSelection: Codable {
+    var nodes: Set<AnalysisNode> = []
+    
+    var first:AnalysisNode? { nodes.first }
+}
+
 //-----------------------------------------------
 @Observable
 public class Experiment :  Codable, Identifiable, Equatable
@@ -29,6 +36,8 @@ public class Experiment :  Codable, Identifiable, Equatable
 
     var samples:[Sample] = [Sample]()
     var selectedSamples = Set<Sample.ID>()
+    var selectedAnalysisNodes = AnalysisNodeSelection()
+    
     var groups = [CGroup]()
     var tables = [TableSchema]()
     var layouts = [CGLayoutModel]()
@@ -74,7 +83,16 @@ public class Experiment :  Codable, Identifiable, Equatable
     public func clearSampleSelection() {
         selectedSamples.removeAll()
     }
-  
+    
+    public var focusedAnalysisNode: AnalysisNode? {
+        let selectedSample = self[selectedSamples.first]
+        return selectedAnalysisNodes.first ?? selectedSample?.getTree()
+    }
+    
+    public func clearAnalysisNodeSelection() {
+        selectedAnalysisNodes.nodes.removeAll()
+    }
+
     public func readFCSFile(_ url: URL) async
     {
         if  url.isDirectory

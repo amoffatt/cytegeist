@@ -18,24 +18,23 @@ extension Gate {
         
         for node in fjxml.children
         {
-            spec.dims += readDimensions(fjxml: node)
-            switch node.value {
-                
-            case "gating:PolygonGate":
-                let pts: [CGPoint] = readVertices(fjxml: node)
-                spec  = PolygonGate(points: pts)
-                
-            case "gating:RectangleGate":
-                print ("rect gate switch")
-                spec  = RectGate()
-                
-            case "gating:EllipsoidGate":
-                let foci = readVertices(fjxml: node)
-                let edges = readEdges(fjxml: node.findChild(value: "gating:edge") ?? node)
-                spec  = EllipsoidGate(foci: foci, edge: edges)
-                
-            default: print ("in default of gate switch")
-            }
+//            spec.dims += readDimensions(fjxml: node)
+//            switch node.value {
+//                
+//            case "gating:PolygonGate":
+//                let pts: [CGPoint] = readVertices(fjxml: node)
+//                spec  = PolygonGate(points: pts)
+//                
+//            case "gating:RectangleGate":
+//                print ("rect gate switch")
+//                spec  = RectGate()
+//                case "gating:EllipsoidGate":
+//                let foci = readVertices(fjxml: node)
+//                let edges = readEdges(fjxml: node.findChild(value: "gating:edge") ?? node)
+//                spec  = EllipsoidGateDef(foci: foci, edges: edges)
+//                
+//            default: print ("in default of gate switch")
+//            }
             
         }
     }

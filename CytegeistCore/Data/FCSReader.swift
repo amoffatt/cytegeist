@@ -8,7 +8,7 @@
 import Foundation
 import CytegeistLibrary
 
-public typealias FCSParameterValueReader = (DataBufferReader) throws -> Float
+public typealias FCSParameterValueReader = (DataBufferReader) throws -> ValueType
 
 public struct CDimension : Hashable, Codable {
     
@@ -155,17 +155,20 @@ enum EventDataError : Error {
     case inconsistentVariableLengths
 }
 
+public typealias ValueType = Double
+
 public struct EventData: Identifiable {
     public let id: Int
-    public let values: [Float]
+    public let values: [ValueType]
 }
+
 
 public struct EventDataTable: BackedRandomAccessCollection {
     
     public typealias Element = EventData
     public typealias SubSequence = EventDataTable
     
-    public var _indexBacking:[Float] { data.first ?? [] }
+    public var _indexBacking:[ValueType] { data.first ?? [] }
 
     // Subscript to access elements
     public subscript(position: Int) -> EventData {
@@ -180,10 +183,10 @@ public struct EventDataTable: BackedRandomAccessCollection {
     }
     
     
-    public let data:[[Float]]
+    public let data:[[ValueType]]
 //    public let parameterNames:[String]
     
-    init(data:[[Float]]) throws {
+    init(data:[[Double]]) throws {
         self.data = data
         
         if !data.isEmpty {
@@ -195,11 +198,15 @@ public struct EventDataTable: BackedRandomAccessCollection {
         }
     }
     
+    public func columns(_ indices:[Int]) throws -> EventDataTable {
+        return try .init(data: indices.map { data[$0] })
+    }
+    
 }
 
 public struct FCSParameterData {
     public let meta:CDimension
-    public let data:[Float]
+    public let data:[ValueType]
 }
 
 public protocol CPopulationData {
@@ -219,9 +226,30 @@ public extension CPopulationData {
         return .init(meta:parameters[index], data:data.data[index])
     }
     
-    func and(filter:() -> PValue) -> CPopulationData {
-        // AM DEBUGGING
-        fatalError()
+    func data(parameterNames:[String]) throws -> EventDataTable? {
+        guard let data else {
+            return nil
+        }
+        let indices = parameterNames.map { meta.parameterLookup[$0] }
+        if !indices.allSatisfy({ $0 != nil }) {
+            return nil
+        }
+        return try data.columns(indices.map { $0! })
+    }
+
+    
+    
+    func multiply(filterDims: [String], filter:(EventData) -> PValue) throws -> CPopulationData {
+        guard let filterData = try self.data(parameterNames: filterDims) else {
+            throw APIError.noDataAvailable
+        }
+        
+        var probabilities = Array(repeating: PValue.zero, count: data?.count ?? 0)
+        for i in 0..<probabilities.count {
+            let event = filterData[i]
+            probabilities[i] = .init(probability(of: i).p * filter(event).p)
+        }
+        return PopulationData(meta: meta, data: data, probabilities: probabilities)
     }
 }
 
@@ -239,7 +267,7 @@ public struct PopulationData : CPopulationData {
     public let data:EventDataTable?
     public let probabilities: [PValue]
     
-    init(meta: FCSMetadata, data: EventDataTable, probabilities: [PValue]) {
+    init(meta: FCSMetadata, data: EventDataTable?, probabilities: [PValue]) {
         self.meta = meta
         self.data = data
         self.probabilities = probabilities
@@ -370,7 +398,7 @@ public class FCSReader {
         let parameterCount = parameters.count
         
         var parameterDataArray = parameters.map { p in
-            Array(repeating: Float(0), count: meta.eventCount)
+            Array(repeating: ValueType(0), count: meta.eventCount)
         }
         let valueReaderArray = parameters.map { p in p.valueReader }
         
@@ -422,10 +450,10 @@ public class FCSReader {
         switch dataType {
             case .integer:
                 try DataBufferReader.validateIntType(bits: bits)
-                return { reader in Float(try reader.readUInt(bits:bits)) }
+                return { reader in ValueType(try reader.readUInt(bits:bits)) }
             case .float, .double:
                 try DataBufferReader.validateFloatType(bits: bits)
-                return { reader in try reader.readFloat(bits:bits) }
+                return { reader in try ValueType(reader.readFloat(bits:bits)) }
             case .ascii, .unicode:
                 throw error("Unsupported data type \(dataType)")
         }

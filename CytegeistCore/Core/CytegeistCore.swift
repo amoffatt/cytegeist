@@ -12,16 +12,18 @@ import CytegeistLibrary
 public enum APIError : Error {
     var message: String {
         switch self {
-        case .creatingChart(let cause):
-            "Error creating chart: \(cause)"
-        case .parameterNotFound(let name):
-            "Parameter '\(name) not found"
-        case .creatingImage:
-            "Could not create 2D image"
-        case .noDataComputed:
-            "No data computed"
-        case .noSampleDataLoaded:
-            "No sample data loaded"
+            case .creatingChart(let cause):
+                "Error creating chart: \(cause)"
+            case .parameterNotFound(let name):
+                "Parameter '\(name) not found"
+            case .creatingImage:
+                "Could not create 2D image"
+            case .noDataComputed:
+                "No data computed"
+            case .noSampleDataLoaded:
+                "No sample data loaded"
+            case .noDataAvailable:
+                "No population data available"
         }
     }
     case creatingChart(_ cause:Error)
@@ -29,6 +31,7 @@ public enum APIError : Error {
     case creatingImage
     case noDataComputed
     case noSampleDataLoaded
+    case noDataAvailable
 }
 
 @Observable
@@ -293,28 +296,27 @@ public class CytegeistCoreAPI {
             return data
         case .gated(let parent, let gate):
             let parentData = try await self.populationCache.get(parent)
-//            let gatedData = applyGate(data: parentData, gate: gate)
-            // AM DEBUGGING
-            let gatedData = parentData //parentData.and()
-            return gatedData
-            
-        case .union(_, union: let union):
+                if let gate {
+                    return try parentData.multiply(filterDims: gate.dimNames, filter: gate.filter)
+                }
+                return parentData
+                
+            case .union(_, union: let union):
             fatalError("Union gates not implemented")
         }
     }
     
-//    nonisolated private func applyGate(data:EventDataTable, gate:GateRequest) -> EventDataTable {
-////        gate.variableNames
-//        // AM DEBUGGING add gate filter logic
-//        return data
-//        
-//    }
-    
     nonisolated private func _histogram(_ request:HistogramRequest<X>) async throws -> CachedHistogram<X> {
         let population = try await self.populationCache.get(request.population)
         let parameters = try _getParameters(from: population, parameterNames: request.variableNames.values)
+        
         let x = parameters[0]
-        let h = HistogramData<X>(data: .init(x.data), size: request.size ?? .init(defaultHistogramResolution), axes: .init(x.meta.normalizer))
+        // AM DEBUGGING
+        let select = x.data.enumerated().filter { i, x in
+            population.probability(of: i).p > 0.5
+        }.map { $0.element }
+        
+        let h = HistogramData<X>(data: .init(select), size: request.size ?? .init(defaultHistogramResolution), axes: .init(x.meta.normalizer))
         return CachedHistogram(h, view: nil)
     }
     
@@ -359,12 +361,12 @@ public struct GateRequest : Hashable {
     }
     
     public let repr: String
-    let variableNames: [String]
+    let dimNames: [String]
     let filter: (EventData) -> PValue
     
-    public init(repr:String, variableNames: [String], filter: @escaping (EventData) -> PValue) {
+    public init(repr:String, dimNames: [String], filter: @escaping (EventData) -> PValue) {
         self.repr = repr
-        self.variableNames = variableNames
+        self.dimNames = dimNames
         self.filter = filter
     }
 }
@@ -400,7 +402,7 @@ public indirect enum PopulationRequest: Hashable {
 //    }
     
     case sample(_ sample: SampleRef)
-    case gated(_ parent: PopulationRequest, gate:GateRequest)
+    case gated(_ parent: PopulationRequest, gate:GateRequest?)
     case union(_ parent: PopulationRequest, union: [PopulationRequest])
     
     func getSample() -> SampleRef {
@@ -474,4 +476,9 @@ public struct CachedHistogram<D:Dimensions> {
     }
 }
 
+public struct HistogramStatRequest {
+    public let parent: HistogramRequest<X>
+    
+    public let name: String
+}
 

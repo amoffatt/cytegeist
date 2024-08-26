@@ -30,27 +30,36 @@ public extension UTType {
     static var population = UTType(exportedAs: "cytegeist.population")
 }
 
+enum AnalysisNodeError : Error {
+    case noSampleRef
+}
+
 //---------------------------------------------------------
 @Observable
-public class AnalysisNode : Codable, Transferable, Identifiable, Equatable
+public class AnalysisNode : Codable, Transferable, Identifiable, Hashable, Equatable
 {
-
+    
     public static func == (lhs: AnalysisNode, rhs: AnalysisNode) -> Bool {
-         lhs.id == rhs.id
+        lhs.id == rhs.id
+    }
+    
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
     }
     
     public var id = UUID()
-    var name = ""
+    var name: String = ""
     var graphDef =  ChartDef()              // how this population wants to be shown
-    var gate =  Gate()                      // the predicate to filter ones parent
     var statistics =  [Statistic]()         // what to report
     var children: [AnalysisNode]?  =  [AnalysisNode]()        // subpopulations dependent on us
     var extraAttributes = AttributeStore()
     
+    public private(set) var parent: AnalysisNode?
+
     public static var transferRepresentation: some TransferRepresentation {
         CodableRepresentation(contentType: UTType.population)
     }
-
+    
         // addChild
         // removeChild
         // gate.clear()
@@ -58,47 +67,71 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Equatable
     init()
     {
     }
-    init(name: String, children: [AnalysisNode]? = nil)
+    init(children: [AnalysisNode]? = nil)
     {
-        self.name = name
         if let children {
             self.children = children
         }
     }
-
     
-        func addChild(_ node:AnalysisNode) {
-            if children == nil {
-                children = []
-            }
-            children!.append(node)
+    
+    func getSample() -> Sample? { fatalError("Must be overriden") }
+    
+    func addChild(_ node:AnalysisNode) {
+        if children == nil {
+            children = []
         }
+        children!.append(node)
+        
+        node.parent = self
     }
+    
+    func createRequest() throws -> PopulationRequest { fatalError("Implement") }
+}
+
+public class SampleNode : AnalysisNode {
+    public let sample:Sample
+
+    override func getSample() -> Sample { sample }
+    
+    init(_ sample: Sample) {
+        self.sample = sample
+        super.init()
+        self.name = "All Cells"
+    }
+    
+    required init(from decoder: any Decoder) throws {
+        fatalError("init(from:) has not been implemented")
+    }
+    
+    override func createRequest() throws -> PopulationRequest {
+        guard let ref = sample.ref else {
+            throw AnalysisNodeError.noSampleRef
+        }
+        return .sample(ref)
+    }
+}
+public class GroupNode : AnalysisNode {
+}
+
+public class PopulationNode : AnalysisNode {
+    var gate:Gate?                      // the predicate to filter ones parent
+
+    override func getSample() -> Sample? { parent?.getSample() }
+
+    override func createRequest() throws -> PopulationRequest {
+        guard let parent = parent else {
+            throw AnalysisNodeError.noSampleRef
+        }
+        let gateRequest = gate?.createRequest()
+        
+        return .gated(try parent.createRequest(), gate: gateRequest)
+    }
+}
 
 
 
     //-------------------------------------------------------------------------------
     // hardcoded data for an outline group
 
-let sections = [ AnalysisNode(name: "Cytometry Protocols", children: pops),
-                 AnalysisNode(name: "Image Analysis", children: pops),
-                 AnalysisNode(name: "Single Cell Analysis", children: tree)
-]
-let pops = [ AnalysisNode(name: "CD4"),
-             AnalysisNode(name: "CD8"),
-             AnalysisNode(name: "CD45"),
-             AnalysisNode(name: "CD19")
-]
-let tree = [ AnalysisNode(name: "CD34",  children: [ AnalysisNode(name: "Leva X"), AnalysisNode(name: "Leva S") ]),
-             AnalysisNode(name: "BCells", children: [ AnalysisNode(name: "Strada EP" ),
-                                                                          AnalysisNode(name: "Strada AV" ),
-                                                                          AnalysisNode(name: "Strada MP"),
-                                                                          AnalysisNode(name: "Strada EE") ]),
-             AnalysisNode(name: "KB90"),
-             AnalysisNode(name: "TCells", children: [ AnalysisNode(name: "Linea PB X"),
-                                                                           AnalysisNode(name: "Linea PB"),
-                                                                           AnalysisNode(name: "Linea Classic") ]),
-             AnalysisNode(name: "CD45"),
-             AnalysisNode(name: "CD3", children: [ AnalysisNode(name: "CD4"),
-                                                                 AnalysisNode(name: "CD8") ])
-]
+//let root = [ AnalysisNode(name: "All Cells") ]

@@ -12,6 +12,35 @@ import CytegeistLibrary
 import CytegeistCore
 
 
+struct GateConfigView : View {
+    let initialName:String = "T Cells"
+    var finalize:(String) -> Void
+    
+    @State var name:String = ""
+    
+        //    init(name: String, finalize: @escaping (String) -> Void) {
+        //        self.finalize = finalize
+        //        self.name = name
+        //    }
+    
+    var body: some View {
+            //        @Binding var name = name
+        
+        VStack {
+            TextField("Enter gate name", text: $name)
+            Button("OK", action: {
+                finalize(name)
+            })
+            
+        }
+        .onAppear {
+            name = initialName
+        }
+    }
+}
+
+
+
 struct GatingView: View {
 
     @State private var mode = ReportMode.gating
@@ -23,55 +52,136 @@ struct GatingView: View {
     @State public var mouseTranslation = CGPoint.zero
     @State private var isHovering = false
     @State private var offset = CGSize.zero
-//    @State var population: AnalysisNode
+    
+    @State private var candidateGate:Gate? = nil
+//    var sample: Sample?
+    var population: AnalysisNode?
+    
     @State var chartDef: ChartDef = {
         var c = ChartDef()
         c.xAxis = .init(variableName:"FSC-A")
         return c
     }()
     
-    var sample: Sample?
+    @Environment(Experiment.self) var experiment
 
 
 
 //    var selectedSample: Sample
-    var chart: some View {
-        VStack {
-            if let sampleRef = sample?.ref {
-                ChartView(population: .sample(sampleRef), config: chartDef)
-                    .overlay {
-                        GeometryReader { proxy in
-                            ZStack(alignment: .topLeading){
-                                
-                                gateRadius(siz: proxy.size)
-                                gateRange(siz: proxy.size)
-                                gateRect(siz: proxy.size)
-                                gateEllipse(siz: proxy.size)
-                                crosshair(location: mouseLocation, size: proxy.size )
-                                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                                    .gesture(gateDrag)
-                            }
-                        }
+    func chart(_ request: PopulationRequest) -> some View {
+        let showGatePopup:Binding<Bool> = .init(
+            get: { self.candidateGate != nil },
+            set: { _ in self.candidateGate = nil }
+        )
+        
+        return ChartView(population: request, config: chartDef)
+            .overlay {
+                GeometryReader { proxy in
+                    ZStack(alignment: .topLeading){
+                        
+                        gateRadius(siz: proxy.size)
+                        gateRange(siz: proxy.size)
+                        gateRect(siz: proxy.size)
+                        gateEllipse(siz: proxy.size)
+                        crosshair(location: mouseLocation, size: proxy.size )
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            .gesture(gateDrag(areaSize: proxy.size))
                     }
-                    .padding(40)
-                    .allowsHitTesting(true)
-                    .opacity(mode == ReportMode.gating ? 1.0 : 0.0)
+                }
             }
-            else {
-                Text("No sample file reference")
+            .padding(40)
+            .allowsHitTesting(true)
+            .opacity(mode == ReportMode.gating ? 1.0 : 0.0)
+            .alert("Enter gate name", isPresented: showGatePopup) {
+                GateConfigView() { name in
+                    finalizeCandidateGate(gateName: name)
+                }
             }
-//            Chart()
-//            {
-////                PointMark(
-////                    x: .value("Wing Length", $0.wingLength),
-////                    y: .value("Wing Width", $0.wingWidth)
-////                )
-////                .symbol(by: .value("Family", $0.family))
-////                .shadow(color: .blue, radius: 5, x:0, y:0)
-//            }
+    }
+    
+//    func makeChart() -> some View {
+//        
+//    }
+    
+    var axisNormalizers: (x:AxisNormalizer?, y:AxisNormalizer?) {
+        guard let sample = population?.getSample() else {
+            return (nil, nil)
         }
         
+        let xAxis = chartDef.xAxis?.name
+        let yAxis = chartDef.yAxis?.name
+        
+        return (
+            sample.meta?.parameter(named: xAxis.nonNil)?.normalizer,
+            sample.meta?.parameter(named: yAxis.nonNil)?.normalizer
+        )
     }
+    
+    
+    func makeGate(_ start: CGPoint, _ location: CGPoint, areaPixelSize:CGSize)
+    {
+        var minX:Double = .nan, maxX:Double = .nan
+        var minY:Double, maxY: Double
+        
+        let normalizers = axisNormalizers
+        if let xAxis = normalizers.x {
+            
+            minX = min(start.x, location.x) / areaPixelSize.width
+            maxX = max(start.x, location.x) / areaPixelSize.width
+            minX = xAxis.unnormalize(minX)
+            maxX = xAxis.unnormalize(maxX)
+        }
+        
+            // TODO delete
+        let candidateGateName = ""
+        
+        switch curTool
+        {
+            case .range:        addRangeGate(candidateGateName, minX, maxX)
+            case .split:        add2RangeGates(candidateGateName, x: maxX)
+            case .rectangle:    addRectGate(candidateGateName, start: start, location)
+            case .ellipse:      addEllipseGate(candidateGateName, start, location)
+                    //            case .quads:        addQuadGates(gateName, start, location)
+                    //            case .polygon:      addPolygonGate(gateName, start, location)
+                    //            case .spline:       addSplineGate(gateName, start, location)
+            case .radius:       addRadialGate(candidateGateName, start, distance(start, location))
+            default: print("no curTool")
+                
+        }
+    }
+    func addGate(_ gate: Gate)
+    {
+            //        self.candidateGateName = getCandidateGateName()
+        candidateGate = gate
+    }
+    
+    func finalizeCandidateGate(gateName:String) {
+        guard let population,
+              let candidateGate
+        else {
+            print("No population selected")
+            return
+        }
+        let graphDef = population.graphDef            // change axes?
+        let newChild = PopulationNode()
+        newChild.name = gateName
+        newChild.graphDef = graphDef
+        newChild.gate = candidateGate
+        
+        print("adding \(gateName) to \(population.name)")
+        population.addChild(newChild)
+        
+        experiment.selectedAnalysisNodes.nodes = [newChild]
+        
+        self.candidateGate = nil
+    }
+    
+    
+    
+    
+    
+    
+    
     var icons = ["None","triangle.righthalf.fill","pencil","square.and.pencil","ellipsis.circle", "skew", "scribble" ]
 
     var  GatingTools: some View {
@@ -104,10 +214,25 @@ struct GatingView: View {
  
 
     var body: some View {
-        VStack {
-        Text("GatingView")
+        var request:PopulationRequest? = nil
+        var requestError:Error? = nil
+        
+        do {
+            request = try population?.createRequest()
+        } catch {
+            requestError = error
+        }
+
+        return VStack {
 //            Text("Gating Prototype")
-            chart
+            if let sample = population?.getSample() {
+                Text("Sample: \(sample.tubeName), population: \((population?.name).nonNil)")
+            }
+            if let request {
+                chart(request)
+            } else {
+                Text("Error creating chart: \(requestError?.localizedDescription ?? "")")
+            }
 
         }.toolbar {
             GatingTools
@@ -121,25 +246,66 @@ struct GatingView: View {
 //        .onChanged { _ in self.isDragging = true }
 //        .onEnded { _ in self.isDragging = false }
 //}
-var gateDrag: some Gesture {
-    DragGesture()
-        .onChanged { value in offset = value.translation
-            isDragging = true
-//            print(offset)
-            mouseLocation = value.location
-            mouseTranslation = CGPoint( x:offset.width, y: offset.height)
-            if (startLocation == CGPoint.zero)
-            { 
-                startLocation = value.location
-            }
+    func gateDrag(areaSize: CGSize) -> some Gesture {
+        DragGesture()
+            .onChanged { value in offset = value.translation
+                isDragging = true
+    //            print(offset)
+                mouseLocation = value.location
+                mouseTranslation = CGPoint( x:offset.width, y: offset.height)
+                if (startLocation == CGPoint.zero)
+                {
+                    startLocation = value.location
+                }
 
+            }
+            .onEnded { value in
+                isDragging = false
+                makeGate(mouseLocation, startLocation, areaPixelSize:areaSize)
+                startLocation = CGPoint.zero
+                mouseLocation = CGPoint.zero
+            }
+    }
+    
+    func addRangeGate(_ newName: String, _ min: CGFloat, _ max: CGFloat)
+    {
+        guard let axis = chartDef.xAxis else {
+            print("No x axis for gate")
+            return
         }
-        .onEnded { value in
-            isDragging = false
-            startLocation = CGPoint.zero
-            mouseLocation = CGPoint.zero
-        }
-}
+        
+        let gate = Gate(spec: RangeGateDef(chartDef.xAxis?.name ?? "", min, max),
+                        color: Color.yellow, opacity: 0.6)
+        addGate(gate)
+    }
+    
+    func add2RangeGates(_ name: String,x: CGFloat)
+    {
+        addGate(Gate(spec: BifurGateDef(x), color: Color.yellow, opacity: 0.2))
+            //        addGate(Gate(spec: RangeGateDef(,0, x), color: Color.yellow, opacity: 0.2))
+            //        addGate(Gate(spec: RangeGateDef(x, 2 * x), color: Color.red, opacity: 0.2))         // TODO MAX value
+    }
+    
+    func addRectGate(_ name: String, start: CGPoint, _ location: CGPoint)
+    {
+        addGate(Gate(spec: RectGateDef(start.x, start.y, location.x, location.y ), color: Color.blue, opacity: 0.1))
+    }
+    
+    func addRadialGate(_ newName: String,_ start: CGPoint, _ radius: CGFloat)
+    {
+        addGate(Gate(spec: RadialGateDef(start, radius), color: Color.brown, opacity: 0.2))
+    }
+    
+    func addEllipseGate(_ name: String,_ start: CGPoint, _ location: CGPoint)
+    {
+        addGate(Gate(spec: EllipsoidGateDef(start, location), color: Color.brown, opacity: 0.2))
+    }
+
+    
+    
+    
+    
+    
 let DEBUG = false
     //------------------------------------------------------
     // we need the size of the parent View to offset ourself

@@ -63,31 +63,31 @@ class WorkspaceReader {
 }
 
 
-extension AnalysisNode {
-    convenience init(fjxml: TreeNode)
-    {
-        self.init()
-        
-        extraAttributes.merge(fjxml.attrib, uniquingKeysWith: +)
-        if let gs = fjxml.findChild(value: "Graph")
-        {
-            graphDef = ChartDef(fjxml:gs)
-        }
-        if let g = fjxml.findChild(value: "Gate")
-        {
-            gate = Gate(fjxml: g)
-        }
-        for stat in fjxml.children where (stat.value == "Statistic")
-        {
-            statistics.append( Statistic(fjxml: stat))
-        }
-        if let kids = fjxml.findChild(value: "Subpopulations")
-        {
-            addChild(AnalysisNode(fjxml:kids))
-        }
-    }
-    
-}
+//extension AnalysisNode {
+//    convenience init(fjxml: TreeNode)
+//    {
+//        self.init()
+//        
+//        extraAttributes.merge(fjxml.attrib, uniquingKeysWith: +)
+//        if let gs = fjxml.findChild(value: "Graph")
+//        {
+//            graphDef = ChartDef(fjxml:gs)
+//        }
+//        if let g = fjxml.findChild(value: "Gate")
+//        {
+//            gate = Gate(fjxml: g)
+//        }
+//        for stat in fjxml.children where (stat.value == "Statistic")
+//        {
+//            statistics.append( Statistic(fjxml: stat))
+//        }
+//        if let kids = fjxml.findChild(value: "Subpopulations")
+//        {
+//            addChild(AnalysisNode(fjxml:kids))
+//        }
+//    }
+//    
+//}
 
 
 struct Criterion : Codable

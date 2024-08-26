@@ -113,11 +113,21 @@ struct MainAppView : View {
         }
         content:
         {
-            HSplitView {
                 Group {
                     if let selected = app.getSelectedExperiment() {
-                        SampleList(experiment: selected)
-                            .frame(minWidth: 100, idealWidth: 600)
+                        HSplitView {
+                            SampleList(experiment: selected)
+                                .frame(minWidth: 100, idealWidth: 600)
+                            
+                            AnalysisList()
+                                .frame(minWidth: 250, idealWidth: 600, maxWidth: .infinity, maxHeight: .infinity)
+                                .fillAvailableSpace()
+                        }
+                        .environment(selected)
+                        .onChange(of: selected.selectedSamples) {
+                            selected.clearAnalysisNodeSelection()
+                        }
+
                     } else {
                         ZStack {
                             VStack {
@@ -131,12 +141,8 @@ struct MainAppView : View {
                 }
                 .frame(minWidth: 250, idealWidth: 800, maxWidth: .infinity)
                 .fillAvailableSpace()
-                
-                AnalysisList()
-                    .frame(minWidth: 250, idealWidth: 600, maxWidth: .infinity, maxHeight: .infinity)
-                    .fillAvailableSpace()
-            }
-            .navigationSplitViewColumnWidth(min: 600, ideal: 1600, max: .infinity)
+                .navigationSplitViewColumnWidth(min: 600, ideal: 1600, max: .infinity)
+
         }
         detail: {
             if let experiment = app.getSelectedExperiment() {
@@ -148,6 +154,7 @@ struct MainAppView : View {
                     }
                     
                 }
+                .environment(experiment)
                 .environment(experiment.core)
                 .navigationSplitViewColumnWidth(min: 300, ideal: 1200, max: .infinity)
                 .toolbar {
@@ -170,8 +177,8 @@ struct MainAppView : View {
     
     func gatingBuilder(_ exp: Experiment) -> some View {
         VStack {
-            if let sample = exp.focusedSample {
-                GatingView(sample: sample)
+            if let node = exp.focusedAnalysisNode {
+                GatingView(population:node)
             }
         }
     }

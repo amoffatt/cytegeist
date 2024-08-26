@@ -49,7 +49,7 @@ public struct ChartView: View {
                         HistogramView(query: query)
                         ChartAxisView(label: axis.label, normalizer: variable.normalizer)
                     }
-                    .background(.blue)
+//                    .background(.blue)
             default:
                 EmptyView()
 //                }

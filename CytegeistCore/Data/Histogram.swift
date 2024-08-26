@@ -20,8 +20,8 @@ public protocol Dimensions<Axes, Strings, IntCoord, FloatCoord, Data> where
 Axes:Tuple<AxisNormalizer>,
 Strings:Tuple<String>,
 IntCoord:Tuple<Int>,
-FloatCoord:Tuple<Float>,
-Data:Tuple<[Float]>
+FloatCoord:Tuple<ValueType>,
+Data:Tuple<[ValueType]>
 {
     
     associatedtype Axes
@@ -48,27 +48,27 @@ public struct X : Dimensions {
     public typealias Axes = Tuple1<AxisNormalizer>
     public typealias Strings = Tuple1<String>
     public typealias IntCoord = Tuple1<Int>
-    public typealias FloatCoord = Tuple1<Float>
-    public typealias Data = Tuple1<[Float]>
+    public typealias FloatCoord = Tuple1<ValueType>
+    public typealias Data = Tuple1<[ValueType]>
     
     public static func inlineArraySize(size: Tuple1<Int>) -> Int {
         size.x
     }
     
-    public static func inlineArrayIndex(ndIndex: Tuple1<Int>, arraySize: Tuple1<Int>) -> Int {
+    public static func inlineArrayIndex(ndIndex: IntCoord, arraySize: IntCoord) -> Int {
         precondition((0..<arraySize.x).contains(ndIndex.x))
         return ndIndex.x
     }
     
-    public static func count(data: Tuple1<[Float]>) -> Int {
+    public static func count(data: Data) -> Int {
         data.x.count
     }
     
-    public static func value(in data: Tuple1<[Float]>, at index: Int) -> Tuple1<Float> {
+    public static func value(in data: Data, at index: Int) -> FloatCoord {
         .init(data.x[index])
     }
     
-    public static func pointToNDIndex(point: Tuple1<Float>, axes: Tuple1<AxisNormalizer>, arraySize:Tuple1<Int>) -> Tuple1<Int> {
+    public static func pointToNDIndex(point: FloatCoord, axes: Tuple1<AxisNormalizer>, arraySize:IntCoord) -> Tuple1<Int> {
         let bin = axes.x.normalize(Double(point.x)) * Double(arraySize.x)
         return .init(Int(bin))
     }
@@ -80,8 +80,9 @@ public struct XY : Dimensions {
     public typealias Axes = Tuple2<AxisNormalizer>
     public typealias Strings = Tuple2<String>
     public typealias IntCoord = Tuple2<Int>
-    public typealias FloatCoord = Tuple2<Float>
-    
+    public typealias FloatCoord = Tuple2<ValueType>
+    public typealias Data = Tuple2<[ValueType]>
+
     public static func inlineArraySize(size: Tuple2<Int>) -> Int {
         size.x * size.y
     }
@@ -93,15 +94,15 @@ public struct XY : Dimensions {
         return ndIndex.y * arraySize.x + ndIndex.x
     }
     
-    public static func count(data: Tuple2<[Float]>) -> Int {
+    public static func count(data: Data) -> Int {
         data.x.count
     }
     
-    public static func value(in data: Tuple2<[Float]>, at index: Int) -> Tuple2<Float> {
+    public static func value(in data: Data, at index: Int) -> FloatCoord {
         .init(data.x[index], data.y[index])
     }
     
-    public static func pointToNDIndex(point: Tuple2<Float>, axes: Tuple2<AxisNormalizer>, arraySize:Tuple2<Int>) -> Tuple2<Int> {
+    public static func pointToNDIndex(point: FloatCoord, axes: Tuple2<AxisNormalizer>, arraySize:Tuple2<Int>) -> Tuple2<Int> {
         let binX = axes.x.normalize(Double(point.x)) * Double(arraySize.x)
         let binY = axes.y.normalize(Double(point.y)) * Double(arraySize.y)
         return .init(Int(binX), Int(binY))
