@@ -73,49 +73,6 @@ final class App {
         // gain access to the directory and call readFCSFile
     
     
-    func onFCSPicked(_result: Result<[URL], any Error>)
-    {
-        Task {
-            do {
-                try print("FCSPicked urls: ", _result.get())
-                for url in try _result.get()
-                {
-                    let gotAccess = url.startAccessingSecurityScopedResource()
-                    if !gotAccess { break }
-                    await readFCSFile(url)
-                    url.stopAccessingSecurityScopedResource()     // release access
-                }
-            }
-            catch let error as NSError {
-                debug("Ooops! Something went wrong: \(error)")
-            }
-        }
-    }
-    
-   var fcsWaitList: [URL] = []
-    func readFCSFileLater(_ url:URL)
-    {
-        fcsWaitList.append(url)
-    }
-    func processWaitList() async
-    {
-        for url in fcsWaitList {
-           await readFCSFile(url)
-        }
-    }
-    
-    func readFCSFile(_ url:URL) async
-    {
-        let exp = getSelectedExperiment(createIfNil: true)!
-        await exp.readFCSFile(url)
-    }
-
-    func readFCSFiles(_ urls:[URL]) async
-    {
-        for url in urls  {
-            await readFCSFile(url)
-        }
-    }
     
         //-------------------------------------------------------------------------
 // subscript(experimentID: Experiment.ID?) -> Experiment? {

@@ -193,7 +193,7 @@ struct SampleList: View {
                        allowsMultipleSelection: true)
         { result in
             switch result {
-            case .success:  app.onFCSPicked(_result: result)       // gain access to the directory
+            case .success:  experiment.onFCSPicked(_result: result)       // gain access to the directory
             case .failure(let error):  print(error)         // handle error
             }
         }
