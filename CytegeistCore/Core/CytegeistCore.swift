@@ -315,13 +315,17 @@ public class CytegeistCoreAPI {
         let parameters = try _getParameters(from: population, parameterNames: request.dims.values)
         
         let x = parameters[0]
-        // AM DEBUGGING
-        let select = x.data.enumerated().filter { i, x in
-            population.probability(of: i).p > 0.5
-        }.map { $0.element }
+//        // AM DEBUGGING
+//        let select = x.data.enumerated().filter { i, x in
+//            population.probability(of: i).p > 0.5
+//        }.map { $0.element }
         
-        let h = HistogramData<X>(data: .init(select), size: request.size ?? .init(defaultHistogramResolution), axes: .init(x.meta.normalizer))
-        return CachedHistogram(h, view: nil)
+        let h = HistogramData<X>(data: .init(x.data),
+                                 probabilities: population.probabilities,
+                                 size: request.size ?? .init(defaultHistogramResolution),
+                                 axes: .init(x.meta.normalizer))
+        let smoothed = h.convolute(kernel: request.smoothing.kernel)
+        return CachedHistogram(h, smoothed, view: nil)
     }
     
     nonisolated private func _histogram2D(_ request:HistogramRequest<XY>) async throws -> CachedHistogram<XY> {
@@ -329,17 +333,10 @@ public class CytegeistCoreAPI {
         let parameters = try _getParameters(from: population, parameterNames: request.dims.values)
         let x = parameters[0]
         let y = parameters[1]
-        
-            // AM DEBUGGING
-        let selectX = x.data.enumerated().filter { i, x in
-            population.probability(of: i).p > 0.5
-        }.map { $0.element }
-        let selectY = y.data.enumerated().filter { i, x in
-            population.probability(of: i).p > 0.5
-        }.map { $0.element }
 
         let h = HistogramData<XY>(
-            data: .init(selectX, selectY),
+            data: .init(x.data, y.data),
+            probabilities: population.probabilities,
             size: request.size ?? .init(defaultHistogramResolution, defaultHistogramResolution),
             axes: .init(x.meta.normalizer, y.meta.normalizer))
         
@@ -347,7 +344,8 @@ public class CytegeistCoreAPI {
             throw APIError.creatingImage
         }
         
-        return CachedHistogram(h, view: AnyView(image.resizable().scaleEffect(y: -1)))
+        let smoothed = h.convolute(kernel: request.smoothing.kernel)
+        return CachedHistogram(h, smoothed, view: AnyView(image.resizable().scaleEffect(y: -1)))
     }
 
 }
@@ -507,21 +505,25 @@ public struct HistogramRequest<D:Dimensions> : Hashable {
     
     public let dims:D.Strings
     public let size:D.IntCoord?
+    public let smoothing:HistogramSmoothing
     
-    public init(_ population: PopulationRequest, _ dims: D.Strings, size:D.IntCoord? = nil) {
+    public init(_ population: PopulationRequest, _ dims: D.Strings, size:D.IntCoord? = nil, smoothing:HistogramSmoothing = .off) {
         self.population = population
         self.dims = dims
         self.size = size
+        self.smoothing = smoothing
     }
 }
 
 
 public struct CachedHistogram<D:Dimensions> {
     public let histogram:HistogramData<D>
+    public let smoothed:HistogramData<D>?
     public let view:AnyView?
     
-    public init(_ histogram: HistogramData<D>, view: AnyView? =  nil) {
+    public init(_ histogram: HistogramData<D>, _ smoothed:HistogramData<D>?, view: AnyView? =  nil) {
         self.histogram = histogram
+        self.smoothed = smoothed
         self.view = view
     }
 }

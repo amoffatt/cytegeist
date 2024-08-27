@@ -10,7 +10,7 @@ import CytegeistLibrary
 
 public class TestUtil {
     
-    public static func addNormalDistribution(to array: inout [Int], amplitude: Float, mean: Float, stdDev: Float) {
+    public static func addNormalDistribution(to array: inout [Float], amplitude: Float, mean: Float, stdDev: Float) {
         guard !array.isEmpty else { return }
         
         let xmax = Float(array.count - 1)
@@ -18,7 +18,7 @@ public class TestUtil {
         for i in 0..<array.count {
             let x = Float(i) / xmax
             let normalValue = (1 / (stdDev * sqrt(2 * .pi))) * exp(-pow(x - mean, 2) / (2 * pow(stdDev, 2)))
-            array[i] += Int(normalValue * amplitude)
+            array[i] += Float(normalValue * amplitude)
         }
     }
     
@@ -32,7 +32,7 @@ public class TestUtil {
             await sleep(2.0)
             
             await MainActor.run {
-                var bins:[Int] = Array(repeating: 0, count: 256)
+                var bins:[Float] = Array(repeating: 0, count: 256)
                 TestUtil.addNormalDistribution(to: &bins, amplitude: 8, mean: 0.3, stdDev: 0.2)
                 result.progress(
                     CachedHistogram(
@@ -40,6 +40,7 @@ public class TestUtil {
                             bins: bins,
                             size: .init(bins.count),
                             axes: .init(.linear(min: 0, max: 200))),
+                        nil,
                         view: nil
                     )
                 )

@@ -27,6 +27,13 @@ if (DEBUG)  {
 private let newline = "\n".data(using: .utf8)!
 private let comma = ",".data(using: .utf8)!
 
+public func isEmpty(_ value:String?) -> Bool {
+    value?.isEmpty ?? true
+}
+
+public func nonNil(_ value:String?) -> String {
+    value ?? ""
+}
 
 
 public extension String {

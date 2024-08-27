@@ -215,6 +215,7 @@ public protocol CPopulationData {
     var meta:FCSMetadata { get }
     var data:EventDataTable? { get }
     func probability(of index: Int) -> PValue
+    var probabilities:[PValue]? { get }
 }
 
 public extension CPopulationData {
@@ -262,21 +263,24 @@ public struct FCSFile : CPopulationData {
     public func probability(of index: Int) -> PValue {
         .init(1.0)
     }
+    
+    public var probabilities: [PValue]? { nil }
 }
 
 public struct PopulationData : CPopulationData {
     public let meta:FCSMetadata
     public let data:EventDataTable?
-    public let probabilities: [PValue]
+    private let _probabilities: [PValue]
+    public var probabilities: [PValue]? { _probabilities }
     
     init(meta: FCSMetadata, data: EventDataTable?, probabilities: [PValue]) {
         self.meta = meta
         self.data = data
-        self.probabilities = probabilities
+        self._probabilities = probabilities
     }
     
     public func probability(of index: Int) -> PValue {
-        probabilities[index]
+        _probabilities[index]
     }
 }
 

@@ -10,17 +10,21 @@ import CytegeistLibrary
 
 public struct ChartAxisView: View {
     var dim:Binding<String>
-    let normalizer: AxisNormalizer
+    let normalizer: AxisNormalizer?
     var sampleMeta: FCSMetadata?
 
     public var body: some View {
-        let label = sampleMeta?.parameter(named: dim.wrappedValue)?.name ?? "<None selected>"
+//        let label = sampleMeta?.parameter(named: dim.wrappedValue)?.name ?? "<None selected>"
         let availableParameters = sampleMeta?.parameters ?? []
         
         GeometryReader { proxy in
             VStack {
-                ticks(proxy)
+                if let normalizer = normalizer {
+                    ticks(proxy, normalizer)
+                }
                 Picker("", selection: dim) {
+                    Text("<None>")
+                        .tag("")
                     ForEach(availableParameters, id: \.name) { p in
                         Text(p.displayName)
                             .tag(p.name)
@@ -31,7 +35,7 @@ public struct ChartAxisView: View {
         }
     }
     
-    func ticks(_ proxy: GeometryProxy) -> some View {
+    func ticks(_ proxy: GeometryProxy, _ normalizer:AxisNormalizer) -> some View {
         let ticks = normalizer.tickMarks(10)
         let size = proxy.size
         return ZStack(alignment: .topLeading) {

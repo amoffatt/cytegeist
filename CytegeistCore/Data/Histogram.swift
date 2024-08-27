@@ -281,16 +281,15 @@ public struct Tuple3<Value> {
 public struct HistogramData<D:Dimensions> {
 //    public typealias Axes = AxesTuple
     
-    public let bins:[UInt8]
-    public let smoothedBins:[UInt8]
-    public let maxCount: Int
+    public let bins:[Float]
+    public let mode: Float
     
     public let axes:D.Axes
     public let countAxis:AxisNormalizer?
     
     public var size:D.IntCoord
     
-    private let binScaling:Double
+//    private let mode:Float
     
     public func normalizedCount(bin: D.IntCoord) -> Float {
         let index = D.inlineArrayIndex(ndIndex: bin, arraySize: size)
@@ -298,29 +297,26 @@ public struct HistogramData<D:Dimensions> {
     }
     
     public func normalizedCount(bin: Int) -> Float {
-        return bins[bin].unitFloat
+        return bins[bin] / mode
     }
 
-    public init(bins: [Int], size: D.IntCoord, axes: D.Axes, countAxis: AxisNormalizer? = nil) {
-        self.maxCount = bins.max() ?? 0
-        let binScaling = Double(max(1, maxCount)) / 255.0
-        self.bins = bins.map { UInt8(Double($0) / binScaling) }
-        self.binScaling = binScaling
+    public init(bins: [Float], size: D.IntCoord, axes: D.Axes, countAxis: AxisNormalizer? = nil) {
+        self.mode = bins.max() ?? 0
+        self.bins = bins
         
         self.axes = axes
         self.size = size
-        self.countAxis = countAxis ?? defaultCountAxis(maxCount: maxCount)
-        self.smoothedBins = self.bins // TODO
+        self.countAxis = countAxis ?? defaultCountAxis(mode: mode)
     }
     
-    public init(data: D.Data, size: D.IntCoord, axes: D.Axes, countAxis: AxisNormalizer? = nil) {
-        var bins = Array(repeating: 0, count: D.inlineArraySize(size:size))
+    public init(data: D.Data, probabilities: [PValue]?, size: D.IntCoord, axes: D.Axes, countAxis: AxisNormalizer? = nil) {
+        var bins = Array(repeating: Float(0), count: D.inlineArraySize(size:size))
         
         for i in 0..<D.count(data: data) {
             let point = D.value(in: data, at: i)
             let ndBin = D.pointToNDIndex(point: point, axes: axes, arraySize: size)
             let bin = D.inlineArrayIndex(ndIndex:ndBin, arraySize: size)
-            bins[bin] += 1              // TODO pValue??
+            bins[bin] += Float(probabilities?[i].p ?? 1)
         }
         
         self.init(bins:bins, size:size, axes:axes, countAxis:countAxis)
@@ -329,12 +325,39 @@ public struct HistogramData<D:Dimensions> {
 
 
 
-fileprivate func defaultCountAxis(maxCount:Int?) -> AxisNormalizer {
+fileprivate func defaultCountAxis(mode:Float?) -> AxisNormalizer {
 //        var maxValue = max(1, bins.max() ?? 1)
-    let maxCount = max(1, maxCount ?? 0)
-    return .linear(min: 0, max: Double(maxCount))
+    let mode = max(1, mode ?? 0)
+    return .linear(min: 0, max: Double(mode))
 }
 
+
+public enum HistogramSmoothing {
+    case off, low, high
+    
+    var kernel: Any? {
+        switch self {
+            case .off:
+                nil
+            case .low:
+                fatalError()
+            case .high:
+                fatalError()
+        }
+    }
+}
+
+public extension HistogramData<X> {
+    func convolute(kernel:Any?) -> HistogramData<X>? {
+        nil
+    }
+}
+
+public extension HistogramData<XY> {
+    func convolute(kernel:Any?) -> HistogramData<XY>? {
+        nil
+    }
+}
 
 func smooth()
 {
