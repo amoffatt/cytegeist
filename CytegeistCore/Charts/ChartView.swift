@@ -25,7 +25,7 @@ public struct ChartView<Overlay>: View where Overlay:View {
     @Environment(CytegeistCoreAPI.self) var core: CytegeistCoreAPI
     
     let population: PopulationRequest
-    let config: ChartDef
+    var config: Binding<ChartDef>
     let chartOverlay:() -> Overlay
     
     @State var sampleQuery: APIQuery<FCSFile>? = nil
@@ -33,14 +33,29 @@ public struct ChartView<Overlay>: View where Overlay:View {
     @State var errorMessage:String = ""
     
     
-    public init(population: PopulationRequest, config:ChartDef, overlay:@escaping () -> Overlay = { EmptyView() }){
+    public init(population: PopulationRequest, config:Binding<ChartDef>, overlay:@escaping () -> Overlay = { EmptyView() }){
         self.population = population
         self.config = config
         self.chartOverlay = overlay
     }
     
+    @MainActor
+    func axisBinding(_ chartDef:Binding<ChartDef>, _ axis:WritableKeyPath<ChartDef, AxisDef?>) -> Binding<String> {
+        Binding(get: {
+            let axisDef = chartDef.wrappedValue[keyPath:axis]
+            return axisDef?.name ?? ""
+        }, set: {
+            var value = chartDef.wrappedValue
+            value[keyPath:axis] = AxisDef(dim: $0)
+            chartDef.wrappedValue = value
+        })
+    }
+    
     public var body: some View {
-        
+//        let xAxis = sampleQuery?.data?.meta.parameter(named: config.xAxis?.name)
+//        let yAxis = sampleQuery?.data?.meta.parameter(named: config.yAxis?.name)
+        let sampleMeta = sampleQuery?.data?.meta
+
         VStack {
             if !errorMessage.isEmpty {
                 Text("\(errorMessage)")
@@ -54,7 +69,7 @@ public struct ChartView<Overlay>: View where Overlay:View {
                     VStack {
                         HistogramView(query: query)
                             .overlay(chartOverlay())
-                        ChartAxisView(label: axis.label, normalizer: dim.normalizer)
+                        ChartAxisView(dim:axisBinding(config, \.xAxis), normalizer: dim.normalizer, sampleMeta: sampleMeta)
                     }
             case .histogram2D(let query, let axes, let dims):
 //                let columns = [
@@ -75,16 +90,10 @@ public struct ChartView<Overlay>: View where Overlay:View {
                         
                         GeometryReader { proxy in
                             let axisWidth = proxy.size.height
-                            ChartAxisView(label: axes.y.label, normalizer: dims.y.normalizer)
+                            ChartAxisView(dim: axisBinding(config, \.yAxis), normalizer: dims.y.normalizer, sampleMeta: sampleMeta)
                                 .frame(width: axisWidth, height: 80)
-//                                .border(.red)
                                 .rotationEffect(.degrees(-90), anchor: .topLeading)
                                 .offset(y: axisWidth)
-                        //                            .fixedSize()
-                        //                            .background(.green)
-//                        Rectangle()
-//                            .frame(width: 80)
-//                            .frame(maxHeight: .infinity)
                         }
                         .frame(width: 80)
                         .frame(maxHeight: .infinity)
@@ -93,11 +102,9 @@ public struct ChartView<Overlay>: View where Overlay:View {
 //                    .fillAvailableSpace()
                     
                     HStack(spacing: 0) {
-                        ChartAxisView(label: axes.x.label, normalizer: dims.x.normalizer)
+                        ChartAxisView(dim:axisBinding(config, \.xAxis), normalizer: dims.x.normalizer, sampleMeta: sampleMeta)
                             .frame(height: 80)
                             .frame(maxWidth: .infinity)
-//                            .border(.green)
-                        //            Selector()
                         Rectangle()
                             .fill(.clear)
                             .frame(width: 80, height: 80)
@@ -112,7 +119,7 @@ public struct ChartView<Overlay>: View where Overlay:View {
         .onChange(of: population.getSample(), initial: true, updateSampleQuery)
         
         .onChange(of: population, initial: true, updateChartQuery)
-        .onChange(of: config, updateChartQuery)
+        .onChange(of: config.wrappedValue, updateChartQuery)
         .onChange(of: sampleQuery?.data?.meta, updateChartQuery)
     }
     
@@ -135,6 +142,7 @@ public struct ChartView<Overlay>: View where Overlay:View {
     @MainActor func updateChartQuery()  {
         chartQuery?.dispose()
         errorMessage = ""
+        let config = self.config.wrappedValue
         if let meta = sampleQuery?.data?.meta {
             if config.yAxis == nil,
                let axis = config.xAxis {

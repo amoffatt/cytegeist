@@ -72,7 +72,6 @@
 		B6C9A4972C7679BF00DB6786 /* FJWorkspaceReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4682C75D04800DB6786 /* FJWorkspaceReader.swift */; };
 		B6C9A49B2C767FAF00DB6786 /* CGLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A49A2C767FAF00DB6786 /* CGLayout.swift */; };
 		B6C9A49C2C7680EA00DB6786 /* FocusedValues+Experiment.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A46A2C75D04800DB6786 /* FocusedValues+Experiment.swift */; };
-		B6C9A49D2C7680EA00DB6786 /* Gate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4692C75D04800DB6786 /* Gate.swift */; };
 		B6C9A49E2C7680EA00DB6786 /* Experiment.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A46B2C75D04800DB6786 /* Experiment.swift */; };
 		B6C9A49F2C7680EA00DB6786 /* Sample+ItemProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4672C75D04800DB6786 /* Sample+ItemProvider.swift */; };
 		B6C9A4A02C7680EA00DB6786 /* Sample+ImportImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4702C75D04800DB6786 /* Sample+ImportImage.swift */; };
@@ -91,6 +90,7 @@
 		B6C9A4B82C77D9AA00DB6786 /* ChartAxisView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4B72C77D9AA00DB6786 /* ChartAxisView.swift */; };
 		B6C9A4BA2C77DB3700DB6786 /* AxisNormalizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4B92C77DB3700DB6786 /* AxisNormalizer.swift */; };
 		DC05A3D12C798EC900C08BBF /* Smoothing.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC05A3D02C798EC900C08BBF /* Smoothing.swift */; };
+		DC23F02F2C7D3C0B002FCDC0 /* Gate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4692C75D04800DB6786 /* Gate.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -386,6 +386,7 @@
 		B63EEE8E2C569BFA00E465C9 /* Core */ = {
 			isa = PBXGroup;
 			children = (
+				B6C9A4692C75D04800DB6786 /* Gate.swift */,
 				B68529682C74DBB500EF9EF4 /* ComputeCache.swift */,
 				B63EEE8F2C569C7600E465C9 /* CytegeistCore.swift */,
 				DC05A3D02C798EC900C08BBF /* Smoothing.swift */,
@@ -510,7 +511,6 @@
 				B6C9A46B2C75D04800DB6786 /* Experiment.swift */,
 				B6C9A46D2C75D04800DB6786 /* Sample.swift */,
 				B6C9A46F2C75D04800DB6786 /* AnalysisNode.swift */,
-				B6C9A4692C75D04800DB6786 /* Gate.swift */,
 				B6C9A4702C75D04800DB6786 /* Sample+ImportImage.swift */,
 				B6C9A4672C75D04800DB6786 /* Sample+ItemProvider.swift */,
 				B6C9A46A2C75D04800DB6786 /* FocusedValues+Experiment.swift */,
@@ -852,6 +852,7 @@
 				B63EEE922C569CB300E465C9 /* SampleRef.swift in Sources */,
 				B6C9A4B02C76E2CD00DB6786 /* FCS.swift in Sources */,
 				B64173922C58A89A001AA2F4 /* CoreTestUtil.swift in Sources */,
+				DC23F02F2C7D3C0B002FCDC0 /* Gate.swift in Sources */,
 				B63D164C2C55E54500E81C2F /* DataBufferReader.swift in Sources */,
 				B63EEE902C569C7700E465C9 /* CytegeistCore.swift in Sources */,
 				B68529692C74DBB500EF9EF4 /* ComputeCache.swift in Sources */,
@@ -887,7 +888,6 @@
 				B6C9A45C2C75D01300DB6786 /* LayoutItemViews.swift in Sources */,
 				B6C9A45B2C75D01300DB6786 /* CGLayoutView.swift in Sources */,
 				B6C9A49C2C7680EA00DB6786 /* FocusedValues+Experiment.swift in Sources */,
-				B6C9A49D2C7680EA00DB6786 /* Gate.swift in Sources */,
 				B6C9A49E2C7680EA00DB6786 /* Experiment.swift in Sources */,
 				B6C9A49F2C7680EA00DB6786 /* Sample+ItemProvider.swift in Sources */,
 				B6C9A4A02C7680EA00DB6786 /* Sample+ImportImage.swift in Sources */,
@@ -1004,7 +1004,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = 9D5TC7JPM8;
+				DEVELOPMENT_TEAM = WFRFMHK56T;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
@@ -1045,7 +1045,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = 9D5TC7JPM8;
+				DEVELOPMENT_TEAM = WFRFMHK56T;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
@@ -1290,7 +1290,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"CytegeistApp/Preview Content\"";
-				DEVELOPMENT_TEAM = 9D5TC7JPM8;
+				DEVELOPMENT_TEAM = WFRFMHK56T;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "$(TARGET_NAME)/Info.plist";
@@ -1319,7 +1319,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"CytegeistApp/Preview Content\"";
-				DEVELOPMENT_TEAM = 9D5TC7JPM8;
+				DEVELOPMENT_TEAM = WFRFMHK56T;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "$(TARGET_NAME)/Info.plist";
@@ -1347,7 +1347,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = 9D5TC7JPM8;
+				DEVELOPMENT_TEAM = WFRFMHK56T;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
@@ -1391,7 +1391,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = 9D5TC7JPM8;
+				DEVELOPMENT_TEAM = WFRFMHK56T;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";

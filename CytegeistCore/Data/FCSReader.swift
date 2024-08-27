@@ -10,7 +10,9 @@ import CytegeistLibrary
 
 public typealias FCSParameterValueReader = (DataBufferReader) throws -> ValueType
 
-public struct CDimension : Hashable, Codable {
+public struct CDimension : Identifiable, Hashable, Codable {
+    public var id: String { name }
+    
     
     public static func displayName(_ name:String, _ stain:String) -> String {
         if name == stain {
@@ -132,8 +134,8 @@ public struct FCSMetadata: Hashable, Codable {
         }
     }
     
-    public func parameter(named: String) -> CDimension? {
-        if let parameters, let index = parameterLookup[named] {
+    public func parameter(named: String?) -> CDimension? {
+        if let named, let parameters, let index = parameterLookup[named] {
             return parameters.get(index: index)
         }
         return nil

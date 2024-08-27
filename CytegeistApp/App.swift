@@ -11,22 +11,6 @@ import CytegeistCore
 
 
 
-// switch between table and gallery views
-enum ViewMode: String, CaseIterable, Identifiable {
-    var id: Self { self }
-    case gallery
-    case table
-}
-
-    // switch between table and gallery views
-enum ReportMode: String, CaseIterable, Identifiable {
-    var id: Self { self }
-    case gating
-    case table
-    case layout
-}
-
-
 @Observable
 final class App {
     

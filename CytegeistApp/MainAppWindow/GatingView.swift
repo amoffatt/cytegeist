@@ -75,7 +75,7 @@ struct GatingView: View {
             set: { _ in self.candidateGate = nil }
         )
         
-        return ChartView(population: request, config: chartDef) {
+        return ChartView(population: request, config: $chartDef) {
             VStack {
                 GeometryReader { proxy in
                     let size = proxy.size
@@ -134,7 +134,7 @@ struct GatingView: View {
         end.y = 1 - end.y
 
         let normalizers = axisNormalizers
-        var rect = CGRect(
+        let rect = CGRect(
             from: start.unnormalize(normalizers),
             to: end.unnormalize(normalizers)
         )

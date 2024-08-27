@@ -9,14 +9,24 @@ import SwiftUI
 import CytegeistLibrary
 
 public struct ChartAxisView: View {
-    let label: String
+    var dim:Binding<String>
     let normalizer: AxisNormalizer
-    
+    var sampleMeta: FCSMetadata?
+
     public var body: some View {
+        let label = sampleMeta?.parameter(named: dim.wrappedValue)?.name ?? "<None selected>"
+        let availableParameters = sampleMeta?.parameters ?? []
+        
         GeometryReader { proxy in
             VStack {
                 ticks(proxy)
-                Text(label)
+                Picker("", selection: dim) {
+                    ForEach(availableParameters, id: \.name) { p in
+                        Text(p.displayName)
+                            .tag(p.name)
+                    }
+                }
+                .pickerStyle(.menu)
             }
         }
     }
@@ -40,9 +50,9 @@ public struct ChartAxisView: View {
     }
 }
 
-#Preview {
-    ChartAxisView(
-        label:"My Parameter",
-        normalizer: .linear(min: -2.1, max: 520)
-    )
-}
+//#Preview {
+//    ChartAxisView(
+//        label:"My Parameter",
+//        normalizer: .linear(min: -2.1, max: 520)
+//    )
+//}
