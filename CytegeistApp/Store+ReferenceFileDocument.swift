@@ -7,6 +7,7 @@ The store extension file support.
 
 import SwiftUI
 import UniformTypeIdentifiers
+import CytegeistCore
 
 extension App: ReferenceFileDocument {
     typealias Snapshot = [Experiment]

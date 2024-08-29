@@ -7,6 +7,7 @@ The plant extension to support drag and drop.
 
 import Foundation
 import UniformTypeIdentifiers
+import CytegeistCore
 
 extension Sample {
     static var draggableType = UTType(exportedAs: "com.cytegeist.CyteGeistApp.sample")

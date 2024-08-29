@@ -98,9 +98,9 @@ struct Criterion : Codable
     }
 }
 
-extension Statistic {
-    init(fjxml: TreeNode)
-    {
-        extraAttributes.merge(fjxml.attrib, uniquingKeysWith: +)
-   }
-}
+//extension Statistic {
+//    init(fjxml: TreeNode)
+//    {
+//        extraAttributes.merge(fjxml.attrib, uniquingKeysWith: +)
+//   }
+//}

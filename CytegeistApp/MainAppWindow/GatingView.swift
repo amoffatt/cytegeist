@@ -53,7 +53,7 @@ struct GatingView: View {
     @State private var isHovering = false
     @State private var offset = CGSize.zero
     
-    @State private var candidateGate:Gate? = nil
+    @State private var candidateGate:AnyGate? = nil
 //    var sample: Sample?
     var population: AnalysisNode?
     
@@ -65,21 +65,43 @@ struct GatingView: View {
     }()
     
     @Environment(Experiment.self) var experiment
+    
+    func visibleChildren() -> [ChartAnnotation] {
+        if let children = population?.children {
+            let result = children.compactMap { child in
+                child.chartView(chart: chartDef)
+            }
+            return result
+        }
+        return []
+//        guard let children:[PopulationNode] = population?.getChildren() else {
+//            return []
+//        }
+        
+//        children.filter { child in
+//            let gate = child.gate
+////            gate.dims.
+//        }
+    }
 
 
 
 //    var selectedSample: Sample
-    func chart(_ request: PopulationRequest) -> some View {
+    func chart(_ request: PopulationRequest, _ meta: FCSMetadata) -> some View {
         let showGatePopup:Binding<Bool> = .init(
             get: { self.candidateGate != nil },
             set: { _ in self.candidateGate = nil }
         )
+        
         
         return ChartView(population: request, config: $chartDef) {
             VStack {
                 GeometryReader { proxy in
                     let size = proxy.size
                     ZStack(alignment: .topLeading){
+                        ForEach(visibleChildren()) { child in
+                            AnyView(child.view(meta, size))
+                        }
                         
                         gateRadius(siz: proxy.size)
                         gateRange(siz: proxy.size)
@@ -90,7 +112,6 @@ struct GatingView: View {
                             .gesture(gateDrag(areaSize: proxy.size))
                     }
 //                    .frame(width:size.width, height:size.height)
-                    .border(.green.opacity(0.8))
                 }
             }
             .fillAvailableSpace()
@@ -109,8 +130,12 @@ struct GatingView: View {
 //        
 //    }
     
+    var sampleMeta: FCSMetadata? {
+        population?.getSample()?.meta
+    }
+    
     var axisNormalizers: Tuple2<AxisNormalizer?> {
-        guard let sample = population?.getSample() else {
+        guard let sampleMeta else {
             return .init(nil, nil)
         }
         
@@ -118,8 +143,8 @@ struct GatingView: View {
         let yAxis = chartDef.yAxis?.name
         
         return .init(
-            sample.meta?.parameter(named: xAxis.nonNil)?.normalizer,
-            sample.meta?.parameter(named: yAxis.nonNil)?.normalizer
+            sampleMeta.parameter(named: xAxis.nonNil)?.normalizer,
+            sampleMeta.parameter(named: yAxis.nonNil)?.normalizer
         )
     }
     
@@ -179,7 +204,7 @@ struct GatingView: View {
             default: break
         }
     }
-    func addGate(_ gate: Gate)
+    func addGate(_ gate: AnyGate)
     {
             //        self.candidateGateName = getCandidateGateName()
         candidateGate = gate
@@ -257,11 +282,19 @@ struct GatingView: View {
 //            Text("Gating Prototype")
             if let sample = population?.getSample() {
                 Text("Sample: \(sample.tubeName), population: \((population?.name).nonNil)")
+                
+                if let meta = sample.meta {
+                    if let request {
+                        chart(request, meta)
+                    } else {
+                        Text("Error creating chart: \(requestError?.localizedDescription ?? "")")
+                    }
+                } else {
+                    Text("Sample metadata not found")
+                }
             }
-            if let request {
-                chart(request)
-            } else {
-                Text("Error creating chart: \(requestError?.localizedDescription ?? "")")
+            else {
+                Text("Select a sample")
             }
 
         }.toolbar {
@@ -299,9 +332,7 @@ struct GatingView: View {
     
     func addRangeGate(_ newName: String, _ dim:String, _ min: CGFloat, _ max: CGFloat)
     {
-        let gate = Gate(spec: RangeGateDef(dim, min, max),
-                        color: Color.yellow, opacity: 0.6)
-        addGate(gate)
+        addGate(RangeGateDef(dim, min, max))
     }
     
     func add2RangeGates(_ name: String, _ dim:String, _ x: CGFloat)
@@ -313,7 +344,7 @@ struct GatingView: View {
     
     func addRectGate(_ name: String, _ dims:Tuple2<String>, _ rect: CGRect)
     {
-        addGate(Gate(spec: RectGateDef(dims, rect), color: Color.blue, opacity: 0.1))
+        addGate(RectGateDef(dims, rect))
     }
     
     func addRadialGate(_ newName: String,_ start: CGPoint, _ radius: CGFloat)

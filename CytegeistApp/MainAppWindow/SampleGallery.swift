@@ -7,6 +7,7 @@ The plant gallery view.
 
 import SwiftUI
 import Foundation
+import CytegeistCore
 
 struct SampleGallery: View {
     var experiment: Experiment

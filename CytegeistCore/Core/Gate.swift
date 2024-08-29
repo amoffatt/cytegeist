@@ -11,80 +11,82 @@ import CytegeistLibrary
 import Combine
 
     //--------------------------------------------------------
-public struct Gate : Codable, Hashable
-{
-    public var invert = false;         // any gate can be inverted
-//    var extraAttributes = AttributeStore()
-    public var spec: (any GateDef)?
-    @CodableIgnored
-    public var color = Color.pink
-    public var opacity = 0.2
-    
-    public init(spec: any GateDef, color: Color, opacity: CGFloat)
-    {
-        self.spec = spec
-        self.color = color
-        self.opacity = opacity
-    }
-    
-    
-    public init()
-    {
-//        spec = GateDef()  // define empty
-    }
-
-        
-//   public func setInvert(on: Bool)
+//public struct Gate : Codable, Hashable
+//{
+//    
+//    public var invert = false;         // any gate can be inverted
+////    var extraAttributes = AttributeStore()
+//    public var spec: (any GateDef)?
+//    @CodableIgnored
+//    public var color = Color.pink
+//    public var opacity = 0.2
+//    
+//    public init(spec: any GateDef, color: Color, opacity: CGFloat)
 //    {
-//        self.invert = on
+//        self.spec = spec
+//        self.color = color
+//        self.opacity = opacity
 //    }
-    public init(from decoder: any Decoder) throws {
-        fatalError()
-    }
-    
-    public func encode(to encoder: any Encoder) throws {
-//        color.encode(to: encoder)
-        try opacity.encode(to: encoder)
-        try spec?.encode(to: encoder)
-    }
-    
-    
-    public func hash(into hasher: inout Hasher) {
-        ///        hasher.combine(x)
-        ///         hasher.combine(y)
-    }
-    
-    public static func == (lhs: Gate, rhs: Gate) -> Bool {
-        lhs.hashValue == rhs.hashValue;
-    }
-    
-//    public func testMembership(inNumber: Double) -> PValue
+//    
+//    
+//    public init()
 //    {
-//        return PValue(1.0)
+////        spec = GateDef()  // define empty
 //    }
-    
-        
-//    func createRequest() -> (any GateDef)? {
-//        return spec
-//        guard let spec else {
-//            return nil
-//        }
-        
-//        let p = spec.probability
-//        let probability:(EventData) -> PValue = invert
-//        ? { p($0).inverted }
-//        : { p($0) }
+//
 //        
-//        return GateRequest(repr: "\(spec.hashValue)",
-//                    dimNames: spec.dims,
-//                    filter: probability
-//        )
+////   public func setInvert(on: Bool)
+////    {
+////        self.invert = on
+////    }
+//    public init(from decoder: any Decoder) throws {
+//        fatalError()
 //    }
-
-    
-}
+//    
+//    public func encode(to encoder: any Encoder) throws {
+////        color.encode(to: encoder)
+//        try opacity.encode(to: encoder)
+//        try spec?.encode(to: encoder)
+//    }
+//    
+//    
+//    public func hash(into hasher: inout Hasher) {
+//        ///        hasher.combine(x)
+//        ///         hasher.combine(y)
+//    }
+//    
+//    public static func == (lhs: Gate, rhs: Gate) -> Bool {
+//        lhs.hashValue == rhs.hashValue;
+//    }
+//    
+////    public func testMembership(inNumber: Double) -> PValue
+////    {
+////        return PValue(1.0)
+////    }
+//    
+//        
+////    func createRequest() -> (any GateDef)? {
+////        return spec
+////        guard let spec else {
+////            return nil
+////        }
+//        
+////        let p = spec.probability
+////        let probability:(EventData) -> PValue = invert
+////        ? { p($0).inverted }
+////        : { p($0) }
+////        
+////        return GateRequest(repr: "\(spec.hashValue)",
+////                    dimNames: spec.dims,
+////                    filter: probability
+////        )
+////    }
+//
+//}
 
     //-----------------------------------------------------
+
+public typealias AnyGate = (any GateDef)
 
 public protocol GateDef : Codable, Hashable, Equatable
 {
@@ -107,6 +109,7 @@ public protocol GateDef : Codable, Hashable, Equatable
 //        fatalError("Implemented")
 //    }
     
+    func chartView(id:String, chart:ChartDef) -> ChartAnnotation?
 }
 
 public extension GateDef {
@@ -135,6 +138,7 @@ public extension GateDef {
 
 public struct RangeGateDef : GateDef
 {
+    
     public var min: ValueType
     public var max: ValueType
     public var dims: [String]
@@ -161,16 +165,36 @@ public struct RangeGateDef : GateDef
         ? PValue(1)
         : PValue(0)
     }
+    
+    public func chartView(id:String, chart: ChartDef) -> ChartAnnotation? {
+        
+        guard let xAxis = chart.xAxis?.name,
+              xAxis == dims.first else {
+            return nil
+        }
+        return .init(id:id) { sampleMeta, chartSize in
+                if let xNormalizer = sampleMeta.parameter(named: xAxis)?.normalizer {
+                    return RangeGateView(gate: self, normalizer: xNormalizer, chartSize: chartSize)
+                }
+                return EmptyView()
+        }
+        
+    }
 }
 
 public struct RectGateDef : GateDef
 {
+
+    
     public var minX: ValueType
     public var maxX: ValueType
     public var minY: ValueType
     public var maxY: ValueType
     public var dims:[String]
     
+    public var min: CGPoint { .init(x:minX, y:minY) }
+    public var max: CGPoint { .init(x:maxX, y:maxY) }
+
     public init(_ dims: Tuple2<String>, _ rect: CGRect)
     {
         self.init(dims, rect.minX, rect.maxX, rect.minY, rect.maxY)
@@ -204,6 +228,25 @@ public struct RectGateDef : GateDef
             return .zero
         }
         return .one
+    }
+    
+    public func chartView(id:String, chart: ChartDef) -> ChartAnnotation? {
+        
+        guard let xAxis = chart.xAxis?.name, xAxis == dims.get(index:0),
+              let yAxis = chart.yAxis?.name, yAxis == dims.get(index:1)
+        else {
+            return nil
+        }
+        return .init(id:id) { sampleMeta, chartSize in
+            if let xNormalizer = sampleMeta.parameter(named: xAxis)?.normalizer,
+               let yNormalizer = sampleMeta.parameter(named: yAxis)?.normalizer {
+                return RectGateView(gate: self,
+                                    normalizers: .init(xNormalizer, yNormalizer),
+                                    chartSize: chartSize)
+            }
+            return EmptyView()
+        }
+        
     }
 }
 

@@ -13,18 +13,18 @@ import CytegeistCore
 
 
 //---------------------------------------------------------
-    struct Statistic : Codable, Hashable
-    {
-        var extraAttributes = AttributeStore()
+public struct Statistic : Codable, Hashable
+{
+    var extraAttributes = AttributeStore()
         // operation  (.median, .cv, )
         // parameters ($3,  ["APC"] )
         // currentValue  (.undefined)
-
-        init()
-        {
-            
-        }
+    
+    init()
+    {
+        
     }
+}
 
 public extension UTType {
     static var population = UTType(exportedAs: "cytegeist.population")
@@ -48,11 +48,11 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable, Equat
     }
     
     public var id = UUID()
-    var name: String = ""
-    var graphDef =  ChartDef()              // how this population wants to be shown
-    var statistics =  [Statistic]()         // what to report
-    var children: [AnalysisNode]?  =  [AnalysisNode]()        // subpopulations dependent on us
-    var extraAttributes = AttributeStore()
+    public var name: String = ""
+    public var graphDef =  ChartDef()              // how this population wants to be shown
+    public var statistics =  [Statistic]()         // what to report
+    public var children: [AnalysisNode]?  =  [AnalysisNode]()        // subpopulations dependent on us
+    public var extraAttributes = AttributeStore()
     
     public private(set) var parent: AnalysisNode?
 
@@ -63,10 +63,10 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable, Equat
         // removeChild
         // gate.clear()
         // graphDef.edit
-    init()
+    public init()
     {
     }
-    init(children: [AnalysisNode]? = nil)
+    public init(children: [AnalysisNode]? = nil)
     {
         if let children {
             self.children = children
@@ -74,9 +74,9 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable, Equat
     }
     
     
-    func getSample() -> Sample? { fatalError("Must be overriden") }
+    public func getSample() -> Sample? { fatalError("Must be overriden") }
     
-    func addChild(_ node:AnalysisNode) {
+    public func addChild(_ node:AnalysisNode) {
         if children == nil {
             children = []
         }
@@ -85,13 +85,24 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable, Equat
         node.parent = self
     }
     
-    func createRequest() throws -> PopulationRequest { fatalError("Implement") }
+    public func createRequest() throws -> PopulationRequest { fatalError("Implement") }
+    
+    public func getChildren<T:AnalysisNode>() -> [T] {
+        if let children {
+            return children.compactMap { $0 as? T }
+        }
+        return []
+    }
+    
+    public func chartView(chart: ChartDef) -> ChartAnnotation? {
+        nil
+    }
 }
 
 public class SampleNode : AnalysisNode {
     public let sample:Sample
 
-    override func getSample() -> Sample { sample }
+    public override func getSample() -> Sample { sample }
     
     init(_ sample: Sample) {
         self.sample = sample
@@ -103,7 +114,7 @@ public class SampleNode : AnalysisNode {
         fatalError("init(from:) has not been implemented")
     }
     
-    override func createRequest() throws -> PopulationRequest {
+    public override func createRequest() throws -> PopulationRequest {
         guard let ref = sample.ref else {
             throw AnalysisNodeError.noSampleRef
         }
@@ -114,15 +125,26 @@ public class GroupNode : AnalysisNode {
 }
 
 public class PopulationNode : AnalysisNode {
-    var gate:Gate?                      // the predicate to filter ones parent
+    public var gate:(any GateDef)?                      // the predicate to filter ones parent
+    public var invert: Bool = false
+    public var color: Color = .green
+    public var opacity: Float = 0.2
 
-    override func getSample() -> Sample? { parent?.getSample() }
+    public override func getSample() -> Sample? { parent?.getSample() }
 
-    override func createRequest() throws -> PopulationRequest {
+    public override func createRequest() throws -> PopulationRequest {
         guard let parent = parent else {
             throw AnalysisNodeError.noSampleRef
         }
         
-        return .gated(try parent.createRequest(), gate: gate?.spec, invert: gate?.invert ?? false, name: name)
+        return .gated(try parent.createRequest(), gate: gate, invert: invert, name: name)
+    }
+    
+    override public func chartView(chart: ChartDef) -> ChartAnnotation? {
+        guard let gate = gate else {
+            return nil
+        }
+        
+        return gate.chartView(id: id.uuidString, chart: chart)
     }
 }

@@ -8,6 +8,7 @@ The sample extension to support importing an image.
 import AppKit
 import Foundation
 import UniformTypeIdentifiers
+import CytegeistCore
 
 extension Sample {
     static var importImageTypes = NSImage.imageTypes.compactMap { UTType($0) }

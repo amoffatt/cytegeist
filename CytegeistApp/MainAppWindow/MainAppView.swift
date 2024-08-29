@@ -7,6 +7,7 @@
 
 import SwiftUI
 import UniformTypeIdentifiers
+import CytegeistCore
 
 
     // switch between table and gallery views in the sampleList

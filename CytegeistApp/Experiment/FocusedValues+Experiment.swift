@@ -6,6 +6,7 @@ The focused value definitions.
 */
 
 import SwiftUI
+import CytegeistCore
 
 extension FocusedValues {
     var experiment: Binding<Experiment>? {

@@ -13,6 +13,7 @@ public class FCSKeys {
     btim = "$BTIM",
     cyt = "$CYT",
     sys = "$SYS",
+    src = "$SRC",
     setup = "SETUP",
     creator = "$Creator"
     

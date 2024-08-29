@@ -180,5 +180,10 @@ public extension CGPoint {
         .init(x:normalizers.x?.unnormalize(x) ?? x,
               y:normalizers.y?.unnormalize(y) ?? y)
     }
+    
+    func normalize(_ normalizers:Tuple2<AxisNormalizer?>) -> CGPoint {
+        .init(x:normalizers.x?.normalize(x) ?? x,
+              y:normalizers.y?.normalize(y) ?? y)
+    }
 }
 

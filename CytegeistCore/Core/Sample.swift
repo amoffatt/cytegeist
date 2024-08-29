@@ -49,26 +49,26 @@ public class Sample : Identifiable, Codable, Hashable
     //    var membership =  [String : PValue]()
     //    var validity = SampleValidityCheck ()
     
-    var imageURL: URL?
-    var meta:FCSMetadata?
+    public var imageURL: URL?
+    public var meta:FCSMetadata?
     
 //    var keywords:AttributeStore { meta?.keywordLookup ?? [:] }
-    subscript(_ keyword:String) -> String { (meta?.keywordLookup[keyword]).nonNil }
+    public subscript(_ keyword:String) -> String { (meta?.keywordLookup[keyword]).nonNil }
 
-    var eventCount: Int { meta?.eventCount ?? 0 }
+    public var eventCount: Int { meta?.eventCount ?? 0 }
  
-    var tubeName: String { self["TUBE NAME"] }
-    var experimentName:  String { self["EXPERIMENT NAME"] }
-    var date: String { self["$DATE"] }
-    var btime:  String = ""//{ meta?.keywordLookup["$BTIM"] ?? "" }
-    var filename:  String { self["$FIL"] }
-    var creator:  String { self["CREATOR"] }
-    var apply:  String { self["APPLY COMPENSATION"] }
-    var threshold:  String { self["THRESHOLD"] }
-    var src:  String { self["$SRC"] }
-    var sys:  String { self["$SYS"] }
-    var cytometer:  String { self["$CYT"] }
-    var setup1:  String { self["CST SETUP STATUS"] }
+    public var tubeName: String { self["TUBE NAME"] }
+    public var experimentName:  String { self["EXPERIMENT NAME"] }
+    public var date: String { self["$DATE"] }
+    public var btime:  String = ""//{ meta?.keywordLookup["$BTIM"] ?? "" }
+    public var filename:  String { self["$FIL"] }
+    public var creator:  String { self["CREATOR"] }
+    public var apply:  String { self["APPLY COMPENSATION"] }
+    public var threshold:  String { self["THRESHOLD"] }
+    public var src:  String { self["$SRC"] }
+    public var sys:  String { self["$SYS"] }
+    public var cytometer:  String { self["$CYT"] }
+    public var setup1:  String { self["CST SETUP STATUS"] }
 
 
         //-------------------------------------------------------------------------
@@ -79,7 +79,7 @@ public class Sample : Identifiable, Codable, Hashable
 }
     
         //-------------------------------------------------------------------------
-   init(
+    public init(
         ref: SampleRef
     ) {
         self.ref = ref
@@ -98,7 +98,7 @@ public class Sample : Identifiable, Codable, Hashable
     }
         //-------------------------------------------------------------------------
         //  iniitialize based on a new FCS File added
-    func setUp(core:CytegeistCoreAPI)
+    public func setUp(core:CytegeistCoreAPI)
     {
         debug("in SetUp")
         
@@ -120,7 +120,7 @@ public class Sample : Identifiable, Codable, Hashable
     }
     
     private var _tree:AnalysisNode?
-    func getTree() -> AnalysisNode {
+    public func getTree() -> AnalysisNode {
         if _tree == nil {
             _tree = SampleNode(self)
         }
