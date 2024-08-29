@@ -76,9 +76,7 @@
 		B6C9A49F2C7680EA00DB6786 /* Sample+ItemProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4672C75D04800DB6786 /* Sample+ItemProvider.swift */; };
 		B6C9A4A02C7680EA00DB6786 /* Sample+ImportImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4702C75D04800DB6786 /* Sample+ImportImage.swift */; };
 		B6C9A4A12C7680EA00DB6786 /* FJChartDefExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A46C2C75D04800DB6786 /* FJChartDefExtensions.swift */; };
-		B6C9A4A22C7680EA00DB6786 /* Sample.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A46D2C75D04800DB6786 /* Sample.swift */; };
 		B6C9A4A32C7680EA00DB6786 /* Matrix.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A46E2C75D04800DB6786 /* Matrix.swift */; };
-		B6C9A4A42C7680EA00DB6786 /* AnalysisNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A46F2C75D04800DB6786 /* AnalysisNode.swift */; };
 		B6C9A4A52C7680EA00DB6786 /* Cytometer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4722C75D04900DB6786 /* Cytometer.swift */; };
 		B6C9A4A72C76814F00DB6786 /* SaveOpenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4A62C76814F00DB6786 /* SaveOpenView.swift */; };
 		B6C9A4AB2C7689A000DB6786 /* FileInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4AA2C7689A000DB6786 /* FileInfo.swift */; };
@@ -91,6 +89,9 @@
 		B6C9A4BA2C77DB3700DB6786 /* AxisNormalizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4B92C77DB3700DB6786 /* AxisNormalizer.swift */; };
 		DC05A3D12C798EC900C08BBF /* Smoothing.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC05A3D02C798EC900C08BBF /* Smoothing.swift */; };
 		DC23F02F2C7D3C0B002FCDC0 /* Gate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4692C75D04800DB6786 /* Gate.swift */; };
+		DCA66B752C81047200F51C70 /* GatingViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCA66B742C81047200F51C70 /* GatingViews.swift */; };
+		DCA66B762C810BF200F51C70 /* AnalysisNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A46F2C75D04800DB6786 /* AnalysisNode.swift */; };
+		DCA66B772C810C0E00F51C70 /* Sample.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A46D2C75D04800DB6786 /* Sample.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -262,6 +263,7 @@
 		B6C9A4B72C77D9AA00DB6786 /* ChartAxisView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartAxisView.swift; sourceTree = "<group>"; };
 		B6C9A4B92C77DB3700DB6786 /* AxisNormalizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AxisNormalizer.swift; sourceTree = "<group>"; };
 		DC05A3D02C798EC900C08BBF /* Smoothing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Smoothing.swift; sourceTree = "<group>"; };
+		DCA66B742C81047200F51C70 /* GatingViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GatingViews.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -379,6 +381,7 @@
 				B641739C2C5C4E00001AA2F4 /* ParameterInspectorView.swift */,
 				B6C9A4B32C77CA5400DB6786 /* ChartDefs.swift */,
 				B6C9A4B72C77D9AA00DB6786 /* ChartAxisView.swift */,
+				DCA66B742C81047200F51C70 /* GatingViews.swift */,
 			);
 			path = Charts;
 			sourceTree = "<group>";
@@ -386,6 +389,8 @@
 		B63EEE8E2C569BFA00E465C9 /* Core */ = {
 			isa = PBXGroup;
 			children = (
+				B6C9A46D2C75D04800DB6786 /* Sample.swift */,
+				B6C9A46F2C75D04800DB6786 /* AnalysisNode.swift */,
 				B6C9A4692C75D04800DB6786 /* Gate.swift */,
 				B68529682C74DBB500EF9EF4 /* ComputeCache.swift */,
 				B63EEE8F2C569C7600E465C9 /* CytegeistCore.swift */,
@@ -509,8 +514,6 @@
 			isa = PBXGroup;
 			children = (
 				B6C9A46B2C75D04800DB6786 /* Experiment.swift */,
-				B6C9A46D2C75D04800DB6786 /* Sample.swift */,
-				B6C9A46F2C75D04800DB6786 /* AnalysisNode.swift */,
 				B6C9A4702C75D04800DB6786 /* Sample+ImportImage.swift */,
 				B6C9A4672C75D04800DB6786 /* Sample+ItemProvider.swift */,
 				B6C9A46A2C75D04800DB6786 /* FocusedValues+Experiment.swift */,
@@ -843,13 +846,16 @@
 				B6C9A4B82C77D9AA00DB6786 /* ChartAxisView.swift in Sources */,
 				B6C9A4B42C77CA5400DB6786 /* ChartDefs.swift in Sources */,
 				B68529742C74DC1100EF9EF4 /* SampleInspectorView.swift in Sources */,
+				DCA66B762C810BF200F51C70 /* AnalysisNode.swift in Sources */,
 				B6C9A4BA2C77DB3700DB6786 /* AxisNormalizer.swift in Sources */,
 				B641739D2C5C4E00001AA2F4 /* ParameterInspectorView.swift in Sources */,
 				B63EEE942C569D7300E465C9 /* Histogram.swift in Sources */,
+				DCA66B772C810C0E00F51C70 /* Sample.swift in Sources */,
 				B64173942C58AB2B001AA2F4 /* DemoData.swift in Sources */,
 				B63EEE8C2C5624C000E465C9 /* HistogramView.swift in Sources */,
 				B63EEE8D2C5624C000E465C9 /* ChartView.swift in Sources */,
 				B63EEE922C569CB300E465C9 /* SampleRef.swift in Sources */,
+				DCA66B752C81047200F51C70 /* GatingViews.swift in Sources */,
 				B6C9A4B02C76E2CD00DB6786 /* FCS.swift in Sources */,
 				B64173922C58A89A001AA2F4 /* CoreTestUtil.swift in Sources */,
 				DC23F02F2C7D3C0B002FCDC0 /* Gate.swift in Sources */,
@@ -892,10 +898,8 @@
 				B6C9A49F2C7680EA00DB6786 /* Sample+ItemProvider.swift in Sources */,
 				B6C9A4A02C7680EA00DB6786 /* Sample+ImportImage.swift in Sources */,
 				B6C9A4A12C7680EA00DB6786 /* FJChartDefExtensions.swift in Sources */,
-				B6C9A4A22C7680EA00DB6786 /* Sample.swift in Sources */,
 				B6C9A4B62C77D57500DB6786 /* FJGatingExtensions.swift in Sources */,
 				B6C9A4A32C7680EA00DB6786 /* Matrix.swift in Sources */,
-				B6C9A4A42C7680EA00DB6786 /* AnalysisNode.swift in Sources */,
 				B6C9A4A52C7680EA00DB6786 /* Cytometer.swift in Sources */,
 				B6C9A4972C7679BF00DB6786 /* FJWorkspaceReader.swift in Sources */,
 				B6C9A4642C75D01300DB6786 /* SampleGallery.swift in Sources */,
@@ -1083,7 +1087,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 9D5TC7JPM8;
+				DEVELOPMENT_TEAM = WFRFMHK56T;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.cytegeist.visionos.2.CytegeistLibraryTests;
@@ -1105,7 +1109,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 9D5TC7JPM8;
+				DEVELOPMENT_TEAM = WFRFMHK56T;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.cytegeist.visionos.2.CytegeistLibraryTests;
@@ -1125,7 +1129,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 9D5TC7JPM8;
+				DEVELOPMENT_TEAM = WFRFMHK56T;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
 				MACOSX_DEPLOYMENT_TARGET = 14.5;
@@ -1147,7 +1151,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 9D5TC7JPM8;
+				DEVELOPMENT_TEAM = WFRFMHK56T;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
 				MACOSX_DEPLOYMENT_TARGET = 14.5;
@@ -1434,7 +1438,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 9D5TC7JPM8;
+				DEVELOPMENT_TEAM = WFRFMHK56T;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
 				MACOSX_DEPLOYMENT_TARGET = 14.5;
@@ -1458,7 +1462,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 9D5TC7JPM8;
+				DEVELOPMENT_TEAM = WFRFMHK56T;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
 				MACOSX_DEPLOYMENT_TARGET = 14.5;
