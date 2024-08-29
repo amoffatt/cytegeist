@@ -11,7 +11,8 @@ import CytegeistLibrary
 public struct ChartAxisView: View {
     var dim:Binding<String>
     let normalizer: AxisNormalizer?
-    var sampleMeta: FCSMetadata?
+    var sampleMeta: SampleMetadata?
+    @State var showDimensionChooser:Bool = false
 
     public var body: some View {
 //        let label = sampleMeta?.parameter(named: dim.wrappedValue)?.name ?? "<None selected>"
@@ -22,15 +23,18 @@ public struct ChartAxisView: View {
                 if let normalizer = normalizer {
                     ticks(proxy, normalizer)
                 }
-                Picker("", selection: dim) {
-                    Text("<None>")
-                        .tag("")
-                    ForEach(availableParameters, id: \.name) { p in
-                        Text(p.displayName)
-                            .tag(p.name)
-                    }
-                }
-                .pickerStyle(.menu)
+//                Picker("", selection: dim) {
+//                    Text("<None>")
+//                        .tag("")
+//                    ForEach(availableParameters, id: \.name) { p in
+//                        Text(p.displayName)
+//                            .tag(p.name)
+//                    }
+//                }
+//                .pickerStyle(.menu)
+                Button(dim.wrappedValue) { showDimensionChooser = true }
+                    .buttonStyle(.borderless)
+                    .popover(isPresented: $showDimensionChooser) { dimensionChooser }
             }
         }
     }
@@ -52,6 +56,39 @@ public struct ChartAxisView: View {
             .frame(width: size.width, height: 50)
         }
     }
+    
+    var dimensionChooser: some View {
+        VStack {
+            if let sampleMeta {
+                let scatter = sampleMeta.parameters(tagged: [.scatter])
+                let stained = sampleMeta.parameters(tagged: [.stained])
+                Text("Choose Dimension")
+                HStack {
+                    if !scatter.isEmpty {
+                        VStack {
+                            Text("Scatter")
+                            dimensionList(scatter, selection:dim)
+                        }
+                    }
+                    if !stained.isEmpty {
+                        VStack {
+                            Text("Stains")
+                            dimensionList(stained, selection:dim)
+                        }
+                    }
+                }
+            }
+        }
+        .padding()
+    }
+    
+    func dimensionList(_ dims:[CDimension], selection:Binding<String>) -> some View {
+        List(dims) { dim in
+            Text(dim.displayName)
+                .tag(dim.name)
+        }
+    }
+    
 }
 
 //#Preview {

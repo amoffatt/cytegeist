@@ -26,7 +26,8 @@ public struct ChartView<Overlay>: View where Overlay:View {
     @Environment(CytegeistCoreAPI.self) var core: CytegeistCoreAPI
     
     let population: PopulationRequest
-    var config: Binding<ChartDef>
+    let config: Binding<ChartDef>
+    let lockAspect: Bool = true
     let chartOverlay:() -> Overlay
     
     @State var sampleQuery: APIQuery<FCSFile>? = nil
@@ -54,8 +55,6 @@ public struct ChartView<Overlay>: View where Overlay:View {
     }
     
     public var body: some View {
-//        let xAxis = sampleQuery?.data?.meta.parameter(named: config.xAxis?.name)
-//        let yAxis = sampleQuery?.data?.meta.parameter(named: config.yAxis?.name)
         let sampleMeta = sampleQuery?.data?.meta
 
         VStack {
@@ -64,14 +63,7 @@ public struct ChartView<Overlay>: View where Overlay:View {
                     .foregroundColor(.red)
             }
             
-//                let columns = [
-//                    GridItem(.flexible(minimum: 20)),
-//                    GridItem(.fixed(80)),
-//                ]
-//                LazyVGrid(columns:columns, spacing: 0) {
                 VStack(spacing: 0) {
-//                Grid {
-//                    GridRow {
                     HStack {
                         switch chartQuery {
                             case nil:
@@ -85,9 +77,6 @@ public struct ChartView<Overlay>: View where Overlay:View {
                                 Histogram2DView(query: query)
                                     .overlay(chartOverlay())
                                     .fillAvailableSpace()
-                                    //                        Rectangle()
-                                    //                            .fill(.blue)
-                                    //                            .fillAvailableSpace()
                         }
 
                         GeometryReader { proxy in
@@ -100,8 +89,6 @@ public struct ChartView<Overlay>: View where Overlay:View {
                         .frame(width: 80)
                         .frame(maxHeight: .infinity)
                     }
-//                    }
-//                    .fillAvailableSpace()
                     
                     HStack(spacing: 0) {
                         ChartAxisView(dim:axisBinding(config, \.xAxis), normalizer: chartDims.x?.normalizer, sampleMeta: sampleMeta)
@@ -110,11 +97,10 @@ public struct ChartView<Overlay>: View where Overlay:View {
                         Rectangle()
                             .fill(.clear)
                             .frame(width: 80, height: 80)
-//                            .gridCellUnsizedAxes([.vertical, .horizontal])
                     }
                 }
+                .scaledToFit()
                 .fillAvailableSpace()
-//                .border(.yellow)
         }
         
         .onChange(of: population.getSample(), initial: true, updateSampleQuery)
@@ -123,8 +109,6 @@ public struct ChartView<Overlay>: View where Overlay:View {
         .onChange(of: config.wrappedValue, updateChartQuery)
         .onChange(of: sampleQuery?.data?.meta, updateChartQuery)
     }
-    
-//    var sampleRef: SampleRef? { population.getSample() }
     
 //    var stateHash: Int {
 //        var stateHash = Hasher()

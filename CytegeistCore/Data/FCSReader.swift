@@ -10,6 +10,11 @@ import CytegeistLibrary
 
 public typealias FCSParameterValueReader = (DataBufferReader) throws -> ValueType
 
+public enum DimensionTag {
+    case scatter, forwardScatter, sideScatter, stained
+    case width, height, area
+}
+
 public struct CDimension : Identifiable, Hashable, Codable {
     public var id: String { name }
     
@@ -33,6 +38,7 @@ public struct CDimension : Identifiable, Hashable, Codable {
     public let filter: String
     public let displayInfo: String
     public let normalizer: AxisNormalizer
+    public let tags: [DimensionTag]
     
     
     public let valueReader: FCSParameterValueReader
@@ -57,6 +63,9 @@ public struct CDimension : Identifiable, Hashable, Codable {
         self.displayInfo = displayInfo
         self.normalizer = normalizer
         self.valueReader = valueReader
+        self.tags = Self.getTags(name: name, stain: stain)
+        
+        
     }
     
     public init(from decoder: any Decoder) throws {
@@ -65,6 +74,24 @@ public struct CDimension : Identifiable, Hashable, Codable {
     
     public func encode(to encoder: any Encoder) throws {
         fatalError()
+    }
+    
+    private static func getTags(name:String, stain:String) -> [DimensionTag] {
+        var tags = [DimensionTag]()
+        let nameLower = name.lowercased()
+        
+        if name.hasSuffix("-w") { tags.append(.width) }
+        if name.hasSuffix("-h") { tags.append(.height) }
+        if name.hasSuffix("-a") { tags.append(.area) }
+        
+        if name.hasPrefix("fsc") { tags += [.scatter, .forwardScatter] }
+        if name.hasPrefix("ssc") { tags += [.scatter, .sideScatter] }
+
+        if !stain.isEmpty {
+            tags.append(.stained)
+        }
+        
+        return tags
     }
 
 }
@@ -105,7 +132,7 @@ public struct StringField : Identifiable, Hashable, Codable {
 }
 
 
-public struct FCSMetadata: Hashable, Codable {
+public struct SampleMetadata: Hashable, Codable {
     
     public private(set) var keywords: [StringField] = []
     public private(set) var keywordLookup: [String:String] = [:]
@@ -122,20 +149,33 @@ public struct FCSMetadata: Hashable, Codable {
     public var parameterLookup:[String:Int] = [:]
     
     
-    public var parameters: [CDimension]? {
-        get { _parameters }
+    public var parameters: [CDimension] {
+        get { _parameters ?? [] }
         set {
             _parameters = newValue
-            parameterLookup = newValue == nil
-            ? [:]
-            : .init(uniqueKeysWithValues: newValue!.enumerated().map { i, parameter in
+            parameterLookup = .init(uniqueKeysWithValues: newValue.enumerated().map { i, parameter in
                 (parameter.name, i)
             })
         }
     }
     
+    public func parameters(tagged:[DimensionTag]) -> [CDimension] {
+        parameters.filter { $0.tags.containsAll(tagged) }
+    }
+    
+    public func parameters(groups:[DimensionTag]) -> [DimensionTag:[CDimension]] {
+        var grouped = [DimensionTag:[CDimension]]()
+        
+        for d in parameters {
+            
+        }
+        
+        return grouped
+    }
+    
+    
     public func parameter(named: String?) -> CDimension? {
-        if let named, let parameters, let index = parameterLookup[named] {
+        if let named, let index = parameterLookup[named] {
             return parameters.get(index: index)
         }
         return nil
@@ -212,7 +252,7 @@ public struct FCSParameterData {
 }
 
 public protocol CPopulationData {
-    var meta:FCSMetadata { get }
+    var meta:SampleMetadata { get }
     var data:EventDataTable? { get }
     func probability(of index: Int) -> PValue
     var probabilities:[PValue]? { get }
@@ -222,11 +262,10 @@ public extension CPopulationData {
     
     func parameter(named:String) -> FCSParameterData? {
         guard let data,
-              let parameters = meta.parameters,
               let index = meta.parameterLookup[named] else {
             return nil
         }
-        return .init(meta:parameters[index], data:data.data[index])
+        return .init(meta:meta.parameters[index], data:data.data[index])
     }
     
     func data(parameterNames:[String]) throws -> EventDataTable? {
@@ -257,7 +296,7 @@ public extension CPopulationData {
 }
 
 public struct FCSFile : CPopulationData {
-    public let meta:FCSMetadata
+    public let meta:SampleMetadata
     public let data:EventDataTable?
     
     public func probability(of index: Int) -> PValue {
@@ -268,12 +307,12 @@ public struct FCSFile : CPopulationData {
 }
 
 public struct PopulationData : CPopulationData {
-    public let meta:FCSMetadata
+    public let meta:SampleMetadata
     public let data:EventDataTable?
     private let _probabilities: [PValue]
     public var probabilities: [PValue]? { _probabilities }
     
-    init(meta: FCSMetadata, data: EventDataTable?, probabilities: [PValue]) {
+    init(meta: SampleMetadata, data: EventDataTable?, probabilities: [PValue]) {
         self.meta = meta
         self.data = data
         self._probabilities = probabilities
@@ -310,7 +349,7 @@ public class FCSReader {
     
     public func readFCSFile(at url: URL, includeData:Bool = true) throws -> FCSFile {
         let data = try Data(contentsOf: url)
-        var fcs = FCSMetadata()
+        var fcs = SampleMetadata()
         
         var header = try self.readHeader(data)
         guard header.format.hasPrefix("FCS") else {
@@ -398,9 +437,9 @@ public class FCSReader {
             data: includeData ? try readEventData(dataSegment: dataSegment, meta: fcs) : nil)
     }
     
-    private func readEventData(dataSegment:Data, meta:FCSMetadata) throws -> EventDataTable {
+    private func readEventData(dataSegment:Data, meta:SampleMetadata) throws -> EventDataTable {
         let eventCount = meta.eventCount
-        let parameters = meta.parameters!
+        let parameters = meta.parameters
         let parameterCount = parameters.count
         
         var parameterDataArray = parameters.map { p in

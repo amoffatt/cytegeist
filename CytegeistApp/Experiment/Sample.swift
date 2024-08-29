@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftData
 import CytegeistLibrary
 import CytegeistCore
 
@@ -21,9 +22,10 @@ public enum SampleError : Error {
 }
 
 //---------------------------------------------------------
+//@Model
 @Observable
 //@MainActor
-public class Sample : Identifiable, Codable, Hashable
+public class Sample : Identifiable, Hashable
 {
     public static func == (lhs: Sample, rhs: Sample) -> Bool {
         lhs.id == rhs.id
@@ -38,8 +40,9 @@ public class Sample : Identifiable, Codable, Hashable
     
     var ref:SampleRef? = nil
     
-    @CodableIgnored
-    @ObservationIgnored
+    @Transient
+//    @CodableIgnored
+//    @ObservationIgnored
     var error:Error? = nil
     
     
@@ -50,7 +53,7 @@ public class Sample : Identifiable, Codable, Hashable
     //    var validity = SampleValidityCheck ()
     
     var imageURL: URL?
-    var meta:FCSMetadata?
+    var meta:SampleMetadata?
     
 //    var keywords:AttributeStore { meta?.keywordLookup ?? [:] }
     subscript(_ keyword:String) -> String { (meta?.keywordLookup[keyword]).nonNil }

@@ -116,6 +116,11 @@ public class Buttons {
     public static func toolbar(_ name:LocalizedStringKey, _ icon:Icon, action: @escaping Action) -> some View {
         Button(name, systemImage: icon.systemImage, action: action)
     }
+    
+//    public static func text(_ name:String, _ style: any PrimitiveButtonStyle = .plain, action: @escaping Action) -> some View {
+//        Button(name, action: action)
+//            .buttonStyle(style)
+//    }
 
     
 //    public static func

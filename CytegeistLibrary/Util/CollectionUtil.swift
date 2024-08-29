@@ -39,11 +39,30 @@ public extension Array where Element: Collection {
     }
 }
 
-public extension Collection {
+public extension Sequence {
     func sorted<T: Comparable>(by keyPath: KeyPath<Element, T>) -> [Element] {
         return self.sorted { $0[keyPath: keyPath] < $1[keyPath: keyPath] }
     }
+    
 }
+
+public extension Sequence where Element:Equatable {
+    /// Check if any element in the collection is present in another collection
+    func containsAny(_ items: any Collection<Element>) -> Bool {
+        items.contains { item in
+            self.contains(item)
+        }
+    }
+
+    // Check if all elements in the collection are present in another collection
+    func containsAll(_ items: any Collection<Element>) -> Bool {
+        //    func containsAll<S: Sequence>(_ items: S) -> Bool where S.Element == Element {    // alternate signature. Not sure which is better
+        return items.allSatisfy { item in
+            self.contains(item)
+        }
+    }
+}
+
 
 
 extension RandomAccessCollection {

@@ -20,7 +20,7 @@ class AnalysisNodeSelection: Codable {
 
 //-----------------------------------------------
 @Observable
-public class Experiment :  Codable, Identifiable, Equatable
+public class Experiment :  Identifiable, Equatable
 {
     public static func == (lhs: Experiment, rhs: Experiment) -> Bool {
         lhs.id == rhs.id

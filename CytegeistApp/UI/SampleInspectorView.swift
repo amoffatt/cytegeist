@@ -61,10 +61,8 @@ public struct SampleInspectorView: View {
     
     private func parameterGalleryView() -> some View {
         VStack {
-            if let metadata = query?.data?.meta {
-                if let parameters = metadata.parameters {
-                    ParameterGalleryView(core:core, sample: sample, parameters: parameters)
-                }
+            if let meta = query?.data?.meta {
+                ParameterGalleryView(core:core, sample: sample, parameters: meta.parameters)
             }
         }
     }
@@ -72,8 +70,8 @@ public struct SampleInspectorView: View {
     private func dataView() -> some View {
         VStack {
             if let data = query?.data,
-               let eventData = data.data,
-               let parameters = data.meta.parameters {
+               let eventData = data.data {
+                let parameters = data.meta.parameters
                 Table(eventData) {
                     TableColumn("#") { e in
                         Text("\(e.id)")

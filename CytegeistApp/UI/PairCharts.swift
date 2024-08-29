@@ -84,11 +84,9 @@ public struct PairChartsPreview: View {
     public var body: some View {
         VStack {
             if let query {
-                if let meta = query.data?.meta,
-                   let parameters = meta.parameters
-                {
+                if let meta = query.data?.meta {
                     //        Histogram2DView(data: core.histogram2D(sampleRef: sampleRef, parameterNames: .init("FSC-A", "PacificBlue-A")))
-                    PairChartsView(core:core, sampleRef:sampleRef, parameters: parameters)
+                    PairChartsView(core:core, sampleRef:sampleRef, parameters: meta.parameters)
                 }
                 else {
                     Text("No Data Yet...")

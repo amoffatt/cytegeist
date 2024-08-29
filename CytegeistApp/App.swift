@@ -57,17 +57,17 @@ final class App {
         }
     }
         //-------------------------------------------------------------------------
-    private func loadExperiments(from storeFileData: Data) -> [Experiment] {
-        do {
-            let decoder = JSONDecoder()
-            decoder.dateDecodingStrategy = .iso8601
-                //            print(storeFileData([)in: [0, 300])
-            return try decoder.decode([Experiment].self, from: storeFileData)
-        } catch {
-            print(error)
-            return []
-        }
-    }
+//    private func loadExperiments(from storeFileData: Data) -> [Experiment] {
+//        do {
+//            let decoder = JSONDecoder()
+//            decoder.dateDecodingStrategy = .iso8601
+//                //            print(storeFileData([)in: [0, 300])
+//            return try decoder.decode([Experiment].self, from: storeFileData)
+//        } catch {
+//            print(error)
+//            return []
+//        }
+//    }
         //-------------------------------------------------------------------------
         //------------------------------------------------------
         // gain access to the directory and call readFCSFile
@@ -142,26 +142,26 @@ final class App {
     
     
         //-------------------------------------------------------------------------
-   func save() {
-        let encoder = JSONEncoder()
-        encoder.dateEncodingStrategy = .iso8601
-        encoder.outputFormatting = .prettyPrinted
-        do {
-            let data = try encoder.encode(experiments)
-            if let databaseFileUrl {
-                if FileManager.default.fileExists(atPath: databaseFileUrl.path) {
-                    try FileManager.default.removeItem(at: databaseFileUrl)
-                }
-                try data.write(to: databaseFileUrl)
-            }
-            else {
-                print("Database file url is nil")
-            }
-            
-        } catch {
-                //..
-        }
-    }
+//   func save() {
+//        let encoder = JSONEncoder()
+//        encoder.dateEncodingStrategy = .iso8601
+//        encoder.outputFormatting = .prettyPrinted
+//        do {
+//            let data = try encoder.encode(experiments)
+//            if let databaseFileUrl {
+//                if FileManager.default.fileExists(atPath: databaseFileUrl.path) {
+//                    try FileManager.default.removeItem(at: databaseFileUrl)
+//                }
+//                try data.write(to: databaseFileUrl)
+//            }
+//            else {
+//                print("Database file url is nil")
+//            }
+//            
+//        } catch {
+//                //..
+//        }
+//    }
  }
 
 

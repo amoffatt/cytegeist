@@ -81,16 +81,14 @@ struct GatingView: View {
                     let size = proxy.size
                     ZStack(alignment: .topLeading){
                         
-                        gateRadius(siz: proxy.size)
-                        gateRange(siz: proxy.size)
-                        gateRect(siz: proxy.size)
-                        gateEllipse(siz: proxy.size)
-                        crosshair(location: mouseLocation, size: proxy.size )
+                        gateRadius(siz: size)
+                        gateRange(siz: size)
+                        gateRect(siz: size)
+                        gateEllipse(siz: size)
+                        crosshair(location: mouseLocation, size: size )
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
-                            .gesture(gateDrag(areaSize: proxy.size))
+                            .gesture(gateDrag(areaSize: size))
                     }
-//                    .frame(width:size.width, height:size.height)
-                    .border(.green.opacity(0.8))
                 }
             }
             .fillAvailableSpace()
@@ -270,12 +268,7 @@ struct GatingView: View {
         }
     }
     //------------------------------------------------------
-//
-//var drag: some Gesture {
-//    DragGesture()
-//        .onChanged { _ in self.isDragging = true }
-//        .onEnded { _ in self.isDragging = false }
-//}
+    
     func gateDrag(areaSize: CGSize) -> some Gesture {
         DragGesture()
             .onChanged { value in offset = value.translation
