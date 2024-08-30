@@ -56,6 +56,13 @@ public func distance(_ a: CGPoint,_  b: CGPoint) -> CGFloat {
 }
 
 public extension CGPoint {
+    
+    var asSize:CGSize { .init(width:x, height:y) }
+    
+    init(_ x:Double, _ y:Double) {
+        self.init(x:x, y:y)
+    }
+    
     static func - (a: CGPoint, b: CGSize) -> CGPoint {
         return CGPoint(x: a.x-b.width, y: a.y-b.height)
     }
@@ -79,23 +86,59 @@ public extension CGPoint {
     static func / (a: CGPoint, b: CGSize) -> CGPoint {
         return CGPoint(x: a.x / b.width, y: a.y / b.height)
     }
+    
+    static func * (a: CGPoint, b: Double) -> CGPoint {
+        return CGPoint(x: a.x * b, y: a.y * b)
+    }
+
+    static func / (a: CGPoint, b: Double) -> CGPoint {
+        return CGPoint(x: a.x / b, y: a.y / b)
+    }
 }
 
 public extension CGSize {
     init(_ size: Float) {
-        self.init(width:Double(size), height:Double(size))
+        self.init(size, size)
     }
     init(_ width: Float, _ height: Float) {
-        self.init(width:Double(width), height:Double(height))
+        self.init(Double(width), Double(height))
+    }
+    
+    init(_ width: Double, _ height: Double) {
+        self.init(width:width, height:height)
     }
     var asPoint:CGPoint { .init(x:width, y:height) }
+    
+    static func * (a: CGSize, b: Double) -> CGSize {
+        .init(a.width * b, a.height * b)
+    }
+
+    static func / (a: CGSize, b: Double) -> CGSize {
+        .init(a.width / b, a.height / b)
+    }
 }
 
 public extension CGRect {
+    var min:CGPoint { .init(minX, minY) }
+    var max:CGPoint { .init(maxX, maxY) }
+    
     init(from:CGPoint, to:CGPoint) {
         let x = sort(from.x, to.x)
         let y = sort(from.y, to.y)
         self.init(origin: .init(x:x.0, y:y.0), size: .init(width:x.1 - x.0, height:y.1 - y.0))
+    }
+    
+    func scaled(_ scale:CGSize) -> CGRect {
+        .init(from: min * scale, to: max * scale)
+    }
+    
+    /// Invert Y values based on full view height
+    func invertedY(maxY:Double) -> CGRect {
+        var min = min
+        var max = max
+        max.y = maxY - max.y
+        min.y = maxY - min.y
+        return .init(from:min, to:max)
     }
     
 //    static func * (a: CGRect, b: CGSize) -> CGPoint {

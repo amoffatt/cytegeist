@@ -117,9 +117,44 @@ public class Buttons {
         Button(name, systemImage: icon.systemImage, action: action)
     }
 
+    public static func text<S:PrimitiveButtonStyle>(_ name:LocalizedStringKey, _ style:S = .plain, role:ButtonRole? = nil, action: @escaping Action) -> some View {
+        Button(name, role: role, action: action)
+            .buttonStyle(style)
+    }
     
+    public static func ok(_ titleKey: LocalizedStringKey = "Ok", action: @escaping () -> Void) -> some View {
+        text(titleKey, action:action)
+            .keyboardShortcut(.defaultAction)
+    }
+    
+    public static func cancel(action: @escaping () -> Void = {}) -> some View {
+        text("Cancel", role:.cancel, action:action)
+            .keyboardShortcut(.cancelAction)
+    }
+
 //    public static func
     
+}
+
+
+
+public extension ControlSize {
+    var scaling: Double {
+        switch self {
+        case .mini:
+                0.5
+        case .small:
+                0.75
+        case .regular:
+            1
+        case .large:
+            1.5
+        case .extraLarge:
+            2
+        @unknown default:
+            1
+        }
+    }
 }
 
 

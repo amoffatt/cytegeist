@@ -13,10 +13,9 @@ import CytegeistCore
 
 
 struct GateConfigView : View {
-    let initialName:String = "T Cells"
-    var finalize:(String) -> Void
+    var node:PopulationNode
+    var finalize:() -> Void
     
-    @State var name:String = ""
     
         //    init(name: String, finalize: @escaping (String) -> Void) {
         //        self.finalize = finalize
@@ -24,17 +23,12 @@ struct GateConfigView : View {
         //    }
     
     var body: some View {
-            //        @Binding var name = name
+        @Bindable var node = node
         
-        VStack {
-            TextField("Enter gate name", text: $name)
-            Button("OK", action: {
-                finalize(name)
-            })
-            
-        }
-        .onAppear {
-            name = initialName
+        Group {
+            TextField("Name", text: $node.name)
+            Buttons.ok("Create Gate", action:finalize)
+            Buttons.cancel()
         }
     }
 }
@@ -53,7 +47,7 @@ struct GatingView: View {
     @State private var isHovering = false
     @State private var offset = CGSize.zero
     
-    @State private var candidateGate:AnyGate? = nil
+    @State private var candidateGate:PopulationNode? = nil
 //    var sample: Sample?
     var population: AnalysisNode?
     
@@ -119,9 +113,10 @@ struct GatingView: View {
             .padding(40)
             .allowsHitTesting(true)
             .opacity(mode == ReportMode.gating ? 1.0 : 0.0)
-            .alert("Enter gate name", isPresented: showGatePopup) {
-                GateConfigView() { name in
-                    finalizeCandidateGate(gateName: name)
+        
+            .confirmationDialog("Enter new gate name", isPresented: showGatePopup) {
+                if let candidateGate {
+                    GateConfigView(node:candidateGate, finalize: finalizeCandidateGate)
                 }
             }
     }
@@ -134,17 +129,17 @@ struct GatingView: View {
         population?.getSample()?.meta
     }
     
-    var axisNormalizers: Tuple2<AxisNormalizer?> {
+    var axisNormalizers: Tuple2<AxisNormalizer> {
         guard let sampleMeta else {
-            return .init(nil, nil)
+            return .init(.none, .none)
         }
         
         let xAxis = chartDef.xAxis?.name
         let yAxis = chartDef.yAxis?.name
         
         return .init(
-            sampleMeta.parameter(named: xAxis.nonNil)?.normalizer,
-            sampleMeta.parameter(named: yAxis.nonNil)?.normalizer
+            sampleMeta.parameter(named: xAxis.nonNil)?.normalizer ?? .none,
+            sampleMeta.parameter(named: yAxis.nonNil)?.normalizer ?? .none
         )
     }
     
@@ -207,34 +202,31 @@ struct GatingView: View {
     func addGate(_ gate: AnyGate)
     {
             //        self.candidateGateName = getCandidateGateName()
-        candidateGate = gate
+        let node = PopulationNode(gate:gate)
+        node.gate = gate
+        node.name = "T Cells"
+        candidateGate = node
     }
     
-    func finalizeCandidateGate(gateName:String) {
+    func finalizeCandidateGate() {
         guard let population,
               let candidateGate
         else {
             print("No population selected")
             return
         }
+        
         let graphDef = population.graphDef            // change axes?
-        let newChild = PopulationNode()
-        newChild.name = gateName
-        newChild.graphDef = graphDef
-        newChild.gate = candidateGate
+        candidateGate.graphDef = graphDef
+
         
-        print("adding \(gateName) to \(population.name)")
-        population.addChild(newChild)
+        print("adding \(candidateGate.name) to \(population.name)")
+        population.addChild(candidateGate)
         
-        experiment.selectedAnalysisNodes.nodes = [newChild]
+        experiment.selectedAnalysisNodes.nodes = [candidateGate]
         
         self.candidateGate = nil
     }
-    
-    
-    
-    
-    
     
     
     var icons = ["None","triangle.righthalf.fill","pencil","square.and.pencil","ellipsis.circle", "skew", "scribble" ]

@@ -15,6 +15,8 @@ public enum AxisScaleType: Hashable {
 }
 
 public struct AxisNormalizer: Hashable, Codable {
+    public static let none = AxisNormalizer(0, 1, .linear, { $0 }, { $0 }, { _ in [] })
+    
     public static func linear(min:Double, max:Double) -> AxisNormalizer {
         let span = max - min
         
@@ -176,14 +178,25 @@ func niceNumber(_ x: Double, round: Bool) -> Double {
 }
 
 public extension CGPoint {
-    func unnormalize(_ normalizers:Tuple2<AxisNormalizer?>) -> CGPoint {
-        .init(x:normalizers.x?.unnormalize(x) ?? x,
-              y:normalizers.y?.unnormalize(y) ?? y)
+    func unnormalize(_ normalizers:Tuple2<AxisNormalizer>) -> CGPoint {
+        .init(x:normalizers.x.unnormalize(x),
+              y:normalizers.y.unnormalize(y))
     }
     
-    func normalize(_ normalizers:Tuple2<AxisNormalizer?>) -> CGPoint {
-        .init(x:normalizers.x?.normalize(x) ?? x,
-              y:normalizers.y?.normalize(y) ?? y)
+    func normalize(_ normalizers:Tuple2<AxisNormalizer>) -> CGPoint {
+        .init(x:normalizers.x.normalize(x),
+              y:normalizers.y.normalize(y))
     }
 }
 
+public extension CGRect {
+    func unnormalize(_ normalizers:Tuple2<AxisNormalizer>) -> CGRect {
+        .init(from: min.unnormalize(normalizers),
+              to:max.unnormalize(normalizers))
+    }
+    
+    func normalize(_ normalizers:Tuple2<AxisNormalizer>) -> CGRect {
+        .init(from: min.normalize(normalizers),
+              to: max.normalize(normalizers))
+    }
+}

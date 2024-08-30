@@ -194,6 +194,7 @@ public struct RectGateDef : GateDef
     
     public var min: CGPoint { .init(x:minX, y:minY) }
     public var max: CGPoint { .init(x:maxX, y:maxY) }
+    public var rect: CGRect { .init(from:min, to:max) }
 
     public init(_ dims: Tuple2<String>, _ rect: CGRect)
     {

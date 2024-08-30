@@ -126,9 +126,21 @@ public class GroupNode : AnalysisNode {
 
 public class PopulationNode : AnalysisNode {
     public var gate:(any GateDef)?                      // the predicate to filter ones parent
-    public var invert: Bool = false
-    public var color: Color = .green
-    public var opacity: Float = 0.2
+    public var invert: Bool
+    public var color: Color
+    public var opacity: Float
+    
+    public init(gate: AnyGate? = nil, invert: Bool = false, color: Color? = nil, opacity: Float = 0.2) {
+        self.gate = gate
+        self.invert = invert
+        self.color = color ?? .green
+        self.opacity = opacity
+        super.init()
+    }
+    
+    public required init(from decoder: any Decoder) throws {
+        fatalError()
+    }
 
     public override func getSample() -> Sample? { parent?.getSample() }
 
