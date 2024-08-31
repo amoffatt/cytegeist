@@ -48,6 +48,7 @@ struct GatingView: View {
     @State private var offset = CGSize.zero
     
     @State private var candidateGate:PopulationNode? = nil
+    @State private var focusedItem:ChartAnnotation? = nil
 //    var sample: Sample?
     var population: AnalysisNode?
     
@@ -92,18 +93,27 @@ struct GatingView: View {
             VStack {
                 GeometryReader { proxy in
                     let size = proxy.size
-                    ZStack(alignment: .topLeading){
-                        ForEach(visibleChildren()) { child in
-                            AnyView(child.view(meta, size))
-                        }
-                        
+                    ZStack(alignment: .topLeading) {
                         gateRadius(siz: proxy.size)
                         gateRange(siz: proxy.size)
                         gateRect(siz: proxy.size)
                         gateEllipse(siz: proxy.size)
                         crosshair(location: mouseLocation, size: proxy.size )
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
-                            .gesture(gateDrag(areaSize: proxy.size))
+                            .gesture(makeDragGesture(areaSize: proxy.size))
+                            .gesture(makeTapGesture())
+                        
+                        
+                        ForEach(visibleChildren()) { child in
+                            let editing = child == focusedItem
+                            AnyView(child.view(meta, size, editing))
+                            .onTapGesture {
+                                focusedItem = child
+                            }
+
+                        }
+                        
+                        
                     }
 //                    .frame(width:size.width, height:size.height)
                 }
@@ -301,7 +311,7 @@ struct GatingView: View {
 //        .onChanged { _ in self.isDragging = true }
 //        .onEnded { _ in self.isDragging = false }
 //}
-    func gateDrag(areaSize: CGSize) -> some Gesture {
+    func makeDragGesture(areaSize: CGSize) -> some Gesture {
         DragGesture()
             .onChanged { value in offset = value.translation
                 isDragging = true
@@ -319,6 +329,13 @@ struct GatingView: View {
                 makeGate(mouseLocation, startLocation, areaPixelSize:areaSize)
                 startLocation = CGPoint.zero
                 mouseLocation = CGPoint.zero
+            }
+    }
+    
+    func makeTapGesture() -> some Gesture {
+        TapGesture()
+            .onEnded {
+                focusedItem = nil
             }
     }
     

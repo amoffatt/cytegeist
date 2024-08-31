@@ -99,6 +99,7 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable, Equat
     }
 }
 
+@Observable
 public class SampleNode : AnalysisNode {
     public let sample:Sample
 
@@ -121,11 +122,14 @@ public class SampleNode : AnalysisNode {
         return .sample(ref)
     }
 }
+
+@Observable
 public class GroupNode : AnalysisNode {
 }
 
+@Observable
 public class PopulationNode : AnalysisNode {
-    public var gate:(any GateDef)?                      // the predicate to filter ones parent
+    public var gate:AnyGate?                      // the predicate to filter ones parent
     public var invert: Bool
     public var color: Color
     public var opacity: Float
@@ -157,6 +161,12 @@ public class PopulationNode : AnalysisNode {
             return nil
         }
         
-        return gate.chartView(id: id.uuidString, chart: chart)
+        let gateBinding = Binding<AnyGate?>() {
+            gate
+        } set: {
+            self.gate = $0
+        }
+        
+        return gate.chartView(gateBinding, id: id.uuidString, chart: chart)
     }
 }

@@ -109,7 +109,8 @@ public protocol GateDef : Codable, Hashable, Equatable
 //        fatalError("Implemented")
 //    }
     
-    func chartView(id:String, chart:ChartDef) -> ChartAnnotation?
+    /// self is a binding for the gate's view to be able to edit the gate itself through
+    func chartView(_ self:Binding<AnyGate?>, id:String, chart:ChartDef) -> ChartAnnotation?
 }
 
 public extension GateDef {
@@ -166,15 +167,19 @@ public struct RangeGateDef : GateDef
         : PValue(0)
     }
     
-    public func chartView(id:String, chart: ChartDef) -> ChartAnnotation? {
-        
+    public func chartView(_ self:Binding<AnyGate?>, id:String, chart: ChartDef) -> ChartAnnotation? {
         guard let xAxis = chart.xAxis?.name,
               xAxis == dims.first else {
             return nil
         }
-        return .init(id:id) { sampleMeta, chartSize in
+        
+        return .init(id:id) { sampleMeta, chartSize, editing in
                 if let xNormalizer = sampleMeta.parameter(named: xAxis)?.normalizer {
-                    return RangeGateView(gate: self, normalizer: xNormalizer, chartSize: chartSize)
+                    return RangeGateView(
+                        gate: castBinding(self),
+                        normalizer: xNormalizer,
+                        chartSize: chartSize,
+                        editing: editing)
                 }
                 return EmptyView()
         }
@@ -231,17 +236,17 @@ public struct RectGateDef : GateDef
         return .one
     }
     
-    public func chartView(id:String, chart: ChartDef) -> ChartAnnotation? {
+    public func chartView(_ self:Binding<AnyGate?>, id:String, chart: ChartDef) -> ChartAnnotation? {
         
         guard let xAxis = chart.xAxis?.name, xAxis == dims.get(index:0),
               let yAxis = chart.yAxis?.name, yAxis == dims.get(index:1)
         else {
             return nil
         }
-        return .init(id:id) { sampleMeta, chartSize in
+        return .init(id:id) { sampleMeta, chartSize, editing in
             if let xNormalizer = sampleMeta.parameter(named: xAxis)?.normalizer,
                let yNormalizer = sampleMeta.parameter(named: yAxis)?.normalizer {
-                return RectGateView(gate: self,
+                return RectGateView(gate: castBinding(self),
                                     normalizers: .init(xNormalizer, yNormalizer),
                                     chartSize: chartSize)
             }

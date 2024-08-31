@@ -158,3 +158,40 @@ public extension ControlSize {
 }
 
 
+public func castBinding<SrcType, DstType>(_ src:Binding<SrcType?>) -> Binding<DstType?> {
+    .init(get: {
+        src.wrappedValue as? DstType
+    }, set: {
+        src.wrappedValue = $0 as? SrcType
+    })
+}
+
+
+
+public extension View {
+    func onPress(pressed: @escaping (Bool) -> Void) -> some View {
+        modifier(OnPressGestureModifier(pressed: pressed))
+    }
+}
+
+private struct OnPressGestureModifier: ViewModifier {
+    @State private var isPressed = false
+    let pressed: (Bool) -> Void
+
+    func body(content: Content) -> some View {
+        content
+            .simultaneousGesture(DragGesture(minimumDistance: 0)
+                .onChanged { _ in
+                    if !self.isPressed {
+                        self.isPressed = true
+                        self.pressed(true)
+                    }
+                }
+                .onEnded { _ in
+                    if self.isPressed {
+                        self.isPressed = false
+                        self.pressed(false)
+                    }
+                })
+    }
+}
