@@ -9,7 +9,6 @@ import Foundation
 import SwiftUI
 import UniformTypeIdentifiers.UTType
 import CytegeistLibrary
-import CytegeistCore
 
 
 //---------------------------------------------------------
@@ -36,7 +35,7 @@ enum AnalysisNodeError : Error {
 
 //---------------------------------------------------------
 @Observable
-public class AnalysisNode : Codable, Transferable, Identifiable, Hashable, Equatable
+public class AnalysisNode : Codable, Transferable, Identifiable, Hashable
 {
     
     public static func == (lhs: AnalysisNode, rhs: AnalysisNode) -> Bool {
@@ -51,18 +50,30 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable, Equat
     public var name: String = ""
     public var graphDef =  ChartDef()              // how this population wants to be shown
     public var statistics =  [Statistic]()         // what to report
-    public var children: [AnalysisNode]?  =  [AnalysisNode]()        // subpopulations dependent on us
+    private var _parent: AnalysisNode?
+    public var parent: AnalysisNode? {
+        get { _parent }
+        set {
+            if newValue == parent {
+                return
+            }
+            if let _parent {
+                _parent._removeChild(self)
+            }
+            _parent = newValue
+            if let _parent {
+                _parent._addChild(self)
+            }
+        }
+    }
+    public private(set) var children: [AnalysisNode] = []        // subpopulations dependent on us
     public var extraAttributes = AttributeStore()
     
-    public private(set) var parent: AnalysisNode?
 
     public static var transferRepresentation: some TransferRepresentation {
         CodableRepresentation(contentType: UTType.population)
     }
     
-        // removeChild
-        // gate.clear()
-        // graphDef.edit
     public init()
     {
     }
@@ -76,41 +87,41 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable, Equat
     
     public func getSample() -> Sample? { fatalError("Must be overriden") }
     
+    private func _addChild(_ node:AnalysisNode) {
+        children.append(node)
+    }
     public func addChild(_ node:AnalysisNode) {
-        if children == nil {
-            children = []
-        }
-        children!.append(node)
-        
         node.parent = self
     }
     
     public func createRequest() throws -> PopulationRequest { fatalError("Implement") }
     
     public func getChildren<T:AnalysisNode>() -> [T] {
-        if let children {
-            return children.compactMap { $0 as? T }
-        }
-        return []
+        children.compactMap { $0 as? T }
     }
     
     public func chartView(chart: ChartDef, dims:Tuple2<CDimension?>) -> ChartAnnotation? {
         nil
     }
     
-    public func removeChild(_ node: AnalysisNode?) {
+    private func _removeChild(_ node: AnalysisNode) {
+        children.removeAll { $0 == node }
+    }
+        
+    public func removeChild(_ node: AnalysisNode?) -> Bool {
         guard let node else {
-            return
+            return false
         }
         
-        children.remove
-    }
-    
-    public func remove() {
-        if let parent {
-            self.parent = nil
-            parent.removeChild(self)
+        if node.parent == self {
+            node.parent = nil
+            return true
         }
+        return false
+    }
+
+    public func remove() {
+        parent = nil
     }
 }
 
@@ -180,14 +191,11 @@ public class PopulationNode : AnalysisNode {
         
         @Bindable var _self = self
         
-//        return gate.chartView($_self.gate, id: id.uuidString, chart: chart)
         return ChartAnnotation(
             id:id.uuidString, name: "\(name) gate",
             view: { chartSize, editing in
-                gate.chartView(_self:$_self.gate, chartSize:chartSize, chartDims:dims, editing:editing)
-            }, remove: {
-                self.remove()
-            })
-//        { sampleMeta, chartSize, editing in
+                gate.chartView(_self:$_self.gate, chartSize:chartSize, chartDims:dims)
+            }, remove: self.remove
+            )
     }
 }

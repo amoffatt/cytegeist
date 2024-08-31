@@ -43,6 +43,11 @@ public extension Collection {
     func sorted<T: Comparable>(by keyPath: KeyPath<Element, T>) -> [Element] {
         return self.sorted { $0[keyPath: keyPath] < $1[keyPath: keyPath] }
     }
+    
+    /// If this collection is empty, returns nil instead
+    var emptyToNil: Self? {
+        isEmpty ? nil : self
+    }
 }
 
 

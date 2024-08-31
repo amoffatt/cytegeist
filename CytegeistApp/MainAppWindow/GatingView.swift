@@ -63,9 +63,10 @@ struct GatingView: View {
     @Environment(Experiment.self) var experiment
     
     func visibleChildren() -> [ChartAnnotation] {
+        let dims = dimensions()
         if let children = population?.children {
             let result = children.compactMap { child in
-                child.chartView(chart: chartDef)
+                child.chartView(chart: chartDef, dims:dims)
             }
             return result
         }
@@ -80,6 +81,11 @@ struct GatingView: View {
 //        }
     }
 
+    func deleteSelectedAnnotation() {
+        if let focusedItem, focusedItem.remove != nil {
+            confirmDelete = focusedItem
+        }
+    }
 
 
 //    var selectedSample: Sample
@@ -100,18 +106,15 @@ struct GatingView: View {
                             .gesture(makeTapGesture())
                         
                         
-                        ForEach(visibleChildren()) { child in
+                        ForEach(visibleChildren(), id:\.self) { child in
                             let editing = child == focusedItem
-                            AnyView(child.view(meta, size, editing))
+                            AnyView(child.view(size, editing))
+                                .environment(\.isEditing, editing)
                             .onTapGesture {
                                 focusedItem = child
                             }
-
                         }
-                        
-                        
                     }
-//                    .frame(width:size.width, height:size.height)
                 }
             }
             .fillAvailableSpace()
@@ -119,37 +122,29 @@ struct GatingView: View {
             .padding(40)
             .allowsHitTesting(true)
             .opacity(mode == ReportMode.gating ? 1.0 : 0.0)
-            .onDeleteCommand {
-                if let focusedItem, focusedItem.remove != nil {
-                    confirmDelete = focusedItem
-                }
-            }
+            .focusable()
+            .focusEffectDisabled()
+            .onDeleteCommand(perform: deleteSelectedAnnotation)
         
             .confirmationDialog("Enter new gate name", isPresented: isNonNilBinding($confirmGate)) {
                 if let confirmGate {
                     GateConfigView(node:confirmGate, finalize: finalizeCandidateGate)
                 }
             }
-            .confirmationDialog("Delete", isPresented: isNonNilBinding($confirmDelete)) {
-                if let confirmDelete {
-                    Text("Are you sure you want to delete \(confirmDelete.name)")
-                    Buttons.delete() {
-                        confirmDelete.remove?()
-                    }
-                    Buttons.cancel()
+            .confirmationDialog("Are you sure you want to delete \(confirmDelete?.name ?? "")",
+                                isPresented: isNonNilBinding($confirmDelete)) {
+                Buttons.delete() {
+                    confirmDelete?.remove?()
                 }
+                Buttons.cancel()
             }
     }
-    
-//    func makeChart() -> some View {
-//        
-//    }
     
     var sampleMeta: FCSMetadata? {
         population?.getSample()?.meta
     }
     
-    var axisNormalizers: Tuple2<AxisNormalizer?> {
+    func dimensions() -> Tuple2<CDimension?> {
         guard let sampleMeta else {
             return .init(nil, nil)
         }
@@ -158,9 +153,13 @@ struct GatingView: View {
         let yAxis = chartDef.yAxis?.name
         
         return .init(
-            sampleMeta.parameter(named: xAxis.nonNil)?.normalizer,
-            sampleMeta.parameter(named: yAxis.nonNil)?.normalizer
+            sampleMeta.parameter(named: xAxis.nonNil),
+            sampleMeta.parameter(named: yAxis.nonNil)
         )
+    }
+    
+    func axisNormalizers() -> Tuple2<AxisNormalizer?> {
+        dimensions().map { $0?.normalizer }
     }
     
     
@@ -173,7 +172,7 @@ struct GatingView: View {
         start.y = 1 - start.y
         end.y = 1 - end.y
 
-        let normalizers = axisNormalizers
+        let normalizers = axisNormalizers()
         let rect = CGRect(
             from: start.unnormalize(normalizers),
             to: end.unnormalize(normalizers)

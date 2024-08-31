@@ -15,78 +15,129 @@ import CytegeistLibrary
 //    func chartView(chart:ChartDef) -> AnnotationView?
 //}
 
-public struct ChartAnnotation : Identifiable, Equatable {
+public struct ChartAnnotation : Identifiable, Hashable {
     public static func == (lhs: ChartAnnotation, rhs: ChartAnnotation) -> Bool { lhs.id == rhs.id }
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
     public let id:String
     public let name:String
     public let view:(CGSize, Bool) -> any View
     public let remove:Action?
 }
 
+protocol GateHandle : View {
+}
 
-struct GateHandle : View, Identifiable {
+struct CircleHandle: GateHandle {
+    @Environment(\.gateColor) var color
+    @Environment(\.controlState) var state
+    
+    
+    let solid:Bool
+    public init(solid: Bool = false) {
+        self.solid = solid
+    }
+    
+    var body: some View {
+        let solidColor = color.opacity(state.hovered ? 1.0 : 0.7)
+        ZStack {
+            if solid {
+                Circle()
+                    .fill(solidColor)
+            }
+            else {
+                Circle()
+                    .fill(color.opacity(state.hovered ? 0.6 : 0.3))
+                    .stroke(solidColor, lineWidth: state.pressed ? 3 : 2)
+            }
+        }
+    }
+}
+
+extension GateHandle {
+}
+
+struct EmptyHandle: GateHandle {
+    var body: some View {
+        EmptyView()
+    }
+}
+
+
+typealias ControlState = (hovered:Bool, pressed:Bool)
+
+struct GateControlZone<Content, Handle> : View, Identifiable where Content:View, Handle:View {
     @Environment(\.handleSize) var size
     @Environment(\.controlSize) var controlSize
-    
+    @Environment(\.isEditing) var editing
+
     let id: String
-    let color:Color
-    let solid:Bool
-    let scale:ControlSize = .regular
-    let position:CGPoint
+//    let color:Color
+//    let solid:Bool
+//    let scale:ControlSize = .regular
+    let content: (((ControlState) -> Content))
+    let handle: ((ControlState) -> Handle)?
     let move:(CGPoint) -> Void
     
     @State var isHovered:Bool = false
     @State var isPressed:Bool = false
     
-    init(id: String, _ color: Color, _ position: CGPoint, solid: Bool = false, move: @escaping (CGPoint) -> Void) {
+    init(id: String,
+         content: @escaping ((ControlState) -> Content),
+         handle: @escaping ((ControlState) -> Handle),
+         move: @escaping (CGPoint) -> Void) {
         self.id = id
-        self.color = color
-        self.position = position
-        self.solid = solid
+        self.content = content
+        self.handle = handle
         self.move = move
-        self.isHovered = isHovered
-        self.isPressed = isPressed
     }
     
     var body: some View {
-        let size = (size * controlSize.scaling) * (isHovered ? 1.15 : 1) * (isPressed ? 0.8 : 1)
-        let p = position
-        let color = color.opacity(isHovered ? 1 : 0.7)
+        let state = (isHovered, isPressed)
         
-        ZStack {
-            if solid {
-                Circle()
-                    .fill(color)
-            }
-            else {
-                Circle()
-                    .fill(color.opacity(isHovered ? 0.6 : 0.3))
-                    .stroke(color, lineWidth: isPressed ? 3 : 2)
+        ZStack(alignment: .topLeading) {
+            content(state)
+            
+            if editing, let handle {
+                let size = (size * controlSize.scaling) * (isHovered ? 1.15 : 1) * (isPressed ? 0.8 : 1)
+                handle(state)
+                    .frame(width:size, height: size)
             }
         }
+        .transition(.opacity)
+        .environment(\.controlState, state)
         .id(id)
-
-        .onHover { hovering in
-            withAnimation(.spring) {
-                isHovered = hovering
-            }
-        }
-
-        .frame(width:size, height: size)
-        .position(x: p.x, y: p.y)
         
-        .gesture(
-            DragGesture()
-                .onChanged { drag in
-                    let p = drag.location
-                    move(p)
+        // If in edit mode, apply interation modifiers
+        .if(editing) { view in
+            view
+                .onHover { hovering in
+                    if !editing { return }
+                    
+                    withAnimation(.spring) {
+                        isHovered = hovering
+                    }
                 }
-                .onEnded { drag in }
-        )
-        .onPress { pressed in
-            withAnimation(.bouncy) {
-                isPressed = pressed
-            }
+                .gesture(
+                    editing
+                    ? DragGesture()
+                        .onChanged { drag in
+                            if !editing { return }
+                            
+                            let p = drag.location
+                            move(p)
+                        }
+                        .onEnded { drag in }
+                    : nil
+                )
+                .onPress { pressed in
+                    if !editing { return }
+                    
+                    withAnimation(.bouncy) {
+                        isPressed = pressed
+                    }
+                }
         }
     }
 }
@@ -94,15 +145,14 @@ struct GateHandle : View, Identifiable {
 
 struct RangeGateView : View {
     @Environment(\.lineWidth) var lineWidth
+    @Environment(\.isEditing) var editing
 //    @Environment(\.backgroundStyle) var style
     @Binding var gate:RangeGateDef?
     let normalizer:AxisNormalizer
     let chartSize:CGSize
-    let editing:Bool
     let color:Color = .green
     
     var body: some View {
-        
         
         return ZStack(alignment: .topLeading) {
             if let gate {
@@ -112,57 +162,49 @@ struct RangeGateView : View {
                 let viewWidth = viewMax - viewMin
                 let viewCenter = viewMin + viewWidth / 2
                 let chartCenter = chartSize / 2
-                
                 let opacity = (editing ? 1.5 : 1) * 0.3
                 
-                Rectangle()
-                    .fill(color.opacity(opacity))
-//                    .stroke(color.opacity(0.8), lineWidth: lineWidth)
-                //                .opacity(isDragging ? 0.8 : 0.5)
-                    .position(x: viewMin, y: 0)
-                    .offset(x: viewWidth / 2, y:chartCenter.height)
-                    .frame(width: viewWidth,  height: chartSize.height, alignment: .topLeading)
-                
-                ForEach([(0, viewMin), (1, viewMax)], id:\.0) { _, x in
+                GateControlZone(id:"main-area") { state in
                     Rectangle()
-                        .fill(color.opacity(0.8))
-                        .position(x: x, y: 0)
-                        .offset(y: chartCenter.height)
-                        .frame(width: lineWidth, height: chartSize.height, alignment: .topLeading)
-                }
-
-                if editing {
-                    Group {
-                        GateHandle(id:"center-handle", color, .init(viewCenter, chartCenter.height), solid: true) { p in
-                            var gate = gate
-                            gate.min = normalizer.unnormalize((p.x - viewWidth / 2) / chartSize.width)
-                            gate.max = normalizer.unnormalize((p.x + viewWidth / 2)  / chartSize.width)
-                            $gate.wrappedValue = gate
-                        }
-                        
-                        GateHandle(id:"min-handle", color, .init(viewMin, chartCenter.height)) { p in
-                            $gate.wrappedValue?.min = normalizer.unnormalize(p.x / chartSize.width)
-                        }
-                        
-                        GateHandle(id:"max-handle",  color, .init(viewMax, chartCenter.height)) { p in
-                            $gate.wrappedValue?.max = normalizer.unnormalize(p.x / chartSize.width)
-                        }
-                    }
-                    .transition(.opacity)
-
+                        .fill(color.opacity(opacity))
+                        .position(x: viewMin, y: 0)
+                        .offset(x: viewWidth / 2, y:chartCenter.height)
+                        .frame(width: viewWidth,  height: chartSize.height, alignment: .topLeading)
+                } handle: { state in
+                    CircleHandle(solid:true)
+                        .position(x:viewCenter, y:chartCenter.height)
                     
-//                    fix()
-                    // Crossing min/max
-                    // Min/max becoming equal via center drag to edge
-                    // Add delete support
-                    // Add rect and ellipse gates
+                } move: { p in
+                    var gate = gate
+                    gate.min = normalizer.unnormalize((p.x - viewWidth / 2) / chartSize.width)
+                    gate.max = normalizer.unnormalize((p.x + viewWidth / 2)  / chartSize.width)
+                    $gate.wrappedValue = gate
+                }
+                
+                edgeControlZone("min-edge", x: viewMin) { p in
+                    $gate.wrappedValue?.min = normalizer.unnormalize(p.x / chartSize.width)
+                }
+                edgeControlZone("max-edge", x: viewMax) { p in
+                    $gate.wrappedValue?.max = normalizer.unnormalize(p.x / chartSize.width)
                 }
             }
         }
+        .environment(\.isEditing, editing)
         .animation(.smooth, value:editing)
-//        .onChange(of: editing, initial: true) {
-//            withAnimation { showEditor = editing }
-//        }
+    }
+    
+    func edgeControlZone(_ id:String, x:Double, move:@escaping (CGPoint) -> Void) -> some View {
+        GateControlZone(id:id) { state in
+            Rectangle()
+                .fill(color.opacity(0.8))
+                .position(x: x, y: 0)
+                .offset(y: chartSize.height / 2)
+                .frame(width: lineWidth, height: chartSize.height, alignment: .topLeading)
+        } handle: { state in
+            CircleHandle()
+                .position(x: x, y: chartSize.height / 2)
+            
+        } move: { move($0) }
     }
 }
 
@@ -221,5 +263,37 @@ public extension EnvironmentValues {
     var handleSize: Double {
         get { self[HandleSizeEnvironmentKey.self] }
         set { self[HandleSizeEnvironmentKey.self] = newValue }
+    }
+}
+
+struct GateColorEnvironmentKey: EnvironmentKey {
+    static let defaultValue = Color.green
+}
+
+public extension EnvironmentValues {
+    var gateColor: Color {
+        get { self[GateColorEnvironmentKey.self] }
+        set { self[GateColorEnvironmentKey.self] = newValue }
+    }
+}
+struct ControlStateEnvironmentKey: EnvironmentKey {
+    static let defaultValue:ControlState = (false, false)
+}
+
+public extension EnvironmentValues {
+    internal var controlState: ControlState {
+        get { self[ControlStateEnvironmentKey.self] }
+        set { self[ControlStateEnvironmentKey.self] = newValue }
+    }
+}
+
+struct IsEditingEnvironmentKey: EnvironmentKey {
+    static let defaultValue:Bool = false
+}
+
+public extension EnvironmentValues {
+    var isEditing: Bool {
+        get { self[IsEditingEnvironmentKey.self] }
+        set { self[IsEditingEnvironmentKey.self] = newValue }
     }
 }

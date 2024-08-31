@@ -283,6 +283,7 @@ public struct HistogramData<D:Dimensions> {
     
     public let bins:[Float]
     public let mode: Float
+    public let normalizeCoeff: Float
     
     public let axes:D.Axes
     public let countAxis:AxisNormalizer?
@@ -297,11 +298,12 @@ public struct HistogramData<D:Dimensions> {
     }
     
     public func normalizedCount(bin: Int) -> Float {
-        return bins[bin] / mode
+        return bins[bin] * normalizeCoeff
     }
 
     public init(bins: [Float], size: D.IntCoord, axes: D.Axes, countAxis: AxisNormalizer? = nil) {
         self.mode = bins.max() ?? 0
+        self.normalizeCoeff = 1 / max(1, mode)
         self.bins = bins
         
         self.axes = axes

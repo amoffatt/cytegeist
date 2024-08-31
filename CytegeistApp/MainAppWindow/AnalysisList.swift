@@ -39,7 +39,7 @@ struct AnalysisList: View {
         return VStack {
             Text("Analysis Tree for \(sample.tubeName): selected: \(selection.nodes.debugDescription)").frame(width: 150)
             List(selection: $selection.nodes) {
-                OutlineGroup(tree, children: \.children) {  item in
+                OutlineGroup(tree, children: \.children.emptyToNil) {  item in
                     HStack {
                         Image(systemName: "lightbulb")  //item.image)
                             .resizable()

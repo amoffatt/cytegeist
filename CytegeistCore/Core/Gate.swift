@@ -113,16 +113,43 @@ public protocol GateDef : Codable, Hashable, Equatable
 //    func chartView(_ self:Binding<AnyGate?>, chart:ChartDef) -> ChartAnnotation?
     func chartView(_self:Binding<AnyGate?>,
                    chartSize:CGSize,
-                   chartDims:Tuple2<CDimension?>,
-                   editing:Bool) -> any View
+                   chartDims:Tuple2<CDimension?>
+                   ) -> any View
     
     func isValid(for chartDims: Tuple2<CDimension?>) -> Bool
+}
+
+public enum GateVisibility {
+    case none, normal, transposed
 }
 
 public extension GateDef {
     func isEqualTo(_ other: (any GateDef)?) -> Bool {
         guard let otherGate = other as? Self else { return false }
         return self == otherGate
+    }
+    
+    func isValid(for chartDims: Tuple2<CDimension?>) -> Bool {
+//        visibility(for: chartDims) != .none
+        visibility(for: chartDims) == .normal   //AM: transposed not yet supported
+    }
+
+    func visibility(for chartDims: Tuple2<CDimension?>) -> GateVisibility {
+        let xDim = dims.get(index:0)
+        let yDim = dims.get(index:1)
+        
+        switch (chartDims.x?.name, chartDims.y?.name) {
+            // Chart matches gate
+        case (xDim, yDim): return .normal
+            // Chart matches gate, but transposed
+        case (yDim, xDim): return .transposed
+            // 1D gate matches chart X axis
+        case (xDim, _): return yDim == nil ? .normal : .none
+            // 1D gate matches chart Y axis
+        case (_, xDim): return yDim == nil ? .transposed : .none
+        case (_, _):
+            return .none
+        }
     }
 }
 
@@ -183,25 +210,21 @@ public struct RangeGateDef : GateDef
         : PValue(0)
     }
     
-    public func isValid(for chartDims: Tuple2<CDimension?>) -> Bool {
-        dims.first != nil && dims.first == chartDims.x?.name
-    }
 
-    public func chartView(_self:Binding<AnyGate?>, chartSize:CGSize, chartDims:Tuple2<CDimension?>, editing:Bool) -> any View {
-        precondition(isValid(for: chartDims))
+    public func chartView(_self:Binding<AnyGate?>, chartSize:CGSize, chartDims:Tuple2<CDimension?>) -> any View {
+        let visibility = visibility(for:chartDims)
+        precondition(visibility != .none)
+        // TODO support .transposed
         
         return RangeGateView(
             gate: castBinding(_self),
             normalizer: chartDims.x!.normalizer,
-            chartSize: chartSize,
-            editing: editing)
+            chartSize: chartSize)
     }
 }
 
 public struct RectGateDef : GateDef
 {
-
-    
     public var minX: ValueType
     public var maxX: ValueType
     public var minY: ValueType
@@ -246,23 +269,23 @@ public struct RectGateDef : GateDef
         }
         return .one
     }
-    
-    public func chartView(_ self:Binding<AnyGate?>, chart: ChartDef) -> ChartAnnotation? {
-        
-        guard let xAxis = chart.xAxis?.name, xAxis == dims.get(index:0),
-              let yAxis = chart.yAxis?.name, yAxis == dims.get(index:1)
-        else {
-            return nil
-        }
-        return .init(id:id) { sampleMeta, chartSize, editing in
-            if let xNormalizer = sampleMeta.parameter(named: xAxis)?.normalizer,
-               let yNormalizer = sampleMeta.parameter(named: yAxis)?.normalizer {
-                return RectGateView(gate: castBinding(self),
-                                    normalizers: .init(xNormalizer, yNormalizer),
-                                    chartSize: chartSize)
-            }
-            return EmptyView()
-        } remove: {}
+
+    public func chartView(_self: Binding<AnyGate?>, chartSize: CGSize, chartDims: Tuple2<CDimension?>) -> any View {
+            Text("Rect gate not yet supported")
+//        guard let xAxis = chart.xAxis?.name, xAxis == dims.get(index:0),
+//              let yAxis = chart.yAxis?.name, yAxis == dims.get(index:1)
+//        else {
+//            return nil
+//        }
+//        return .init(id:id) { sampleMeta, chartSize, editing in
+//            if let xNormalizer = sampleMeta.parameter(named: xAxis)?.normalizer,
+//               let yNormalizer = sampleMeta.parameter(named: yAxis)?.normalizer {
+//                return RectGateView(gate: castBinding(self),
+//                                    normalizers: .init(xNormalizer, yNormalizer),
+//                                    chartSize: chartSize)
+//            }
+//            return EmptyView()
+//        } remove: {}
         
     }
 }
