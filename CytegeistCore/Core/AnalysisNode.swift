@@ -94,8 +94,23 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable, Equat
         return []
     }
     
-    public func chartView(chart: ChartDef) -> ChartAnnotation? {
+    public func chartView(chart: ChartDef, dims:Tuple2<CDimension?>) -> ChartAnnotation? {
         nil
+    }
+    
+    public func removeChild(_ node: AnalysisNode?) {
+        guard let node else {
+            return
+        }
+        
+        children.remove
+    }
+    
+    public func remove() {
+        if let parent {
+            self.parent = nil
+            parent.removeChild(self)
+        }
     }
 }
 
@@ -156,17 +171,23 @@ public class PopulationNode : AnalysisNode {
         return .gated(try parent.createRequest(), gate: gate, invert: invert, name: name)
     }
     
-    override public func chartView(chart: ChartDef) -> ChartAnnotation? {
-        guard let gate = gate else {
+    override public func chartView(chart: ChartDef, dims:Tuple2<CDimension?>) -> ChartAnnotation? {
+        guard let gate = gate,
+              gate.isValid(for: dims)
+        else {
             return nil
         }
         
-        let gateBinding = Binding<AnyGate?>() {
-            gate
-        } set: {
-            self.gate = $0
-        }
+        @Bindable var _self = self
         
-        return gate.chartView(gateBinding, id: id.uuidString, chart: chart)
+//        return gate.chartView($_self.gate, id: id.uuidString, chart: chart)
+        return ChartAnnotation(
+            id:id.uuidString, name: "\(name) gate",
+            view: { chartSize, editing in
+                gate.chartView(_self:$_self.gate, chartSize:chartSize, chartDims:dims, editing:editing)
+            }, remove: {
+                self.remove()
+            })
+//        { sampleMeta, chartSize, editing in
     }
 }

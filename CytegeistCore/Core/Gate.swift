@@ -110,7 +110,13 @@ public protocol GateDef : Codable, Hashable, Equatable
 //    }
     
     /// self is a binding for the gate's view to be able to edit the gate itself through
-    func chartView(_ self:Binding<AnyGate?>, id:String, chart:ChartDef) -> ChartAnnotation?
+//    func chartView(_ self:Binding<AnyGate?>, chart:ChartDef) -> ChartAnnotation?
+    func chartView(_self:Binding<AnyGate?>,
+                   chartSize:CGSize,
+                   chartDims:Tuple2<CDimension?>,
+                   editing:Bool) -> any View
+    
+    func isValid(for chartDims: Tuple2<CDimension?>) -> Bool
 }
 
 public extension GateDef {
@@ -140,14 +146,24 @@ public extension GateDef {
 public struct RangeGateDef : GateDef
 {
     
-    public var min: ValueType
-    public var max: ValueType
+    private var _min: ValueType
+    private var _max: ValueType
+//    private var _max: ValueType
     public var dims: [String]
+    
+    public var min: ValueType {
+        get { _min }
+        set { (_min, _max) = sort(newValue, _max) }
+    }
+    
+    public var max: ValueType {
+        get { _max }
+        set { (_min, _max) = sort(_min, newValue) }
+    }
     
     public init(_ dim:String, _ min: ValueType, _ max: ValueType)
     {
-        self.min = min
-        self.max = max
+        (_min, _max) = sort(min, max)
         self.dims = [dim]
     }
 
@@ -167,23 +183,18 @@ public struct RangeGateDef : GateDef
         : PValue(0)
     }
     
-    public func chartView(_ self:Binding<AnyGate?>, id:String, chart: ChartDef) -> ChartAnnotation? {
-        guard let xAxis = chart.xAxis?.name,
-              xAxis == dims.first else {
-            return nil
-        }
+    public func isValid(for chartDims: Tuple2<CDimension?>) -> Bool {
+        dims.first != nil && dims.first == chartDims.x?.name
+    }
+
+    public func chartView(_self:Binding<AnyGate?>, chartSize:CGSize, chartDims:Tuple2<CDimension?>, editing:Bool) -> any View {
+        precondition(isValid(for: chartDims))
         
-        return .init(id:id) { sampleMeta, chartSize, editing in
-                if let xNormalizer = sampleMeta.parameter(named: xAxis)?.normalizer {
-                    return RangeGateView(
-                        gate: castBinding(self),
-                        normalizer: xNormalizer,
-                        chartSize: chartSize,
-                        editing: editing)
-                }
-                return EmptyView()
-        }
-        
+        return RangeGateView(
+            gate: castBinding(_self),
+            normalizer: chartDims.x!.normalizer,
+            chartSize: chartSize,
+            editing: editing)
     }
 }
 
@@ -236,7 +247,7 @@ public struct RectGateDef : GateDef
         return .one
     }
     
-    public func chartView(_ self:Binding<AnyGate?>, id:String, chart: ChartDef) -> ChartAnnotation? {
+    public func chartView(_ self:Binding<AnyGate?>, chart: ChartDef) -> ChartAnnotation? {
         
         guard let xAxis = chart.xAxis?.name, xAxis == dims.get(index:0),
               let yAxis = chart.yAxis?.name, yAxis == dims.get(index:1)
@@ -251,7 +262,7 @@ public struct RectGateDef : GateDef
                                     chartSize: chartSize)
             }
             return EmptyView()
-        }
+        } remove: {}
         
     }
 }

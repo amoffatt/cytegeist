@@ -47,8 +47,9 @@ struct GatingView: View {
     @State private var isHovering = false
     @State private var offset = CGSize.zero
     
-    @State private var candidateGate:PopulationNode? = nil
+    @State private var confirmGate:PopulationNode? = nil
     @State private var focusedItem:ChartAnnotation? = nil
+    @State private var confirmDelete:ChartAnnotation? = nil
 //    var sample: Sample?
     var population: AnalysisNode?
     
@@ -83,11 +84,6 @@ struct GatingView: View {
 
 //    var selectedSample: Sample
     func chart(_ request: PopulationRequest, _ meta: FCSMetadata) -> some View {
-        let showGatePopup:Binding<Bool> = .init(
-            get: { self.candidateGate != nil },
-            set: { _ in self.candidateGate = nil }
-        )
-        
         
         return ChartView(population: request, config: $chartDef) {
             VStack {
@@ -123,10 +119,24 @@ struct GatingView: View {
             .padding(40)
             .allowsHitTesting(true)
             .opacity(mode == ReportMode.gating ? 1.0 : 0.0)
+            .onDeleteCommand {
+                if let focusedItem, focusedItem.remove != nil {
+                    confirmDelete = focusedItem
+                }
+            }
         
-            .confirmationDialog("Enter new gate name", isPresented: showGatePopup) {
-                if let candidateGate {
-                    GateConfigView(node:candidateGate, finalize: finalizeCandidateGate)
+            .confirmationDialog("Enter new gate name", isPresented: isNonNilBinding($confirmGate)) {
+                if let confirmGate {
+                    GateConfigView(node:confirmGate, finalize: finalizeCandidateGate)
+                }
+            }
+            .confirmationDialog("Delete", isPresented: isNonNilBinding($confirmDelete)) {
+                if let confirmDelete {
+                    Text("Are you sure you want to delete \(confirmDelete.name)")
+                    Buttons.delete() {
+                        confirmDelete.remove?()
+                    }
+                    Buttons.cancel()
                 }
             }
     }
@@ -139,17 +149,17 @@ struct GatingView: View {
         population?.getSample()?.meta
     }
     
-    var axisNormalizers: Tuple2<AxisNormalizer> {
+    var axisNormalizers: Tuple2<AxisNormalizer?> {
         guard let sampleMeta else {
-            return .init(.none, .none)
+            return .init(nil, nil)
         }
         
         let xAxis = chartDef.xAxis?.name
         let yAxis = chartDef.yAxis?.name
         
         return .init(
-            sampleMeta.parameter(named: xAxis.nonNil)?.normalizer ?? .none,
-            sampleMeta.parameter(named: yAxis.nonNil)?.normalizer ?? .none
+            sampleMeta.parameter(named: xAxis.nonNil)?.normalizer,
+            sampleMeta.parameter(named: yAxis.nonNil)?.normalizer
         )
     }
     
@@ -215,27 +225,27 @@ struct GatingView: View {
         let node = PopulationNode(gate:gate)
         node.gate = gate
         node.name = "T Cells"
-        candidateGate = node
+        confirmGate = node
     }
     
     func finalizeCandidateGate() {
         guard let population,
-              let candidateGate
+              let confirmGate
         else {
             print("No population selected")
             return
         }
         
         let graphDef = population.graphDef            // change axes?
-        candidateGate.graphDef = graphDef
+        confirmGate.graphDef = graphDef
 
         
-        print("adding \(candidateGate.name) to \(population.name)")
-        population.addChild(candidateGate)
+        print("adding \(confirmGate.name) to \(population.name)")
+        population.addChild(confirmGate)
         
-        experiment.selectedAnalysisNodes.nodes = [candidateGate]
+        experiment.selectedAnalysisNodes.nodes = [confirmGate]
         
-        self.candidateGate = nil
+        self.confirmGate = nil
     }
     
     

@@ -45,7 +45,7 @@
 		B6C9A40B2C75A46800DB6786 /* GraphicsUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = B685296B2C74DBD700EF9EF4 /* GraphicsUtil.swift */; };
 		B6C9A40C2C75A46800DB6786 /* VectorUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = B685296C2C74DBD700EF9EF4 /* VectorUtil.swift */; };
 		B6C9A40D2C75A46800DB6786 /* ExceptionCatcher.m in Sources */ = {isa = PBXBuildFile; fileRef = B63D16992C55F52D00E81C2F /* ExceptionCatcher.m */; };
-		B6C9A40E2C75A46800DB6786 /* UIViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = B64173982C59A06F001AA2F4 /* UIViews.swift */; };
+		B6C9A40E2C75A46800DB6786 /* UIUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = B64173982C59A06F001AA2F4 /* UIUtil.swift */; };
 		B6C9A40F2C75A46800DB6786 /* ExceptionCatcher.h in Headers */ = {isa = PBXBuildFile; fileRef = B63D169D2C55F79700E81C2F /* ExceptionCatcher.h */; };
 		B6C9A4112C75A59200DB6786 /* CytegeistLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B6C9A3EB2C75A3EF00DB6786 /* CytegeistLibrary.framework */; platformFilters = (ios, macos, ); };
 		B6C9A4122C75A59200DB6786 /* CytegeistLibrary.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = B6C9A3EB2C75A3EF00DB6786 /* CytegeistLibrary.framework */; platformFilters = (ios, macos, ); settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -201,7 +201,7 @@
 		B64173912C58A89A001AA2F4 /* CoreTestUtil.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreTestUtil.swift; sourceTree = "<group>"; };
 		B64173932C58AB2B001AA2F4 /* DemoData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoData.swift; sourceTree = "<group>"; };
 		B64173962C599B09001AA2F4 /* ThreadUtil.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreadUtil.swift; sourceTree = "<group>"; };
-		B64173982C59A06F001AA2F4 /* UIViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIViews.swift; sourceTree = "<group>"; };
+		B64173982C59A06F001AA2F4 /* UIUtil.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIUtil.swift; sourceTree = "<group>"; };
 		B641739C2C5C4E00001AA2F4 /* ParameterInspectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParameterInspectorView.swift; sourceTree = "<group>"; };
 		B65D82A32C44BE7100E4F0A2 /* CytegeistApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CytegeistApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B65D82A72C44BE7100E4F0A2 /* RealityKitContent */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = RealityKitContent; sourceTree = "<group>"; };
@@ -571,7 +571,7 @@
 		B6C9A4A82C76820300DB6786 /* UI */ = {
 			isa = PBXGroup;
 			children = (
-				B64173982C59A06F001AA2F4 /* UIViews.swift */,
+				B64173982C59A06F001AA2F4 /* UIUtil.swift */,
 				B6C9A4B12C76F13A00DB6786 /* TableUtil.swift */,
 			);
 			path = UI;
@@ -937,7 +937,7 @@
 				B6C9A40B2C75A46800DB6786 /* GraphicsUtil.swift in Sources */,
 				B6C9A40C2C75A46800DB6786 /* VectorUtil.swift in Sources */,
 				B6C9A40D2C75A46800DB6786 /* ExceptionCatcher.m in Sources */,
-				B6C9A40E2C75A46800DB6786 /* UIViews.swift in Sources */,
+				B6C9A40E2C75A46800DB6786 /* UIUtil.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

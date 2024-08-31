@@ -18,7 +18,9 @@ import CytegeistLibrary
 public struct ChartAnnotation : Identifiable, Equatable {
     public static func == (lhs: ChartAnnotation, rhs: ChartAnnotation) -> Bool { lhs.id == rhs.id }
     public let id:String
-    public let view:(FCSMetadata, CGSize, Bool) -> any View
+    public let name:String
+    public let view:(CGSize, Bool) -> any View
+    public let remove:Action?
 }
 
 
@@ -121,7 +123,7 @@ struct RangeGateView : View {
                     .offset(x: viewWidth / 2, y:chartCenter.height)
                     .frame(width: viewWidth,  height: chartSize.height, alignment: .topLeading)
                 
-                ForEach([viewMin, viewMax], id:\.self) { x in
+                ForEach([(0, viewMin), (1, viewMax)], id:\.0) { _, x in
                     Rectangle()
                         .fill(color.opacity(0.8))
                         .position(x: x, y: 0)
@@ -130,30 +132,44 @@ struct RangeGateView : View {
                 }
 
                 if editing {
-                    GateHandle(id:"min-handle", color, .init(viewMin, chartCenter.height)) { p in
-                        $gate.wrappedValue?.min = normalizer.unnormalize(p.x / chartSize.width)
+                    Group {
+                        GateHandle(id:"center-handle", color, .init(viewCenter, chartCenter.height), solid: true) { p in
+                            var gate = gate
+                            gate.min = normalizer.unnormalize((p.x - viewWidth / 2) / chartSize.width)
+                            gate.max = normalizer.unnormalize((p.x + viewWidth / 2)  / chartSize.width)
+                            $gate.wrappedValue = gate
+                        }
+                        
+                        GateHandle(id:"min-handle", color, .init(viewMin, chartCenter.height)) { p in
+                            $gate.wrappedValue?.min = normalizer.unnormalize(p.x / chartSize.width)
+                        }
+                        
+                        GateHandle(id:"max-handle",  color, .init(viewMax, chartCenter.height)) { p in
+                            $gate.wrappedValue?.max = normalizer.unnormalize(p.x / chartSize.width)
+                        }
                     }
+                    .transition(.opacity)
+
                     
-                    GateHandle(id:"max-handle",  color, .init(viewMax, chartCenter.height)) { p in
-                        $gate.wrappedValue?.max = normalizer.unnormalize(p.x / chartSize.width)
-                    }
-                    
-                    GateHandle(id:"center-handle", color, .init(viewCenter, chartCenter.height), solid: true) { p in
-                        var gate = gate
-                        gate.min = normalizer.unnormalize((p.x - viewWidth / 2) / chartSize.width)
-                        gate.max = normalizer.unnormalize((p.x + viewWidth / 2)  / chartSize.width)
-                        $gate.wrappedValue = gate
-                    }
+//                    fix()
+                    // Crossing min/max
+                    // Min/max becoming equal via center drag to edge
+                    // Add delete support
+                    // Add rect and ellipse gates
                 }
             }
         }
+        .animation(.smooth, value:editing)
+//        .onChange(of: editing, initial: true) {
+//            withAnimation { showEditor = editing }
+//        }
     }
 }
 
 struct RectGateView : View {
     @Binding var gate:RectGateDef?
     @State var isDragging:Bool = false
-    let normalizers:Tuple2<AxisNormalizer>
+    let normalizers:Tuple2<AxisNormalizer?>
     let chartSize:CGSize
         //    @Binding var editing:Bool
     

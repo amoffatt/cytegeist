@@ -178,24 +178,24 @@ func niceNumber(_ x: Double, round: Bool) -> Double {
 }
 
 public extension CGPoint {
-    func unnormalize(_ normalizers:Tuple2<AxisNormalizer>) -> CGPoint {
-        .init(x:normalizers.x.unnormalize(x),
-              y:normalizers.y.unnormalize(y))
+    func unnormalize(_ normalizers:Tuple2<AxisNormalizer?>) -> CGPoint {
+        .init(x:normalizers.x?.unnormalize(x) ?? .nan,
+              y:normalizers.y?.unnormalize(y) ?? .nan)
     }
     
-    func normalize(_ normalizers:Tuple2<AxisNormalizer>) -> CGPoint {
-        .init(x:normalizers.x.normalize(x),
-              y:normalizers.y.normalize(y))
+    func normalize(_ normalizers:Tuple2<AxisNormalizer?>) -> CGPoint {
+        .init(x:normalizers.x?.normalize(x) ?? .nan,
+              y:normalizers.y?.normalize(y) ?? .nan)
     }
 }
 
 public extension CGRect {
-    func unnormalize(_ normalizers:Tuple2<AxisNormalizer>) -> CGRect {
+    func unnormalize(_ normalizers:Tuple2<AxisNormalizer?>) -> CGRect {
         .init(from: min.unnormalize(normalizers),
               to:max.unnormalize(normalizers))
     }
     
-    func normalize(_ normalizers:Tuple2<AxisNormalizer>) -> CGRect {
+    func normalize(_ normalizers:Tuple2<AxisNormalizer?>) -> CGRect {
         .init(from: min.normalize(normalizers),
               to: max.normalize(normalizers))
     }

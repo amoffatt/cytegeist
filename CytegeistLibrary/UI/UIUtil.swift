@@ -131,6 +131,11 @@ public class Buttons {
         text("Cancel", role:.cancel, action:action)
             .keyboardShortcut(.cancelAction)
     }
+    
+    public static func delete(action: @escaping () -> Void = {}) -> some View {
+        text("Delete", role:.destructive, action:action)
+            .keyboardShortcut(.defaultAction)
+    }
 
 //    public static func
     
@@ -163,6 +168,17 @@ public func castBinding<SrcType, DstType>(_ src:Binding<SrcType?>) -> Binding<Ds
         src.wrappedValue as? DstType
     }, set: {
         src.wrappedValue = $0 as? SrcType
+    })
+}
+
+/// Binding which returns true when src Binding is non nil, otherwise false.
+/// Setting the binding's value writes nil to the src value.
+/// Used for UI popup isPresented:Binding<Bool>
+public func isNonNilBinding<T>(_ src:Binding<T?>) -> Binding<Bool> {
+    .init(get: {
+        src.wrappedValue != nil
+    }, set: { _ in
+        src.wrappedValue = nil
     })
 }
 
