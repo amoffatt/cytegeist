@@ -186,27 +186,31 @@ public func isNonNilBinding<T>(_ src:Binding<T?>) -> Binding<Bool> {
 
 public extension View {
     func onPress(pressed: @escaping (Bool) -> Void) -> some View {
+        modifier(OnPressGestureModifier(pressed: { p, _ in pressed(p) }))
+    }
+    
+    func onPress(pressed: @escaping (Bool, CGPoint) -> Void) -> some View {
         modifier(OnPressGestureModifier(pressed: pressed))
     }
 }
 
 private struct OnPressGestureModifier: ViewModifier {
     @State private var isPressed = false
-    let pressed: (Bool) -> Void
+    let pressed: (Bool, CGPoint) -> Void
 
     func body(content: Content) -> some View {
         content
             .simultaneousGesture(DragGesture(minimumDistance: 0)
-                .onChanged { _ in
+                .onChanged { info in
                     if !self.isPressed {
                         self.isPressed = true
-                        self.pressed(true)
+                        self.pressed(true, info.startLocation)
                     }
                 }
-                .onEnded { _ in
+                .onEnded { info in
                     if self.isPressed {
                         self.isPressed = false
-                        self.pressed(false)
+                        self.pressed(false, info.location)
                     }
                 })
     }

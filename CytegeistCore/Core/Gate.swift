@@ -111,7 +111,7 @@ public protocol GateDef : Codable, Hashable, Equatable
     
     /// self is a binding for the gate's view to be able to edit the gate itself through
 //    func chartView(_ self:Binding<AnyGate?>, chart:ChartDef) -> ChartAnnotation?
-    func chartView(_self:Binding<AnyGate?>,
+    func chartView(_ node:PopulationNode,
                    chartSize:CGSize,
                    chartDims:Tuple2<CDimension?>
                    ) -> any View
@@ -211,13 +211,13 @@ public struct RangeGateDef : GateDef
     }
     
 
-    public func chartView(_self:Binding<AnyGate?>, chartSize:CGSize, chartDims:Tuple2<CDimension?>) -> any View {
+    public func chartView(_ node:PopulationNode, chartSize:CGSize, chartDims:Tuple2<CDimension?>) -> any View {
         let visibility = visibility(for:chartDims)
         precondition(visibility != .none)
         // TODO support .transposed
         
         return RangeGateView(
-            gate: castBinding(_self),
+            node: node,
             normalizer: chartDims.x!.normalizer,
             chartSize: chartSize)
     }
@@ -270,7 +270,7 @@ public struct RectGateDef : GateDef
         return .one
     }
 
-    public func chartView(_self: Binding<AnyGate?>, chartSize: CGSize, chartDims: Tuple2<CDimension?>) -> any View {
+    public func chartView(_ node: PopulationNode, chartSize: CGSize, chartDims: Tuple2<CDimension?>) -> any View {
             Text("Rect gate not yet supported")
 //        guard let xAxis = chart.xAxis?.name, xAxis == dims.get(index:0),
 //              let yAxis = chart.yAxis?.name, yAxis == dims.get(index:1)

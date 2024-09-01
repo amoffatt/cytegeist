@@ -160,6 +160,9 @@ public class PopulationNode : AnalysisNode {
     public var color: Color
     public var opacity: Float
     
+    /// Label offset from center of gate in chart 0-1 scale coordinates
+    public var labelOffset: CGPoint = .zero
+    
     public init(gate: AnyGate? = nil, invert: Bool = false, color: Color? = nil, opacity: Float = 0.2) {
         self.gate = gate
         self.invert = invert
@@ -189,12 +192,11 @@ public class PopulationNode : AnalysisNode {
             return nil
         }
         
-        @Bindable var _self = self
-        
         return ChartAnnotation(
-            id:id.uuidString, name: "\(name) gate",
+            id:id.uuidString,
+            name: "\(name) gate",
             view: { chartSize, editing in
-                gate.chartView(_self:$_self.gate, chartSize:chartSize, chartDims:dims)
+                gate.chartView(self, chartSize:chartSize, chartDims:dims)
             }, remove: self.remove
             )
     }

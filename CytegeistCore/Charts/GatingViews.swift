@@ -73,21 +73,24 @@ struct GateControlZone<Content, Handle> : View, Identifiable where Content:View,
     @Environment(\.isEditing) var editing
 
     let id: String
-//    let color:Color
-//    let solid:Bool
-//    let scale:ControlSize = .regular
+    let position: CGPoint
     let content: (((ControlState) -> Content))
-    let handle: ((ControlState) -> Handle)?
+    let handle: ((ControlState) -> Handle)
     let move:(CGPoint) -> Void
     
+    @State var dragStart:(zonePosition:CGPoint, pressPosition:CGPoint)?
+
     @State var isHovered:Bool = false
     @State var isPressed:Bool = false
     
-    init(id: String,
+    init(_ id: String,
+         position: CGPoint,
+         move: @escaping (CGPoint) -> Void,
          content: @escaping ((ControlState) -> Content),
-         handle: @escaping ((ControlState) -> Handle),
-         move: @escaping (CGPoint) -> Void) {
+         handle: @escaping ((ControlState) -> Handle) = { _ in EmptyView() }
+    ) {
         self.id = id
+        self.position = position
         self.content = content
         self.handle = handle
         self.move = move
@@ -96,15 +99,17 @@ struct GateControlZone<Content, Handle> : View, Identifiable where Content:View,
     var body: some View {
         let state = (isHovered, isPressed)
         
-        ZStack(alignment: .topLeading) {
+        ZStack() {
             content(state)
-            
-            if editing, let handle {
+
+            if editing, Handle.self != EmptyView.self {
                 let size = (size * controlSize.scaling) * (isHovered ? 1.15 : 1) * (isPressed ? 0.8 : 1)
                 handle(state)
                     .frame(width:size, height: size)
             }
         }
+        .position(position)
+        .fixedSize()
         .transition(.opacity)
         .environment(\.controlState, state)
         .id(id)
@@ -113,27 +118,27 @@ struct GateControlZone<Content, Handle> : View, Identifiable where Content:View,
         .if(editing) { view in
             view
                 .onHover { hovering in
-                    if !editing { return }
-                    
                     withAnimation(.spring) {
                         isHovered = hovering
                     }
                 }
-                .gesture(
-                    editing
-                    ? DragGesture()
+                .simultaneousGesture(
+                    DragGesture()
                         .onChanged { drag in
-                            if !editing { return }
-                            
-                            let p = drag.location
+                            guard let dragStart else {
+                                print("dragStart not set in gate handle \(id)")
+                                return
+                            }
+                            let delta = drag.location - dragStart.pressPosition
+                            let p = dragStart.zonePosition + delta
                             move(p)
                         }
-                        .onEnded { drag in }
-                    : nil
+                        .onEnded { drag in
+                            dragStart = nil
+                        }
                 )
-                .onPress { pressed in
-                    if !editing { return }
-                    
+                .onPress { pressed, pressPosition in
+                    dragStart = (position, pressPosition)
                     withAnimation(.bouncy) {
                         isPressed = pressed
                     }
@@ -147,46 +152,59 @@ struct RangeGateView : View {
     @Environment(\.lineWidth) var lineWidth
     @Environment(\.isEditing) var editing
 //    @Environment(\.backgroundStyle) var style
-    @Binding var gate:RangeGateDef?
+    @Bindable var node: PopulationNode
     let normalizer:AxisNormalizer
     let chartSize:CGSize
     let color:Color = .green
     
     var body: some View {
+//        @Bindable var node = node
+        let gateBinding:Binding<RangeGateDef?> = castBinding($node.gate)
         
         return ZStack(alignment: .topLeading) {
-            if let gate {
+            if let gate = node.gate as? RangeGateDef {
                 let (min, max) = sort(gate.min, gate.max)
                 let viewMin = normalizer.normalize(min) * chartSize.width
                 let viewMax = normalizer.normalize(max) * chartSize.width
                 let viewWidth = viewMax - viewMin
-                let viewCenter = viewMin + viewWidth / 2
                 let chartCenter = chartSize / 2
+                let viewCenter = CGPoint(viewMin + viewWidth / 2, chartCenter.height)
                 let opacity = (editing ? 1.5 : 1) * 0.3
                 
-                GateControlZone(id:"main-area") { state in
+                GateControlZone("main-area", position: viewCenter) { p in
+                    gateBinding.wrappedValue?.min = normalizer.unnormalize((p.x - viewWidth / 2) / chartSize.width)
+                    gateBinding.wrappedValue?.max = normalizer.unnormalize((p.x + viewWidth / 2)  / chartSize.width)
+                } content: { state in
                     Rectangle()
                         .fill(color.opacity(opacity))
-                        .position(x: viewMin, y: 0)
-                        .offset(x: viewWidth / 2, y:chartCenter.height)
-                        .frame(width: viewWidth,  height: chartSize.height, alignment: .topLeading)
+//                        .position(x: viewMin, y: 0)
+//                        .offset(x: viewWidth / 2, y:chartCenter.height)
+                        .frame(width: viewWidth,  height: chartSize.height)
                 } handle: { state in
                     CircleHandle(solid:true)
-                        .position(x:viewCenter, y:chartCenter.height)
-                    
-                } move: { p in
-                    var gate = gate
-                    gate.min = normalizer.unnormalize((p.x - viewWidth / 2) / chartSize.width)
-                    gate.max = normalizer.unnormalize((p.x + viewWidth / 2)  / chartSize.width)
-                    $gate.wrappedValue = gate
+//                        .position(x:viewCenter, y:chartCenter.height)
                 }
                 
                 edgeControlZone("min-edge", x: viewMin) { p in
-                    $gate.wrappedValue?.min = normalizer.unnormalize(p.x / chartSize.width)
+                    gateBinding.wrappedValue?.min = normalizer.unnormalize(p.x / chartSize.width)
                 }
                 edgeControlZone("max-edge", x: viewMax) { p in
-                    $gate.wrappedValue?.max = normalizer.unnormalize(p.x / chartSize.width)
+                    gateBinding.wrappedValue?.max = normalizer.unnormalize(p.x / chartSize.width)
                 }
+                
+                let labelPosition = viewCenter + node.labelOffset * chartSize
+                GateControlZone("label", position: labelPosition) { p in
+                    let offset = (p - viewCenter) / chartSize
+                    node.labelOffset = offset
+                } content: { state in
+                    GateLabel(node:node)
+                        .scaleEffect(.init(state.hovered ? 1.1 : 1))
+                        .shadow(radius: state.hovered ? 5 : 0)
+                }
+////            handle: { state in
+////                    CircleHandle(solid:true)
+////                        .position(x:viewCenter, y:chartCenter.height + 30)
+////                }
             }
         }
         .environment(\.isEditing, editing)
@@ -194,17 +212,16 @@ struct RangeGateView : View {
     }
     
     func edgeControlZone(_ id:String, x:Double, move:@escaping (CGPoint) -> Void) -> some View {
-        GateControlZone(id:id) { state in
+        GateControlZone(id, position: .init(x, chartSize.height / 2), move: move) { state in
             Rectangle()
                 .fill(color.opacity(0.8))
-                .position(x: x, y: 0)
-                .offset(y: chartSize.height / 2)
-                .frame(width: lineWidth, height: chartSize.height, alignment: .topLeading)
+//                .position(x: x, y: 0)
+//                .offset(y: chartSize.height / 2)
+                .frame(width: lineWidth, height: chartSize.height)
         } handle: { state in
             CircleHandle()
-                .position(x: x, y: chartSize.height / 2)
-            
-        } move: { move($0) }
+//                .position(x: x, y: chartSize.height / 2)
+        }
     }
 }
 
@@ -234,12 +251,28 @@ struct RectGateView : View {
                     .opacity(isDragging ? 0.8 : 0.5)
                     .position(rect.min)
                     .offset(size / 2.0)
-                    .frame(width: size.width,  height: size.width, alignment: Alignment.topLeading)
-                //                .allowsHitTesting(false)
+                    .frame(width: size.width,  height: size.width, alignment: .topLeading)
                 
                 
             }
         }
+    }
+}
+
+struct GateLabel: View {
+    let node:PopulationNode
+
+    var body: some View {
+        Text(node.name)
+            .padding()
+            .background(.regularMaterial.opacity(0.4))
+            .cornerRadius(10)
+        // AM note this offset may need to be different when gate is transposed
+//        Rectangle()
+//            .fill(.blue)
+//            .frame(width: 50, height: 50)
+//            .position(gateCenter + node.labelOffset)
+            .offset(node.labelOffset.asSize)
     }
 }
 
