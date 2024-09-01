@@ -116,12 +116,20 @@ public extension CGSize {
     static func / (a: CGSize, b: Double) -> CGSize {
         .init(a.width / b, a.height / b)
     }
+    
+    static func / (a: Double, b: CGSize) -> CGSize {
+        .init(a / b.width, a / b.height)
+    }
 }
 
 public extension CGRect {
     var min:CGPoint { .init(minX, minY) }
     var max:CGPoint { .init(maxX, maxY) }
-    
+    var center:CGPoint {
+        get { .init(midX, midY) }
+        set { origin = newValue - size / 2 }
+    }
+
     init(from:CGPoint, to:CGPoint) {
         let x = sort(from.x, to.x)
         let y = sort(from.y, to.y)

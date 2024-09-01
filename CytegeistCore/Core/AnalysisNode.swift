@@ -160,12 +160,12 @@ public class PopulationNode : AnalysisNode {
     public var gate:AnyGate?                      // the predicate to filter ones parent
     public var invert: Bool
     public var color: Color
-    public var opacity: Float
+    public var opacity: Double
     
     /// Label offset from center of gate in chart 0-1 scale coordinates
     public var labelOffset: CGPoint = .zero
     
-    public init(gate: AnyGate? = nil, invert: Bool = false, color: Color? = nil, opacity: Float = 0.2) {
+    public init(gate: AnyGate? = nil, invert: Bool = false, color: Color? = nil, opacity: Double = 0.2) {
         self.gate = gate
         self.invert = invert
         self.color = color ?? .green
@@ -189,6 +189,7 @@ public class PopulationNode : AnalysisNode {
     
     override public func chartView(chart: ChartDef, dims:Tuple2<CDimension?>) -> ChartAnnotation? {
         guard let gate = gate,
+              let gate = gate as? any ViewableGate,
               gate.isValid(for: dims)
         else {
             return nil

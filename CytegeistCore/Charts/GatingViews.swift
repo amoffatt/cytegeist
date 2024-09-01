@@ -10,11 +10,6 @@ import SwiftUI
 import CytegeistLibrary
 
 
-
-//public protocol ChartViewable {
-//    func chartView(chart:ChartDef) -> AnnotationView?
-//}
-
 public struct ChartAnnotation : Identifiable, Hashable {
     public static func == (lhs: ChartAnnotation, rhs: ChartAnnotation) -> Bool { lhs.id == rhs.id }
     public func hash(into hasher: inout Hasher) {
@@ -147,49 +142,30 @@ struct GateControlZone<Content, Handle> : View, Identifiable where Content:View,
     }
 }
 
-
-struct RangeGateView : View {
+struct GateView<GateType:GateDef> : View where GateType:ViewableGate {
     @Environment(\.lineWidth) var lineWidth
     @Environment(\.isEditing) var editing
-//    @Environment(\.backgroundStyle) var style
     @Bindable var node: PopulationNode
-    let normalizer:AxisNormalizer
+    let normalizers:Tuple2<AxisNormalizer?>
     let chartSize:CGSize
-    let color:Color = .green
+    
+    var gate:Binding<GateType?> {
+        castBinding($node.gate)
+    }
+    
+    public init(node: PopulationNode, axes: Tuple2<AxisNormalizer?>, chartSize: CGSize) {
+        self.node = node
+        self.normalizers = axes
+        self.chartSize = chartSize
+    }
     
     var body: some View {
-//        @Bindable var node = node
-        let gateBinding:Binding<RangeGateDef?> = castBinding($node.gate)
         
         return ZStack(alignment: .topLeading) {
-            if let gate = node.gate as? RangeGateDef {
-                let (min, max) = sort(gate.min, gate.max)
-                let viewMin = normalizer.normalize(min) * chartSize.width
-                let viewMax = normalizer.normalize(max) * chartSize.width
-                let viewWidth = viewMax - viewMin
-                let chartCenter = chartSize / 2
-                let viewCenter = CGPoint(viewMin + viewWidth / 2, chartCenter.height)
-                let opacity = (editing ? 1.5 : 1) * 0.3
-                
-                GateControlZone("main-area", position: viewCenter) { p in
-                    gateBinding.wrappedValue?.min = normalizer.unnormalize((p.x - viewWidth / 2) / chartSize.width)
-                    gateBinding.wrappedValue?.max = normalizer.unnormalize((p.x + viewWidth / 2)  / chartSize.width)
-                } content: { state in
-                    Rectangle()
-                        .fill(color.opacity(opacity))
-//                        .position(x: viewMin, y: 0)
-//                        .offset(x: viewWidth / 2, y:chartCenter.height)
-                        .frame(width: viewWidth,  height: chartSize.height)
-                } handle: { state in
-                    CircleHandle(solid:true)
-//                        .position(x:viewCenter, y:chartCenter.height)
-                }
-                
-                edgeControlZone("min-edge", x: viewMin) { p in
-                    gateBinding.wrappedValue?.min = normalizer.unnormalize(p.x / chartSize.width)
-                }
-                edgeControlZone("max-edge", x: viewMax) { p in
-                    gateBinding.wrappedValue?.max = normalizer.unnormalize(p.x / chartSize.width)
+            if let gate = gate.wrappedValue {
+                var viewCenter:CGPoint = .zero
+                if let content = gate.viewContent(self, viewCenter: &viewCenter) {
+                    AnyView(content)
                 }
                 
                 let labelPosition = viewCenter + node.labelOffset * chartSize
@@ -201,63 +177,239 @@ struct RangeGateView : View {
                         .scaleEffect(.init(state.hovered ? 1.1 : 1))
                         .shadow(radius: state.hovered ? 5 : 0)
                 }
-////            handle: { state in
-////                    CircleHandle(solid:true)
-////                        .position(x:viewCenter, y:chartCenter.height + 30)
-////                }
             }
         }
         .environment(\.isEditing, editing)
         .animation(.smooth, value:editing)
     }
     
-    func edgeControlZone(_ id:String, x:Double, move:@escaping (CGPoint) -> Void) -> some View {
-        GateControlZone(id, position: .init(x, chartSize.height / 2), move: move) { state in
+    func rectControlZone(_ id:String, center:CGPoint, width:Double, height:Double, opacity:Double? = nil, solid:Bool = false, move:@escaping (CGPoint) -> Void) -> some View {
+        let opacity = opacity ?? node.opacity
+        return GateControlZone(id, position: center, move: move) { state in
             Rectangle()
-                .fill(color.opacity(0.8))
-//                .position(x: x, y: 0)
-//                .offset(y: chartSize.height / 2)
-                .frame(width: lineWidth, height: chartSize.height)
+                .fill(node.color.opacity(opacity))
+                .frame(width:width, height:height)
         } handle: { state in
-            CircleHandle()
-//                .position(x: x, y: chartSize.height / 2)
+            CircleHandle(solid:solid)
+        }
+    }
+
+}
+
+
+
+protocol ViewableGate: GateDef {
+    associatedtype ViewType = GateView<Self>
+    
+    func chartView(_ node:PopulationNode, chartSize:CGSize, chartDims:Tuple2<CDimension?>) -> any View
+    func viewContent(_ view:GateView<Self>, viewCenter: inout CGPoint) -> (any View)?
+    func isValid(for chartDims: Tuple2<CDimension?>) -> Bool
+}
+
+extension ViewableGate {
+    func chartView(_ node:PopulationNode, chartSize:CGSize, chartDims:Tuple2<CDimension?>) -> any View {
+        let visibility = visibility(for:chartDims)
+        precondition(visibility != .none)
+        // TODO support .transposed
+        
+        return GateView<Self>(
+            node: node,
+            axes: chartDims.map { $0?.normalizer },
+            chartSize: chartSize)
+    }
+}
+
+public enum GateVisibility {
+    case none, normal, transposed
+}
+
+public extension GateDef {
+    func isValid(for chartDims: Tuple2<CDimension?>) -> Bool {
+//        visibility(for: chartDims) != .none
+        visibility(for: chartDims) == .normal   //AM: transposed not yet supported
+    }
+
+    func visibility(for chartDims: Tuple2<CDimension?>) -> GateVisibility {
+        let xDim = dims.get(index:0)
+        let yDim = dims.get(index:1)
+        
+        switch (chartDims.x?.name, chartDims.y?.name) {
+            // Chart matches gate
+        case (xDim, yDim): return .normal
+            // Chart matches gate, but transposed
+        case (yDim, xDim): return .transposed
+            // 1D gate matches chart X axis
+        case (xDim, _): return yDim == nil ? .normal : .none
+            // 1D gate matches chart Y axis
+        case (_, xDim): return yDim == nil ? .transposed : .none
+        case (_, _):
+            return .none
         }
     }
 }
 
-struct RectGateView : View {
-    @Binding var gate:RectGateDef?
-    @State var isDragging:Bool = false
-    let normalizers:Tuple2<AxisNormalizer?>
-    let chartSize:CGSize
-        //    @Binding var editing:Bool
-    
-    var body: some View {
+
+extension RangeGateDef : ViewableGate {
+
+    func viewContent(_ v:ViewType, viewCenter: inout CGPoint) -> (any View)? {
+        if let n = v.normalizers.x {
+            let chartSize = v.chartSize
+            let (min, max) = sort(self.min, self.max)
+            let viewMin = n.normalize(min) * v.chartSize.width
+            let viewMax = n.normalize(max) * v.chartSize.width
+            let viewWidth = viewMax - viewMin
+            let chartCenter = v.chartSize / 2
+            viewCenter = CGPoint(viewMin + viewWidth / 2, chartCenter.height)
+            let opacity = (v.editing ? 1.5 : 1) * v.node.opacity
+            
+            return Group {
+                v.rectControlZone("main-area",
+                                  center:viewCenter, width:viewWidth, height:v.chartSize.height,
+                                  opacity: opacity,
+                                  solid: true
+                ) { p in
+                    v.gate.wrappedValue?.min = n.unnormalize((p.x - viewWidth / 2) / chartSize.width)
+                    v.gate.wrappedValue?.max = n.unnormalize((p.x + viewWidth / 2)  / chartSize.width)
+                }
+                
+                v.rectControlZone("min-edge", center:.init(viewMin, chartCenter.height), width:v.lineWidth, height:chartSize.height) { p in
+                    v.gate.wrappedValue?.min = n.unnormalize(p.x / chartSize.width)
+                }
+                v.rectControlZone("max-edge", center:.init(viewMax, chartCenter.height), width:v.lineWidth, height:chartSize.height) { p in
+                    v.gate.wrappedValue?.max = n.unnormalize(p.x / chartSize.width)
+                }
+            }
+        }
+        return nil
+    }
+
+}
+
+extension RectGateDef : ViewableGate {
+
+    func viewContent(_ v:ViewType, viewCenter: inout CGPoint) -> (any View)? {
+        guard let xNormalizer = v.normalizers.x,
+              let yNormalizer = v.normalizers.y
+        else {
+            return nil
+        }
         
-        return ZStack {
-            if let gate {
-                let rect = gate.rect
-                    .normalize(normalizers)
-                    .invertedY(maxY: 1)
-                    .scaled(chartSize)
-        //        let viewMin = normalizer.normalize(min) * chartSize.width
-        //        let viewMax = normalizer.normalize(max) * chartSize.width
-                let size = rect.size
-                
-                Rectangle()
-                    .stroke(style: StrokeStyle(lineWidth: 1.8, dash: [15, 5]))
-                    .fill(.green.opacity(0.2))
-                    .foregroundColor(.green)
-                    .opacity(isDragging ? 0.8 : 0.5)
-                    .position(rect.min)
-                    .offset(size / 2.0)
-                    .frame(width: size.width,  height: size.width, alignment: .topLeading)
-                
-                
+        let chartSize = v.chartSize
+        let viewRect = rect
+            .normalize(v.normalizers)
+            .invertedY(maxY: 1)
+            .scaled(chartSize)
+        viewCenter = viewRect.center
+        let opacity = (v.editing ? 1.5 : 1) * v.node.opacity
+        
+        return Group {
+            v.rectControlZone("main-area",
+                              center: viewRect.center,
+                              width: viewRect.width,
+                              height: viewRect.height,
+                              opacity: opacity,
+                              solid: true
+            ) { p in
+                var newRect = viewRect
+                newRect.center = p
+                v.gate.wrappedValue?.rect = newRect
+                    .scaled(1 / chartSize)
+                    .invertedY(maxY: 1.0)
+                    .unnormalize(v.normalizers)
+            }
+            
+            v.rectControlZone("left-edge", center:.init(viewRect.minX, viewRect.midY), width:v.lineWidth, height:viewRect.height) { p in
+                v.gate.wrappedValue?.minX = xNormalizer.unnormalize(p.x / chartSize.width)
+            }
+            v.rectControlZone("right-edge", center:.init(viewRect.maxX, viewRect.midY), width:v.lineWidth, height:viewRect.height) { p in
+                v.gate.wrappedValue?.maxX = xNormalizer.unnormalize(p.x / chartSize.width)
+            }
+            v.rectControlZone("top-edge", center:.init(viewRect.midX, viewRect.minY), width:viewRect.width, height:v.lineWidth) { p in
+                v.gate.wrappedValue?.maxY = yNormalizer.unnormalize(1.0 - p.y / chartSize.height)
+            }
+            v.rectControlZone("bottom-edge", center:.init(viewRect.midX, viewRect.maxY), width:viewRect.width, height:v.lineWidth) { p in
+                v.gate.wrappedValue?.minY = yNormalizer.unnormalize(1.0 - p.y / chartSize.height)
             }
         }
     }
+
 }
+//struct Test<Content:View> : View {
+//    let content: (Self) -> Content
+//    let name = "Hello"
+//    var body: some View {
+//        ZStack { content(self) }
+//    }
+//}
+//
+//extension Test {
+//    func range(_ parent:Self) -> some View {
+//        ZStack {
+//            Text(parent.name)
+//        }
+//    }
+//}
+//
+//func test() -> some View {
+//    Test(content: range)
+//}
+
+//func range<Content:View>(parent:Test<Content>) -> some View {
+//    ZStack {}
+//}
+
+//class GateViewBuilders {
+//}
+
+
+
+//struct RangeGateViewBuilder<Content> : GateViewBuilder<RangeGateDef, Content> where Content:View {
+//    typealias Content = <#type#>
+    
+//    func view(view:GateView<RangeGateDef, Content>) -> Content {
+//        ZStack { Text("Hello")}
+//        return ZStack(alignment: .topLeading) {
+//            if let gate = node.gate as? RangeGateDef {
+//                let (min, max) = sort(gate.min, gate.max)
+//                let viewMin = normalizer.normalize(min) * chartSize.width
+//                let viewMax = normalizer.normalize(max) * chartSize.width
+//                let viewWidth = viewMax - viewMin
+//                let chartCenter = chartSize / 2
+//                let viewCenter = CGPoint(viewMin + viewWidth / 2, chartCenter.height)
+//                let opacity = (editing ? 1.5 : 1) * node.opacity
+//                
+//                GateControlZone("main-area", position: viewCenter) { p in
+//                    gateBinding.wrappedValue?.min = normalizer.unnormalize((p.x - viewWidth / 2) / chartSize.width)
+//                    gateBinding.wrappedValue?.max = normalizer.unnormalize((p.x + viewWidth / 2)  / chartSize.width)
+//                } content: { state in
+//                    Rectangle()
+//                        .fill(node.color.opacity(opacity))
+//                        .frame(width: viewWidth,  height: chartSize.height)
+//                } handle: { state in
+//                    CircleHandle(solid:true)
+//                }
+//                
+//                edgeControlZone("min-edge", x: viewMin) { p in
+//                    gateBinding.wrappedValue?.min = normalizer.unnormalize(p.x / chartSize.width)
+//                }
+//                edgeControlZone("max-edge", x: viewMax) { p in
+//                    gateBinding.wrappedValue?.max = normalizer.unnormalize(p.x / chartSize.width)
+//                }
+//                
+//                let labelPosition = viewCenter + node.labelOffset * chartSize
+//                GateControlZone("label", position: labelPosition) { p in
+//                    let offset = (p - viewCenter) / chartSize
+//                    node.labelOffset = offset
+//                } content: { state in
+//                    GateLabel(node:node)
+//                        .scaleEffect(.init(state.hovered ? 1.1 : 1))
+//                        .shadow(radius: state.hovered ? 5 : 0)
+//                }
+//            }
+//        }
+//    }
+//}
+
 
 struct GateLabel: View {
     let node:PopulationNode
@@ -278,7 +430,7 @@ struct GateLabel: View {
 
 
 struct LineWidthEnvironmentKey: EnvironmentKey {
-    static let defaultValue: Double = 2.0
+    static let defaultValue: Double = 3.0
 }
 
 public extension EnvironmentValues {

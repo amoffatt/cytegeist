@@ -111,48 +111,12 @@ public protocol GateDef : Codable, Hashable, Equatable
     
     /// self is a binding for the gate's view to be able to edit the gate itself through
 //    func chartView(_ self:Binding<AnyGate?>, chart:ChartDef) -> ChartAnnotation?
-    func chartView(_ node:PopulationNode,
-                   chartSize:CGSize,
-                   chartDims:Tuple2<CDimension?>
-                   ) -> any View
+//    func chartView(_ node:PopulationNode,
+//                   chartSize:CGSize,
+//                   chartDims:Tuple2<CDimension?>
+//                   ) -> any View
     
-    func isValid(for chartDims: Tuple2<CDimension?>) -> Bool
 }
-
-public enum GateVisibility {
-    case none, normal, transposed
-}
-
-public extension GateDef {
-    func isEqualTo(_ other: (any GateDef)?) -> Bool {
-        guard let otherGate = other as? Self else { return false }
-        return self == otherGate
-    }
-    
-    func isValid(for chartDims: Tuple2<CDimension?>) -> Bool {
-//        visibility(for: chartDims) != .none
-        visibility(for: chartDims) == .normal   //AM: transposed not yet supported
-    }
-
-    func visibility(for chartDims: Tuple2<CDimension?>) -> GateVisibility {
-        let xDim = dims.get(index:0)
-        let yDim = dims.get(index:1)
-        
-        switch (chartDims.x?.name, chartDims.y?.name) {
-            // Chart matches gate
-        case (xDim, yDim): return .normal
-            // Chart matches gate, but transposed
-        case (yDim, xDim): return .transposed
-            // 1D gate matches chart X axis
-        case (xDim, _): return yDim == nil ? .normal : .none
-            // 1D gate matches chart Y axis
-        case (_, xDim): return yDim == nil ? .transposed : .none
-        case (_, _):
-            return .none
-        }
-    }
-}
-
 //class BifurGateDef : GateDef
 //{
 //    var division: CGFloat
@@ -168,6 +132,13 @@ public extension GateDef {
 //        fatalError("init(from:) has not been implemented")
 //    }
 //}
+
+public extension GateDef {
+    func isEqualTo(_ other: (any GateDef)?) -> Bool {
+        guard let otherGate = other as? Self else { return false }
+        return self == otherGate
+    }
+}
 
 
 public struct RangeGateDef : GateDef
@@ -194,14 +165,6 @@ public struct RangeGateDef : GateDef
         self.dims = [dim]
     }
 
-//    init(from decoder: any Decoder) throws {
-//        fatalError("init(from:) has not been implemented")
-//    }
-//    
-//    func hash(into hasher: inout Hasher) {
-//        hasher.combineMany(min, max, dims)
-//    }
-
     public func probability(of event:EventData) -> PValue
     {
             //  for d in dimensions where d.name?
@@ -210,17 +173,6 @@ public struct RangeGateDef : GateDef
         : PValue(0)
     }
     
-
-    public func chartView(_ node:PopulationNode, chartSize:CGSize, chartDims:Tuple2<CDimension?>) -> any View {
-        let visibility = visibility(for:chartDims)
-        precondition(visibility != .none)
-        // TODO support .transposed
-        
-        return RangeGateView(
-            node: node,
-            normalizer: chartDims.x!.normalizer,
-            chartSize: chartSize)
-    }
 }
 
 public struct RectGateDef : GateDef
@@ -233,7 +185,15 @@ public struct RectGateDef : GateDef
     
     public var min: CGPoint { .init(x:minX, y:minY) }
     public var max: CGPoint { .init(x:maxX, y:maxY) }
-    public var rect: CGRect { .init(from:min, to:max) }
+    public var rect: CGRect { 
+        get {.init(from:min, to:max) }
+        set {
+            minX = newValue.minX
+            maxX = newValue.maxX
+            minY = newValue.minY
+            maxY = newValue.maxY
+        }
+    }
 
     public init(_ dims: Tuple2<String>, _ rect: CGRect)
     {
@@ -270,8 +230,8 @@ public struct RectGateDef : GateDef
         return .one
     }
 
-    public func chartView(_ node: PopulationNode, chartSize: CGSize, chartDims: Tuple2<CDimension?>) -> any View {
-            Text("Rect gate not yet supported")
+//    public func chartView(_ node: PopulationNode, chartSize: CGSize, chartDims: Tuple2<CDimension?>) -> any View {
+//            Text("Rect gate not yet supported")
 //        guard let xAxis = chart.xAxis?.name, xAxis == dims.get(index:0),
 //              let yAxis = chart.yAxis?.name, yAxis == dims.get(index:1)
 //        else {
@@ -287,7 +247,7 @@ public struct RectGateDef : GateDef
 //            return EmptyView()
 //        } remove: {}
         
-    }
+//    }
 }
 
 //public class RadialGateDef : GateDef
