@@ -10,8 +10,8 @@ import CytegeistLibrary
 
 public enum AxisScaleType: Hashable {
     case linear
-    case log(base:Double)
-//    case biex(a:Float, b:Float)
+    case log(base:ValueType)
+    case biex(_ transform: Logicle)
 }
 
 public struct AxisNormalizer: Hashable, Codable {
@@ -86,6 +86,20 @@ public struct AxisNormalizer: Hashable, Codable {
             calculateTickMarks
         )
     }
+    
+    public static func logicle(min:Double, max:Double) -> AxisNormalizer {
+        let transform = Logicle(T:0, w:0, m:0)
+        
+        func calculateTickMarks(desiredTicks: Int) -> [MajorAxisTick] {
+            []
+        }
+        
+        return .init(
+            min, max, .biex(transform),
+            transform.logicle,
+            transform.unnormalize,
+            calculateTickMarks)
+    }
 
     
     
@@ -153,24 +167,16 @@ func niceNumber(_ x: Double, round: Bool) -> Double {
     var nf: Double
     
     if round {
-        if f < 1.5 {
-            nf = 1
-        } else if f < 3 {
-            nf = 2
-        } else if f < 7 {
-            nf = 5
-        } else {
-            nf = 10
+        if f < 1.5      {  nf = 1
+        } else if f < 3 {  nf = 2
+        } else if f < 7 {  nf = 5
+        } else {          nf = 10
         }
     } else {
-        if f <= 1 {
-            nf = 1
-        } else if f <= 2 {
-            nf = 2
-        } else if f <= 5 {
-            nf = 5
-        } else {
-            nf = 10
+        if f <= 1 {        nf = 1
+        } else if f <= 2 { nf = 2
+        } else if f <= 5 { nf = 5
+        } else {           nf = 10
         }
     }
     

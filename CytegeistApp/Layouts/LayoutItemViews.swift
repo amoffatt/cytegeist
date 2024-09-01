@@ -16,7 +16,7 @@ struct LayoutItemWrappper: View, Identifiable {
     var id = UUID()
     var item: LayoutItem
     let editableItem:Binding<LayoutItem?>
-   @State var startPosition: CGPoint = .zero
+   @State var dragStartPosition: CGPoint? = nil
     
     var body: some View
     {
@@ -48,12 +48,12 @@ struct LayoutItemWrappper: View, Identifiable {
     var dragSelectedItems: some Gesture {
         DragGesture()
             .onChanged { info in
-print("dragging")   // if starting and optionKey(), clone selection
-                if startPosition == .zero && optionKey()
+//print("dragging")   // if starting and optionKey(), clone selection
+                if dragStartPosition == nil && optionKey()
                 {
-                    startPosition = info.location
                     parent.layoutModel.cloneSelection()
                 }
+                dragStartPosition = info.location
                 item.tmpOffset = info.translation.asPoint
                 if !item.selected && !anyModifiers() { parent.layoutModel.deselectAll() }
                 item.selected = true;
@@ -62,6 +62,7 @@ print("dragging")   // if starting and optionKey(), clone selection
             .onEnded { info in
                 parent.layoutModel.moveSelection(offset: item.tmpOffset)
                 item.tmpOffset = .zero
+                dragStartPosition = nil
             }
     }
 }

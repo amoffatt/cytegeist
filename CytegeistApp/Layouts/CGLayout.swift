@@ -8,8 +8,19 @@ import CytegeistLibrary
 import CytegeistCore
 
 @Observable
-class CGLayoutModel : Codable
+class CGLayoutModel : Codable, Hashable, Identifiable
 {
+    static func == (lhs: CGLayoutModel, rhs: CGLayoutModel) -> Bool {
+        lhs.id == rhs.id
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+    
+    var id = UUID()
+    var name = "Untitled Layout"
+    
     var items = [LayoutItem]()
     var attribs = Dictionary<String, String> ()
     var info = BatchInfo()
@@ -309,7 +320,7 @@ struct PrintReport
     var header : PageSection
     var footer : PageSection
 }
-struct BatchInfo  : Codable
+struct BatchInfo  : Codable, Hashable
 {
     var  iter = ["", ""]
     var  discrim = ["", ""]

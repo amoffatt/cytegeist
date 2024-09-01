@@ -532,8 +532,11 @@ let DEBUG = false
 //            .textRenderer(ColorfulRender())
 //    }
 //}
-struct LayoutPasteboard: View {
+struct LayoutBuilder: View {
     @State  var mode =  ReportMode.gating
+    @Environment(Experiment.self) var experiment
+    
+    @State var selectedLayout:CGLayoutModel? = nil
  
 //    var Dragger: any View {
 //     }
@@ -541,8 +544,26 @@ struct LayoutPasteboard: View {
     {
         VStack {
             Text("Layout Editor:. \(mode) ")
-            Spacer()
-            CGLayoutView()
+            TabBar(experiment.layouts, selection:$selectedLayout) { layout in
+                Text(layout.name)
+            } add: {
+                let layout = CGLayoutModel()
+                layout.name = layout.name.generateUnique(existing: experiment.layouts.map { $0.name })
+                experiment.layouts.append(layout)
+                selectedLayout = layout
+            } remove: { layout in
+                experiment.layouts.removeAll { $0 == layout }
+            }
+            
+            VStack {
+                if let selectedLayout {
+                    CGLayoutView(layoutModel: selectedLayout)
+                } else {
+                    Text("Select a Layout")
+                }
+            }
+            .fillAvailableSpace()
+//            Spacer()
 //            Spacer(4)
          }
         .opacity(mode == ReportMode.layout ? 1.0 : 0.0)

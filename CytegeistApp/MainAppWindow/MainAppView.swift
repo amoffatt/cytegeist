@@ -84,7 +84,7 @@ struct MainAppView : View {
                     switch mode {
                     case .table: tableBuilder
                     case .gating: gatingBuilder(experiment)
-                    case .layout: LayoutPasteboard(mode: mode)
+                    case .layout: LayoutBuilder(mode: mode)
                     }
                     
                 }

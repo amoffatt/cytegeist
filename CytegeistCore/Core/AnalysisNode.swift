@@ -84,7 +84,9 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable
         }
     }
     
-    
+    public func freqOfParent() -> Float {
+        0.24
+    }
     public func getSample() -> Sample? { fatalError("Must be overriden") }
     
     private func _addChild(_ node:AnalysisNode) {

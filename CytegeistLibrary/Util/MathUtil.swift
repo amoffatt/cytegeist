@@ -49,6 +49,7 @@ public extension Comparable {
 ////        : self > max ? max : x
 //    }
 }
+    //-----------------------------------------------------------------------
 
 public struct PValue : Codable  //ClosedRange<Double> { (0.0...1.0) }       // 0...1 restricted float
 {
@@ -97,6 +98,7 @@ public struct PValue : Codable  //ClosedRange<Double> { (0.0...1.0) }       // 0
 //    }
 //}
 
+    //-----------------------------------------------------------------------
 
 public extension ClosedRange where Bound: Strideable {
 //    var mutable: MutableClosedRange<Bound> {
@@ -114,4 +116,82 @@ public extension ClosedRange where Bound: Strideable {
     func within(_ range:ClosedRange<Bound>) -> Bool {
         lowerBound >= range.lowerBound && upperBound <= range.upperBound
     }
+}
+    //-----------------------------------------------------------------------
+
+
+public struct Logicle : Equatable, Hashable {
+    static let maxLoops = 1000
+    static let initPLowBound = 1e-3
+    static let initPUpperBound = 1e6
+    static let epsilon = 1e-12
+    
+    static func calculateP(w:Double) -> Double {
+        var lowerBound = initPLowBound
+        var upperBound = initPUpperBound
+        var p = (upperBound + lowerBound) / 2
+        var nCheck = maxLoops;
+        
+        while ((lowerBound + epsilon < upperBound) && (nCheck > 0)) {
+            if (2.0 * p * log(p) / (p+1)) > w
+            {     upperBound = p    }
+            else    {      lowerBound = p    }
+            p = (upperBound + lowerBound) / 2
+            nCheck -= 1
+        }
+        return p;
+    }
+    
+
+    var T: Double
+    var w: Double
+    var m: Double
+    var p: Double
+    
+    
+    public init(T: Double, w: Double, m: Double)
+    {
+            //      assert((T>0) && (w>0) && (m>0))
+        self.T = T
+        self.w = w
+        self.m = m
+        self.p = Self.calculateP(w:w)
+    }
+    
+//    func getP() -> Double {   return p   }
+    
+    public func logicle(_ x: Double) -> Double
+    {
+//        var lowerBound: Double = -T
+//        var upperBound: Double = T
+//        var r: Double = (upperBound + lowerBound) / 2
+//        var nCheck = maxLoops
+//        while (lowerBound + epsilon < upperBound && nCheck > 0)
+//        {
+//            if(s(y: r, firstTime: true) > x)
+//            {    upperBound = r  }
+//            else {   lowerBound = r     }
+//            r = (upperBound + lowerBound) / 2
+//            nCheck -= 1
+//        }
+//        return r;
+        fatalError()
+    }
+    
+    public func unnormalize(_ x: Double) -> Double {
+        0.0
+    }
+    
+        //-----------------------------------------------------------------------
+    func s(y: Double) -> Double {    return s(y: y, firstTime: true)    }
+    
+    func  s(y: Double,  firstTime: Bool)  -> Double
+    {
+        if((y >= w) || (!firstTime))
+        {
+            return T * exp(-(m-w)) * (exp(y-w) - p*p*exp(-(y-w)/p) + p*p - 1)
+        }
+        return -1.0 * s(y: w-y, firstTime: false);
+    }
+        //-----------------------------------------------------------------------
 }

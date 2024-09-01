@@ -13,7 +13,7 @@ let gSmoothingLowresolution = 64
 let gSmoothingHighresolution = 256
 let kMaxRadHigh = 13.5 // was 9;
 let kMaxRadLow = 6
-let gReflect = true
+let reflect = true
 
 let kMatricesToBuild = 256;
  
@@ -31,7 +31,7 @@ struct Smoother
         return  Int(Double(radius) / sqrt(sq) + 0.9999);
     }
         //------------------------------------------------------------------------
-    func buildAllSmoothingMatrices()
+    init()
     {
         if initialized   { return }
         for idx in 1 ... kMatricesToBuild          // low res
@@ -150,7 +150,7 @@ struct Smoother
                 }
             }
             
-            if (gReflect) {
+            if (reflect) {
                 reflectMargins(destMatrix: &destMatrix,inRows: inRows, inCols: inCols, margin: radius)
             }
                 // copy the destMatrix back onto srcMatrix
@@ -164,9 +164,8 @@ struct Smoother
     }
     
     
-        // reflect smoothed events outside of the matrix back in.
-        // reflect such that the axis of reflection is the outside edge of the
-        // extreme pixel, so that the first pixel outside is added to the extreme-most pixel.
+        // reflect smoothed events outside of the matrix back symmetrical to the edge.
+        // The first pixel outside is added to the last spot inside.
     
     func reflectMargins(destMatrix: inout [Double], inRows: Int , inCols: Int , margin:  Int)
     {
@@ -174,7 +173,7 @@ struct Smoother
         let rightEdge = inCols + margin;                                // the edges of the part to be kept
         let topEdge = inRows + margin;
         
-        for row in 0 ..< margin       {                                   // reflect entire bottom edge
+        for row in 0 ..< margin       {
             for col in 0 ..< rightEdge + margin    {
                 let i = (margin-1+(margin-row)) * colsInMatrix + col;
                 let j = row * colsInMatrix + col;
@@ -182,7 +181,7 @@ struct Smoother
             }
         }
         
-        for row in topEdge+1 ..< topEdge + margin  {                                   // reflect entire bottom edge
+        for row in topEdge+1 ..< topEdge + margin  {
             for col in 0 ..< rightEdge + margin    {
                 let i = (topEdge+1-(row-topEdge)) * colsInMatrix + col;
                 let j = row * colsInMatrix + col;
@@ -190,7 +189,7 @@ struct Smoother
             }
         }
         
-        for col in 0 ..< margin       {                                   // reflect entire bottom edge
+        for col in 0 ..< margin       {
             for row in margin ..< topEdge    {
                 let i = row * colsInMatrix +  (margin-1+(margin-col));
                 let j = row * colsInMatrix + col;
@@ -198,7 +197,7 @@ struct Smoother
             }
         }
         
-        for col in rightEdge + 1 ..< rightEdge + margin       {                                   // reflect entire bottom
+        for col in rightEdge + 1 ..< rightEdge + margin       {
             for row in margin ..< topEdge    {
                 let  i = row * colsInMatrix +  (rightEdge+1-(col-rightEdge));
                 let j = row * colsInMatrix + col;
@@ -215,7 +214,7 @@ struct Smoother
         let radius:Int = hiRes ?  radHighRes : radLowRes
         
         let matrixBins = inNBins + 2 * radius
-        var destMatrix = [Double]()
+        var matrix = [Double]()
         var smoothMatrix = [Double]()
         var nElements: Int
         var destBins = [Double]()
@@ -237,29 +236,29 @@ struct Smoother
                 smoothMatrix = smoothingMatrix(bins: binCt , mxSize: nElements, hiRes: hiRes)
             }
             
-            destMatrix[bin] += smoothMatrix[0] * binCt;    // 0 point
+            matrix[bin] += smoothMatrix[0] * binCt;    // 0 point
             for i in 1 ..< nElements        // points to either side
             {
                 let k3 = smoothMatrix[i] * binCt;
-                destMatrix[bin + i] += k3;
-                destMatrix[bin - i] += k3;
+                matrix[bin + i] += k3;
+                matrix[bin - i] += k3;
             }
             
-            if gReflect
+            if reflect
             {
                 for i in 1 ..< radius
                 {
                     let leftEdge = radius;
                     let rightEdge = radius + inNBins;
-                    destMatrix[leftEdge + i - 1] += destMatrix[leftEdge - i];
-                    destMatrix[rightEdge - i + 1] += destMatrix[rightEdge + i];
+                    matrix[leftEdge + i - 1] += matrix[leftEdge - i];
+                    matrix[rightEdge - i + 1] += matrix[rightEdge + i];
                 }
             }
-                // copy the destMatrix back onto srcMatrix
-            for bin in radius ..< radius + inNBins {
-                destBins[bin-radius] = destMatrix[bin]
-            }
+//                // copy the destMatrix back onto srcMatrix
+//            for bin in radius ..< radius + inNBins {
+//                destBins[bin-radius] = matrix[bin]
+//            }
         }
-        return destBins
+        return matrix
     }
 }

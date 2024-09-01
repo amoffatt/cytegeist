@@ -22,13 +22,12 @@ import CytegeistLibrary
 
 @MainActor
 struct CGLayoutView: View {
-    let layoutModel:CGLayoutModel = CGLayoutModel()
+    let layoutModel:CGLayoutModel
 //    let container = try ModelContainer(for: Store.self, layoutModel)
 //    container.mainContext.undoManager = UndoManager()
     
     @Environment(\.undoManager) var undoManager
         // Should come from the workspace
-    @State var core:CytegeistCoreAPI = CytegeistCoreAPI()
     
     @State var editingItem:LayoutItem?
     @FocusState private var isFocused: Bool
@@ -88,7 +87,6 @@ struct CGLayoutView: View {
                     layoutModel.addItem( CText(value: "new text item!"))
                     isFocused = true
                 }
-                .environment(core)
     }
     
     func layoutBackdrop() -> some View {

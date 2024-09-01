@@ -7,7 +7,6 @@
 
 import Foundation
 import CytegeistLibrary
-import CytegeistCore
 
 
 //---------------------------------------------------------
