@@ -165,29 +165,12 @@ struct GatingView: View {
     
     func makeGate(_ start: CGPoint, _ location: CGPoint, areaPixelSize:CGSize)
     {
-        var start = (start / areaPixelSize)
-        var end = (location / areaPixelSize)
-        
-        // Invert view space coordinates
-        start.y = 1 - start.y
-        end.y = 1 - end.y
-
         let normalizers = axisNormalizers()
-        let rect = CGRect(
-            from: start.unnormalize(normalizers),
-            to: end.unnormalize(normalizers)
-        )
         
-//        if let xAxis = normalizers.x {
-//            
-//            minX = min(start.x, location.x) / areaPixelSize.width
-//            maxX = max(start.x, location.x) / areaPixelSize.width
-//            minX = xAxis.unnormalize(minX)
-//            maxX = xAxis.unnormalize(maxX)
-//        }
-        
-            // TODO delete
-        let candidateGateName = ""
+        var start = (start / areaPixelSize).invertedY().unnormalize(normalizers)
+        var end = (location / areaPixelSize).invertedY().unnormalize(normalizers)
+
+        let rect = CGRect(from:start, to:end)
         
         guard let xDim = chartDef.xAxis?.name else {
             print("No x axis for gate")
@@ -197,8 +180,8 @@ struct GatingView: View {
 
         switch curTool
         {
-            case .range:        addRangeGate(candidateGateName, xDim, rect.minX, rect.maxX); return
-            case .split:        add2RangeGates(candidateGateName, xDim, rect.maxX); return
+            case .range:        addRangeGate(xDim, rect.minX, rect.maxX); return
+            case .split:        add2RangeGates(xDim, rect.maxX); return
             default: break
         }
         
@@ -206,15 +189,24 @@ struct GatingView: View {
             print("No y axis for gate")
             return
         }
+        
+        guard let xNormalizer = normalizers.x,
+              let yNormalizer = normalizers.y else {
+            print("2D gate has nil normalizer")
+            return
+        }
+        
         let dims = Tuple2(xDim, yDim)
+        let normalizersNonNil = Tuple2(xNormalizer, yNormalizer)
+        
 
         switch curTool {
-            case .rectangle:    addRectGate(candidateGateName, dims, rect)
-            case .ellipse:      addEllipseGate(candidateGateName, start, location)
+            case .rectangle:    addRectGate(dims, rect)
+            case .ellipse:      addEllipseGate(dims, normalizersNonNil, start, end)
                     //            case .quads:        addQuadGates(gateName, start, location)
                     //            case .polygon:      addPolygonGate(gateName, start, location)
                     //            case .spline:       addSplineGate(gateName, start, location)
-            case .radius:       addRadialGate(candidateGateName, start, distance(start, location))
+//            case .radius:       addRadialGate(candidateGateName, start, distance(start, location))
             default: break
         }
     }
@@ -348,39 +340,41 @@ struct GatingView: View {
             }
     }
     
-    func addRangeGate(_ newName: String, _ dim:String, _ min: CGFloat, _ max: CGFloat)
+    func addRangeGate(_ dim:String, _ min: CGFloat, _ max: CGFloat)
     {
         addGate(RangeGateDef(dim, min, max))
     }
     
-    func add2RangeGates(_ name: String, _ dim:String, _ x: CGFloat)
+    func add2RangeGates(_ dim:String, _ x: CGFloat)
     {
 //        addGate(Gate(spec: BifurGateDef(x), color: Color.yellow, opacity: 0.2))
             //        addGate(Gate(spec: RangeGateDef(,0, x), color: Color.yellow, opacity: 0.2))
             //        addGate(Gate(spec: RangeGateDef(x, 2 * x), color: Color.red, opacity: 0.2))         // TODO MAX value
     }
     
-    func addRectGate(_ name: String, _ dims:Tuple2<String>, _ rect: CGRect)
+    func addRectGate(_ dims:Tuple2<String>, _ rect: CGRect)
     {
         addGate(RectGateDef(dims, rect))
     }
     
-    func addRadialGate(_ newName: String,_ start: CGPoint, _ radius: CGFloat)
+    func addRadialGate(_ start: CGPoint, _ radius: CGFloat)
     {
 //        addGate(Gate(spec: RadialGateDef(start, radius), color: Color.brown, opacity: 0.2))
     }
     
-    func addEllipseGate(_ name: String,_ start: CGPoint, _ location: CGPoint)
+    func addEllipseGate(_ dims:Tuple2<String>, _ axes:Tuple2<AxisNormalizer>, _ start: CGPoint, _ end: CGPoint)
     {
-//        addGate(Gate(spec: EllipsoidGateDef(start, location), color: Color.brown, opacity: 0.2))
+        var gate = EllipsoidGateDef(dims,
+                                    .init(vertex0: start.normalize(axes),
+                                          vertex1: end.normalize(axes),
+                                          widthRatio: 0.6),
+                                    axes: axes)
+        addGate(gate)
     }
-
     
     
     
-    
-    
-let DEBUG = false
+    let DEBUG = false
     //------------------------------------------------------
     // we need the size of the parent View to offset ourself
     func gateRect(siz: CGSize ) -> some View {

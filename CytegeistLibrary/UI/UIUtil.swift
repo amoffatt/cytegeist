@@ -232,6 +232,19 @@ public extension View {
     }
 }
 
+public extension Path {
+    init(points:[CGPoint]) {
+        self.init() { path in
+            guard let firstPoint = points.first else { return }
+            path.move(to: firstPoint)
+            for point in points.dropFirst() {
+                path.addLine(to: point)
+            }
+            path.closeSubpath()
+        }
+    }
+}
+
 
 //public extension FocusedValues {
 //

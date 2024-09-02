@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import CoreGraphics
 import CytegeistLibrary
 
 public typealias FCSParameterValueReader = (DataBufferReader) throws -> ValueType
@@ -158,6 +159,21 @@ enum EventDataError : Error {
 }
 
 public typealias ValueType = Double
+public typealias CPoint = CGPoint   // CGPoint, and CGRect use Double values
+public typealias CRect = CGRect
+
+extension CPoint : Hashable {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combineMany(x, y)
+    }
+}
+
+extension CRect : Hashable {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combineMany(origin, size.width, size.height)
+    }
+}
+
 
 public struct EventData: Identifiable {
     public let id: Int

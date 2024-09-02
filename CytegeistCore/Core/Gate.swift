@@ -8,7 +8,6 @@
 import Foundation
 import SwiftUI
 import CytegeistLibrary
-import Combine
 
     //--------------------------------------------------------
 //public struct Gate : Codable, Hashable
@@ -177,36 +176,30 @@ public struct RangeGateDef : GateDef
 
 public struct RectGateDef : GateDef
 {
-    public var minX: ValueType
-    public var maxX: ValueType
-    public var minY: ValueType
-    public var maxY: ValueType
-    public var dims:[String]
+    public var rect:CRect
     
-    public var min: CGPoint { .init(x:minX, y:minY) }
-    public var max: CGPoint { .init(x:maxX, y:maxY) }
-    public var rect: CGRect { 
-        get {.init(from:min, to:max) }
-        set {
-            minX = newValue.minX
-            maxX = newValue.maxX
-            minY = newValue.minY
-            maxY = newValue.maxY
-        }
-    }
+//    public var minX: ValueType
+//    public var maxX: ValueType
+//    public var minY: ValueType
+//    public var maxY: ValueType
+    public var dims:[String]
+//    public var rect: CGRect {
+//        get {.init(from:min, to:max) }
+//        set {
+//            min = newValue.min
+//            max = newValue.max
+//        }
+//    }
 
     public init(_ dims: Tuple2<String>, _ rect: CGRect)
     {
-        self.init(dims, rect.minX, rect.maxX, rect.minY, rect.maxY)
+        self.rect = rect
+        self.dims = dims.values
     }
     
     public init(_ dims: Tuple2<String>, _ minX: ValueType, _ maxX: ValueType, _ minY: ValueType, _ maxY: ValueType)
     {
-        self.minX = minX
-        self.maxX = maxX
-        self.minY = minY
-        self.maxY = maxY
-        self.dims = dims.values
+        self.init(dims, CRect(from:.init(minX, minY), to:.init(maxX, maxY)))
     }
     
     public init(from decoder: any Decoder) throws {
@@ -221,13 +214,17 @@ public struct RectGateDef : GateDef
     public func probability(of event:EventData) -> PValue
     {
             //  for d in dimensions where d.name?
-        if !(minX...maxX).contains(event.values[0]) {
-            return .zero
+        let point = CPoint(event.values[0], event.values[1])
+        if rect.contains(point) {
+            return .one
         }
-        if !(minY...maxY).contains(event.values[1]) {
-            return .zero
-        }
-        return .one
+        return .zero
+//        if !(minX...maxX).contains(event.values[0]) {
+//            return .zero
+//        }
+//        if !(minY...maxY).contains(event.values[1]) {
+//            return .zero
+//        }
     }
 
 //    public func chartView(_ node: PopulationNode, chartSize: CGSize, chartDims: Tuple2<CDimension?>) -> any View {
@@ -268,67 +265,125 @@ public struct RectGateDef : GateDef
 //    
 //}
 
-//public class EllipsoidGateDef: GateDef
-//{
-//    var threshold = 1
-//    var sumDist = 0.0
-//    var foci: [CGPoint] = []
-//    var edges: [CGPoint] = []
-//    
-//    public func distance() -> Double
-//    {
-//        for _ in dims {
-//            sumDist += 2.0
-//        }
-//        return sumDist
-//    }
-//    init(foci:[CGPoint], edges: [CGPoint])
-//    {
-//        self.foci = foci
-//        self.edges = edges
-//        super.init()
-//    }
-//    init(_ a: CGPoint,_ b: CGPoint)
-//    {
-//        foci.append(a)
-//        foci.append(b)
-//        edges.append(a)
-//        edges.append(b)    // TODO ???
-//        
-//        super.init()
-//    }
-//    init(threshold: Int = 1) {
-//        super.init()    }
-//    
-//    required init(from decoder: any Decoder) throws {
-//        fatalError("init(from:) has not been implemented")
-//    }
-//    
-//}
-    //    struct Point {
-    //        var x = 0, y = 0
-    //    }
-
-public struct CPoint : Equatable, Hashable {
-    var x:ValueType, y:ValueType
+public protocol PathGate : GateDef {
+    func normalizedPath() -> [CPoint]
 }
 
-public struct PolygonGateDef : Hashable
-{
-    func probability(of: EventData) -> PValue {
-        fatalError()
+public struct EllipsoidGateDef: PathGate {
+    public var dims: [String]
+    public var normalizedShape:Ellipsoid
+    public var axes:Tuple2<AxisNormalizer>
+    public init(_ dims: Tuple2<String>, _ normalizedShape:Ellipsoid, axes:Tuple2<AxisNormalizer>)
+    {
+        self.dims = dims.values
+        self.normalizedShape = normalizedShape
+        self.axes = axes
     }
     
-    var points : [CPoint] = []
-    var dims:[String]
-    init(_ dims:[String], points: [CPoint])
+    public func probability(of event: EventData) -> PValue {
+        let normalizedPoint = CPoint(
+            axes.x.normalize(event.values[0]),
+            axes.y.normalize(event.values[1])
+        )
+        return normalizedShape.distanceSqr(of: normalizedPoint) <= 1 ? .one : .zero
+    }
+    
+    public func normalizedPath() -> [CPoint] {
+        normalizedShape
+            .path(subdivisions:100)
+//            .map { $0.unnormalize(axes) }
+    }
+}
+
+public struct Ellipsoid: Codable, Hashable {
+    public var center:CPoint
+    public var major:ValueType = 0  // at angle 0, horizontal axis
+    public var minor:ValueType = 0  // at angle 0, vertical axis
+    public var angle:ValueType = 0
+    
+    public var majorVertices: [CPoint] {
+        get {
+            let dx = major * cos(angle)
+            let dy = major * sin(angle)
+            let vertex1 = CPoint(x: center.x + dx, y: center.y + dy)
+            let vertex2 = CPoint(x: center.x - dx, y: center.y - dy)
+            return [vertex1, vertex2]
+        }
+    }
+
+    public var minorVertices: [CPoint] {
+        get {
+            let dx = minor * cos(angle + .pi / 2)
+            let dy = minor * sin(angle + .pi / 2)
+            let vertex1 = CPoint(x: center.x + dx, y: center.y + dy)
+            let vertex2 = CPoint(x: center.x - dx, y: center.y - dy)
+            return [vertex1, vertex2]
+        }
+    }
+    
+    public init(vertex0: CPoint, vertex1: CPoint, widthRatio: ValueType) {
+        center = (vertex0 + vertex1) / 2
+        let delta = vertex1 - vertex0
+        major = delta.magnitude / 2
+        minor = major * widthRatio
+        angle = delta.angle
+    }
+    
+    public init(center: CPoint, major: ValueType, minor: ValueType, angle: ValueType) {
+        self.center = center
+        self.major = major
+        self.minor = minor
+        self.angle = angle
+    }
+    
+    public mutating func setMajor(relativeToCenter:CPoint) {
+        let minorRatio = (minor / major).ifNotFinite(0.5)
+        major = relativeToCenter.magnitude
+        minor = minorRatio * major
+        angle = relativeToCenter.angle
+    }
+    
+    public mutating func setMinor(relativeToCenter:CPoint) {
+        minor = relativeToCenter.magnitude
+        angle = relativeToCenter.angle - .pi / 2
+    }
+
+    public func distanceSqr(of point:CPoint) -> ValueType {
+        let transformed = (point - center).rotated(by: .radians(-angle))
+        let distanceSqr = sqr(transformed.x / major) + sqr(transformed.y / minor)
+        return distanceSqr
+    }
+    
+    public func path(subdivisions: Int) -> [CPoint] {
+        let angleIncrement = 2 * Double.pi / Double(subdivisions)
+        
+        return (0..<subdivisions).map { i in
+            let theta = Double(i) * angleIncrement
+            let p = CPoint(major * cos(theta), minor * sin(theta))
+            
+            let rotatedP = p.rotated(by: .radians(angle))
+            
+            return rotatedP + center
+        }
+    }
+    
+//    public func scaled(_ scale:CGSize) -> Ellipsoid {
+//        
+//    }
+}
+
+
+public struct PolygonGateDef : GateDef {
+    public var points : [CPoint] = []
+    public var dims:[String]
+    public init(_ dims:[String], points: [CPoint])
     {
         self.dims = dims
         self.points = points
     }
     
-    init(from decoder: any Decoder) throws {
-        fatalError("init(from:) has not been implemented")
+    public func probability(of: EventData) -> PValue {
+        fatalError()
     }
 }
 

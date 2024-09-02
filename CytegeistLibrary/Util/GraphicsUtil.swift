@@ -94,6 +94,23 @@ public extension CGPoint {
     static func / (a: CGPoint, b: Double) -> CGPoint {
         return CGPoint(x: a.x / b, y: a.y / b)
     }
+    
+    /// Invert Y values based on full view height (defaults to normalized coordinates with max=1
+    func invertedY(maxY:Double = 1) -> CGPoint {
+        var p = self
+        p.y = maxY - p.y
+        return p
+    }
+    
+    func rotated(by angle: Angle) -> CGPoint {
+        let angle = angle.radians
+        return CGPoint(x * Foundation.cos(angle) - y * Foundation.sin(angle),
+                       x * Foundation.sin(angle) + y * Foundation.cos(angle))
+    }
+    
+    var magnitudeSqr:Double { sqr(x) + sqr(y) }
+    var magnitude:Double { sqrt(magnitudeSqr) }
+    var angle:Double { atan2(y, x) }
 }
 
 public extension CGSize {
@@ -136,17 +153,76 @@ public extension CGRect {
         self.init(origin: .init(x:x.0, y:y.0), size: .init(width:x.1 - x.0, height:y.1 - y.0))
     }
     
+    /// Based on lower-left origin
+    subscript(_ point:Alignment) -> CGPoint {
+        get {
+            let x = switch point.horizontal {
+                case .leading: minX
+                case .center: midX
+                case .trailing:
+                {
+                    print("__Rect size: \(size.width)")
+                    return maxX}()
+            default: midY
+            }
+            
+            let y = switch point.vertical {
+                case .top: maxY
+                case .center: midY
+                case .bottom: minY
+            default: fatalError("Unsupported")
+            }
+            
+            return .init(x, y)
+        }
+        set {
+            switch point.horizontal {
+            case .leading:
+                size.width = origin.x + size.width - newValue.x
+                origin.x = newValue.x
+            case .center:
+                origin.x = newValue.x - size.width / 2
+            case .trailing:
+                size.width = newValue.x - origin.x
+            default: fatalError("Unsupported")
+            }
+            
+            switch point.vertical {
+            case .top:
+                size.height = newValue.y - origin.y
+            case .center:
+                origin.y = newValue.y - size.height / 2
+            case .bottom:
+                size.height = origin.y + size.height - newValue.y
+                origin.y = newValue.y
+            default: fatalError("Unsupported")
+            }
+        }
+    }
+    
+    /// Fix rectangle with negative size values
+    mutating func canonicalize() {
+        if size.width < 0 {
+            size.width *= -1
+            origin.x -= size.width
+        }
+        if size.height < 0 {
+            size.height *= -1
+            origin.y -= size.height
+        }
+    }
+    
     func scaled(_ scale:CGSize) -> CGRect {
         .init(from: min * scale, to: max * scale)
     }
     
-    /// Invert Y values based on full view height
-    func invertedY(maxY:Double) -> CGRect {
-        var min = min
-        var max = max
-        max.y = maxY - max.y
-        min.y = maxY - min.y
-        return .init(from:min, to:max)
+    
+    /// Invert Y values based on full view height (defaults to normalized coordinates with max=1
+    func invertedY(maxY:Double = 1) -> CGRect {
+        return .init(
+            from:min.invertedY(maxY: maxY),
+            to:max.invertedY(maxY: maxY)
+        )
     }
     
 //    static func * (a: CGRect, b: CGSize) -> CGPoint {
@@ -157,3 +233,6 @@ public extension CGRect {
 //        return CGPoint(x: a.x / b.width, y: a.y / b.height)
 //    }
 }
+
+
+

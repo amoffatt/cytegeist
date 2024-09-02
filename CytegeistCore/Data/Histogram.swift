@@ -138,6 +138,8 @@ public struct Tuple1<Value> : Tuple where Value:Hashable {
     
 }
 
+extension Tuple1:Codable where Value:Codable {}
+
 
 public struct Tuple2<Value> : Tuple where Value:Hashable {
     public static func from(_ values: [Value]) -> Tuple2<Value> {
@@ -159,12 +161,15 @@ public struct Tuple2<Value> : Tuple where Value:Hashable {
         return Tuple2<ResultValue>(f(x), f(y))
     }
 }
+extension Tuple2:Codable where Value:Codable {}
 
 public struct Tuple3<Value> {
     public let x:Value
     public let y:Value
     public let z:Value
 }
+
+extension Tuple3:Codable where Value:Codable {}
 
 
 //

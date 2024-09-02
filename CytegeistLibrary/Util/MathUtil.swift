@@ -30,6 +30,16 @@ public func sort<T:Comparable>(_ a:T, _ b:T) -> (T, T) {
     return (a, b)
 }
 
+public func sqr<T:FloatingPoint>(_ x:T) -> T {
+    x * x
+}
+
+public extension FloatingPoint {
+    func ifNotFinite(_ newValue:Self) -> Self {
+        self.isFinite ? self : newValue
+    }
+}
+
 public extension UInt8 {
     static func fromUnitFloat(_ value:Float) -> UInt8 {
         UInt8(clamp01(value) * 255 + 0.5)

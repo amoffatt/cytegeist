@@ -193,6 +193,16 @@ public extension CGPoint {
         .init(x:normalizers.x?.normalize(x) ?? .nan,
               y:normalizers.y?.normalize(y) ?? .nan)
     }
+    
+    func unnormalize(_ normalizers:Tuple2<AxisNormalizer>) -> CGPoint {
+        .init(x:normalizers.x.unnormalize(x),
+              y:normalizers.y.unnormalize(y))
+    }
+    
+    func normalize(_ normalizers:Tuple2<AxisNormalizer>) -> CGPoint {
+        .init(x:normalizers.x.normalize(x),
+              y:normalizers.y.normalize(y))
+    }
 }
 
 public extension CGRect {
@@ -206,3 +216,21 @@ public extension CGRect {
               to: max.normalize(normalizers))
     }
 }
+
+public extension Tuple2<AxisNormalizer?> {
+    var nonNil: Tuple2<AxisNormalizer> {
+        map { $0! }
+    }
+}
+
+//public extension Ellipsoid {
+//    func normalize(_ normalizers:Tuple2<AxisNormalizer?>) -> Ellipsoid {
+//        with(vertex0: vertex0.normalize(normalizers),
+//             vertex1: vertex1.normalize(normalizers))
+//    }
+//    
+//    func unnormalize(_ normalizers:Tuple2<AxisNormalizer?>) -> Ellipsoid {
+//        with(vertex0: vertex0.unnormalize(normalizers),
+//             vertex1: vertex1.unnormalize(normalizers))
+//    }
+//}
