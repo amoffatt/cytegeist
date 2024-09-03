@@ -247,23 +247,38 @@ public struct RectGateDef : GateDef
 //    }
 }
 
-//public class RadialGateDef : GateDef
-//{
-//    var center: CGPoint
-//    var radius: CGFloat
-//    
-//    init (_ center: CGPoint, _ radius: CGFloat)
-//    {
-//        self.center = center
-//        self.radius = radius
-//        super.init()
-//    }
-//    
-//    required init(from decoder: any Decoder) throws {
-//        fatalError("init(from:) has not been implemented")
-//    }
-//    
-//}
+public struct RadialGateDef : GateDef
+{
+    var centerX: CGFloat
+    var centerY: CGFloat
+    var radius: CGFloat
+    public var dims:[String]
+    
+    public init(_ dims: Tuple2<String>, _ centerX: CGFloat, _ centerY: CGFloat, _ radius: CGFloat)
+    {
+        self.centerX = centerX
+        self.centerY = centerY
+        self.radius = radius
+        self.dims = dims.values
+    }
+    
+    public  static func == (lhs: RadialGateDef, rhs: RadialGateDef) -> Bool {
+                return lhs.hashValue == rhs.hashValue
+            }
+    public func probability(of event:EventData) -> PValue
+    {
+        let pt = CGPoint(event.values[0], event.values[1])
+        let center = CGPoint(centerX, centerY)
+       return distance(pt, center) < radius
+            ? PValue(1)
+            : PValue(0)
+    }
+    
+    public init(from decoder: any Decoder) throws {
+        fatalError("init(from:) has not been implemented")
+    }
+    
+}
 
 public protocol PathGate : GateDef {
     func normalizedPath() -> [CPoint]

@@ -12,23 +12,53 @@ import SwiftData
 import CytegeistCore
 import CytegeistLibrary
     
-    
-//  https://gist.github.com/tarasis/f9bac6d98de5433f1ddbadaef02f9a29
-// https://swiftui-lab.com/drag-drop-with-swiftui/
-//https://www.codecademy.com/resources/docs/swiftui/drag-and-drop
 
 //---------------------------------------------------------------------------
-// MAIN VIEW
+// Container with tab bar
+
+public struct LayoutBuilder: View {
+        //    @State  var mode =  ReportMode.gating
+    @Environment(Experiment.self) var experiment
+    
+    @State var selectedLayout:CGLayoutModel? = nil
+    
+    public var body: some View
+    {
+        VStack {
+            Text("Layout Editor")
+            TabBar(experiment.layouts, selection:$selectedLayout) { layout in
+                Text(layout.name)
+            } add: {
+                let layout = experiment.addLayout()
+                selectedLayout = layout
+            } remove: { layout in
+                experiment.layouts.removeAll { $0 == layout }
+            }
+            
+            VStack {
+                if let selectedLayout {
+                    CGLayoutView(layoutModel: selectedLayout)
+                } else {
+                    Text("Select a Layout")
+                }
+            }
+            .fillAvailableSpace()
+        }
+        .onAppear {
+            if experiment.layouts.isEmpty {
+                selectedLayout = experiment.addLayout()
+            }
+        }
+            //        .opacity(mode == ReportMode.layout ? 1.0 : 0.0)
+    }
+}
+//---------------------------------------------------------------------------
+// each tab has a pasteboard with editor of layout items
 
 @MainActor
 struct CGLayoutView: View {
     let layoutModel:CGLayoutModel
-//    let container = try ModelContainer(for: Store.self, layoutModel)
-//    container.mainContext.undoManager = UndoManager()
-    
-    @Environment(\.undoManager) var undoManager
-        // Should come from the workspace
-    
+
     @State var editingItem:LayoutItem?
     @FocusState private var isFocused: Bool
     @State  var mouseLocation = CGPoint.zero
@@ -41,7 +71,7 @@ struct CGLayoutView: View {
      
     var body: some View {
         
-        let step =  shiftKey() ? 20 : optionKey() ? 1 : 5
+        let step =  shiftKey() ? 20 : optionKey() ? 1 : 5           //  PREFS
             VStack {
                  ZStack(alignment:.topLeading) {
                      layoutBackdrop()
@@ -67,8 +97,8 @@ struct CGLayoutView: View {
                 .focusEffectDisabled(true)
                 .onKeyPress(.return)        {  print("Return key pressed!");   return .handled    }
                 .onKeyPress(.deleteForward) {  layoutModel.deleteSelection();  return .handled}
-                .onKeyPress(.delete)        {  layoutModel.deleteSelection();   return .handled   }         // .delete DOESNT WORK
-                .onKeyPress(.init(Character(UnicodeScalar(127))))      {  layoutModel.deleteSelection();   return .handled   }         // .delete DOESNT WORK
+                .onKeyPress(.delete)        {  layoutModel.deleteSelection();   return .handled   }   // .delete DOESNT WORK
+                .onKeyPress(.init(Character(UnicodeScalar(127))))      {  layoutModel.deleteSelection();   return .handled   }   // .delete DOESNT WORK
                 .onKeyPress(.leftArrow)     {  layoutModel.nudgeSelection(offset: CGPoint(x: -step, y: 0)); return .handled     }
                 .onKeyPress(.rightArrow)    {  layoutModel.nudgeSelection(offset: CGPoint(x: step, y: 0)) ; return .handled     }
                 .onKeyPress(.upArrow)       {  layoutModel.nudgeSelection(offset: CGPoint(x: 0, y: -step)); return .handled     }
@@ -115,13 +145,10 @@ struct CGLayoutView: View {
     func layoutOverlay() -> some View {
         ZStack(alignment:.topLeading) {
             selectionRectangle()
-            crosshair()             // <-------
+            crosshair()
         }                    
         .fillAvailableSpace()
     }
-    
-    
-    
     
     func newChartItem(node:AnalysisNode, position:CGPoint)
     {
@@ -131,36 +158,33 @@ struct CGLayoutView: View {
     }
     
    //------------------------------------------------------
+    struct ItemSizeSlider: View {
+        @Binding var size: CGFloat
         
-        struct ItemSizeSlider: View {
-            @Binding var size: CGFloat
-            
-            var body: some View {
-                Slider(value: $size, in: 0.125...4)
-                    .controlSize(.regular)
-                    .frame(width: 150, height: 40)
-                    .frame(maxWidth: .infinity)
+        var body: some View {
+            Slider(value: $size, in: 0.125...4)
+                .controlSize(.regular)
+                .frame(width: 150, height: 40)
+                .frame(maxWidth: .infinity)
+        }
+    }
+    //------------------------------------------------------
+    func selectionRectangle() -> some View {
+        ZStack {
+            if let dragValue {
+                let startLocation = dragValue.startLocation
+                let translation = dragValue.translation
+                Rectangle()
+                    .stroke(style: StrokeStyle(lineWidth: 1.8, dash: [15, 5]))
+                    .foregroundColor(.red)
+                    .offset(x: startLocation.x, y: startLocation.y)
+                    .offset(x:          min(translation.width,0),  y: min(translation.height, 0) )
+                    .frame(maxWidth:     abs(translation.width),    maxHeight: abs(translation.height),
+                           alignment: Alignment.center)         // DOESNT SEEM TO MATTER
+                    .allowsHitTesting(false)
             }
         }
-
-        func selectionRectangle() -> some View {
-            ZStack {
-                if let dragValue {
-                    let startLocation = dragValue.startLocation
-                    let translation = dragValue.translation
-                    Rectangle()
-                        .stroke(style: StrokeStyle(lineWidth: 1.8, dash: [15, 5]))
-                        .foregroundColor(.red)
-//                        .opacity(isDragging ? 1.0 : 0.0)
-                        .offset(x: startLocation.x, y: startLocation.y)
-                        //                .offset(x:-mouseTranslation.x/2, y: -mouseTranslation.y/2)
-                        .offset(x:          min(translation.width,0),  y: min(translation.height, 0) )
-                        .frame(maxWidth:     abs(translation.width),    maxHeight: abs(translation.height),
-                               alignment: Alignment.center)         // DOESNT SEEM TO MATTER
-                        .allowsHitTesting(false)
-                }
-            }
-        }
+    }
 
     func crosshair() -> some View
     {
@@ -203,3 +227,7 @@ struct CGLayoutView: View {
 
 
   
+// Drag and drop references
+    //  https://gist.github.com/tarasis/f9bac6d98de5433f1ddbadaef02f9a29
+    // https://swiftui-lab.com/drag-drop-with-swiftui/
+    //https://www.codecademy.com/resources/docs/swiftui/drag-and-drop

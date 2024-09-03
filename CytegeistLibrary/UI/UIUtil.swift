@@ -136,7 +136,7 @@ public class Buttons {
         text("Delete", role:.destructive, action:action)
             .keyboardShortcut(.defaultAction)
     }
-
+    
 //    public static func
     
 }

@@ -24,13 +24,13 @@ struct ExperimentHistoryOutline: View {
     
     var body: some View {
         ForEach(app.experimentsByYearCreated, id: \.year) { (year, experiments) in
-            DisclosureGroup(isExpanded: $expansionState[year]) {
-                ForEach(experiments) { experiment in
-                    SidebarLabel(experiment: experiment, section: .history)
-                }
-            } label: {
-                HistoryLabel(year: year)
-            }
+//            DisclosureGroup(isExpanded: $expansionState[year]) {
+//                ForEach(experiments) { experiment in
+//                    SidebarLabel(experiment: experiment, section: .history)
+//                }
+//            } label: {
+//                HistoryLabel(year: year)
+//            }
         }
     }
 }

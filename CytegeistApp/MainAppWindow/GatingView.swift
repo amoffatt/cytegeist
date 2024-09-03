@@ -37,7 +37,7 @@ struct GateConfigView : View {
 
 struct GatingView: View {
 
-    @State private var mode = ReportMode.gating
+//    @State private var mode = ReportMode.gating
     @State var curTool = GatingTool.range
     @State private var isDragging = false
  
@@ -121,7 +121,7 @@ struct GatingView: View {
             }
             .padding(40)
             .allowsHitTesting(true)
-            .opacity(mode == ReportMode.gating ? 1.0 : 0.0)
+//            .opacity(mode == ReportMode.gating ? 1.0 : 0.0)
             .focusable()
             .focusEffectDisabled()
             .onDeleteCommand(perform: deleteSelectedAnnotation)
@@ -206,7 +206,7 @@ struct GatingView: View {
                     //            case .quads:        addQuadGates(gateName, start, location)
                     //            case .polygon:      addPolygonGate(gateName, start, location)
                     //            case .spline:       addSplineGate(gateName, start, location)
-//            case .radius:       addRadialGate(candidateGateName, start, distance(start, location))
+            case .radius:       addRadialGate(dims,  start, distance(start, location))
             default: break
         }
     }
@@ -233,13 +233,28 @@ struct GatingView: View {
         
         print("adding \(confirmGate.name) to \(population.name)")
         population.addChild(confirmGate)
-        
         experiment.selectedAnalysisNodes.nodes = [confirmGate]
-        
         self.confirmGate = nil
     }
     
-    
+    func toParent() -> ()
+    {
+        if let pop = population {
+            if let parent = pop.parent {
+                experiment.setAnalysisNodeSelection(parent)
+            } }
+//        print ("toParent")
+    }
+ 
+    func toChild() -> ()
+    {
+        if let pop = population {
+            if let child = pop.children.first {
+                experiment.setAnalysisNodeSelection(child)
+            } }
+       print ("TODO  toChild -- using first child, not selected")
+    }
+
     var icons = ["None","triangle.righthalf.fill","pencil","square.and.pencil","ellipsis.circle", "skew", "scribble" ]
 
     var  GatingTools: some View {
@@ -247,10 +262,13 @@ struct GatingView: View {
             Spacer()
             HStack{
                 Button("Range", systemImage: "pencil",  action: { curTool = GatingTool.range }).background(curTool == .range ? .yellow : .gray)
-//                Button("Split", systemImage: "triangle.righthalf.fill",   action: {curTool = GatingTool.split })
+                Button("Split", systemImage: "triangle.righthalf.fill",   action: {curTool = GatingTool.split })
                 Button("Radius", systemImage: "triangle.righthalf.fill",   action: {curTool = GatingTool.radius }).background(curTool == .radius ? .yellow : .gray)
                 Button("Rectangle", systemImage: "square.and.pencil",   action: { curTool = GatingTool.rectangle}).background(curTool == .rectangle ? .yellow : .gray)
                 Button("Ellipse", systemImage: "ellipsis.circle",   action: {curTool = GatingTool.ellipse }).background(curTool == .ellipse ? .yellow : .gray)
+                Spacer(minLength: 50)
+                Button("Up",  systemImage: "arrowtriangle.up.square.fill", action: { toParent() })
+                Button("Down",  systemImage: "arrowtriangle.down.square.fill", action: { toChild() })
 //                Button("Quads", systemImage: "person.crop.square",   action: { curTool = GatingTool.quads})
 //                Button("Polygon", systemImage: "skew",   action: { curTool = GatingTool.polygon})
 //                Button("Spline", systemImage: "scribble",   action: {curTool = GatingTool.spline })
@@ -292,18 +310,11 @@ struct GatingView: View {
                     } else {
                         Text("Error creating chart: \(requestError?.localizedDescription ?? "")")
                     }
-                } else {
-                    Text("Sample metadata not found")
-                }
+                } else { Text("Sample metadata not found")  }
             }
-            else {
-                Text("Select a sample")
-            }
+            else {Text("Select a sample")  }
 
-        }.toolbar {
-            GatingTools
-            
-        }
+        }.toolbar {  GatingTools   }
     }
     //------------------------------------------------------
 //
@@ -357,9 +368,9 @@ struct GatingView: View {
         addGate(RectGateDef(dims, rect))
     }
     
-    func addRadialGate(_ start: CGPoint, _ radius: CGFloat)
+    func addRadialGate(_ dims:Tuple2<String>, _ start: CGPoint, _ radius: CGFloat)
     {
-//        addGate(Gate(spec: RadialGateDef(start, radius), color: Color.brown, opacity: 0.2))
+        addGate(RadialGateDef(dims, start.x, start.y, radius))
     }
     
     func addEllipseGate(_ dims:Tuple2<String>, _ axes:Tuple2<AxisNormalizer>, _ start: CGPoint, _ end: CGPoint)
@@ -378,10 +389,6 @@ struct GatingView: View {
     //------------------------------------------------------
     // we need the size of the parent View to offset ourself
     func gateRect(siz: CGSize ) -> some View {
-        let start = startLocation.x
-        let end = mouseLocation.x
-        let startY = startLocation.y
-        let endY = mouseLocation.y
         let startLocation = startLocation
         let translation = mouseLocation - startLocation
         return Rectangle()
@@ -422,6 +429,7 @@ struct GatingView: View {
                    alignment: Alignment.center)         // DOESNT SEEM TO MATTER
             .allowsHitTesting(false)
     }
+    
     func gateRadius(siz: CGSize ) -> some View {
         let startLocation = startLocation
         return Group
@@ -526,68 +534,4 @@ struct GatingView: View {
 //            .textRenderer(ColorfulRender())
 //    }
 //}
-struct LayoutBuilder: View {
-    @State  var mode =  ReportMode.gating
-    @Environment(Experiment.self) var experiment
-    
-    @State var selectedLayout:CGLayoutModel? = nil
- 
-//    var Dragger: any View {
-//     }
-    var body: some View
-    {
-        VStack {
-            Text("Layout Editor:. \(mode) ")
-            TabBar(experiment.layouts, selection:$selectedLayout) { layout in
-                Text(layout.name)
-            } add: {
-                let layout = CGLayoutModel()
-                layout.name = layout.name.generateUnique(existing: experiment.layouts.map { $0.name })
-                experiment.layouts.append(layout)
-                selectedLayout = layout
-            } remove: { layout in
-                experiment.layouts.removeAll { $0 == layout }
-            }
-            
-            VStack {
-                if let selectedLayout {
-                    CGLayoutView(layoutModel: selectedLayout)
-                } else {
-                    Text("Select a Layout")
-                }
-            }
-            .fillAvailableSpace()
-//            Spacer()
-//            Spacer(4)
-         }
-        .opacity(mode == ReportMode.layout ? 1.0 : 0.0)
-   }
-}
 
-//
-//
-//struct MyDropDelegate : DropDelegate {
-//    
-//    let item : String
-//    @Binding var items : [String]
-//    @Binding var draggedItem : String?
-//    
-//    func performDrop(info: DropInfo) -> Bool {
-//        return true
-//    }
-//    
-//    func dropEntered(info: DropInfo) {
-//        guard let draggedItem = self.draggedItem else {
-//            return
-//        }
-//        
-//        if draggedItem != item {
-//            let from = items.firstIndex(of: draggedItem)!
-//            let to = items.firstIndex(of: item)!
-//            withAnimation(.default) {
-//                self.items.move(fromOffsets: IndexSet(integer: from), toOffset: to > from ? to + 1 : to)
-//            }
-//        }
-//    }
-//}
-//

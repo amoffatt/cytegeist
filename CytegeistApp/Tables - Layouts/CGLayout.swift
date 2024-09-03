@@ -41,7 +41,7 @@ class CGLayoutModel : Codable, Hashable, Identifiable
  
     public func addTextItem() -> ()
     {
-       deselectAll()
+        if !optionKey() { deselectAll()  }
         newTextItem(name: "some text", position: CGPoint.zero)
     }
     
@@ -54,7 +54,7 @@ class CGLayoutModel : Codable, Hashable, Identifiable
     
     public func addTable() -> ()
     {
-        deselectAll()
+        if !optionKey() { deselectAll()  }
         newTable(name: "some table", position: CGPoint.zero)
     }
     
@@ -128,7 +128,6 @@ class CGLayoutModel : Codable, Hashable, Identifiable
         }
 
     }
-    
     
     func bringToFront() -> ()
     {

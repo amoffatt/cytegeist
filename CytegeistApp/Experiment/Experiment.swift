@@ -20,7 +20,7 @@ class AnalysisNodeSelection: Codable {
 
 //-----------------------------------------------
 @Observable
-public class Experiment :  Codable, Identifiable, Equatable
+public class Experiment : Usable
 {
     public static func == (lhs: Experiment, rhs: Experiment) -> Bool {
         lhs.id == rhs.id
@@ -39,7 +39,8 @@ public class Experiment :  Codable, Identifiable, Equatable
     var selectedAnalysisNodes = AnalysisNodeSelection()
     
     var groups = [CGroup]()
-    var tables = [TableSchema]()
+    var tables = [CGTableModel]()
+    
     var layouts = [CGLayoutModel]()
     
     @ObservationIgnored
@@ -58,6 +59,20 @@ public class Experiment :  Codable, Identifiable, Equatable
         
     }
     
+    func addTable() -> CGTableModel {
+        let table = CGTableModel()
+        table.name = table.name.generateUnique(existing: tables.map { $0.name })
+        tables.append(table)
+        return table
+    }
+    
+    func addLayout() -> CGLayoutModel {
+        let layout = CGLayoutModel()
+        layout.name = layout.name.generateUnique(existing: layouts.map { $0.name })
+        layouts.append(layout)
+        return layout
+    }
+
 
     init(name: String = "Untitled", version: String = "" )
     {
@@ -92,7 +107,12 @@ public class Experiment :  Codable, Identifiable, Equatable
     public func clearAnalysisNodeSelection() {
         selectedAnalysisNodes.nodes.removeAll()
     }
-
+    
+    public func setAnalysisNodeSelection(_ node: AnalysisNode ) {
+        selectedAnalysisNodes.nodes.removeAll()
+        selectedAnalysisNodes.nodes.insert(node)
+    }
+    
     public func readFCSFile(_ url: URL) async
     {
         if  url.isDirectory
@@ -108,9 +128,9 @@ public class Experiment :  Codable, Identifiable, Equatable
             sample.setUp(core:core)
             addSample(sample)
         }
-        catch let err as NSError {
-            debug("Ooops! Something went wrong: \(err)")
-        }
+//        catch let err as NSError {
+//            debug("Ooops! Something went wrong: \(err)")
+//        }
         debug("FCS Read")
     }
 
@@ -154,8 +174,56 @@ public class Experiment :  Codable, Identifiable, Equatable
 //        }
 //        
 //    }
+///*
+///
+    public struct Entry
+    {
+        var key: String
+        var vals: [String] = []
+        
+        init ( key: String,  val: String)
+        {
+            self.key = key
+            self.vals.append(val)
+        }
+    }
+//    
+//    public func buildVaribleKeyDictionary() -> [Entry]
+//    {
+//        var union: [Entry]
+//        var keywords = meta?.keywords.filter(! $0.starts(with: "$P"))            // exclude parameter keywords
+//
+//        ForEach (samples) { sample in
+//            ForEach (keywords) { keyPair in
+//                if let entry = union[keyPair.key] {
+//                    entry.vals.append(keyPair.val)
+//                }
+//                else {
+//                    union.addEntry(Entry(keyPair.key,keyPair.val))
+//                }
+//            }
+//        }
+//            
+//    
+//        let ct = union.count            // number of keywords in all samples
+//        let sampleCt = samples.count
+//        
+//        let globals = union.filter( { entry in  entry.vals.ct == sampleCt })
+//        let multivals = globals.filter( entry in { entry.vals.reduce().count > 1 })
+//        let uniques = multivals.filter( entry in { entry.vals.reduce().count == sampleCt })
+//        let nonuniques = multivals.filter( entry in { entry.vals.reduce().count < sampleCt })
+//
+//        
+//        ForEach nonuniques { entry in
+//            print(entry.key + " --> " + entry.vals)
+//        }
+//        return nonuniques
+//    }
+//}
+//     
+  
 
-    
+
     
  
     subscript(sampleId: Sample.ID?) -> Sample? {

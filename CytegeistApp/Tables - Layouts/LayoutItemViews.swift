@@ -135,30 +135,45 @@ struct CTableView : View {
     var parent: CGLayoutView
     let item: CTable
     let editing: Bool
-//    @State var columnCustomization = TableColumnCustomization<User>()
-//    @State var selection = Set<User.ID>()
-//    @State var sortOrders = [KeyPathComparator(\User.name, order: .forward), KeyPathComparator(\User.score, order: .forward)]
+    @State var columnCustomization = TableColumnCustomization<User>()
+    @State var selection = Set<User.ID>()
+    @State var sortOrders = [KeyPathComparator(\User.name, order: .forward), KeyPathComparator(\User.score, order: .forward)]
     
     var body: some View {
         VStack {
-//            Table(selection: $selection, sortOrder: $sortOrders,  columnCustomization: $columnCustomization)
-//            {
-//                TableColumn("Marker", value:\.marker){ user in Text(user.marker)  }.customizationID("marker")
-//                TableColumn("Score", value:\.score) { user in Text(String(user.score))  }.customizationID("score")
-//                TableColumn("Number", value:\.number){ user in Text(String(user.number))  }.customizationID("number")
-//            }
-//        rows:
-//            {
-//                ForEach(users) { user in TableRow(user)  }
-//            }.frame(width: 180, height: 120)
-//                .border(.blue)
-//                .fontWidth(Font.Width(8))
-//                .allowsHitTesting(false)
-//                .clipShape(Rectangle())
-//                .border(.red, width: item.selected ? 3.0 : 0.0 )
+            Table(selection: $selection, sortOrder: $sortOrders,  columnCustomization: $columnCustomization)
+            {
+                TableColumn("Marker", value:\.marker){ user in Text(user.marker)  }.customizationID("marker")
+                TableColumn("Score", value:\.score) { user in Text(String(user.score))  }.customizationID("score")
+                TableColumn("Number", value:\.number){ user in Text(String(user.number))  }.customizationID("number")
+            }
+        rows:
+            {
+                ForEach(users) { user in TableRow(user)  }
+            }.frame(width: 180, height: 120)
+                .border(.blue)
+                .fontWidth(Font.Width(8))
+                .allowsHitTesting(false)
+                .clipShape(Rectangle())
+                .border(.red, width: item.selected ? 3.0 : 0.0 )
         }
         .onAppear(perform:  {   item.position = CGPoint(x: 100, y: 200) })
         
         
     }
+    ///-------------------------------------------------------------------------
+    public  struct User: Identifiable {
+        public var id: Int
+        var name: String
+        var score: Int
+        var number: Double
+        var marker: String
+    }
+    @State private var  users = [
+        User(id: 1, name: "Taylor", score: 95, number: 9.32, marker: "CD34"),
+        User(id: 2, name: "Justin", score: 80, number: Double.pi, marker: "CD3"),
+        User(id: 3, name: "Adkins", score: 84, number: 9.32e4, marker: "CD4"),
+        User(id: 4, name: "Bob", score: 94, number: 0.32, marker: "CD44-39"),
+        User(id: 5, name: "Ted", score: 82, number: 92, marker: "CD44-8")]
+
 }

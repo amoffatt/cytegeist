@@ -102,6 +102,7 @@ final class App {
     /// If no experiment is selected, will return nil, unless:
     /// If autoselect is true, will selected and eturn the most recently modified experiment
     /// if createIfNil is true, will create a new experiment if none already exist
+    // AM DEBUGGING DELETE this, replace with ModelList
     @discardableResult
     func getSelectedExperiment(autoselect:Bool = false, createIfNil:Bool = false) -> Experiment?
     {

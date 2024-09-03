@@ -6,6 +6,7 @@ The sample's side bar view.
 */
 
 import SwiftUI
+import CytegeistCore
 import CytegeistLibrary
 
 enum ListSection: String, Identifiable, Hashable {
@@ -31,7 +32,7 @@ struct MainAppSidebar: View {
     var body: some View {
         
             // AM Important: Selection needs to differentiate the same experiment between
-            // different sections in order to support SwiftUI renaming behavior
+            // different selections in order to support SwiftUI renaming behavior
         let selection:Binding<SidebarSelection?> = .init {
             let s = app.getSelectedExperiment().map {
                 SidebarSelection(lastSelectedSection, $0.id)
@@ -44,11 +45,25 @@ struct MainAppSidebar: View {
         VStack {
             HStack 
             { Button("All Samples", action: allSamples)
+                    .dropDestination(for: AnalysisNode.self) { (items, position) in
+                         addNodesToGroup(items, "All Samples")
+                        return true
+                    }
                 Spacer()
             }
             HStack {
                 Button("Controls", action: controls)
+                    .dropDestination(for: AnalysisNode.self) { (items, position) in
+                        addNodesToGroup(items, "Controls")
+                        return true
+                    }
+                       
+                
                 Button("Tests", action: tests)
+                    .dropDestination(for: AnalysisNode.self) { (items, position) in
+                        addNodesToGroup(items, "Tests")
+                        return true
+                 }
                 Spacer()
             }
             Section("Panels")
@@ -59,7 +74,7 @@ struct MainAppSidebar: View {
                     //                DisclosureGroup("Groups", isExpanded: $expansionState[app.currentYear]) {
                 if let experiment = app.getSelectedExperiment() {
                     ForEach(experiment.groups) { group in
-                        SidebarLabel2(group: group)  //
+                        SidebarLabel2(sidebar: self, group: group)  //
                     }
                 } }
             
@@ -131,9 +146,15 @@ struct MainAppSidebar: View {
         print (app.getSelectedExperiment()!.groups.count)
             //        showAlert = true
     }
+    func addNodesToGroup(_ nodes: [AnalysisNode], _ groupName: String)
+    {
+        print ("Adding \(nodes.count) to the group: " + groupName)
+    }
+    
     func makePanel()
     {
-        
+        print ("makePanel")
+
     }
     func allSamples()
     {
@@ -147,7 +168,20 @@ struct MainAppSidebar: View {
     {
         print ("tests")
     }
-}
+
+    struct SidebarLabel2: View {
+        var sidebar: MainAppSidebar
+        var group: CGroup
+
+        var body: some View {
+            let name = group.name
+            Label(name, systemImage: "leaf")
+                .dropDestination(for: AnalysisNode.self) { (items, position) in
+                    sidebar.addNodesToGroup(items, group.name)
+                return true
+              }
+        }
+    }
 
 
 struct SidebarSelection : Identifiable, Hashable, Equatable {
@@ -162,11 +196,11 @@ struct SidebarSelection : Identifiable, Hashable, Equatable {
     }
 }
 
-struct SidebarLabel: View, Identifiable {
+public struct SidebarLabel: View, Identifiable {
     var id: SidebarSelection { SidebarSelection(section, experiment.id) }
     
     let experiment: Experiment
-    let section:ListSection
+    let section: ListSection
 
     var body: some View {
         @Bindable var experiment = experiment
@@ -180,11 +214,4 @@ struct SidebarLabel: View, Identifiable {
     }
 }
 
-struct SidebarLabel2: View {
-    var group: CGroup
-    
-    var body: some View {
-        let name = group.name
-        Label(name, systemImage: "leaf")
-    }
 }

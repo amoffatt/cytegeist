@@ -3,4 +3,82 @@
    uuid = "32C3A8A6-6EC5-4709-B64C-2C74A3923FA4"
    type = "1"
    version = "2.0">
+   <Breakpoints>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "79750F5A-D93E-42F5-AD92-B5569FFDE820"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "CytegeistApp/Layouts/CGLayout.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "198"
+            endingLineNumber = "198"
+            landmarkName = "clone()"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  uuid = "79750F5A-D93E-42F5-AD92-B5569FFDE820 - 4b9ae31379f9740d"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "CytegeistApp.LayoutItem.clone() -&gt; CytegeistApp.LayoutItem"
+                  moduleName = "CytegeistApp"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/adamtreister/Documents/aaron-cytegeist-1/CytegeistApp/Layouts/CGLayout.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "197"
+                  endingLineNumber = "197">
+               </Location>
+               <Location
+                  uuid = "79750F5A-D93E-42F5-AD92-B5569FFDE820 - 4b9ae31379f9742c"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "CytegeistApp.LayoutItem.clone() -&gt; CytegeistApp.LayoutItem"
+                  moduleName = "CytegeistApp"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/adamtreister/Documents/aaron-cytegeist-1/CytegeistApp/Layouts/CGLayout.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "198"
+                  endingLineNumber = "198">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "48D10D55-1F0A-43D5-AC56-49ED5853F290"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "CytegeistApp/Layouts/CGLayout.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "57"
+            endingLineNumber = "57"
+            landmarkName = "addTable()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "BAB953A7-64F4-417F-8F08-817F88820A72"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../../var/folders/qw/kdm4khfs1xg_mpt2svh8sfc80000gn/T/swift-generated-sources/@__swiftmacro_12CytegeistApp12CGTableModelC5items18ObservationTrackedfMp_.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "1"
+            endingLineNumber = "1">
+         </BreakpointContent>
+      </BreakpointProxy>
+   </Breakpoints>
 </Bucket>
