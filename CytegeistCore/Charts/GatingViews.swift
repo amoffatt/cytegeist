@@ -220,7 +220,6 @@ struct GateView<GateType:GateDef> : View where GateType:ViewableGate {
     }
     
     func rectControlZone(_ id:String, center:CGPoint, width:Double, height:Double, color:Color, solid:Bool = false, move:@escaping MoveAction) -> some View {
-//        let opacity = opacity ?? node.opacity
         return GateControlZone(id, position: center, move: move) { state in
             Rectangle()
                 .fill(color)
@@ -229,6 +228,14 @@ struct GateView<GateType:GateDef> : View where GateType:ViewableGate {
             CircleHandle(solid:solid)
         }
     }
+    
+    func handle(_ id:String, position:CGPoint, solid:Bool = false, move:@escaping MoveAction) -> some View {
+        return GateControlZone(id, position: position, move: move, handle: { state in
+            CircleHandle(solid:solid)
+        })
+    }
+
+    
     
     // AM for each of these, normalizers should be preverified to be ready for gate axes
     // via normalizersValidForGate
@@ -348,14 +355,16 @@ extension RectGateDef : ViewableGate {
 //    typealias HandleInfo = (id:String,
 //                            position:Alignment,
 //                            size:(ViewType, CGRect) -> CGSize,
-//                            setter:(inout CGRect, CPoint) -> Void)
-//
+//                            setter:(inout CGPoint, CPoint) -> Void)
+////
 //    static let handles:[HandleInfo] = [
-//        ("l-edge", .leading, { v, r in .init(v.lineWidth, r.height) }, { r, p in })
+//        ("l-edge", .leading, { .init($0.lineWidth, $1.height) }, { r, p in })
 //    ]
 
     func viewContent(_ v:ViewType, viewCenter: inout CGPoint) -> (any View)? {
-        let viewRect = CGRect(from: v.data2View(rect[.bottomLeading]), to: v.data2View(rect.max))
+        let viewRectOrigin = v.data2View(rect[.bottomLeading])
+        let viewRectOppositeOrigin = v.data2View(rect[.topTrailing])
+        let viewRect = CGRect(origin: viewRectOrigin, size: (viewRectOppositeOrigin - viewRectOrigin).asSize)
         viewCenter = viewRect[.center]
         
         
@@ -367,10 +376,7 @@ extension RectGateDef : ViewableGate {
                               color: v.fillColor,
                               solid: true
             ) { (p, _) in
-//                var newRect = viewRect
-//                newRect.center = p
                 v.gate.wrappedValue?.rect[.center] = v.view2Data(p)
-//                v.gate.wrappedValue?.max = v.view2Data(newRect.max)
             }
             
 //            ForEach(handles, id:\.id) { h in
@@ -378,36 +384,47 @@ extension RectGateDef : ViewableGate {
 //                v.rectControlZone(h.id, center:viewRect[h.position], width:size.width, height:size.height, color:v.strokeColor) { p in
 //                    v.gate.wrappedValue?.rect[.leading].x = v.view2DataX(p.x)
 //                }
-//                
 //            }
 
-            v.rectControlZone("left-edge", center:viewRect[.leading], width:v.lineWidth, height:viewRect.height, color:v.strokeColor) { (p, ended) in
-//                v.gate.wrappedValue?.rect[.leading].x = v.view2DataX(p.x)
-                updateGateRect(v, fix:ended, { r in r[.leading].x = v.view2DataX(p.x) })
-                
+            Group {
+                v.rectControlZone("left-edge", center:viewRect[.leading], width:v.lineWidth, height:viewRect.height, color:v.strokeColor, solid:true) { (p, ended) in
+                    updateGateRect(v, fix:ended, { r in r[.leading].x = v.view2DataX(p.x) })
+                }
+                v.rectControlZone("right-edge", center:viewRect[.trailing], width:v.lineWidth, height:viewRect.height, color:v.strokeColor, solid:true) { (p, ended) in
+                    updateGateRect(v, fix:ended, { r in r[.trailing].x = v.view2DataX(p.x) })
+                    
+                }
+                v.rectControlZone("top-edge", center:viewRect[.top], width:viewRect.width, height:v.lineWidth, color:v.strokeColor, solid:true) { (p, ended) in
+                    updateGateRect(v, fix:ended, { r in r[.top].y = v.view2DataY(p.y)})
+                }
+                v.rectControlZone("bottom-edge", center:viewRect[.bottom], width:viewRect.width, height:v.lineWidth, color:v.strokeColor, solid:true) { (p, ended) in
+                    updateGateRect(v, fix:ended, { r in r[.bottom].y = v.view2DataY(p.y)})
+                }
             }
-            v.rectControlZone("right-edge", center:viewRect[.trailing], width:v.lineWidth, height:viewRect.height, color:v.strokeColor) { (p, ended) in
-//                v.gate.wrappedValue?.rect[.trailing].x = v.view2DataX(p.x)
-                updateGateRect(v, fix:ended, { r in r[.trailing].x = v.view2DataX(p.x) })
-
+            .controlSize(.small)
+            
+            
+            v.handle("tl", position: viewRect[.topLeading], solid:false) { (p, ended) in
+                updateGateRect(v, fix:ended, { r in r[.topLeading] = v.view2Data(p) })
             }
-//            v.rectControlZone("top-edge", center:viewRect[.bottom], width:viewRect.width, height:v.lineWidth, color:v.strokeColor) { p in
-//                // AM important: bottom/top swapped due to view inversion
-//                v.gate.wrappedValue?.rect[.top].y = v.view2DataY(p.y)
-//            }
-//            v.rectControlZone("bottom-edge", center:viewRect[.top], width:viewRect.width, height:v.lineWidth, color:v.strokeColor) { p in
-//                // AM important: bottom/top swapped due to view inversion
-//                v.gate.wrappedValue?.rect[.bottom].y = v.view2DataY(p.y)
-//            }
+            v.handle("tr", position: viewRect[.topTrailing], solid:false) { (p, ended) in
+                updateGateRect(v, fix:ended, { r in r[.topTrailing] = v.view2Data(p) })
+            }
+            v.handle("bl", position: viewRect[.bottomLeading], solid:false) { (p, ended) in
+                updateGateRect(v, fix:ended, { r in r[.bottomLeading] = v.view2Data(p) })
+            }
+            v.handle("br", position: viewRect[.bottomTrailing], solid:false) { (p, ended) in
+                updateGateRect(v, fix:ended, { r in r[.bottomTrailing] = v.view2Data(p) })
+            }
         }
     }
     
     func updateGateRect(_ view: ViewType, fix:Bool, _ update:(inout CRect) -> Void) {
         if var rect = view.gate.wrappedValue?.rect {
             update(&rect)
-//            if fix {
-//                rect.canonicalize()
-//            }
+            if fix {
+                rect.canonicalize()
+            }
             view.gate.wrappedValue?.rect = rect
         }
     }

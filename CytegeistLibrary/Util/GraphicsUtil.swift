@@ -157,19 +157,16 @@ public extension CGRect {
     subscript(_ point:Alignment) -> CGPoint {
         get {
             let x = switch point.horizontal {
-                case .leading: minX
-                case .center: midX
-                case .trailing:
-                {
-                    print("__Rect size: \(size.width)")
-                    return maxX}()
-            default: midY
+                case .leading: origin.x
+                case .center: origin.x + size.width / 2
+                case .trailing: origin.x + size.width
+            default: fatalError("Unsupported")
             }
             
             let y = switch point.vertical {
-                case .top: maxY
-                case .center: midY
-                case .bottom: minY
+                case .top: origin.y + size.height
+                case .center: origin.y + size.height / 2
+                case .bottom: origin.y
             default: fatalError("Unsupported")
             }
             
@@ -233,6 +230,5 @@ public extension CGRect {
 //        return CGPoint(x: a.x / b.width, y: a.y / b.height)
 //    }
 }
-
 
 
