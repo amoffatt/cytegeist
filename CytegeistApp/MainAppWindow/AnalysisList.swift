@@ -40,11 +40,11 @@ struct AnalysisList: View {
                         ZStack {
                             freqOfParentIcon(item.freqOfParent())
                                 .fill(.blue)
-                                .frame(width: 30, height: 30)
+                                .frame(width: 18, height: 18)
                             Circle()
                                 .fill(.clear)
-                                .stroke(.blue, lineWidth: 2)
-                                .frame(width: 30, height: 30)
+                                .stroke(.blue, lineWidth: 1)
+                                .frame(width: 24, height: 24)
                         }
                        
                         

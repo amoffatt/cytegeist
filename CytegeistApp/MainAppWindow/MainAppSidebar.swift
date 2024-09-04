@@ -19,7 +19,9 @@ enum ListSection: String, Identifiable, Hashable {
 struct MainAppSidebar: View {
     
     @Environment(App.self) var app: App
-    @SceneStorage("expansionState") var expansionState = ExpansionState()
+    @SceneStorage("expansionState1") var expansionState1 = ExpansionState()
+    @SceneStorage("expansionState2") var expansionState2 = ExpansionState()
+    @SceneStorage("expansionState3") var expansionState3 = ExpansionState()
     @State var lastSelectedSection:ListSection = .current
         //    @State var selection: SidebarSelection? = nil
     @State var showDeleteConfirmation: Bool = false
@@ -42,85 +44,73 @@ struct MainAppSidebar: View {
             lastSelectedSection = $0?.section ?? .current
             app.selectedExperiment = $0?.experiment
         }
- 
+        
         let exp = app.getSelectedExperiment()
-        VStack {
-            HStack
-            { Button("All", action: allSamples).frame(minWidth: 90, minHeight: 30)
-                    .dropDestination(for: AnalysisNode.self) { (items, position) in
-                        addNodesToGroup(items, "All Samples")
-                        return true
-                    }
-                Button("Controls", action: controls)
-                    .dropDestination(for: AnalysisNode.self) { (items, position) in
-                        addNodesToGroup(items, "Controls")
-                        return true
-                    }
-                Button("Tests", action: tests)
-                    .dropDestination(for: AnalysisNode.self) { (items, position) in
-                        addNodesToGroup(items, "Tests")
-                        return true
-                    }
-                } }
-            
-            List(selection: selection) {
-                    //            SidebarLabel(experiment: e)
-                DisclosureGroup(isExpanded: $expansionState[-1]) {
-                    ForEach(app.recentExperiments) { experiment in
-                        SidebarLabel(experiment: experiment, section: .current)  //
-                                                                                 //                        .badge(experiment.numberOfPlantsNeedingWater)
-                Spacer()
-            }
-            Section("Panels")   {
+        if let exp {
+            VStack {
+                HStack
+                { Button("All", action: allSamples)
+                        .dropDestination(for: AnalysisNode.self) { (items, position) in
+                            addNodesToGroup(items, "All Samples")
+                            return true
+                        }
+                    Button("Controls", action: controls)
+                        .dropDestination(for: AnalysisNode.self) { (items, position) in
+                            addNodesToGroup(items, "Controls")
+                            return true
+                        }
+                    Button("Tests", action: tests)
+                        .dropDestination(for: AnalysisNode.self) { (items, position) in
+                            addNodesToGroup(items, "Tests")
+                            return true
+                        }
+                }
+                    //                    Section("Panels")   {
                 @State var panelselection: SidebarPanelSelection? = nil
                 List(selection: $panelselection) {
-                    DisclosureGroup("Panels", isExpanded: $expansionState[-1]) {
-                        ForEach(exp!.panels) { panel in
-                            SidebarPanelLabel(sidebar: self, panel: panel)
+                    DisclosureGroup("Panels", isExpanded: $expansionState1[-1]) {
+                        ForEach(exp.panels) { panel in
+                            SidebarPanelLabel(sidebar: self, panel: panel, section: .current)
                         }
-                        
-                            //                    label: {
-                            //                        Label("Panels", systemImage: "chart.bar.doc.vertical")
-                            //                    }
-                    }
-                        
                     }
                 }
-                Section("Keyword Groups")
-                {
-                    @State var groupselection: SidebarGroupSelection? = nil
-//                    List(selection: $groupselection) {
-//                        DisclosureGroup("Groups", isExpanded: $expansionState[-1]) {
-//                            ForEach(exp!.groups) { group in
-//                                SidebarGroupLabel(sidebar: self, group: group, section: .current)  //
-//                            }
-//                        } label: { Label("Panels", systemImage: "settings_applications")    }
-//                    }
-                   }
-                Spacer(minLength: 60)
+                    //                    }
+                    //                Section("Keyword Groups")   {
+                @State var groupselection: SidebarGroupSelection? = nil
+                List(selection: $groupselection) {
+                    DisclosureGroup("Groups", isExpanded: $expansionState3[-1]) {
+                        ForEach(exp.groups) { group in
+                            SidebarGroupLabel(sidebar: self, group: group, section: .current)  //
+                        }
+                    } //label: { Label("Panels", systemImage: "settings_applications")    }
+                }
+                    //                }
+//                Spacer(minLength: 60)
                 VStack {
                     HStack  {
-                            Button("Add", systemImage: "plus", action: addGroup).bold()
-                            TextField("Name", text: $groupName).frame(width: 80)
-                            ColorPicker("", selection: $groupColor, supportsOpacity: false).frame(width: 20, height: 20)
-                        }
-                        HStack {
-                            TextField("Key", text: $keyword).frame(width: 80)
-                            TextField("Value", text: $value).frame(width: 80)
-                        }
-                    }.background(.black.opacity(0.1))
-                 
-                Spacer(minLength: 10)
-                List(selection: selection) {
-                            //            SidebarLabel(experiment: e)
-                   DisclosureGroup(isExpanded: $expansionState[-1]) {
+                        Button("Add", systemImage: "plus", action: addGroup)
+                        TextField("Name", text: $groupName).frame(width: 80)
+                        ColorPicker("", selection: $groupColor, supportsOpacity: false).frame(maxWidth: 20, maxHeight: 20)
+                    }
+                    HStack {
+                        TextField("Key", text: $keyword).frame(width: 80)
+                        TextField("Value", text: $value).frame(width: 80)
+                    }
+                }.background(.black.opacity(0.1))
+                
+//                Spacer(minLength: 10)
+                @State var experimentselection: SidebarExperimentSelection? = nil
+                
+                List(selection: $experimentselection) {
+                    DisclosureGroup(isExpanded: $expansionState2[-1]) {
                         ForEach(app.recentExperiments) { experiment in
-                                SidebarExperimentLabel(experiment: experiment, section: .current)  //
-                                                                                                    //                        .badge(experiment.numberOfPlantsNeedingWater)
+                            SidebarExperimentLabel(sidebar: self, experiment: experiment, section: .current)  //
+                                                                                                              //                        .badge(experiment.numberOfPlantsNeedingWater)
                         }
-                    } label: {    Label("History", systemImage: "arrow.swap")     }
-                        
+                    }
+                label: {    Label("History", systemImage: "arrow.swap")     }
                 }
+                
             }
             .frame(minWidth: 200, idealWidth: 350, maxWidth: 1200)
                 //        .toolbar {
@@ -145,6 +135,8 @@ struct MainAppSidebar: View {
                     }
                 }
         }
+    }
+     
   //--------------------------------------------------------------------------------------------------------------
     
  //--------------------------------------------------------------------------------------------------------------
@@ -214,7 +206,7 @@ struct MainAppSidebar: View {
 
      struct SidebarExperimentLabel: View, Identifiable {
         var id: SidebarExperimentSelection { SidebarExperimentSelection(section, experiment.id) }
-        
+         var sidebar: MainAppSidebar
         let experiment: Experiment
         let section: ListSection
         
@@ -232,10 +224,10 @@ struct MainAppSidebar: View {
 
     struct SidebarGroupLabel: View, Identifiable  {
         var id: SidebarGroupSelection { SidebarGroupSelection(section, group.id) }
-       var sidebar: MainAppSidebar
+        var sidebar: MainAppSidebar
         var group: CGroup
         let section: ListSection
-
+        
         var body: some View {
             let name = group.name
             Label(name, systemImage: "leaf")
@@ -245,24 +237,39 @@ struct MainAppSidebar: View {
                 }
         }
     }
-    
 
-     struct SidebarPanelLabel: View, Identifiable {
-         var sidebar: MainAppSidebar
-         var panel: CPanel
- 
-         var id: SidebarPanelSelection { SidebarPanelSelection(section, panel.id) }
-
-         var body: some View {
-             @Bindable var panel = panel
- 
-                // AM Important: tag() is for selection, id() is for the list to track unique items
-                // It is important that even if the same experiment shows up twice in
-                // the List, that each list item has a unique id and tag
-            TextField(text: $panel.name) {}
-                .tag(id)
-                .id(id)
+    struct SidebarPanelLabel: View, Identifiable  {
+        var id: SidebarPanelSelection { SidebarPanelSelection(section, panel.id) }
+        var sidebar: MainAppSidebar
+        var panel: CPanel
+        let section: ListSection
+        
+        var body: some View {
+            let name = panel.name
+            Label(name, systemImage: "cat")
         }
     }
+
+//
+//    struct SidebarPanelLabel: View, Identifiable {
+//        var id: SidebarPanelSelection { SidebarPanelSelection(section, panel.id) }
+//        var sidebar: MainAppSidebar
+//        var panel: CPanel
+//        let section: ListSection
+//        
+//        
+//        var body: some View {
+//            @Bindable var panel = panel
+//            
+//                // AM Important: tag() is for selection, id() is for the list to track unique items
+//                // It is important that even if the same experiment shows up twice in
+//                // the List, that each list item has a unique id and tag
+//            TextField(text: $panel.name) {}
+//                .tag(id)
+//                .id(id)
+//        }
+//    }
+
+ 
 
 }

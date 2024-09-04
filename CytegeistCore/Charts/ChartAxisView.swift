@@ -36,7 +36,7 @@ public struct ChartAxisView: View {
     }
     
     func ticks(_ proxy: GeometryProxy, _ normalizer:AxisNormalizer) -> some View {
-        let ticks = normalizer.tickMarks(10)
+        let ticks = normalizer.tickMarks(4)
         let size = proxy.size
         return ZStack(alignment: .topLeading) {
             ForEach(ticks) { majorTick in
@@ -48,6 +48,8 @@ public struct ChartAxisView: View {
                 
                 Text(majorTick.label)
                     .position(x: x, y: 20)
+//                    .fontWidth(Font.Width(2))
+
             }
             .frame(width: size.width, height: 50)
         }

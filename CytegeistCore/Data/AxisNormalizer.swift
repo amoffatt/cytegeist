@@ -160,7 +160,7 @@ public struct MajorAxisTick: Identifiable {
 
 public class LinearAxis {
 }
-
+//---------------------------------------------------------------------------
 func niceNumber(_ x: Double, round: Bool) -> Double {
     let exp = floor(log10(x))
     let f = x / pow(10, exp)
@@ -182,6 +182,7 @@ func niceNumber(_ x: Double, round: Bool) -> Double {
     
     return nf * pow(10, exp)
 }
+    //---------------------------------------------------------------------------
 
 public extension CGPoint {
     func unnormalize(_ normalizers:Tuple2<AxisNormalizer?>) -> CGPoint {
@@ -204,7 +205,7 @@ public extension CGPoint {
               y:normalizers.y.normalize(y))
     }
 }
-
+    //---------------------------------------------------------------------------
 public extension CGRect {
     func unnormalize(_ normalizers:Tuple2<AxisNormalizer?>) -> CGRect {
         .init(from: min.unnormalize(normalizers),
@@ -217,6 +218,7 @@ public extension CGRect {
     }
 }
 
+    //---------------------------------------------------------------------------
 public extension Tuple2<AxisNormalizer?> {
     var nonNil: Tuple2<AxisNormalizer> {
         map { $0! }
