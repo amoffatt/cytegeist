@@ -45,6 +45,12 @@ public struct TabBar<TabItems, TabItemView>: View where TabItems:RandomAccessCol
                     }
                 }
             }
+            Buttons.icon("Add Tab", .add) {
+                add()
+            }
+            .buttonStyle(.plain)
+            .padding(.horizontal)
+            
             Buttons.icon("Close Tab", .delete) {
                 if let selected = selection.wrappedValue {
                     let index = items.firstIndex { $0 == selected }
@@ -66,12 +72,10 @@ public struct TabBar<TabItems, TabItemView>: View where TabItems:RandomAccessCol
                 }
             }
             .disabled(selection.wrappedValue == nil)
-            
-            Buttons.icon("Add Tab", .add) {
-                add()
-            }
             .buttonStyle(.plain)
             .padding(.horizontal)
+
+
         }
         .frame(height: height)
         

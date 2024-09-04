@@ -267,8 +267,9 @@ struct GatingView: View {
                 Button("Rectangle", systemImage: "square.and.pencil",   action: { curTool = GatingTool.rectangle}).background(curTool == .rectangle ? .yellow : .gray)
                 Button("Ellipse", systemImage: "ellipsis.circle",   action: {curTool = GatingTool.ellipse }).background(curTool == .ellipse ? .yellow : .gray)
                 Spacer(minLength: 50)
-                Button("Up",  systemImage: "arrowtriangle.up.square.fill", action: { toParent() })
-                Button("Down",  systemImage: "arrowtriangle.down.square.fill", action: { toChild() })
+                HStack{ Button("Up",  systemImage: "arrowtriangle.up.square.fill", action: { toParent() })
+                    Button("Down",  systemImage: "arrowtriangle.down.square.fill", action: { toChild() })
+                }
 //                Button("Quads", systemImage: "person.crop.square",   action: { curTool = GatingTool.quads})
 //                Button("Polygon", systemImage: "skew",   action: { curTool = GatingTool.polygon})
 //                Button("Spline", systemImage: "scribble",   action: {curTool = GatingTool.spline })

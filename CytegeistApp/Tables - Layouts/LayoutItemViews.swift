@@ -117,7 +117,7 @@ struct CChartView : View {
                 //                TextField("Test Field", text: bindableText) .foregroundColor(.black)       //, selection: $selection
                 //                    .font(.headline).background(.black.opacity(0.8  )).frame(width: 120)
                 //            } else {
-            Text("Penguins")
+            Text(item.name)
             
         }  .frame(width: 100, height: 100)
             .padding()

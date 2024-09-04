@@ -23,8 +23,8 @@ class CGLayoutModel : Codable, Hashable, Identifiable
     
     var items = [LayoutItem]()
     var attribs = Dictionary<String, String> ()
-    var info = BatchInfo()
- 
+        //    var info = BatchInfo()
+    
     init() {
     }
     
@@ -32,13 +32,13 @@ class CGLayoutModel : Codable, Hashable, Identifiable
     {
         
     }
-    //-------------------------------------------------------------
-    // adding items
+        //-------------------------------------------------------------
+        // adding items
     
     func addItem(_ item:LayoutItem) {
         items.append(item)
     }
- 
+    
     public func addTextItem() -> ()
     {
         if !optionKey() { deselectAll()  }
@@ -64,88 +64,81 @@ class CGLayoutModel : Codable, Hashable, Identifiable
         item.selected = true
         addItem(item)
     }
- //---------------------------------------------------------------------------
-  // manage the selection
+        //---------------------------------------------------------------------------
+        // manage the selection
     
-    func deselectAll() -> ()
-    {
-        for item in items  {    item.selected = false      }
+    func deselectAll() -> ()  {
+        for item in items    { item.selected = false    }
     }
-    func selectAll() -> ()
-    {
-        for item in items   {          item.selected = true      }
+    func selectAll() -> ()   {
+        for item in items   {  item.selected = true   }
     }
-    func selectItem(_  newSel: LayoutItem) -> ()
-    {
-        let opt = NSEvent.modifierFlags.contains(.option)
-        let cmd = NSEvent.modifierFlags.contains(.command)
-        let sht = NSEvent.modifierFlags.contains(.shift)
-        let anyMods = opt || cmd || sht
-        if !anyMods { deselectAll() }
+    
+    func selectItem(_  newSel: LayoutItem) -> ()   {
+        if !anyModifiers() { deselectAll() }
         newSel.selected = true
-        
-            //        for item in layoutModel.items       {          item.selected = (item.id == newSel.id)      }
     }
-    func deleteSelection() -> ()
-    {
+    func deleteSelection() -> ()       {
         items.removeAll (where:  { $0.selected } )
     }
-    func moveSelection( offset: CGPoint) -> ()
-    {
-        for item in items where { item.selected }()
-        {
+    func moveSelection( offset: CGPoint) -> ()   {
+        for item in items where { item.selected }()   {
             item.position = item.position + item.tmpOffset
             item.tmpOffset = .zero
         }
     }
     func nudgeSelection( offset: CGPoint) -> ()
     {
-        for item in items where { item.selected }()
-        {
+        for item in items where { item.selected }()  {
             item.position = item.position + offset
         }
     }
     public func selectRect(marquee: CGRect)
     {
-        for item in items
-        {
-            item.selected = ptInRect(pt: item.position, rect: marquee)
+        for item in items   {
+            item.selected = sectRect(pt: item.position, size: item.size, rect: marquee)
         }
     }
-    func setSelectedOffset( offset: CGPoint) -> ()
+    
+    public func sectRect(pt: CGPoint, size: CGSize, rect: CGRect) -> Bool
     {
-        for item in items where { item.selected }()
-        {
+        let halfHght = (size.height / 2), halfWidth = (size.width / 2)
+        let topLeft = CGPoint(pt.x - halfHght, pt.y - halfWidth)
+        if ptInRect(pt: topLeft, rect: rect) {  return true  }
+        let bottomRight = CGPoint(pt.x + halfHght, pt.y + halfWidth)
+        if ptInRect(pt: bottomRight, rect: rect) {  return true  }
+        return  ptInRect(pt: pt, rect: rect)
+    }
+    
+    func setSelectedOffset( offset: CGPoint)
+    {
+        for item in items where { item.selected }()  {
             item.tmpOffset = offset
         }
     }
+    
     func cloneSelection() -> ()
     {
-        for item in items where { item.selected }()
-        {
+        for item in items where { item.selected }()  {
             let newItem = item.clone()
             items.insert(newItem, at: 0)
         }
-
     }
     
     func bringToFront() -> ()
     {
-        for index in (0..<items.count).reversed()
-        {
-            if items[index].selected
-            {
+        for index in (0..<items.count).reversed()   {
+            if items[index].selected   {
                 let item = items.remove(at: index)
                 items.insert(item, at: 0)
             }
         }
     }
+    
     func sendToBack() -> ()
     {
-        for index in (0..<items.count).reversed()
-        {
-            if items[index].selected
-            {
+        for index in (0..<items.count).reversed()   {
+            if items[index].selected    {
                 let item = items.remove(at: index)
                 items.append(item)
             }
@@ -169,7 +162,7 @@ public class LayoutItem: Codable, Identifiable, Equatable
     private(set) var node:AnalysisNode?
 //
     var name:String {
-        get { node != nil ? node!.name : ""}
+        get { node != nil ? node!.name : "n/a"}
         set { if node != nil { node!.name = newValue }}
     }
     
@@ -221,8 +214,7 @@ public class CText: LayoutItem {
         fatalError("init(from:) has not been implemented")
     }
     
-    override public func clone() -> CText
-    {
+    override public func clone() -> CText    {
         return .init(value: value, position: position)
    }
 
@@ -293,35 +285,4 @@ class CTable : LayoutItem
         return .init(data: data, position: position, node: node)
     }
 
-}
-
-//---------------------------------------------------------------------
-// MISC JUNK that might be streamed in from a FJ workspace
-
-struct TableSchema : Codable
-{
-    var tableName = "a table"
-
-   //    var columns : [TableColumn]
-    init(_ xml: TreeNode)
-    {
-    }
-}
-
-struct PageSection
-{
-  var  sectionName = "header"
-    var content = ""
-}
-struct PrintReport
-{
-    var scale = 1.0
-    var header : PageSection
-    var footer : PageSection
-}
-struct BatchInfo  : Codable, Hashable
-{
-    var  iter = ["", ""]
-    var  discrim = ["", ""]
-    var  destination = "JPEG"
 }

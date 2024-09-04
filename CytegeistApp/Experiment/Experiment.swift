@@ -38,6 +38,7 @@ public class Experiment : Usable
     var selectedSamples = Set<Sample.ID>()
     var selectedAnalysisNodes = AnalysisNodeSelection()
     
+    var panels = [CPanel]()
     var groups = [CGroup]()
     var tables = [CGTableModel]()
     
@@ -76,7 +77,7 @@ public class Experiment : Usable
 
     init(name: String = "Untitled", version: String = "" )
     {
-   print("Experiment \(name) ")
+        print("Experiment \(name) ")
         self.name = name
         self.version = version
     }
@@ -331,6 +332,28 @@ struct CGroup : Identifiable, Codable
         self.color = color
         self.keyword = keyword
         self.value = value
+    }
+}
+
+struct CPanel : Usable
+{
+    var id = UUID()
+    var name = ""
+    var keyword: String?
+    var values: [String]
+    @CodableIgnored
+    var color: Color?
+    
+    
+    public static func == (lhs: CPanel, rhs: CPanel) -> Bool {
+        lhs.id == rhs.id
+    }
+
+    init(name: String = "name", color: Color?, keyword: String?, values:  String?) {
+        self.name = name
+        self.color = color
+        self.keyword = keyword
+        self.values = []
     }
 }
 

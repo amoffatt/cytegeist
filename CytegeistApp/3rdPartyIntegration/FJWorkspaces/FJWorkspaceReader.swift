@@ -89,14 +89,14 @@ class WorkspaceReader {
 //    
 //}
 
-
-struct Criterion : Codable
-{
-    var attributes = [String : String]()
-    init(fjxml: TreeNode)
-    {
-    }
-}
+//
+//struct Criterion : Codable
+//{
+//    var attributes = [String : String]()
+//    init(fjxml: TreeNode)
+//    {
+//    }
+//}
 
 //extension Statistic {
 //    init(fjxml: TreeNode)

@@ -86,6 +86,8 @@ public struct TableView : View {
         
     }.frame(minWidth: 300, idealWidth: 600)
         .dropDestination(for: AnalysisNode.self) { (items, position) in
+            for item in items {print(item.name)  }
+
             for item in items { newTableItem(node: item, position:position)  }
             return true
         }
@@ -94,7 +96,7 @@ public struct TableView : View {
     
     func newTableItem(node:AnalysisNode, position:CGPoint)
     {
-        table.items.append(TColumn(node.name, parm: " a", stat: "Freq. of Parent"))
+        table.items.append(TColumn("", parm: "Keyword", stat: "Date"))
         table.items.append(TColumn(node.name, parm: "CD3", stat: "Median"))
         table.items.append(TColumn(node.name, parm: "CD3", stat: "CV"))
         print("new table item: ", node.name)
