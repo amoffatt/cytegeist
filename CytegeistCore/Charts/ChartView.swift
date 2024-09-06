@@ -136,8 +136,11 @@ public struct ChartView<Overlay>: View where Overlay:View {
     
     @MainActor func updateSampleQuery() {
         sampleQuery?.dispose()
-        let sample = SampleRequest(population.getSample(), includeData: false)
-        sampleQuery = core.loadSample(sample)
+        sampleQuery = nil
+        if let sample = population.getSample() {
+            let r = SampleRequest(sample, includeData: false)
+            sampleQuery = core.loadSample(r)
+        }
     }
             
     @MainActor func updateChartQuery()  {

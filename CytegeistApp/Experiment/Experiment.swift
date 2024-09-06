@@ -40,9 +40,9 @@ public class Experiment : Usable
     
     var panels = [CPanel]()
     var groups = [CGroup]()
-    var tables = [CGTableModel]()
+    var tables = [CGTable]()
     
-    var layouts = [CGLayoutModel]()
+    var layouts = [CGLayout]()
     
     @ObservationIgnored
     @CodableIgnored
@@ -60,15 +60,15 @@ public class Experiment : Usable
         
     }
     
-    func addTable() -> CGTableModel {
-        let table = CGTableModel()
+    func addTable() -> CGTable {
+        let table = CGTable()
         table.name = table.name.generateUnique(existing: tables.map { $0.name })
         tables.append(table)
         return table
     }
     
-    func addLayout() -> CGLayoutModel {
-        let layout = CGLayoutModel()
+    func addLayout() -> CGLayout {
+        let layout = CGLayout()
         layout.name = layout.name.generateUnique(existing: layouts.map { $0.name })
         layouts.append(layout)
         return layout

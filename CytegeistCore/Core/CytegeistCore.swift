@@ -136,62 +136,57 @@ public class CytegeistCoreAPI {
     private let fcsReader:FCSReader = .init()
     
     
-    // AM TODO: store all caches in a dictionary, add BaseComputeCache class, and
-    // lazily create them via a cached<DataType>() method
-    private var sampleCache:ComputeCache<SampleRequest, FCSFile>! = nil;
-    private var populationCache:ComputeCache<PopulationRequest, CPopulationData>! = nil
-    private var histogram1DCache:ComputeCache<HistogramRequest<X>, CachedHistogram<X>>! = nil
-    private var histogram2DCache:ComputeCache<HistogramRequest<XY>, CachedHistogram<XY>>! = nil
+    private var sampleCache:ComputeCache<SampleRequest, FCSFile> { cache(_loadSample) }
+    private var populationCache:ComputeCache<PopulationRequest, CPopulationData> { cache(_population) }
+    private var histogram1DCache:ComputeCache<HistogramRequest<X>, CachedHistogram<X>> { cache(_histogram) }
+//    private var histogram2DCache:ComputeCache<HistogramRequest<XY>, CachedHistogram<XY>>! = nil
+    private var _caches:[ObjectIdentifier:Any] = [:]
 
     nonisolated public init() {
     }
     
-    public func ensureCachesCreated() {
-        if sampleCache != nil {
-            return
+    // Lazily creates caches when needed
+    private func cache<Request, Data>(_ compute:@escaping (Request) async throws -> Data) -> ComputeCache<Request, Data> {
+        if let cache = _caches[ObjectIdentifier(Request.self)] {
+            return cache as! ComputeCache<Request, Data>
         }
-        
-        sampleCache = .init(compute:_loadSample)
-//        { r in
-//            try self._loadSample(r)
-//        }
-        
-        populationCache = .init(compute:_population)
-//        { r in
-//            try await self._population(r)
-//        }
-        
-        histogram1DCache = .init(compute:_histogram)
-//        { r in
-//            return try await self._histogram(r)
-//        }
-        
-        histogram2DCache = .init(compute:_histogram2D)
-//            return try await self._histogram2D(r)
-//        }
+        let cache = ComputeCache(compute: compute)
+        _caches[ObjectIdentifier(Request.self)] = cache
+        return cache
+    }
+    
+    public func statistics(_ population:PopulationRequest, _ dim:String, _ statistics:Statistic...) -> APIQuery<StatisticBatch> {
+        query() {
+            var stats = StatisticBatch()
+            for s in statistics {
+                let r = StatisticRequest(population, dim, s)
+                stats[s] = try await self.cache(self._statistic).get(r)
+            }
+            return stats
+        }
     }
     
     public func histogram(_ request:HistogramRequest<X>) -> APIQuery<CachedHistogram<X>> {
-        query(request) { r in
-            try await self.histogram1DCache.get(r)
+        query() {
+            try await self.cache(self._histogram).get(request)
         }
     }
     
     public func histogram2D(_ request:HistogramRequest<XY>) -> APIQuery<CachedHistogram<XY>> {
-        query(request) { r in
-            try await self.histogram2DCache.get(request)
+        query() {
+            try await self.cache(self._histogram2D).get(request)
         }
     }
     
-    private func query<Request, Data>(_ request:Request, compute: @escaping (Request) async throws -> Data) -> APIQuery<Data> {
+    private func query<Data>(compute: @escaping () async throws -> Data) -> APIQuery<Data> {
         let result:APIQuery<Data> = APIQuery()
-        ensureCachesCreated()
+//        ensureCachesCreated()
         
         Task.detached {
             do {
-                print("Computing query \(request)")
-                let data = try await compute(request)
-                print("  ==> Finished computing query \(request)")
+//                print("Computing query \(request)")
+                let data = try await compute()
+//                print("  ==> Finished computing query \(request)")
 
                 await MainActor.run {
                     result.success(data)
@@ -207,73 +202,13 @@ public class CytegeistCoreAPI {
         
         return result
     }
-
-//    private func sampleDataQuery<Data>(sampleRef:SampleRef, parameterNames:[String], compute: @escaping ([FCSParameterData]) throws -> Data) -> APIQuery<Data> {
-//        let result:APIQuery<Data> = APIQuery()
-////        let resolution = self.histogramResolution
-//
-//        Task.detached {
-//            do {
-//                print("Loading data for '\(sampleRef.filename)'")
-//                let sample = try self._loadSample(ref: sampleRef)
-//                let meta = sample.meta
-//                
-//                print("  ==> Data loaded. \(meta.eventCount) events, \(String(describing: meta.parameters?.count)) parameters")
-//                
-//                let parameters = try self._getParameters(from: sample, parameterNames: parameterNames)
-//                
-//                print("  ==> Parameter loaded")
-//
-//                let data = try compute(parameters)
-//                
-//                await MainActor.run {
-//                    result.success(data)
-//                }
-//                
-//            } catch {
-//                print("Error creating histogram: \(error)")
-//                await MainActor.run {
-//                    result.error("Error creating chart", error)
-//                }
-//            }
-//        }
-//        
-//        return result
-//    }
     
     public func loadSample(_ request:SampleRequest) -> APIQuery<FCSFile> {
-        query(request) { r in
-            try await self.sampleCache.get(r)
+        query() {
+            try await self.cache(self._loadSample).get(request)
         }
     }
 
-//    public func loadSample(sampleRef:SampleRef, includeData:Bool = true) -> APIQuery<FCSFile> {
-//        let result = APIQuery<FCSFile>()
-//        print("Begin load data...")
-//        todo() // use query()
-//
-//        Task.detached {
-//            do {
-//                print("Loading data for '\(sampleRef.filename)'")
-//                let sample = try self._loadSample(ref: sampleRef, includeData: includeData)
-//
-//                await MainActor.run {
-//                    print("Sample loaded...")
-//                    result.success(sample)
-//                }
-//
-//            } catch {
-//                await MainActor.run {
-//                    result.error("Error creating chart", error)
-//                }
-//            }
-//        }
-//
-//        return result
-//    }
-//
-        
-    
     
     nonisolated private func _loadSample(_ request: SampleRequest) throws -> FCSFile {
         try self.fcsReader.readFCSFile(at: request.sampleRef.url, includeData: request.includeData)
@@ -347,6 +282,56 @@ public class CytegeistCoreAPI {
         let smoothed = h.convolute(kernel: request.smoothing.kernel)
         return CachedHistogram(h, smoothed, view: AnyView(image.resizable().scaleEffect(y: -1)))
     }
+    
+    nonisolated private func _statistic(_ r:StatisticRequest) async throws -> Double {
+        
+//        switch r.statistic {
+
+            //            let parentHistogram = try await _statisticHistogram(r.population.parent, r.dim)
+            //            return histogram.totalCount / parentHistogram.totalCount
+//            let rootHistogram = try await _statisticHistogram(r.population.parent, r.dim)
+//            return histogram.totalCount / parentHistogram.totalCount
+
+        
+        // Stats not based on a histogram
+        switch r.statistic {
+            case.freqOfParent, .freqOfTotal:
+                let population = try await self.populationCache.get(r.population)
+                
+                let ancestorRequest = r.statistic == .freqOfTotal ? r.population.getRoot() : r.population.getParent()
+                if let ancestorRequest {
+                    let ancestor = try await self.populationCache.get(ancestorRequest)
+                    return population.count / ancestor.count
+                }
+                return .nan
+            default:
+                break
+        }
+        
+        let histogram = try await _statisticHistogram(r.population, r.dim)
+        // Stats based on a histogram
+        switch r.statistic {
+            case .percentile(let p):
+                return histogram.percentile(p)
+            case .median:
+                return histogram.percentile(0.5)
+            case .cv:
+                break       // not implemented
+            case .mean:
+                return histogram.mean()
+                
+            default: break
+        }
+        
+        print("Unsupported statistic \(r.statistic)")
+        return .nan
+    }
+    
+    nonisolated private func _statisticHistogram(_ population: PopulationRequest, _ dim:String) async throws -> HistogramData<X> {
+        let histogramRequest = HistogramRequest<X>(population, Tuple1(dim), smoothing: .off)
+        let histogram = try await self.histogram1DCache.get(histogramRequest)
+        return histogram.histogram
+    }
 
 }
 
@@ -362,40 +347,25 @@ public struct SampleRequest : Identifiable, Hashable {
     }
 }
 
-//public struct GateRequest : Hashable {
-//    public static func == (lhs: GateRequest, rhs: GateRequest) -> Bool {
-//        lhs.repr == rhs.repr
-//    }
-//    
-//    public func hash(into hasher: inout Hasher) {
-//        hasher.combine(repr)
-//    }
-//    
-//    public let repr: String
-//    let dimNames: [String]
-//    let filter: (EventData) -> PValue
-//    
-//    public init(repr:String, dimNames: [String], filter: @escaping (EventData) -> PValue) {
-//        self.repr = repr
-//        self.dimNames = dimNames
-//        self.filter = filter
-//    }
-//}
+public enum Statistic : Hashable {
+    case freqOfParent, freqOfTotal
+    case percentile(Double)
+    case mean, median, cv
+}
 
+public struct StatisticRequest : Hashable {
+    public let population:PopulationRequest
+    public let statistic:Statistic
+    public let dim:String
 
-//public indirect enum ParentPopulation: Identifiable, Hashable {
-//    public var id: String {
-//        switch self {
-//        case .sample(let value):
-//            return value.sampleRef.url.absoluteString
-//        case .population(let value):
-//            return value.id
-//        }
-//    }
-//    
-//    case sample(SampleRequest)
-//    case population(PopulationRequest)
-//}
+    public init(_ population: PopulationRequest, _ dimName:String, _ statistic: Statistic) {
+        self.population = population
+        self.dim = dimName
+        self.statistic = statistic
+    }
+}
+
+public typealias StatisticBatch = [Statistic:Double]
 
 
 
@@ -422,7 +392,7 @@ public indirect enum PopulationRequest: Hashable {
                 parent.hash(into: &hasher)
                 gate?.hash(into: &hasher)
                 invert.hash(into: &hasher)
-            case .union(_, union: let union):
+            case .union(_, _):
                 fatalError()
         }
     }
@@ -441,10 +411,10 @@ public indirect enum PopulationRequest: Hashable {
     public var name: String {
         switch self {
         case .sample(let sampleRef):
-            sampleRef.url.absoluteString
+                sampleRef.url.lastPathComponent
         case .gated(_, _, _, let name):
             name
-        case .union(let parents):
+        case .union(_, _):
             "Union"
         }
     }
@@ -453,40 +423,41 @@ public indirect enum PopulationRequest: Hashable {
     case gated(_ parent: PopulationRequest, gate:(any GateDef)?, invert:Bool, name:String)
     case union(_ parent: PopulationRequest, union: [PopulationRequest])
     
-    func getSample() -> SampleRef {
-        switch self {
-        case .sample(let s): return s
-        case .gated( let parent, _, _, _): return parent.getSample()
-        case .union(let parent, _): return parent.getSample()
+    func getSample() -> SampleRef? {
+        switch getRoot() {
+            case .sample(let s):
+                return s
+            default:
+                return nil
         }
     }
+    
+    func getParent() -> PopulationRequest? {
+        switch self {
+            case .sample: return nil
+            case .gated(let parent, _, _, _), .union(let parent, _):
+                return parent
+        }
+    }
+    
+    func getRoot() -> PopulationRequest {
+        if let parent = getParent() {
+            return parent.getRoot()
+        }
+        return self
+    }
+    
+    var description: String {
+        var s = name
+        var parent = self
+        while let parent = parent.getParent() {
+            s = "\(parent.name)/\(s)"
+        }
+        
+        return s
+    }
+    
 }
-
-
-//public struct PopulationRequest : Hashable {
-//    public let id: String
-//    public let info: PopulationType
-////    let parent: ParentPopulation
-//    let sample: SampleRequest
-////    let parent: ParentPopulation
-//    
-//    // TODO add gate lineage
-//    
-//    // Each PopulationRequest as one gate with parent population?
-//    // How to handle OR gates?
-//    
-//    public init(_ sampleRef: SampleRef) {
-//        self.sample = .init(sampleRef)
-//        self.id = sample.id
-//        self.gates = []
-//    }
-//    
-//    public init(id:String, sample: SampleRef, gates: [GateRequest]) {
-//        self.id = id
-//        self.sample = .init(sample)
-//        self.gates = gates
-//    }
-//}
 
 
 public struct HistogramRequest<D:Dimensions> : Hashable {

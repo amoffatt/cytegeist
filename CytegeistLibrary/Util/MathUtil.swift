@@ -34,6 +34,8 @@ public func sqr<T:FloatingPoint>(_ x:T) -> T {
     x * x
 }
 
+public let twoPi = 2.0 * CGFloat.pi
+
 public extension FloatingPoint {
     func ifNotFinite(_ newValue:Self) -> Self {
         self.isFinite ? self : newValue

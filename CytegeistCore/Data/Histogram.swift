@@ -36,7 +36,8 @@ Data:Tuple<[ValueType]>
     
     static func pointToNDIndex(point:FloatCoord, axes:Axes, arraySize:IntCoord) -> IntCoord
     static func inlineArrayIndex(ndIndex:IntCoord, arraySize:IntCoord) -> Int
-    
+    static func inlineArrayToCoord(index:Int, axes:Axes, arraySize:IntCoord) -> FloatCoord
+
     static func count(data:Data) -> Int
     static func value(in data:Data, at index:Int) -> FloatCoord
 }
@@ -44,7 +45,6 @@ Data:Tuple<[ValueType]>
 
 
 public struct X : Dimensions {
-    
     public typealias Axes = Tuple1<AxisNormalizer>
     public typealias Strings = Tuple1<String>
     public typealias IntCoord = Tuple1<Int>
@@ -68,9 +68,14 @@ public struct X : Dimensions {
         .init(data.x[index])
     }
     
-    public static func pointToNDIndex(point: FloatCoord, axes: Tuple1<AxisNormalizer>, arraySize:IntCoord) -> Tuple1<Int> {
+    public static func pointToNDIndex(point: FloatCoord, axes:Axes, arraySize:IntCoord) -> Tuple1<Int> {
         let bin = axes.x.normalize(Double(point.x)) * Double(arraySize.x)
         return .init(Int(bin))
+    }
+    
+    public static func inlineArrayToCoord(index: Int, axes:Axes, arraySize:IntCoord) -> FloatCoord {
+        let normalized = Double(index) / Double(arraySize.x)
+        return .init(axes.x.unnormalize(normalized))
     }
 
 }
@@ -94,6 +99,15 @@ public struct XY : Dimensions {
         return ndIndex.y * arraySize.x + ndIndex.x
     }
     
+    public static func inlineArrayToCoord(index: Int, axes:Axes, arraySize:IntCoord) -> FloatCoord {
+        let normalizedX = Double(index % arraySize.x) / Double(arraySize.x)
+        let normalizedY = Double(index / arraySize.x) / Double(arraySize.y)
+        return .init(
+            axes.x.unnormalize(normalizedX),
+            axes.y.unnormalize(normalizedY)
+        )
+    }
+
     public static func count(data: Data) -> Int {
         data.x.count
     }
@@ -287,7 +301,8 @@ public struct HistogramData<D:Dimensions> {
 //    public typealias Axes = AxesTuple
     
     public let bins:[Float]
-    public let mode: Float
+    public let mode: Double
+    public let totalCount: Double
     public let normalizeCoeff: Float
     
     public let axes:D.Axes
@@ -305,10 +320,23 @@ public struct HistogramData<D:Dimensions> {
     public func normalizedCount(bin: Int) -> Float {
         return bins[bin] * normalizeCoeff
     }
+    
+    public var counts:some Sequence<(value:D.FloatCoord, count:Float)> {
+        bins.enumerated().map { index, count in
+            (D.inlineArrayToCoord(index:index, axes:axes, arraySize:size), count)
+        }
+    }
 
     public init(bins: [Float], size: D.IntCoord, axes: D.Axes, countAxis: AxisNormalizer? = nil) {
-        self.mode = bins.max() ?? 0
-        self.normalizeCoeff = 1 / max(1, mode)
+        var sum = 0.0
+        var mode = 0.0
+        for bin in bins {
+            sum += Double(bin)
+            mode = max(Double(bin), mode)
+        }
+        self.mode = mode
+        self.totalCount = sum
+        self.normalizeCoeff = 1 / max(1, Float(mode))
         self.bins = bins
         
         self.axes = axes
@@ -332,10 +360,9 @@ public struct HistogramData<D:Dimensions> {
 
 
 
-fileprivate func defaultCountAxis(mode:Float?) -> AxisNormalizer {
-//        var maxValue = max(1, bins.max() ?? 1)
-    let mode = max(1, mode ?? 0)
-    return .linear(min: 0, max: Double(mode))
+fileprivate func defaultCountAxis(mode:Double?) -> AxisNormalizer {
+    let upper = max(1, mode ?? 0)
+    return .linear(min: 0, max: upper)
 }
 
 

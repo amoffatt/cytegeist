@@ -113,6 +113,22 @@ public extension String {
 
 }
 
+public extension Double {
+    // func asPercentage(decimals: Int = 1) -> String {
+    //     let formatter = NumberFormatter()
+    //     formatter.numberStyle = .percent
+    //     formatter.minimumFractionDigits = decimals
+    //     formatter.maximumFractionDigits = decimals
+    //     return formatter.string(from: self as! NSNumber) ?? ""
+    // }
+
+    func asPercentage() -> String {
+        let multiplied = self * 100
+        return String(format: "%.1f%%", multiplied)
+    }
+}
+
+
 public extension Optional where Wrapped == String {
     var nonNil:String { self ?? "" }
 }

@@ -19,11 +19,11 @@
 				<string>public.data</string>
 			</array>
 			<key>UTTypeDescription</key>
-			<string>Cytegeist Population Analysis Node</string>
+			<string>Cytegeist Analysis Node</string>
 			<key>UTTypeIconFiles</key>
 			<array/>
 			<key>UTTypeIdentifier</key>
-			<string>cytegeist.population</string>
+			<string>cytegeist.nodes.analysis</string>
 			<key>UTTypeTagSpecification</key>
 			<dict/>
 		</dict>

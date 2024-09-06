@@ -12,21 +12,21 @@ import CytegeistLibrary
 
 
 //---------------------------------------------------------
-public struct Statistic : Codable, Hashable
-{
-    var extraAttributes = AttributeStore()
-        // operation  (.median, .cv, )
-        // parameters ($3,  ["APC"] )
-        // currentValue  (.undefined)
-    
-    init()
-    {
-        
-    }
-}
+//public struct Statistic : Codable, Hashable
+//{
+//    var extraAttributes = AttributeStore()
+//        // operation  (.median, .cv, )
+//        // parameters ($3,  ["APC"] )
+//        // currentValue  (.undefined)
+//    
+//    init()
+//    {
+//        
+//    }
+//}
 
 public extension UTType {
-    static var population = UTType(exportedAs: "cytegeist.population")
+    static var analysisNode = UTType(exportedAs: "cytegeist.nodes.analysis")
 }
 
 enum AnalysisNodeError : Error {
@@ -45,11 +45,17 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable
     public func hash(into hasher: inout Hasher) {
         hasher.combine(id)
     }
+
+    public static var transferRepresentation: some TransferRepresentation {
+        CodableRepresentation(contentType: UTType.analysisNode)
+    }
     
+    
+
     public var id = UUID()
     public var name: String = ""
     public var graphDef =  ChartDef()              // how this population wants to be shown
-    public var statistics =  [Statistic]()         // what to report
+//    public var statistics =  [Statistic]()         // what to report
     private var _parent: AnalysisNode?
     public var parent: AnalysisNode? {
         get { _parent }
@@ -69,11 +75,6 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable
     public private(set) var children: [AnalysisNode] = []        // subpopulations dependent on us
     public var extraAttributes = AttributeStore()
     
-
-    public static var transferRepresentation: some TransferRepresentation {
-        CodableRepresentation(contentType: UTType.population)
-    }
-    
     public init()
     {
     }
@@ -84,9 +85,6 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable
         }
     }
     
-    public func freqOfParent() -> Double {
-        0.24
-    }
     public func getSample() -> Sample? { fatalError("Must be overriden") }
     
     private func _addChild(_ node:AnalysisNode) {
@@ -157,6 +155,7 @@ public class GroupNode : AnalysisNode {
 
 @Observable
 public class PopulationNode : AnalysisNode {
+    
     public var gate:AnyGate?                      // the predicate to filter ones parent
     public var invert: Bool
     public var color: Color

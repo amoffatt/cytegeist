@@ -20,7 +20,7 @@ public struct LayoutBuilder: View {
         //    @State  var mode =  ReportMode.gating
     @Environment(Experiment.self) var experiment
     
-    @State var selectedLayout:CGLayoutModel? = nil
+    @State var selectedLayout:CGLayout? = nil
     
     public var body: some View
     {
@@ -57,7 +57,7 @@ public struct LayoutBuilder: View {
 
 @MainActor
 struct CGLayoutView: View {
-    let layoutModel:CGLayoutModel
+    let layoutModel:CGLayout
 
     @State var editingItem:LayoutItem?
     @FocusState private var isFocused: Bool

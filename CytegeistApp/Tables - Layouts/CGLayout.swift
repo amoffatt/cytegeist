@@ -8,9 +8,9 @@ import CytegeistLibrary
 import CytegeistCore
 
 @Observable
-class CGLayoutModel : Codable, Hashable, Identifiable
+class CGLayout : Codable, Hashable, Identifiable
 {
-    static func == (lhs: CGLayoutModel, rhs: CGLayoutModel) -> Bool {
+    static func == (lhs: CGLayout, rhs: CGLayout) -> Bool {
         lhs.id == rhs.id
     }
     

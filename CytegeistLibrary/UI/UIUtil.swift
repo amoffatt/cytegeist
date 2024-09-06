@@ -12,10 +12,15 @@ import SwiftUI
 
 public struct LoadingOverlay<Content: View>: View {
     let isLoading: Bool
+    let scale: CGFloat
+    let dimming: Bool
+    
     let content: () -> Content
 
-    public init(isLoading: Bool, content: @escaping () -> Content) {
+    public init(isLoading: Bool, scale:CGFloat = 1, dimming:Bool = false, content: @escaping () -> Content) {
         self.isLoading = isLoading
+        self.scale = scale
+        self.dimming = dimming
         self.content = content
     }
     
@@ -27,11 +32,14 @@ public struct LoadingOverlay<Content: View>: View {
             content()
             
             if isLoading {
-                Color.black.opacity(0.4)
-                    .edgesIgnoringSafeArea(.all)
+                if dimming {
+                    Color.black.opacity(0.4)
+                        .edgesIgnoringSafeArea(.all)
+                }
                 ProgressView()
                     .progressViewStyle(CircularProgressViewStyle())
-                    .scaleEffect(1.5)
+                    .scaleEffect(scale)
+                    .frame(minWidth: 10, maxWidth: 10)
             }
         }
         .animation(ease, value: isLoading)

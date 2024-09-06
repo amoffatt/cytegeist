@@ -57,6 +57,7 @@ struct MainAppView : View {
                                 .fillAvailableSpace()
                         }
                         .environment(selected)
+                        .environment(selected.core)
                         .onChange(of: selected.selectedSamples) {
                             selected.clearAnalysisNodeSelection()
                         }

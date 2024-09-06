@@ -32,6 +32,7 @@
 		B68529692C74DBB500EF9EF4 /* ComputeCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = B68529682C74DBB500EF9EF4 /* ComputeCache.swift */; };
 		B68529732C74DC1100EF9EF4 /* PairCharts.swift in Sources */ = {isa = PBXBuildFile; fileRef = B68529702C74DC1100EF9EF4 /* PairCharts.swift */; };
 		B68529742C74DC1100EF9EF4 /* SampleInspectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B68529712C74DC1100EF9EF4 /* SampleInspectorView.swift */; };
+		B69001CF2C88CED50083C743 /* Statistics.swift in Sources */ = {isa = PBXBuildFile; fileRef = B69001CE2C88CED50083C743 /* Statistics.swift */; };
 		B6C9A3F32C75A3F000DB6786 /* CytegeistLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B6C9A3EB2C75A3EF00DB6786 /* CytegeistLibrary.framework */; };
 		B6C9A3FA2C75A3F000DB6786 /* CytegeistLibraryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A3F92C75A3F000DB6786 /* CytegeistLibraryTests.swift */; };
 		B6C9A3FB2C75A3F000DB6786 /* CytegeistLibrary.h in Headers */ = {isa = PBXBuildFile; fileRef = B6C9A3ED2C75A3EF00DB6786 /* CytegeistLibrary.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -90,7 +91,7 @@
 		DC05A3D12C798EC900C08BBF /* Smoothing.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC05A3D02C798EC900C08BBF /* Smoothing.swift */; };
 		DC23F02F2C7D3C0B002FCDC0 /* Gate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4692C75D04800DB6786 /* Gate.swift */; };
 		DC6F42FB2C83F7BD00288EB8 /* TabBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC6F42FA2C83F7BD00288EB8 /* TabBar.swift */; };
-		DC861C7C2C8632F000D7C3FB /* CGTableModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC861C7B2C8632F000D7C3FB /* CGTableModel.swift */; };
+		DC861C7C2C8632F000D7C3FB /* CGTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC861C7B2C8632F000D7C3FB /* CGTableView.swift */; };
 		DC861C822C868D8700D7C3FB /* ModelList.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC861C812C868D8700D7C3FB /* ModelList.swift */; };
 		DCA66B752C81047200F51C70 /* GatingViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCA66B742C81047200F51C70 /* GatingViews.swift */; };
 		DCA66B762C810BF200F51C70 /* AnalysisNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A46F2C75D04800DB6786 /* AnalysisNode.swift */; };
@@ -220,6 +221,7 @@
 		B685296C2C74DBD700EF9EF4 /* VectorUtil.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VectorUtil.swift; sourceTree = "<group>"; };
 		B68529702C74DC1100EF9EF4 /* PairCharts.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PairCharts.swift; sourceTree = "<group>"; };
 		B68529712C74DC1100EF9EF4 /* SampleInspectorView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SampleInspectorView.swift; sourceTree = "<group>"; };
+		B69001CE2C88CED50083C743 /* Statistics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Statistics.swift; sourceTree = "<group>"; };
 		B6C9A3EB2C75A3EF00DB6786 /* CytegeistLibrary.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CytegeistLibrary.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B6C9A3ED2C75A3EF00DB6786 /* CytegeistLibrary.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CytegeistLibrary.h; sourceTree = "<group>"; };
 		B6C9A3F22C75A3F000DB6786 /* CytegeistLibraryTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CytegeistLibraryTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -267,7 +269,7 @@
 		B6C9A4B92C77DB3700DB6786 /* AxisNormalizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AxisNormalizer.swift; sourceTree = "<group>"; };
 		DC05A3D02C798EC900C08BBF /* Smoothing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Smoothing.swift; sourceTree = "<group>"; };
 		DC6F42FA2C83F7BD00288EB8 /* TabBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabBar.swift; sourceTree = "<group>"; };
-		DC861C7B2C8632F000D7C3FB /* CGTableModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGTableModel.swift; sourceTree = "<group>"; };
+		DC861C7B2C8632F000D7C3FB /* CGTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGTableView.swift; sourceTree = "<group>"; };
 		DC861C812C868D8700D7C3FB /* ModelList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelList.swift; sourceTree = "<group>"; };
 		DCA66B742C81047200F51C70 /* GatingViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GatingViews.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -402,6 +404,7 @@
 				B68529682C74DBB500EF9EF4 /* ComputeCache.swift */,
 				B63EEE8F2C569C7600E465C9 /* CytegeistCore.swift */,
 				DC05A3D02C798EC900C08BBF /* Smoothing.swift */,
+				B69001CE2C88CED50083C743 /* Statistics.swift */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -531,7 +534,7 @@
 		B6C9A44F2C75D01300DB6786 /* Tables - Layouts */ = {
 			isa = PBXGroup;
 			children = (
-				DC861C7B2C8632F000D7C3FB /* CGTableModel.swift */,
+				DC861C7B2C8632F000D7C3FB /* CGTableView.swift */,
 				B6C9A44D2C75D01300DB6786 /* CGLayoutView.swift */,
 				B6C9A44E2C75D01300DB6786 /* LayoutItemViews.swift */,
 				B6C9A49A2C767FAF00DB6786 /* CGLayout.swift */,
@@ -859,6 +862,7 @@
 				B6C9A4BA2C77DB3700DB6786 /* AxisNormalizer.swift in Sources */,
 				B641739D2C5C4E00001AA2F4 /* ParameterInspectorView.swift in Sources */,
 				B63EEE942C569D7300E465C9 /* Histogram.swift in Sources */,
+				B69001CF2C88CED50083C743 /* Statistics.swift in Sources */,
 				DCA66B772C810C0E00F51C70 /* Sample.swift in Sources */,
 				B64173942C58AB2B001AA2F4 /* DemoData.swift in Sources */,
 				B63EEE8C2C5624C000E465C9 /* HistogramView.swift in Sources */,
@@ -897,7 +901,7 @@
 				B65D82AD2C44BE7100E4F0A2 /* AaronTestContentView.swift in Sources */,
 				B6C9A4A72C76814F00DB6786 /* SaveOpenView.swift in Sources */,
 				B6C9A48B2C75D09A00DB6786 /* SettingsView.swift in Sources */,
-				DC861C7C2C8632F000D7C3FB /* CGTableModel.swift in Sources */,
+				DC861C7C2C8632F000D7C3FB /* CGTableView.swift in Sources */,
 				B6C9A48C2C75D09A00DB6786 /* ProtoStartupScreen.swift in Sources */,
 				B6C9A49B2C767FAF00DB6786 /* CGLayout.swift in Sources */,
 				B6C9A4622C75D01300DB6786 /* MainAppView.swift in Sources */,

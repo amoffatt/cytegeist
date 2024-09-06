@@ -16,14 +16,14 @@ public struct TableBuilder : View
 {
     @Environment(Experiment.self) var experiment
         //        @State var selectedColumns = Set<TColumn.ID>()
-    @State var selectedTable:CGTableModel? = nil
+    @State var selectedTable:CGTable? = nil
     
     public var body: some View {
         return VStack {
             TabBar(experiment.tables, selection:$selectedTable) { table in
                 Text(table.name)
             } add: {
-                let table = CGTableModel()
+                let table = CGTable()
                 table.name = table.name.generateUnique(existing: experiment.tables.map { $0.name })
                 experiment.tables.append(table)
                 selectedTable = table
@@ -33,7 +33,7 @@ public struct TableBuilder : View
             VStack {
                     //            .opacity(1.0)
                 if let selectedTable {
-                    TableView(table:selectedTable)
+                    CGTableView(table:selectedTable)
                 } else {
                     Text("Select a Table")
                 }
@@ -50,12 +50,12 @@ public struct TableBuilder : View
         //------------------------------------------------------------------------------------
 }
 
-public struct TableView : View {
+public struct CGTableView : View {
     @State var selection = Set<TColumn.ID>()
     @State var sortOrder = [KeyPathComparator(\TColumn.pop, order: .forward), KeyPathComparator(\TColumn.parm, order: .forward)]
     @State var columnCustomization = TableColumnCustomization<TColumn>()
     
-    let table:CGTableModel
+    let table:CGTable
     
     public var body: some View {
             //            Table (of: TColumn.Type, selection: $selectedColumns)
@@ -144,9 +144,9 @@ public struct TColumn : Identifiable, Hashable, Codable
 
 
 @Observable
-public class CGTableModel : Usable, Hashable
+public class CGTable : Usable, Hashable
 {
-    public static func == (lhs: CGTableModel, rhs: CGTableModel) -> Bool {
+    public static func == (lhs: CGTable, rhs: CGTable) -> Bool {
         lhs.id == rhs.id
     }
     

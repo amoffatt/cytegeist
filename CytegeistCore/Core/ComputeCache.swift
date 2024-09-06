@@ -30,7 +30,7 @@ fileprivate class ComputeHandle<Request, Data> {
 }
 
 
-public actor ComputeCache<Request:Hashable, Data> {
+public actor ComputeCache<Request:Hashable, Data> : Identifiable {
     
     // TODO: Naive cache pruning system. Improve
     public var maxCacheItems = 10
@@ -60,7 +60,7 @@ public actor ComputeCache<Request:Hashable, Data> {
                 do {
                     print ("Request beginning compute: \(request)")
                     let result = try await self._compute(request)
-                    print (" => Request finished compute: \(request)")
+                    print ("  ==> Request finished compute: \(request)")
 
                     await self.handleSuccess(request, data:result)
                 } catch {
