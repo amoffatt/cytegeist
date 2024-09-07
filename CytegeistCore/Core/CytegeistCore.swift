@@ -369,7 +369,7 @@ public typealias StatisticBatch = [Statistic:Double]
 
 
 
-public indirect enum PopulationRequest: Hashable {
+public indirect enum PopulationRequest: Hashable, CustomStringConvertible {
     public static func == (lhs: PopulationRequest, rhs: PopulationRequest) -> Bool {
         switch (lhs, rhs) {
             case (.sample(let lhsSample), .sample(let rhsSample)):
@@ -447,11 +447,12 @@ public indirect enum PopulationRequest: Hashable {
         return self
     }
     
-    var description: String {
+    public var description: String {
         var s = name
-        var parent = self
-        while let parent = parent.getParent() {
+        var current = self
+        while let parent = current.getParent() {
             s = "\(parent.name)/\(s)"
+            current = parent
         }
         
         return s

@@ -64,6 +64,14 @@ public extension View {
     func fillAvailableSpace() -> some View {
         self.frame(maxWidth: .infinity, maxHeight: .infinity)
     }
+    
+    func onArrowKeys(_ handler:@escaping (CGPoint) -> Void) -> some View {
+        self
+        .onKeyPress(.leftArrow)     { handler(CGPoint(x: -1.0, y: 0)); return .handled }
+        .onKeyPress(.rightArrow)    { handler(CGPoint(x: 1.0, y: 0)); return .handled }
+        .onKeyPress(.upArrow)       { handler(CGPoint(x: 0, y: -1.0)); return .handled }
+        .onKeyPress(.downArrow)     { handler(CGPoint(x: 0, y: 1.0)); return .handled }
+    }
 }
 
 

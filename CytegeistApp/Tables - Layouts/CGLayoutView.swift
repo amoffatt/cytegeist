@@ -71,7 +71,7 @@ struct CGLayoutView: View {
      
     var body: some View {
         
-        let step =  shiftKey() ? 20 : optionKey() ? 1 : 5           //  PREFS
+        let step =  shiftKey() ? 20 : optionKey() ? 1.0 : 5.0           //  PREFS
             VStack {
                  ZStack(alignment:.topLeading) {
                      layoutBackdrop()
@@ -99,10 +99,7 @@ struct CGLayoutView: View {
                 .onKeyPress(.deleteForward) {  layoutModel.deleteSelection();  return .handled}
                 .onKeyPress(.delete)        {  layoutModel.deleteSelection();   return .handled   }   // .delete DOESNT WORK
                 .onKeyPress(.init(Character(UnicodeScalar(127))))      {  layoutModel.deleteSelection();   return .handled   }   // .delete DOESNT WORK
-                .onKeyPress(.leftArrow)     {  layoutModel.nudgeSelection(offset: CGPoint(x: -step, y: 0)); return .handled     }
-                .onKeyPress(.rightArrow)    {  layoutModel.nudgeSelection(offset: CGPoint(x: step, y: 0)) ; return .handled     }
-                .onKeyPress(.upArrow)       {  layoutModel.nudgeSelection(offset: CGPoint(x: 0, y: -step)); return .handled     }
-                .onKeyPress(.downArrow)     {  layoutModel.nudgeSelection(offset: CGPoint(x: 0, y: step));  return .handled     }
+                .onArrowKeys { layoutModel.nudgeSelection(offset: $0 * step) }
             
                 .background(.blue.opacity(0.1))       // Needed to received clicks
                 .dropDestination(for: AnalysisNode.self) { (items, position) in

@@ -152,7 +152,11 @@ struct GateControlZone<Content, Handle> : View, Identifiable where Content:View,
     }
 }
 
+
+let gateNudgeOffsetNormalized = 0.002
+
 struct GateView<GateType:GateDef> : View where GateType:ViewableGate {
+
     @Environment(\.lineWidth) var lineWidth
     @Environment(\.isEditing) var editing
     @Bindable var node: PopulationNode
@@ -198,7 +202,12 @@ struct GateView<GateType:GateDef> : View where GateType:ViewableGate {
                 }
             }
         }
-        .environment(\.isEditing, editing)
+        .focusable()
+        .focusEffectDisabled()
+        .onArrowKeys { offset in
+            gate.wrappedValue?.nudge(node, axes:normalizers, offset: offset * gateNudgeOffsetNormalized)
+        }
+//        .environment(\.isEditing, editing)
         .animation(.smooth, value:editing)
     }
     
@@ -273,6 +282,7 @@ protocol ViewableGate: GateDef {
     func chartView(_ node:PopulationNode, chartSize:CGSize, chartDims:Tuple2<CDimension?>) -> any View
     func viewContent(_ view:GateView<Self>, viewCenter: inout CGPoint) -> (any View)?
     func isValid(for chartDims: Tuple2<CDimension?>) -> Bool
+    mutating func nudge(_ node:PopulationNode, axes: Tuple2<AxisNormalizer?>, offset:CGPoint)
 }
 
 extension ViewableGate {
@@ -286,6 +296,7 @@ extension ViewableGate {
             axes: chartDims.map { $0?.normalizer },
             chartSize: chartSize)
     }
+    
 }
 
 public enum GateVisibility {
@@ -320,6 +331,7 @@ public extension GateDef {
 
 extension RangeGateDef : ViewableGate {
     
+    
     func viewContent(_ v:ViewType, viewCenter: inout CGPoint) -> (any View)? {
         let chartSize = v.chartSize
         let (min, max) = sort(self.min, self.max)
@@ -346,11 +358,20 @@ extension RangeGateDef : ViewableGate {
             }
         }
     }
+    
+    mutating func nudge(_ node: PopulationNode, axes: Tuple2<AxisNormalizer?>, offset: CGPoint) {
+        if let x = axes.x {
+            self.min = x.unnormalize(x.normalize(self.min) + offset.x)
+            self.max = x.unnormalize(x.normalize(self.max) + offset.x)
+        }
+    }
+    
 
 }
 
 
 extension RectGateDef : ViewableGate {
+    
     
 //    typealias HandleInfo = (id:String,
 //                            position:Alignment,
@@ -428,6 +449,11 @@ extension RectGateDef : ViewableGate {
             view.gate.wrappedValue?.rect = rect
         }
     }
+    
+    
+    mutating func nudge(_ node: PopulationNode, axes: Tuple2<AxisNormalizer?>, offset: CGPoint) {
+        print("Rect Nudge not implemented")
+    }
 }
 
 
@@ -490,6 +516,10 @@ extension EllipsoidGateDef : ViewableGate {
 //                .controlSize(.small)
             }
         }
+    }
+    
+    mutating func nudge(_ node: PopulationNode, axes: Tuple2<AxisNormalizer?>, offset: CGPoint) {
+        print("Ellipse Nudge not implemented")
     }
 }
 
