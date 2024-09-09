@@ -17,15 +17,21 @@ fileprivate class ComputeHandle<Request, Data> {
     var data:Data? = nil
     var error:Error? = nil
     var lastRequested:Date = Date()
+    var task:Task<Void, Never>
     
     let semaphore:CSemaphore = .init()
 
-    init(_ request: Request) {
+    init(_ request: Request, _ task: Task<Void, Never>) {
         self.request = request
 //        self.data = data
 //        self.error = error
 //        self.requested = requested
+        self.task = task
     }
+    
+//    func cancel() {
+//        task.cancel()
+//    }
     
 }
 
@@ -33,7 +39,7 @@ fileprivate class ComputeHandle<Request, Data> {
 public actor ComputeCache<Request:Hashable, Data> : Identifiable {
     
     // TODO: Naive cache pruning system. Improve
-    public var maxCacheItems = 10
+    public var maxCacheItems = 10000
     
     public typealias ComputeFunction = (Request) async throws -> Data
 
@@ -46,28 +52,31 @@ public actor ComputeCache<Request:Hashable, Data> : Identifiable {
     }
     
     public func get(_ request:Request) async throws -> Data {
-//        // AM DEBUGGING
-//        return try await self._compute(request)
+//        print("   <<< Cache get()")
+        try Task.checkCancellation()
         
         var handle = _cache[request]
-        
+//        print ("Cache get() hit (hashValue: \(request.hashValue): \(handle != nil): \(request)")
+
         if handle == nil {
-            handle = ComputeHandle<Request, Data>(request)
+            handle = ComputeHandle<Request, Data>(request,
+                Task {  // Note: don't use Task.detached, otherwise cancellation will not be passed through
+                    do {
+                        try Task.checkCancellation()
+                        print ("Request beginning compute: \(request)")
+                        let result = try await self._compute(request)
+                        print ("  ==> Request finished compute: \(request)")
+                        
+                        await self.handleSuccess(request, data:result)
+                    } catch {
+                        await self.handleError(request, error:error)
+                    }
+                }
+            )
+            
+            
             _cache[request] = handle
             pruneOldHandles()
-            
-            Task.detached {
-                do {
-                    print ("Request beginning compute: \(request)")
-                    let result = try await self._compute(request)
-                    print ("  ==> Request finished compute: \(request)")
-
-                    await self.handleSuccess(request, data:result)
-                } catch {
-                    await self.handleError(request, error:error)
-                }
-            }
-            
         }
         
         return try await awaiter(handle!)
@@ -87,7 +96,9 @@ public actor ComputeCache<Request:Hashable, Data> : Identifiable {
                 $0.lastRequested > $1.lastRequested
             }
             
-            _cache.removeValue(forKey: oldest!.request)
+            if let removed = _cache.removeValue(forKey: oldest!.request) {
+                print("  => Removed data from cache: \(removed)")
+            }
         }
     }
     
@@ -126,7 +137,12 @@ public actor ComputeCache<Request:Hashable, Data> : Identifiable {
         }
         handle.error = error
         handle.done = true
+        
+        // Remove handle from cache if error
+        _cache.removeValue(forKey: request)
+        
         await handle.semaphore.release()
+        
     }
 
     

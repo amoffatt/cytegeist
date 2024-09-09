@@ -436,6 +436,9 @@ public class FCSReader {
         
         for eventIndex in 0..<eventCount {
             for i in 0..<parameterCount {
+                if i % 10000 == 0 {
+                    try Task.checkCancellation()
+                }
                 parameterDataArray[i][eventIndex] = try valueReaderArray[i](dataReader)
             }
         }

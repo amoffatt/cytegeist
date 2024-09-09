@@ -28,7 +28,7 @@ public class TestUtil {
         
         let result:APIQuery<CachedHistogram<X>> = APIQuery()
         
-        Task.detached {
+        Task {
             await sleep(2.0)
             
             await MainActor.run {

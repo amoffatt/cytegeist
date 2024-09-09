@@ -8,9 +8,13 @@
 import Foundation
 import SwiftUI
 
+private func progressViewEase(_ visible: Bool) -> Animation {
+    visible ? .easeInOut.delay(0.5) : .easeInOut
+}
 
 
 public struct LoadingOverlay<Content: View>: View {
+    
     let isLoading: Bool
     let scale: CGFloat
     let dimming: Bool
@@ -26,7 +30,7 @@ public struct LoadingOverlay<Content: View>: View {
     
     public var body: some View {
         // Delay fade in so indicator doesn't appear if loading only takes a moment
-        let ease:Animation = isLoading ? .easeInOut.delay(0.5) : .easeInOut
+        
         
         ZStack {
             content()
@@ -42,7 +46,26 @@ public struct LoadingOverlay<Content: View>: View {
                     .frame(minWidth: 10, maxWidth: 10)
             }
         }
-        .animation(ease, value: isLoading)
+        .animation(progressViewEase(isLoading), value: isLoading)
+    }
+}
+
+public struct CProgressView: View {
+    let visible:Bool
+    public init(visible: Bool) {
+        self.visible = visible
+    }
+    
+    public var body: some View {
+        ZStack {
+            if visible {
+                ProgressView()
+                    .progressViewStyle(CircularProgressViewStyle())
+                //            .scaleEffect(scale)
+                //            .frame(minWidth: 10, maxWidth: 10)
+            }
+        }
+        .animation(progressViewEase(visible), value: visible)
     }
 }
 

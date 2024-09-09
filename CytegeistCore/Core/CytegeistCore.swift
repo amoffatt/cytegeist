@@ -12,8 +12,8 @@ import CytegeistLibrary
 public enum APIError : Error {
     var message: String {
         switch self {
-            case .creatingChart(let cause):
-                "Error creating chart: \(cause)"
+            case .computingQuery(let cause):
+                "Error computing query result: \(cause)"
             case .parameterNotFound(let name):
                 "Parameter '\(name) not found"
             case .creatingImage:
@@ -26,7 +26,7 @@ public enum APIError : Error {
                 "No population data available"
         }
     }
-    case creatingChart(_ cause:Error)
+    case computingQuery(_ cause:Error)
     case parameterNotFound(_ name:String)
     case creatingImage
     case noDataComputed
@@ -37,14 +37,14 @@ public enum APIError : Error {
 @Observable
 @MainActor
 public class BaseAPIQuery {
-    public fileprivate(set) var isLoading:Bool = true
+    public fileprivate(set) var isLoading:Bool = false
     public fileprivate(set) var error:APIError?
     public fileprivate(set) var viewPriority: Int = 1
     
     // TODO use to determine when related data should be uncached
     public private(set) var disposeTime: Date? = nil
     
-    init() {
+    nonisolated init() {
     }
 
     public func dispose() {
@@ -53,12 +53,94 @@ public class BaseAPIQuery {
     }
 }
 
+public typealias ComputeAction<Result> = () async throws -> Result
 
 @Observable
 @MainActor
 public class APIQuery<T> : BaseAPIQuery {
     public private(set) var data:T? = nil
     private var _semaphore:CSemaphore? = nil
+    
+    // Accessed in constructor, destructor, and dispose()
+    @ObservationIgnored
+    private var taskHandle:Task<Void, Never>? = nil
+    @ObservationIgnored
+    private var pendingCompute:ComputeAction<T>? = nil
+
+    override nonisolated public init() {}
+    
+    
+    fileprivate func update(_ compute: @escaping ComputeAction<T>) {
+//        let existingTask = taskHandle
+        // Don't cancel the existing task - so we get incremental updates
+        // along the way while user is adjusting parameters/gates
+        pendingCompute = compute
+        isLoading = true
+        
+        if let taskHandle {
+            // If task is currently running, no need to start another
+            return
+        }
+        
+        taskHandle = Task { // AM: don't use Task.detached bc cancellation will not be propagated to this subtask
+            do {
+                // Await for the existing task to complete before continuing
+//                if let existingTask {
+//                    let _ = await existingTask.result
+//                }
+//                print("Query running on main thread: \(Thread.isMainThread)")
+                
+                var data:T? = nil
+                while let compute = getPendingCompute() {
+                    
+                    // Store any progress/data that has been computed so far
+                    if let data {
+                        await MainActor.run {
+                            self.progress(data)
+                        }
+                    }
+                    
+                    try Task.checkCancellation()
+                    
+                    //                print("Computing query \(request)")
+                    data = try await compute()
+                    //                print("  ==> Finished computing query \(request)")
+                }
+                
+                self.taskHandle = nil
+
+                if let data {
+//                    await MainActor.run {
+                        self.success(data)
+//                    }
+                }
+                
+            } catch {
+                if error is CancellationError {
+                } else {
+//                    await MainActor.run {
+                        self.error(.computingQuery(error))
+//                    }
+                }
+            }
+        }
+    }
+    
+    private func getPendingCompute() -> ComputeAction<T>? {
+        let action = pendingCompute
+        pendingCompute = nil
+        return action
+    }
+    
+    // Using deinit() to cancel tasks does not seem to work properly
+//    deinit {
+////        Task.detached {
+////            await MainActor.run {
+//        print("Deinit() on task")
+//        taskHandle?.cancel()
+////            }
+////        }
+//    }
     
     
     func progress(_ result:T) {
@@ -108,27 +190,32 @@ public class APIQuery<T> : BaseAPIQuery {
         assert(data != nil)
         return data!
     }
+    
+    override public func dispose() {
+        super.dispose()
+        taskHandle?.cancel()
+        taskHandle = nil
+        
+        data = nil
+    }
 }
 
-//func resultOf<T>(_ closure:() throws -> T) -> T? {
-//    do {
-//        return try closure()
-//    } catch {
-//        print("Error")
-//    }
-//}
+public extension View {
+    @MainActor
+    func update<Data>(query:APIQuery<Data>, onChangeOf value: some Equatable, with compute: @escaping ComputeAction<Data>) -> some View {
+        self
+            .onChange(of: value, initial: true) {
+                query.update(compute)
+            }
+            .onDisappear {
+                query.dispose()
+            }
+    }
+}
 
-//public class TaskUtil {
-//    @discardableResult
-//    static func safeDetached<Success>(
-//        priority: TaskPriority? = nil,
-//        operation: @escaping () async -> Success
-//    ) -> Task<Success, Failure> {
-//        
-//    }
-//}
 
 public let defaultHistogramResolution:Int = 256
+
 
 @MainActor
 @Observable
@@ -155,8 +242,11 @@ public class CytegeistCoreAPI {
         return cache
     }
     
-    public func statistics(_ population:PopulationRequest, _ dim:String, _ statistics:Statistic...) -> APIQuery<StatisticBatch> {
-        query() {
+    public func statistics(_ population:PopulationRequest?, _ dim:String, _ statistics:Statistic...) -> ComputeAction<StatisticBatch> {
+        return {
+            guard let population else {
+                return [:]
+            }
             var stats = StatisticBatch()
             for s in statistics {
                 let r = StatisticRequest(population, dim, s)
@@ -167,46 +257,30 @@ public class CytegeistCoreAPI {
     }
     
     public func histogram(_ request:HistogramRequest<X>) -> APIQuery<CachedHistogram<X>> {
-        query() {
+        // AM DEBUGGING
+        let query = APIQuery<CachedHistogram<X>>()
+        query.update {
             try await self.cache(self._histogram).get(request)
         }
+        return query
     }
     
-    public func histogram2D(_ request:HistogramRequest<XY>) -> APIQuery<CachedHistogram<XY>> {
-        query() {
+    public func histogram2D( _ request:HistogramRequest<XY>) -> APIQuery<CachedHistogram<XY>> {
+        // AM DEBUGGING
+        let query = APIQuery<CachedHistogram<XY>>()
+        query.update {
             try await self.cache(self._histogram2D).get(request)
         }
-    }
-    
-    private func query<Data>(compute: @escaping () async throws -> Data) -> APIQuery<Data> {
-        let result:APIQuery<Data> = APIQuery()
-//        ensureCachesCreated()
-        
-        Task.detached {
-            do {
-//                print("Computing query \(request)")
-                let data = try await compute()
-//                print("  ==> Finished computing query \(request)")
-
-                await MainActor.run {
-                    result.success(data)
-                }
-                
-            } catch {
-                print("Error creating histogram: \(error)")
-                await MainActor.run {
-                    result.error(.creatingChart(error))
-                }
-            }
-        }
-        
-        return result
+        return query
     }
     
     public func loadSample(_ request:SampleRequest) -> APIQuery<FCSFile> {
-        query() {
+        // AM DEBUGGING
+        let query = APIQuery<FCSFile>()
+        query.update {
             try await self.cache(self._loadSample).get(request)
         }
+        return query
     }
 
     
@@ -225,6 +299,8 @@ public class CytegeistCoreAPI {
     }
     
     nonisolated private func _population(_ request: PopulationRequest) async throws -> CPopulationData {
+        try Task.checkCancellation()
+        
         switch request {
         case .sample(let sample):
             let data = try await self.sampleCache.get(.init(sample))
@@ -255,6 +331,8 @@ public class CytegeistCoreAPI {
 //            population.probability(of: i).p > 0.5
 //        }.map { $0.element }
         
+        try Task.checkCancellation()
+        
         let h = HistogramData<X>(data: .init(x.data),
                                  probabilities: population.probabilities,
                                  size: request.size ?? .init(defaultHistogramResolution),
@@ -269,6 +347,8 @@ public class CytegeistCoreAPI {
         let x = parameters[0]
         let y = parameters[1]
 
+        try Task.checkCancellation()
+        
         let h = HistogramData<XY>(
             data: .init(x.data, y.data),
             probabilities: population.probabilities,

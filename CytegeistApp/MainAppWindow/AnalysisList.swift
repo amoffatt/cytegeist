@@ -74,13 +74,13 @@ struct AnalysisList: View {
 
 public struct AnalysisNodeView: View {
     @Environment(CytegeistCoreAPI.self) var core
-    @State var request:APIQuery<StatisticBatch>?
+    @State var query = APIQuery<StatisticBatch>()
     
     let node:AnalysisNode
     let iconSize = 18.0
 
     public var body: some View {
-        let data = request?.data
+        let data = query.data
         let freqOfParent = data?[.freqOfParent]
         let freqOfTotal = data?[.freqOfTotal]
         
@@ -89,7 +89,7 @@ public struct AnalysisNodeView: View {
         
         
         HStack {
-            LoadingOverlay(isLoading: request != nil && request!.isLoading, scale: 0.5) {
+//            LoadingOverlay(isLoading: query.isLoading, scale: 0.5) {
                 ZStack {
                     ZStack {
                         if let freqOfParent, let freqOfTotal {
@@ -106,7 +106,7 @@ public struct AnalysisNodeView: View {
                         .stroke(.blue, lineWidth: 1)
                     
                 }
-            }
+//            }
             .fixedSize()
             Text(node.name)
                 .font(.system(.title3, design: .rounded))
@@ -117,14 +117,15 @@ public struct AnalysisNodeView: View {
                     .foregroundColor(.secondary)
             }
             Spacer()
+            CProgressView(visible: query.isLoading)
+                .scaleEffect(0.6)
+            
         }
-        .onChange(of: populationRequest, initial: true) {
-            request?.dispose()
-            request = nil
-            if let populationRequest {
-                request = core.statistics(populationRequest, "", .freqOfTotal, .freqOfParent)
-            }
-        }
+        .frame(maxWidth: .infinity)
+        .update(query:query,
+            onChangeOf: populationRequest,
+            with:core.statistics(populationRequest, "", .freqOfTotal, .freqOfParent)
+        )
     }
 }
 
