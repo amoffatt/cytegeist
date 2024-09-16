@@ -180,14 +180,14 @@ struct SampleList: View {
 
         .navigationTitle($experiment.name)
         //        .navigationSubtitle("\(experiment.creationDate)")
-        .importsItemProviders(selection.isEmpty ? [] : Sample.importImageTypes) { providers in
-            Sample.importImageFromProviders(providers) { url in
-                for sampleID in selection {
-                    experiment[sampleID]?.imageURL = url
-                }
-            }
-            
-        }
+//        .importsItemProviders(selection.isEmpty ? [] : Sample.importImageTypes) { providers in
+//            Sample.importImageFromProviders(providers) { url in
+//                for sampleID in selection {
+//                    experiment[sampleID]?.imageURL = url
+//                }
+//            }
+//            
+//        }
         .fileImporter( isPresented: $showFCSImporter,
                        allowedContentTypes: [.item,  .directory],
                        allowsMultipleSelection: true)

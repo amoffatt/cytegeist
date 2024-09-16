@@ -8,6 +8,15 @@
 
 import Foundation
 
+
+public extension URL {
+    var isDirectory: Bool {
+        (try? resourceValues(forKeys: [.isDirectoryKey]))?.isDirectory == true
+    }
+}
+
+
+
 public extension URL {
     
     /// Get list of all extended attributes.

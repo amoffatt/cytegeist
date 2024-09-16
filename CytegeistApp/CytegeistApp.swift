@@ -7,6 +7,7 @@
 
 import SwiftUI
 import CytegeistCore
+import SwiftData
 
 @main
 @MainActor
@@ -14,35 +15,35 @@ struct CytegeistApp: SwiftUI.App {
 
     @State private var appModel = App()
 //    @StateObject  var store = Store()
-    
+    @Environment(\.undoManager) var undoManager
 
     var body: some Scene {
-//        WindowGroup {
 //            AaronTestContentView()
 //                .environment(appModel)
 //        }
         
         
         #if os(macOS)
+            Window("Navigation", id: "nav")
+            {
+                ExperimentView()
+//                     .modelContainer(for:  Experiment.self, isUndoEnabled: true)
+            }
+                //        Settings {
+                //            SettingsView()
+                //                .environmentObject(store)
+                //        }
+            
+            Window("Pair Charts", id: "pair-charts") {
+                PairChartsPreview()
+            }
+            
+            Window("SaveOpenView", id: "SaveOpen")
+            {
+                SaveOpenView()
+            }
         
-        Window("Navigation", id: "nav")
-        {
-            MainAppView()
-                .environment(appModel)
-        }
-//        Settings {
-//            SettingsView()
-//                .environmentObject(store)
-//        }
-        
-        Window("Pair Charts", id: "pair-charts") {
-            PairChartsPreview()
-        }
-        
-        Window("SaveOpenView", id: "SaveOpen")
-        {
-            SaveOpenView()
-        }
+     
         #endif
 
 //        ImmersiveSpace(id: appModel.immersiveSpaceID) {

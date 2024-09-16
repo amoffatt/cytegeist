@@ -7,7 +7,7 @@
 
 import Foundation
 import CytegeistLibrary
-
+import SwiftData
 
 //---------------------------------------------------------
 // CDimension is the analog of a samples parameter
@@ -20,8 +20,9 @@ public enum SampleError : Error {
 }
 
 //---------------------------------------------------------
-@Observable
+//@Model
 //@MainActor
+@Observable
 public class Sample : Identifiable, Codable, Hashable
 {
     public static func == (lhs: Sample, rhs: Sample) -> Bool {
@@ -37,11 +38,13 @@ public class Sample : Identifiable, Codable, Hashable
     
     var ref:SampleRef? = nil
     
-    @CodableIgnored
-    @ObservationIgnored
+//    @CodableIgnored
+//    @ObservationIgnored
     var error:Error? = nil
     
-    
+    public func encode(to encoder: any Encoder) throws {
+        
+    }
 //    var attributes = AttributeStore()
 //    var dimensions = [CDimension]()
     //    var matrix = CMatrix()

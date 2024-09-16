@@ -298,7 +298,7 @@ extension Tuple3:Codable where Value:Codable {}
 //}
 
 public struct HistogramData<D:Dimensions> {
-//    public typealias Axes = AxesTuple
+        //    public typealias Axes = AxesTuple
     
     public let bins:[Float]
     public let mode: Double
@@ -310,7 +310,7 @@ public struct HistogramData<D:Dimensions> {
     
     public var size:D.IntCoord
     
-//    private let mode:Float
+        //    private let mode:Float
     
     public func normalizedCount(bin: D.IntCoord) -> Float {
         let index = D.inlineArrayIndex(ndIndex: bin, arraySize: size)
@@ -356,6 +356,8 @@ public struct HistogramData<D:Dimensions> {
         
         self.init(bins:bins, size:size, axes:axes, countAxis:countAxis)
     }
+    
+  
 }
 
 
@@ -524,3 +526,4 @@ extension HistogramData<XY> {
         return cgImage?.image
     }
 }
+

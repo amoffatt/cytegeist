@@ -7,23 +7,18 @@
 
 import Foundation
 import SwiftUI
+import SwiftData
 import CytegeistLibrary
 
 public enum APIError : Error {
     var message: String {
         switch self {
-            case .computingQuery(let cause):
-                "Error computing query result: \(cause)"
-            case .parameterNotFound(let name):
-                "Parameter '\(name) not found"
-            case .creatingImage:
-                "Could not create 2D image"
-            case .noDataComputed:
-                "No data computed"
-            case .noSampleDataLoaded:
-                "No sample data loaded"
-            case .noDataAvailable:
-                "No population data available"
+            case .creatingChart(let cause):      "Error creating chart: \(cause)"
+            case .parameterNotFound(let name):   "Parameter '\(name) not found"
+            case .creatingImage:                 "Could not create 2D image"
+            case .noDataComputed:                "No data computed"
+            case .noSampleDataLoaded:            "No sample data loaded"
+            case .noDataAvailable:               "No population data available"
         }
     }
     case computingQuery(_ cause:Error)
@@ -220,7 +215,7 @@ public let defaultHistogramResolution:Int = 256
 @MainActor
 @Observable
 public class CytegeistCoreAPI {
-    private let fcsReader:FCSReader = .init()
+    private let fcsReader:FCSReader = FCSReader()
     
     
     private var sampleCache:ComputeCache<SampleRequest, FCSFile> { cache(_loadSample) }
@@ -456,7 +451,7 @@ public indirect enum PopulationRequest: Hashable, CustomStringConvertible {
                 return lhsSample == rhsSample
             case (.gated(let lhsParent, let lhsGate, let lhsInvert, _), .gated(let rhsParent, let rhsGate, let rhsInvert, _)):
                 return lhsParent == rhsParent && lhsGate?.isEqualTo(rhsGate) ?? false && lhsInvert == rhsInvert
-            case (.union(let lhsParents), .union(let rhsParents)):
+//            case (.union(let lhsParents), .union(let rhsParents)):
 //                return lhsParents.sorted() == rhsParents.sorted() // Compare sorted parents for order independence
                 fatalError()
             default:
@@ -472,8 +467,9 @@ public indirect enum PopulationRequest: Hashable, CustomStringConvertible {
                 parent.hash(into: &hasher)
                 gate?.hash(into: &hasher)
                 invert.hash(into: &hasher)
-            case .union(_, _):
-                fatalError()
+//            case .union(_, union: let union):
+//                fatalError()
+            default:  fatalError()
         }
     }
 //    public var id: String {
@@ -490,12 +486,10 @@ public indirect enum PopulationRequest: Hashable, CustomStringConvertible {
     
     public var name: String {
         switch self {
-        case .sample(let sampleRef):
-                sampleRef.url.lastPathComponent
-        case .gated(_, _, _, let name):
-            name
-        case .union(_, _):
-            "Union"
+        case .sample(let sampleRef):            sampleRef.url.absoluteString
+        case .gated(_, _, _, let name):         name
+        case .union(let parents, union: []):    "Union"
+        default:                                 ""
         }
     }
 

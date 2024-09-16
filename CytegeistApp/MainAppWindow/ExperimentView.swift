@@ -27,7 +27,7 @@ enum ReportMode: String, CaseIterable, Identifiable {
 
 
 
-struct MainAppView : View {
+struct ExperimentView : View {
    
     @Environment(App.self) var app: App
 
@@ -42,7 +42,7 @@ struct MainAppView : View {
         
         // AM Note: If we need to support Pre-macOS13, see https://developer.apple.com/documentation/swiftui/migrating-to-new-navigation-types
         NavigationSplitView {
-            MainAppSidebar()
+            Sidebar()
         }
         content:
         {

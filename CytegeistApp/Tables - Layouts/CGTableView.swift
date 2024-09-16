@@ -46,9 +46,9 @@ public struct TableBuilder : View
             }
         }
     }
-    
-        //------------------------------------------------------------------------------------
 }
+//------------------------------------------------------------------------------------
+
 
 public struct CGTableView : View {
     @State var selection = Set<TColumn.ID>()
@@ -105,7 +105,28 @@ public struct CGTableView : View {
     
 }
 //---------------------------------------------------------------------------
+// Model
 
+@Observable
+public class CGTableModel : Usable, Hashable
+{
+    public static func == (lhs: CGTableModel, rhs: CGTableModel) -> Bool {
+        lhs.id == rhs.id
+    }
+    
+    public func hash(into hasher: inout Hasher) {
+        hasher.combineMany(id, name)
+    }
+    
+    public var id = UUID()
+    public  var name = "Untitled Table"
+    public var items = [TColumn]()
+        //    var info = BatchInfo()
+    
+    init() {    }
+}
+
+// model for an individual column, which is actually a row in the table editor
 public struct TColumn : Identifiable, Hashable, Codable
 {
     public var id = UUID()
