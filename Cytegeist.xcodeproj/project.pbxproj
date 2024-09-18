@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B6122E042C90D47A00EE0635 /* CObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6122E032C90D47A00EE0635 /* CObject.swift */; };
 		B63D16362C55E50E00E81C2F /* CytegeistCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B63D162E2C55E50D00E81C2F /* CytegeistCore.framework */; };
 		B63D16412C55E50E00E81C2F /* CytegeistCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B63D162E2C55E50D00E81C2F /* CytegeistCore.framework */; };
 		B63D16422C55E50E00E81C2F /* CytegeistCore.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = B63D162E2C55E50D00E81C2F /* CytegeistCore.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -189,6 +190,7 @@
 		B610A5712C54269A0081C517 /* MathUtil.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MathUtil.swift; sourceTree = "<group>"; };
 		B610A5722C54269A0081C517 /* StringUtil.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StringUtil.swift; sourceTree = "<group>"; };
 		B610A5792C542BB50081C517 /* DataBufferReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataBufferReader.swift; sourceTree = "<group>"; };
+		B6122E032C90D47A00EE0635 /* CObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CObject.swift; sourceTree = "<group>"; };
 		B63D162E2C55E50D00E81C2F /* CytegeistCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CytegeistCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B63D16352C55E50E00E81C2F /* CytegeistCoreTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CytegeistCoreTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B63D16532C55EC8100E81C2F /* CytegeistTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CytegeistTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -501,6 +503,7 @@
 				B6C9A48D2C75D24B00DB6786 /* TreeNode.swift */,
 				B610A5732C54269A0081C517 /* Util */,
 				B6C9A3ED2C75A3EF00DB6786 /* CytegeistLibrary.h */,
+				B6122E032C90D47A00EE0635 /* CObject.swift */,
 			);
 			path = CytegeistLibrary;
 			sourceTree = "<group>";
@@ -939,6 +942,7 @@
 				B6C9A4952C76736100DB6786 /* FormattingUtil.swift in Sources */,
 				B6C9A4912C76723500DB6786 /* CodableUtil.swift in Sources */,
 				B6C9A4B22C76F13A00DB6786 /* TableUtil.swift in Sources */,
+				B6122E042C90D47A00EE0635 /* CObject.swift in Sources */,
 				B6C9A4062C75A46800DB6786 /* CollectionUtil.swift in Sources */,
 				B6C9A4AB2C7689A000DB6786 /* FileInfo.swift in Sources */,
 				B6C9A4962C7678FE00DB6786 /* TreeNode.swift in Sources */,

@@ -13,7 +13,8 @@ import CytegeistCore
 
 
 struct GateConfigView : View {
-    var node:PopulationNode
+    @ObservedObject var node:PopulationNode
+    
     var finalize:() -> Void
     
     
@@ -23,7 +24,7 @@ struct GateConfigView : View {
         //    }
     
     var body: some View {
-        @Bindable var node = node
+//        @Bindable var node = node
         
         Group {
             TextField("Name", text: $node.name)
@@ -213,7 +214,7 @@ struct GatingView: View {
     func addGate(_ gate: AnyGate)
     {
             //        self.candidateGateName = getCandidateGateName()
-        let node = PopulationNode(gate:gate)
+        let node = PopulationNode()
         node.gate = gate
         node.name = "T Cells"
         confirmGate = node

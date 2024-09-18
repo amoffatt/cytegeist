@@ -10,6 +10,7 @@ import Combine
 import CytegeistLibrary
 import CytegeistCore
 import SwiftUI
+import SwiftData
 
 @Observable
 class AnalysisNodeSelection: Codable {
@@ -44,8 +45,8 @@ public class Experiment : Usable
     
     var layouts = [CGLayout]()
     
-    @ObservationIgnored
-    @CodableIgnored
+//    @ObservationIgnored
+    @Transient
     var _core:CytegeistCoreAPI? = nil
     /// Lazilly created
     var core:CytegeistCoreAPI {

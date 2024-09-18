@@ -150,7 +150,7 @@ struct CGLayoutView: View {
     func newChartItem(node:AnalysisNode, position:CGPoint)
     {
         print("new layout item: ", node.name)
-        let layoutItem = CChart(node:node, position:position)
+        let layoutItem = CChart(position:position, node:node)
         layoutModel.addItem(layoutItem)
     }
     

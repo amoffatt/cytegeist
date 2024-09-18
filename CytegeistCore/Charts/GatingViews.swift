@@ -159,7 +159,7 @@ struct GateView<GateType:GateDef> : View where GateType:ViewableGate {
 
     @Environment(\.lineWidth) var lineWidth
     @Environment(\.isEditing) var editing
-    @Bindable var node: PopulationNode
+    @ObservedObject var node: PopulationNode
     let normalizers:Tuple2<AxisNormalizer?>
     let chartSize:CGSize
     let chartCenter:CGSize

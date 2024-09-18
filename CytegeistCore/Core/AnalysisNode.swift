@@ -9,6 +9,7 @@ import Foundation
 import SwiftUI
 import UniformTypeIdentifiers.UTType
 import CytegeistLibrary
+import Combine
 
 
 //---------------------------------------------------------
@@ -34,29 +35,12 @@ enum AnalysisNodeError : Error {
 }
 
 //---------------------------------------------------------
-@Observable
-public class AnalysisNode : Codable, Transferable, Identifiable, Hashable
+public class AnalysisNode : CNamedObject
 {
-    
-    public static func == (lhs: AnalysisNode, rhs: AnalysisNode) -> Bool {
-        lhs.id == rhs.id
-    }
-    
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
-    }
 
-    public static var transferRepresentation: some TransferRepresentation {
-        CodableRepresentation(contentType: UTType.analysisNode)
-    }
-    
-    
-
-    public var id = UUID()
-    public var name: String = ""
-    public var graphDef =  ChartDef()              // how this population wants to be shown
+    @Published public var graphDef =  ChartDef()              // how this population wants to be shown
 //    public var statistics =  [Statistic]()         // what to report
-    private var _parent: AnalysisNode?
+    @Published private var _parent: AnalysisNode?
     public var parent: AnalysisNode? {
         get { _parent }
         set {
@@ -72,18 +56,9 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable
             }
         }
     }
-    public private(set) var children: [AnalysisNode] = []        // subpopulations dependent on us
+    @Published public private(set) var children: [AnalysisNode] = []        // subpopulations dependent on us
     public var extraAttributes = AttributeStore()
     
-    public init()
-    {
-    }
-    public init(children: [AnalysisNode]? = nil)
-    {
-        if let children {
-            self.children = children
-        }
-    }
     
     public func getSample() -> Sample? { fatalError("Must be overriden") }
     
@@ -92,6 +67,7 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable
     }
     public func addChild(_ node:AnalysisNode) {
         node.parent = self
+        
     }
     
     public func createRequest() throws -> PopulationRequest { fatalError("Implement") }
@@ -125,56 +101,47 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable
     }
 }
 
-@Observable
 public class SampleNode : AnalysisNode {
-    public let sample:Sample
+    @Published public private(set) var sample:Sample? = nil
 
-    public override func getSample() -> Sample { sample }
+    public override func getSample() -> Sample? { sample }
     
-    init(_ sample: Sample) {
+    convenience init(_ sample: Sample) {
+        self.init()
         self.sample = sample
-        super.init()
         self.name = "All Cells"
     }
     
-    required init(from decoder: any Decoder) throws {
-        fatalError("init(from:) has not been implemented")
-    }
-    
     public override func createRequest() throws -> PopulationRequest {
-        guard let ref = sample.ref else {
+        guard let ref = sample?.ref else {
             throw AnalysisNodeError.noSampleRef
         }
         return .sample(ref)
     }
 }
 
-@Observable
+//@Observable
 public class GroupNode : AnalysisNode {
 }
 
-@Observable
+//@Observable
 public class PopulationNode : AnalysisNode {
     
-    public var gate:AnyGate?                      // the predicate to filter ones parent
-    public var invert: Bool
-    public var color: Color
-    public var opacity: Double
+    @Published public var gate:AnyGate? = nil                      // the predicate to filter ones parent
+    @Published public var invert: Bool = false
+    @Published public var color: Color = .green
+    @Published public var opacity: Double = 0.2
     
     /// Label offset from center of gate in chart 0-1 scale coordinates
-    public var labelOffset: CGPoint = .zero
-    
-    public init(gate: AnyGate? = nil, invert: Bool = false, color: Color? = nil, opacity: Double = 0.2) {
-        self.gate = gate
-        self.invert = invert
-        self.color = color ?? .green
-        self.opacity = opacity
-        super.init()
-    }
-    
-    public required init(from decoder: any Decoder) throws {
-        fatalError()
-    }
+    @Published public var labelOffset: CGPoint = .zero
+//    
+//    public init(gate: AnyGate? = nil, invert: Bool = false, color: Color? = nil, opacity: Double = 0.2) {
+//        self.gate = gate
+//        self.invert = invert
+//        self.color = color ?? .green
+//        self.opacity = opacity
+//        super.init()
+//    }
 
     public override func getSample() -> Sample? { parent?.getSample() }
 

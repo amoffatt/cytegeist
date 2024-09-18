@@ -7,9 +7,21 @@
 
 import Foundation
 
-public protocol Usable : Identifiable, Equatable, Codable {
+public protocol Usable : Identifiable, Equatable, Hashable {
     
 }
+
+public extension Usable {
+    static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.id == rhs.id
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+
+}
+
 
 //@Observable
 //public struct ModelList<Model> : Codable where Model:Usable {
