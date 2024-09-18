@@ -25,17 +25,14 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable
     public var parent: AnalysisNode? {
         get { _parent }
         set {
-            if newValue == parent {  return }
+            if newValue == parent {  return }               // AT?  is it ok to prohibit children setting parents?
             if let _parent {    _parent._removeChild(self)   }
             _parent = newValue
             if let _parent {    _parent._addChild(self)     }
         }
     }
+        //  these fields are only applicable to populations
     public var gate: AnyGate?                      // the predicate to filter ones parent
-    public var invert: Bool = false
-    public var color: Color  = Color.red
-    public var opacity: Double = 1.0
-    public var labelOffset = CGPoint.zero
 //
 //--------------------------------------------------------
     public static func == (lhs: AnalysisNode, rhs: AnalysisNode) -> Bool {   lhs.id == rhs.id  }
@@ -53,25 +50,30 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable
     public init(children: [AnalysisNode]? = nil)  {
         if let children {   self.children = children  }
     }
-
+    
+    public init(sample: Sample)  {
+        self.sample  = sample
+    }
+    
     init(gate: AnyGate? = nil, invert: Bool = false, color: Color? = nil, opacity: Double = 0.2) {
         self.gate = gate
-        self.invert = invert
-        self.color = color ?? .green
-        self.opacity = opacity
+//        self.invert = invert
+//        self.color = color ?? .green
+//        self.opacity = opacity
     }
     
  //--------------------------------------------------------
-    func getSample() -> Sample? { sample ?? parent?.getSample() }
+    func getSample() -> Sample? { sample ?? parent?.getSample() }       //AT?
 
-    func path() -> String { return parent?.path() ?? "" + name  }
+    func path() -> String { return parent?.path() ?? "" + name  }   //AT?
 //--------------------------------------------------------
     public func mean(dim: String) -> Double     {   statLookup( EStatistic.mean, dim)    }
     public func median(dim: String) -> Double   {   statLookup( EStatistic.median, dim)   }
-    public func cv(dim: String) -> Double       {   statLookup( EStatistic.stdev, dim)   }
+    public func cv(dim: String) -> Double       {   statLookup( EStatistic.cv, dim)   }
+    public func stdev(dim: String) -> Double     {   statLookup( EStatistic.stdev, dim)   }
     public func freqOfParent() -> Double        {   statLookup( EStatistic.freqOf, "")    }
     
-    private func statLookup(_ stat: EStatistic, _ dim: String) -> Double
+    private func statLookup(_ stat: EStatistic, _ dim: String) -> Double   //AT?
     {
         let term = stat.text + dim
         var value: Double? =  statistics[term]
@@ -97,7 +99,7 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable
     }
 
     public func remove() {
-        if parent != nil { _ = parent!.removeChild(self)  }
+        if parent != nil { _ = parent!.removeChild(self)  }     //AT?
         parent = nil
     }
 

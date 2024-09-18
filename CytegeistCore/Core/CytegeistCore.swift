@@ -386,14 +386,10 @@ public class CytegeistCoreAPI {
         let histogram = try await _statisticHistogram(r.population, r.dim)
         // Stats based on a histogram
         switch r.statistic {
-            case .percentile(let p):
-                return histogram.percentile(p)
-            case .median:
-                return histogram.percentile(0.5)
-            case .cv:
-                break       // not implemented
-            case .mean:
-                return histogram.mean()
+            case .percentile(let p):     return histogram.percentile(p)
+            case .median:                return histogram.percentile(0.5)
+            case .cv:                     print("not implemented")
+            case .mean:                return histogram.mean()
                 
             default: break
         }
@@ -449,8 +445,8 @@ public indirect enum PopulationRequest: Hashable, CustomStringConvertible {
         switch (lhs, rhs) {
             case (.sample(let lhsSample), .sample(let rhsSample)):
                 return lhsSample == rhsSample
-            case (.gated(let lhsParent, let lhsGate, let lhsInvert, _), .gated(let rhsParent, let rhsGate, let rhsInvert, _)):
-                return lhsParent == rhsParent && lhsGate?.isEqualTo(rhsGate) ?? false && lhsInvert == rhsInvert
+            case (.gated(let lhsParent, let lhsGate, _), .gated(let rhsParent, let rhsGate, _)):
+                return lhsParent == rhsParent && lhsGate?.isEqualTo(rhsGate) ?? false
 //            case (.union(let lhsParents), .union(let rhsParents)):
 //                return lhsParents.sorted() == rhsParents.sorted() // Compare sorted parents for order independence
 //                fatalError()
@@ -463,10 +459,9 @@ public indirect enum PopulationRequest: Hashable, CustomStringConvertible {
         switch self {
             case .sample(let sample):
                 sample.hash(into: &hasher)
-            case .gated(let parent, let gate, let invert, _):
+            case .gated(let parent, let gate,  _):
                 parent.hash(into: &hasher)
                 gate?.hash(into: &hasher)
-                invert.hash(into: &hasher)
 //            case .union(_, union: let union):
 //                fatalError()
             default:  fatalError()
@@ -476,14 +471,14 @@ public indirect enum PopulationRequest: Hashable, CustomStringConvertible {
     public var name: String {
         switch self {
         case .sample(let sampleRef):            sampleRef.url.absoluteString
-        case .gated(_, _, _, let name):         name
+        case .gated(_, _, let name):         name
         case .union(let parents, union: []):    "Union"
         default:                                 ""
         }
     }
 
     case sample(_ sample: SampleRef)
-    case gated(_ parent: PopulationRequest, gate:(any GateDef)?, invert:Bool, name:String)
+    case gated(_ parent: PopulationRequest, gate:(any GateDef)?, name:String)
     case union(_ parent: PopulationRequest, union: [PopulationRequest])
     
     func getSample() -> SampleRef? {
@@ -498,7 +493,7 @@ public indirect enum PopulationRequest: Hashable, CustomStringConvertible {
     func getParent() -> PopulationRequest? {
         switch self {
             case .sample: return nil
-            case .gated(let parent, _, _, _), .union(let parent, _):
+            case .gated(let parent, _, _), .union(let parent, _):
                 return parent
         }
     }

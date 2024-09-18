@@ -96,7 +96,7 @@ public protocol GateDef : Codable, Hashable, Equatable
 //        hasher.combine(dims)
 //        hasher.combine(id)
 //    }
-    
+
     var dims:[String] { get }
 //    var id = "-1"
 //    init (dims:[String] = [])
@@ -170,6 +170,29 @@ public struct RangeGateDef : GateDef
         event.values[0] >= min && event.values[0] <= max ? .one : .zero
     }
     
+    var _invert: Bool
+    var invert: Bool {
+        get { _invert }
+        set { _invert = newValue }
+    }
+    
+//    var _color: Color
+//    var color: Color {
+//        get { _color }
+//        set { _color = newValue }
+//    }
+    
+    var _opacity: Double
+    var opacity: Double {
+        get { _opacity }
+        set { _opacity = newValue }
+    }
+    
+    var _labelOffset: CGPoint
+    var labelOffset: CGPoint {
+        get { _labelOffset }
+        set { _labelOffset = newValue }
+    }
 }
 
 public struct RectGateDef : GateDef

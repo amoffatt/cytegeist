@@ -6,6 +6,8 @@
 //
 
 import SwiftUI
+import CytegeistLibrary
+
 
 
 struct PairChartView: View {

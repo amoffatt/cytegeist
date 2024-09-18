@@ -127,11 +127,8 @@ public protocol Tuple<Value>: Hashable where Value:Hashable {
     associatedtype Value
     
     var x: Value { get }    // Every tuple will at least have a first/x value
-    
     var values:[Value] { get }
-    
     static func from(_ values:[Value]) -> Self
-    
     func map<ResultValue>(_ f: (Value) -> ResultValue) -> Self where Self.Value == ResultValue
 }
 
@@ -143,12 +140,8 @@ public struct Tuple1<Value> : Tuple where Value:Hashable {
     
     public let x:Value
     public var values: [Value] { [x] }
-    
     public init(_ x: Value) { self.x = x }
-    
-    public func map<ResultValue>(_ f: (Value) -> ResultValue) -> Tuple1<ResultValue> {
-        Tuple1<ResultValue>(f(x))
-    }
+    public func map<ResultValue>(_ f: (Value) -> ResultValue) -> Tuple1<ResultValue> { Tuple1<ResultValue>(f(x)) }
     
 }
 
@@ -300,58 +293,90 @@ extension Tuple3:Codable where Value:Codable {}
 public struct HistogramData<D:Dimensions> {
         //    public typealias Axes = AxesTuple
     
-    public let bins:[Float]
-    public let mode: Double
-    public let totalCount: Double
-    public let normalizeCoeff: Float
-    
+    public var bins:[Double]
+    public var mean: Double?
+    public var mode: Int?
+    public var modeHeight: Double = 0.0
+    public var median: Double?
+    public var totalCount: Double?
+    public var normalizeCoeff: Double?
+    public var stdev: Double?
+    public var cv: Double?
+
     public let axes:D.Axes
-    public let countAxis:AxisNormalizer?
+    public var countAxis:AxisNormalizer?
     
     public var size:D.IntCoord
     
         //    private let mode:Float
     
-    public func normalizedCount(bin: D.IntCoord) -> Float {
+    public func normalizedCount(bin: D.IntCoord) -> Double {
         let index = D.inlineArrayIndex(ndIndex: bin, arraySize: size)
         return normalizedCount(bin: index)
     }
     
-    public func normalizedCount(bin: Int) -> Float {
-        return bins[bin] * normalizeCoeff
+    public func normalizedCount(bin: Int) -> Double {
+        return bins[bin] * normalizeCoeff!
     }
     
-    public var counts:some Sequence<(value:D.FloatCoord, count:Float)> {
+    public var counts:some Sequence<(value:D.FloatCoord, count:Double)> {
         bins.enumerated().map { index, count in
             (D.inlineArrayToCoord(index:index, axes:axes, arraySize:size), count)
         }
     }
 
-    public init(bins: [Float], size: D.IntCoord, axes: D.Axes, countAxis: AxisNormalizer? = nil) {
-        var sum = 0.0
-        var mode = 0.0
-        for bin in bins {
-            sum += Double(bin)
-            mode = max(Double(bin), mode)
-        }
-        self.mode = mode
-        self.totalCount = sum
-        self.normalizeCoeff = 1 / max(1, Float(mode))
+    public init(bins: [Double], size: D.IntCoord, axes: D.Axes, countAxis: AxisNormalizer? = nil) {
+               
         self.bins = bins
-        
         self.axes = axes
         self.size = size
-        self.countAxis = countAxis ?? defaultCountAxis(mode: mode)
     }
     
+    private mutating func calculate()
+    {
+        var sum = 0.0
+        for bin in 0..<bins.count {
+            sum += bins[bin]
+            if bins[bin] > modeHeight {
+                mode = bin
+                modeHeight = bins[bin]
+            }
+        }
+        totalCount = sum
+        mean = totalCount! / Double(bins.count)
+        normalizeCoeff = 1.0 / modeHeight
+        
+        let halfSum = totalCount! / 2.0
+        sum = 0.0
+        for bin in 0..<bins.count {
+            sum += bins[bin ]
+            if sum > halfSum {
+                let diff = bins[bin] - bins[bin-1]
+                let ratio = (sum - halfSum) / (sum - diff)
+                median = Double(bin) - ratio
+                break
+            }   }
+            // σ = √[(Σ(x - μ)^2) / (n - 1)]
+        
+        sum = 0.0
+        for bin in 0..<bins.count {
+            sum += (mean! - bins[bin]) * (mean! - bins[bin])
+        }
+        stdev = sqrt(sum / Double( bins.count-1))
+        cv = stdev! / mean! * 100.0
+        countAxis = countAxis ?? defaultCountAxis(mode: modeHeight)
+
+    }
+    
+    
     public init(data: D.Data, probabilities: [PValue]?, size: D.IntCoord, axes: D.Axes, countAxis: AxisNormalizer? = nil) {
-        var bins = Array(repeating: Float(0), count: D.inlineArraySize(size:size))
+        var bins = Array(repeating: Double(0), count: D.inlineArraySize(size:size))
         
         for i in 0..<D.count(data: data) {
             let point = D.value(in: data, at: i)
             let ndBin = D.pointToNDIndex(point: point, axes: axes, arraySize: size)
             let bin = D.inlineArrayIndex(ndIndex:ndBin, arraySize: size)
-            bins[bin] += Float(probabilities?[i].p ?? 1)
+            bins[bin] += Double(probabilities?[i].p ?? 1)
         }
         
         self.init(bins:bins, size:size, axes:axes, countAxis:countAxis)
@@ -368,32 +393,29 @@ fileprivate func defaultCountAxis(mode:Double?) -> AxisNormalizer {
 }
 
 
-public enum HistogramSmoothing {
-    case off, low, high
-    
-    var kernel: Any? {
-        switch self {
-            case .off:
-                nil
-            case .low:
-                fatalError()
-            case .high:
-                fatalError()
-        }
-    }
-}
+//public enum HistogramSmoothing {
+//    case off, low, high
+//    
+//    var kernel: Any? {
+//        switch self {
+//            case .off:                nil
+//            case .low:                fatalError()
+//            case .high:               fatalError()
+//        }
+//    }
+//}
 
-public extension HistogramData<X> {
-    func convolute(kernel:Any?) -> HistogramData<X>? {
-        nil
-    }
-}
-
-public extension HistogramData<XY> {
-    func convolute(kernel:Any?) -> HistogramData<XY>? {
-        nil
-    }
-}
+//public extension HistogramData<X> {
+//    func convolute(kernel:Any?) -> HistogramData<X>? {
+//        nil
+//    }
+//}
+//
+//public extension HistogramData<XY> {
+//    func convolute(kernel:Any?) -> HistogramData<XY>? {
+//        nil
+//    }
+//}
 
 func smooth()
 {
@@ -500,7 +522,7 @@ extension HistogramData<XY> {
             for x in 0..<size.x {
                 let bin = (y * size.x + x)
                 let value = normalizedCount(bin: bin)
-                let color = colormap.colorUInt8(at: value)
+                let color = colormap.colorUInt8(at: Float(value))
 
                 let pixelOffset = bin * 4
                 pixels[pixelOffset] = color.x

@@ -13,7 +13,7 @@ public struct ChartDef : Hashable, Codable//, Transferable
 //    static var transferRepresentation: some TransferRepresentation {
 //        CodableRepresentation(contentType: UTType.appleArchive)
 //    }
-    public var extraAttributes = AttributeStore()
+//    public var extraAttributes = AttributeStore()
     
     public var name: String = ""
     public var label: String = ""
@@ -35,7 +35,7 @@ public struct AxisDef : Hashable, Codable//, Transferable
 //        CodableRepresentation(contentType: UTType.appleArchive)
 //    }
 
-    var extraAttributes = AttributeStore()
+//    var extraAttributes = AttributeStore()
     
     public var name:String
     public var label:String

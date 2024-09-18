@@ -164,8 +164,8 @@ struct GateView<GateType:GateDef> : View where GateType:ViewableGate {
     let chartSize:CGSize
     let chartCenter:CGSize
     
-    var color:Color { node.color }
-    var fillOpacity:Double { (editing ? 1.5 : 1) * node.opacity }
+    var color:Color { node.gate.color }
+    var fillOpacity:Double { (editing ? 1.5 : 1) * node.gate.opacity }
     var fillColor:Color { color.opacity(fillOpacity) }
     var strokeColor:Color { color.opacity(0.8) }
 
@@ -191,7 +191,7 @@ struct GateView<GateType:GateDef> : View where GateType:ViewableGate {
                     AnyView(content)
                 }
                 
-                let labelPosition = viewCenter + node.labelOffset * chartSize
+                let labelPosition = viewCenter + node.gate.labelOffset * chartSize
                 GateControlZone("label", position: labelPosition) { (p, _) in
                     let offset = (p - viewCenter) / chartSize
                     node.labelOffset = offset
@@ -282,7 +282,7 @@ protocol ViewableGate: GateDef {
     func chartView(_ node:AnalysisNode, chartSize:CGSize, chartDims:Tuple2<CDimension?>) -> any View
     func viewContent(_ view:GateView<Self>, viewCenter: inout CGPoint) -> (any View)?
     func isValid(for chartDims: Tuple2<CDimension?>) -> Bool
-    mutating func nudge(_ node:PopulationNode, axes: Tuple2<AxisNormalizer?>, offset:CGPoint)
+    mutating func nudge(_ node:AnalysisNode, axes: Tuple2<AxisNormalizer?>, offset:CGPoint)
 }
 
 extension ViewableGate {
@@ -359,7 +359,7 @@ extension RangeGateDef : ViewableGate {
         }
     }
     
-    mutating func nudge(_ node: PopulationNode, axes: Tuple2<AxisNormalizer?>, offset: CGPoint) {
+    mutating func nudge(_ node: AnalysisNode, axes: Tuple2<AxisNormalizer?>, offset: CGPoint) {
         if let x = axes.x {
             self.min = x.unnormalize(x.normalize(self.min) + offset.x)
             self.max = x.unnormalize(x.normalize(self.max) + offset.x)
@@ -451,7 +451,7 @@ extension RectGateDef : ViewableGate {
     }
     
     
-    mutating func nudge(_ node: PopulationNode, axes: Tuple2<AxisNormalizer?>, offset: CGPoint) {
+    mutating func nudge(_ node: AnalysisNode, axes: Tuple2<AxisNormalizer?>, offset: CGPoint) {
         print("Rect Nudge not implemented")
     }
 }
@@ -518,7 +518,7 @@ extension EllipsoidGateDef : ViewableGate {
         }
     }
     
-    mutating func nudge(_ node: PopulationNode, axes: Tuple2<AxisNormalizer?>, offset: CGPoint) {
+    mutating func nudge(_ node: AnalysisNode, axes: Tuple2<AxisNormalizer?>, offset: CGPoint) {
         print("Ellipse Nudge not implemented")
     }
 }
@@ -555,7 +555,7 @@ struct GateLabel: View {
             .background(.regularMaterial.opacity(0.4))
             .cornerRadius(10)
         // AM this offset may need to be different when gate is transposed
-            .offset(node.labelOffset.asSize)
+            .offset(node.gate.labelOffset.asSize)
     }
 }
 

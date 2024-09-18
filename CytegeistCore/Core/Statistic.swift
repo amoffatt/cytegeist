@@ -31,12 +31,12 @@ public enum EStatistic : Codable
 }
 
 
-
-public struct Statistic : Codable, Hashable
-{
-    var stat: EStatistic = EStatistic.freq
-    var dims: String = ""
-    var value: Double?
-    
-    init()    {}
-}
+//
+//public struct Statistic : Codable, Hashable
+//{
+//    var stat: EStatistic = EStatistic.freq
+//    var dims: String = ""
+//    var value: Double?
+//    
+//    init()    {}
+//}

@@ -44,6 +44,3 @@ public extension Hasher {
                     
     }
 }
-
-    .
-}
