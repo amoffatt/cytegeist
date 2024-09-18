@@ -167,9 +167,7 @@ public struct RangeGateDef : GateDef
     public func probability(of event:EventData) -> PValue
     {
             //  for d in dimensions where d.name?
-        event.values[0] >= min && event.values[0] <= max
-        ? PValue(1)
-        : PValue(0)
+        event.values[0] >= min && event.values[0] <= max ? .one : .zero
     }
     
 }

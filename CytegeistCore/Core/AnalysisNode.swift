@@ -1,6 +1,5 @@
 //
-//  AnalysisTree.swift
-//  filereader
+//  AnalysisNode.swift
 //
 //  Created by Adam Treister on 7/25/24.
 //
@@ -10,64 +9,12 @@ import SwiftUI
 import UniformTypeIdentifiers.UTType
 import CytegeistLibrary
 
-
-//---------------------------------------------------------
-enum EStatistic : Codable
-{
-    case mean
-    case stdev
-    case median
-    case cv
-    case freq
-    case freqOf
-    
-}
-
-func text(a: EStatistic) -> String
-{
-    switch (a)
-    {
-        case .mean:         return "mean:"
-        case .stdev:        return "stdev:"
-        case .median:       return "median:"
-        case .cv:           return "cv:"
-        case .freq:         return "freq:"
-        case .freqOf:       return "freqOf:"
-    }
-    
-}
-
-
-public struct Statistic : Codable, Hashable
-{
- //   var extraAttributes = AttributeStore()
-        // operation  (.median, .cv, )
-        // parameters ($3,  ["APC"] )
-        // currentValue  (.undefined)
-    
-    var stat: EStatistic = EStatistic.freq
-    var dims: String = ""
-    var value: Double?
-    
-    init()
-    {
-        
-    }
-}
-
-public extension UTType {
-    static var analysisNode = UTType(exportedAs: "cytegeist.nodes.analysis")
-}
-
-enum AnalysisNodeError : Error {
-    case noSampleRef
-}
-
+public extension UTType {  static var population = UTType(exportedAs: "cytegeist.population")   }
+enum AnalysisNodeError : Error {  case noSampleRef      }
 //---------------------------------------------------------
 @Observable
 public class AnalysisNode : Codable, Transferable, Identifiable, Hashable
 {
-
     public var id = UUID()
     public var name: String = ""
     public let sample: Sample?                      // nil except at the root node
@@ -84,13 +31,11 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable
             if let _parent {    _parent._addChild(self)     }
         }
     }
-//    public var extraAttributes = AttributeStore()
-
-    var gate: AnyGate?                      // the predicate to filter ones parent
-    var invert: Bool = false
-    var color: Color  = Color.clear
-    var opacity: Double = 1.0
-    var labelOffset = CGPoint.zero
+    public var gate: AnyGate?                      // the predicate to filter ones parent
+    public var invert: Bool = false
+    public var color: Color  = Color.red
+    public var opacity: Double = 1.0
+    public var labelOffset = CGPoint.zero
 //
 //--------------------------------------------------------
     public static func == (lhs: AnalysisNode, rhs: AnalysisNode) -> Bool {   lhs.id == rhs.id  }
@@ -99,27 +44,21 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable
         CodableRepresentation(contentType: UTType.population)
     }
  //--------------------------------------------------------
-    public init()
-    {
-    }
+    public init() {    }
     
     public required init(from decoder: any Decoder) throws {
         fatalError("init(from:) has not been implemented")
     }
     
-
-    public init(children: [AnalysisNode]? = nil)
-    {
-        if let children {
-            self.children = children
-        }
+    public init(children: [AnalysisNode]? = nil)  {
+        if let children {   self.children = children  }
     }
 
     init(gate: AnyGate? = nil, invert: Bool = false, color: Color? = nil, opacity: Double = 0.2) {
-//        self.gate = gate
-//        self.invert = invert
-//        self.color = color ?? .green
-//        self.opacity = opacity
+        self.gate = gate
+        self.invert = invert
+        self.color = color ?? .green
+        self.opacity = opacity
     }
     
  //--------------------------------------------------------
@@ -127,14 +66,14 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable
 
     func path() -> String { return parent?.path() ?? "" + name  }
 //--------------------------------------------------------
-    public func mean(dim: String) -> Double     {   statLookup( .mean, dim)    }
-    public func median(dim: String) -> Double   {   statLookup( .median, dim)   }
-    public func cv(dim: String) -> Double       {   statLookup( .stdev, dim)   }
-    public func freqOfParent() -> Double        {   statLookup( .freqOf, "")    }
+    public func mean(dim: String) -> Double     {   statLookup( EStatistic.mean, dim)    }
+    public func median(dim: String) -> Double   {   statLookup( EStatistic.median, dim)   }
+    public func cv(dim: String) -> Double       {   statLookup( EStatistic.stdev, dim)   }
+    public func freqOfParent() -> Double        {   statLookup( EStatistic.freqOf, "")    }
     
     private func statLookup(_ stat: EStatistic, _ dim: String) -> Double
     {
-        let term = text(a: stat) + dim
+        let term = stat.text + dim
         var value: Double? =  statistics[term]
         if (value == nil)
         {
@@ -158,14 +97,11 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable
     }
 
     public func remove() {
-        if parent != nil {
-            _ = parent!.removeChild(self)
-        }
+        if parent != nil { _ = parent!.removeChild(self)  }
         parent = nil
     }
 
 //--------------------------------------------------------
-     
      func createRequest() throws -> PopulationRequest {
         guard let parent = parent else {
             throw AnalysisNodeError.noSampleRef
@@ -177,9 +113,7 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable
         guard let gate = gate,
               let gate = gate as? any ViewableGate,
               gate.isValid(for: dims)
-        else {
-            return nil
-        }
+        else {    return nil   }
         
         return ChartAnnotation(
             id:id.uuidString,

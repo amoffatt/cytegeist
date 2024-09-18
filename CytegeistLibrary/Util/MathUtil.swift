@@ -69,8 +69,7 @@ public struct PValue : Codable  //ClosedRange<Double> { (0.0...1.0) }       // 0
     public static let one = PValue(1)
     
     public var p: Double  //ClosedRange<Double> { (0.0...1.0) }
-    public init(_ value: Double)
-    {
+    public init(_ value: Double)    {
         p = value
     }
     
@@ -153,13 +152,11 @@ public struct Logicle : Equatable, Hashable {
         }
         return p;
     }
-    
 
     var T: Double
     var w: Double
     var m: Double
     var p: Double
-    
     
     public init(T: Double, w: Double, m: Double)
     {
@@ -169,8 +166,6 @@ public struct Logicle : Equatable, Hashable {
         self.m = m
         self.p = Self.calculateP(w:w)
     }
-    
-//    func getP() -> Double {   return p   }
     
     public func logicle(_ x: Double) -> Double
     {
@@ -199,8 +194,7 @@ public struct Logicle : Equatable, Hashable {
     
     func  s(y: Double,  firstTime: Bool)  -> Double
     {
-        if((y >= w) || (!firstTime))
-        {
+        if((y >= w) || (!firstTime))   {
             return T * exp(-(m-w)) * (exp(y-w) - p*p*exp(-(y-w)/p) + p*p - 1)
         }
         return -1.0 * s(y: w-y, firstTime: false);

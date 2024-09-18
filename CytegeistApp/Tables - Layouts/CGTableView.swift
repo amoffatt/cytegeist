@@ -31,7 +31,6 @@ public struct TableBuilder : View
                 experiment.tables.removeAll { $0 == table }
             }
             VStack {
-                    //            .opacity(1.0)
                 if let selectedTable {
                     CGTableView(table:selectedTable)
                 } else {
@@ -126,6 +125,7 @@ public class CGTableModel : Usable, Hashable
     init() {    }
 }
 
+//---------------------------------------------------------------------------
 // model for an individual column, which is actually a row in the table editor
 public struct TColumn : Identifiable, Hashable, Codable
 {
@@ -134,7 +134,15 @@ public struct TColumn : Identifiable, Hashable, Codable
     var parm: String = " "
     var stat: String = " "
     var arg: String = " "
-    
+ 
+    init(_ name: String, parm: String, stat: String, arg: String = " ")
+    {
+        self.pop = name
+        self.parm = parm
+        self.stat = stat
+        self.arg = arg
+    }
+
     public func hash(into hasher: inout Hasher) {
         hasher.combineMany(id, pop, parm, stat, arg)
     }
@@ -154,32 +162,4 @@ public struct TColumn : Identifiable, Hashable, Codable
         }
         return provider
     }
-    init(_ name: String, parm: String, stat: String, arg: String = " ")
-    {
-        self.pop = name
-        self.parm = parm
-        self.stat = stat
-        self.arg = arg
-    }
-}
-
-
-@Observable
-public class CGTable : Usable, Hashable
-{
-    public static func == (lhs: CGTable, rhs: CGTable) -> Bool {
-        lhs.id == rhs.id
-    }
-    
-    public func hash(into hasher: inout Hasher) {
-        hasher.combineMany(id, name)
-    }
-    
-    public var id = UUID()
-    public  var name = "Untitled Table"
-    public var items = [TColumn]()
-//    var info = BatchInfo()
-    
-    init() {    }
-}
- 
+ }

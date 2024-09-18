@@ -453,7 +453,7 @@ public indirect enum PopulationRequest: Hashable, CustomStringConvertible {
                 return lhsParent == rhsParent && lhsGate?.isEqualTo(rhsGate) ?? false && lhsInvert == rhsInvert
 //            case (.union(let lhsParents), .union(let rhsParents)):
 //                return lhsParents.sorted() == rhsParents.sorted() // Compare sorted parents for order independence
-                fatalError()
+//                fatalError()
             default:
                 return false
         }
@@ -472,17 +472,6 @@ public indirect enum PopulationRequest: Hashable, CustomStringConvertible {
             default:  fatalError()
         }
     }
-//    public var id: String {
-//        switch self {
-//            
-//        case .sample(let sample):
-//            sample.id
-//        case .gated(parent: let parent, gate: let gate):
-//            
-//        case .merge(parents: let parents):
-//            
-//        }
-//    }
     
     public var name: String {
         switch self {
@@ -536,19 +525,7 @@ public indirect enum PopulationRequest: Hashable, CustomStringConvertible {
 
 
 public struct HistogramRequest<D:Dimensions> : Hashable {
-//    public static func == (lhs: HistogramRequest<D>, rhs: HistogramRequest<D>) -> Bool {
-//        lhs.population == rhs.population && lhs.axisNames == rhs.axisNames
-//    }
     let population:PopulationRequest
-    
-//    public func hash(into hasher: inout Hasher) {
-//        hasher.combine(population)
-//        hasher.combine(axisNames)
-//        hasher.combine(size)
-//    }
-    
-//    public let raw:String
-    
     public let dims:D.Strings
     public let size:D.IntCoord?
     public let smoothing:HistogramSmoothing

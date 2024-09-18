@@ -49,7 +49,6 @@ public struct LayoutBuilder: View {
                 selectedLayout = experiment.addLayout()
             }
         }
-            //        .opacity(mode == ReportMode.layout ? 1.0 : 0.0)
     }
 }
 //---------------------------------------------------------------------------
@@ -84,7 +83,6 @@ struct CGLayoutView: View {
                     .scrollClipDisabled()
                     .scaleEffect( $size.wrappedValue)
                     .background(.blue.opacity(0.1))
-//                }
 
                 HStack {
                     Spacer()
@@ -111,7 +109,7 @@ struct CGLayoutView: View {
                     layoutModel.deselectAll()
                 }
                 .onAppear {
-                    layoutModel.addItem( CText(value: "new text item!"))
+                    layoutModel.addItem( LayoutItem(value: "new text item!"))
                     isFocused = true
                 }
     }
@@ -133,9 +131,7 @@ struct CGLayoutView: View {
                             break
                     }
                 }
-                .onChange(of:proxy.size) { _, newSize in
-                    viewportSize = newSize
-                }
+                .onChange(of:proxy.size) { _, newSize in viewportSize = newSize  }
         }
     }
     
@@ -150,7 +146,7 @@ struct CGLayoutView: View {
     func newChartItem(node:AnalysisNode, position:CGPoint)
     {
         print("new layout item: ", node.name)
-        let layoutItem = CChart(node:node, position:position)
+        let layoutItem = LayoutItem(position:position, node:node,type: ELayoutType.chart)
         layoutModel.addItem(layoutItem)
     }
     
@@ -212,13 +208,10 @@ struct CGLayoutView: View {
     
     var selectionDrag: some Gesture {
         DragGesture()
-            .onChanged { value in
-                dragValue = value
+            .onChanged { value in dragValue = value
                 layoutModel.selectRect(marquee: pts2Rect(value.startLocation, value.location))
             }
-            .onEnded { value in
-                dragValue = nil
-            }
+            .onEnded { value in dragValue = nil }
     }
 }
 

@@ -22,16 +22,13 @@ class AnalysisNodeSelection: Codable {
 @Observable
 public class Experiment : Usable
 {
-    public static func == (lhs: Experiment, rhs: Experiment) -> Bool {
-        lhs.id == rhs.id
-    }
+    public static func == (lhs: Experiment, rhs: Experiment) -> Bool { lhs.id == rhs.id   }
     
     public var id = UUID()
     
     var version:String? = "0.01"
     var creationDate:Date = Date.now
     var modifiedDate:Date = Date.now
-        //    var curGroup:String? = "All Samples"
     var name = "All Samples"
     
     var samples:[Sample] = [Sample]()
@@ -42,22 +39,17 @@ public class Experiment : Usable
     var groups = [CGroup]()
     var tables = [CGTableModel]()
     var layouts = [CGLayoutModel]()
-    
-        //    @ObservationIgnored
-        //    @CodableIgnored
     var _core:CytegeistCoreAPI? = nil
-        /// Lazilly created
-    var core:CytegeistCoreAPI {
-        if let _core {
-            return _core
-        }
+      
+    var core:CytegeistCoreAPI {       /// Lazilly created
+        if let _core {  return _core   }
         _core = CytegeistCoreAPI()
         return _core!
     }
+ //--------------------------------------------------------------------------------
     required public init(from decoder: any Decoder) throws {
         fatalError("Implement decoding")        // TODO AM Write class macro and property wrapper to handle properties with default values
-        
-    }
+     }
     
     init(name: String = "Untitled", version: String = "" )
     {
@@ -68,7 +60,11 @@ public class Experiment : Usable
     public func encode(to encoder: Encoder) throws {
             // Do nothing
     }
-        //--------------------------------------------------------------------------------
+   //--------------------------------------------------------------------------------
+    public func addSample(_ sample: Sample)   {
+        samples.append(sample)
+    }
+
     func addTable() -> CGTableModel {
         let table = CGTableModel()
         table.name = table.name.generateUnique(existing: tables.map { $0.name })
@@ -83,14 +79,7 @@ public class Experiment : Usable
         return layout
     }
     
-    
-    public func addSample(_ sample: Sample)
-    {
-        samples.append(sample)
-            //        print("Added Sample: \(sample.tubeName) collected on   \(sample.date) Count: \(samples.count) to experiment \(id)")
-        
-    }
-        //--------------------------------------------------------------------------------
+   //--------------------------------------------------------------------------------
     
     public var focusedSample: Sample? {
             // AM TODO currently will be a random item when multiple selected.
@@ -98,24 +87,21 @@ public class Experiment : Usable
         self[selectedSamples.first]
     }
     
-    public func clearSampleSelection() {
-        selectedSamples.removeAll()
-    }
+    public func clearSampleSelection() {       selectedSamples.removeAll()    }
     
     public var focusedAnalysisNode: AnalysisNode? {
         let selectedSample = self[selectedSamples.first]
         return selectedAnalysisNodes.first ?? selectedSample?.getTree()
     }
     
-    public func clearAnalysisNodeSelection() {
-        selectedAnalysisNodes.nodes.removeAll()
-    }
+    public func clearAnalysisNodeSelection() {     selectedAnalysisNodes.nodes.removeAll()    }
     
     public func setAnalysisNodeSelection(_ node: AnalysisNode ) {
         selectedAnalysisNodes.nodes.removeAll()
         selectedAnalysisNodes.nodes.insert(node)
     }
-        //--------------------------------------------------------------------------------
+   
+    //--------------------------------------------------------------------------------
     func onFCSPicked(_result: Result<[URL], any Error>)
     {
         Task {
@@ -168,43 +154,19 @@ public class Experiment : Usable
                         for await item in walkDirectory(at: fileURL, options: options) {
                             continuation.yield(item)
                         }
-                    } else {
-                        continuation.yield( fileURL )
-                    }
+                    } else {  continuation.yield( fileURL )    }
                 }
                 continuation.finish()
             }
         }
     }
-        //--------------------------------------------------------------------------------
-    
-        //
-        //        // use it
-        //    let path = URL( string: "<your path>" )
-        //
-        //    let options: FileManager.DirectoryEnumerationOptions = [.skipsHiddenFiles, .skipsPackageDescendants]
-        //
-        //    Task {
-        //
-        //        let swiftFiles = walkDirectory(at: path!, options: options).filter {
-        //            $0.pathExtension == "swift"
-        //        }
-        //
-        //        for await item in swiftFiles {
-        //            print(item.lastPathComponent)
-        //        }
-        //
-        //    }
-        ///*
-        ///
-        //--------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------------
     public struct Entry
     {
         var key: String
         var vals: [String] = []
         
-        init (_ key: String,_ val: String)
-        {
+        init (_ key: String,_ val: String){
             self.key = key
             self.vals.append(val)
         }
@@ -223,11 +185,9 @@ public class Experiment : Usable
             }
         }
         
-        
         let ct = union.count            // number of keywords in all samples
         let sampleCt = samples.count
         
-            //        let globals = union.filter( { Set($0.vals).count == sampleCt })
         let multivals = union.filter( { Set($0.vals).count > 1 })
         let uniques = multivals.filter( { Set($0.vals).count == sampleCt })
         let nonuniques = multivals.filter( { Set($0.vals).count < sampleCt })
@@ -236,59 +196,27 @@ public class Experiment : Usable
         print("Nonuniques: ", nonuniques)
         return nonuniques
     }
-    
-        //
-    
+        
     func isParameterKey(_ keyword: String) -> Bool
     {
         keyword.starts(with: "$P")      // should check for a digit in 3rd position
     }
     
-    
-    
     subscript(sampleId: Sample.ID?) -> Sample? {
         get {
-            if let id = sampleId {
-                return samples.first(where: { $0.id == id })!
-            }
+            if let id = sampleId {  return samples.first(where: { $0.id == id })!  }
             return nil
         }
     }
-    
-    
-        //---------------------------------------------------------
-    @propertyWrapper
-    public struct CodableIgnored<T>: Codable {
-        public var wrappedValue: T?
-        
-        public init(wrappedValue: T?) {
-            self.wrappedValue = wrappedValue
-        }
-        
-        public init(from decoder: Decoder) throws {
-            self.wrappedValue = nil
-        }
-        
-        public func encode(to encoder: Encoder) throws {
-                // Do nothing
-        }
-    }
-        //--------------------------------------------------------------------------------
-}
+ 
 
-
+    //--------------------------------------------------------------------------------
 public struct CGroup : Identifiable, Codable
 {
-        //        var attributes = [String : String]()
-        //        var annotation = ""
-        //        var criteria = [Criterion]()
-        //        var members = [Sample]()
-        //        var graph = GraphDef()
     public var id = UUID()
     var name = ""
     var keyword: String?
     var value: String?
-    @CodableIgnored
     var color: Color?
     
     init(name: String = "name", color: Color?, keyword: String?, value:  String?) {
@@ -298,20 +226,16 @@ public struct CGroup : Identifiable, Codable
         self.value = value
     }
 }
-
+    //--------------------------------------------------------------------------------
 struct CPanel : Usable
 {
     var id = UUID()
     var name = ""
     var keyword: String?
     var values: [String]
-    @CodableIgnored
     var color: Color?
     
-    
-    public static func == (lhs: CPanel, rhs: CPanel) -> Bool {
-        lhs.id == rhs.id
-    }
+     public static func == (lhs: CPanel, rhs: CPanel) -> Bool {   lhs.id == rhs.id   }
 
     init(name: String = "name", color: Color?, keyword: String?, values:  String?) {
         self.name = name
@@ -320,46 +244,3 @@ struct CPanel : Usable
         self.values = []
     }
 }
-
-
-
-
-
-    
-    
-        //        set(newValue) {
-        //            if let index = samples.firstIndex(where: { $0.id == newValue.id }) {
-        //                samples[index] = newValue
-        //            }
-        //        }
-    
-        //    var fcsWaitList: [URL] = []
-        //    func readFCSFileLater(_ url:URL)
-        //    {
-        //        fcsWaitList.append(url)
-        //    }
-        //    func processWaitList() async
-        //    {
-        //        for url in fcsWaitList {
-        //            await readFCSFile(url)
-        //        }
-        //    }
-        //
-        //    func readFCSFile(_ url:URL) async
-        //    {
-        //        let exp = getSelectedExperiment(createIfNil: true)!
-        //        await exp.readFCSFile(url)
-        //    }
-        //
-        //    func readFCSFiles(_ urls:[URL]) async
-        //    {
-        //        for url in urls  {
-        //            await readFCSFile(url)
-        //        }
-        //    }
-
-    //extension Experiment {
-    //static var placeholder: Self {
-    //    Experiment(id: UUID().uuidString, year: 2021, name: "TCell Differentiation", version: "0.012") as! Self
-    //}
-    //}

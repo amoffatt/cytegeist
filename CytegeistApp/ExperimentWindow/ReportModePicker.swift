@@ -24,8 +24,8 @@ extension ReportMode {
     
     var labelContent: (name: String, systemImage: String) {
         switch self {
-            case .gating:        return ("Gating", "square.and.pencil")
-            case .table:        return ("Table", "tablecells")
+            case .gating:      return ("Gating", "square.and.pencil")
+            case .table:       return ("Table", "tablecells")
             case .layout:      return ("Layout", "person.3.sequence.fill")
         }
     }

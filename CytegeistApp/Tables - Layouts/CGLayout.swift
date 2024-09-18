@@ -10,34 +10,20 @@ import CytegeistCore
 @Observable
 class CGLayout : Codable, Hashable, Identifiable
 {
-    static func == (lhs: CGLayout, rhs: CGLayout) -> Bool {
-        lhs.id == rhs.id
-    }
-    
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
-    }
-    
     var id = UUID()
     var name = "Untitled Layout"
-    
     var items = [LayoutItem]()
-    var attribs = Dictionary<String, String> ()
-        //    var info = BatchInfo()
+    //-------------------------------------------------------------
+    init() {    }
+    init(_ xml: TreeNode)    {    }
+    //-------------------------------------------------------------
+    static func == (lhs: CGLayoutModel, rhs: CGLayoutModel) -> Bool {       lhs.id == rhs.id   }
+    func hash(into hasher: inout Hasher) {     hasher.combine(id)   }
+
+    //-------------------------------------------------------------
+    // adding items
     
-    init() {
-    }
-    
-    init(_ xml: TreeNode)
-    {
-        
-    }
-        //-------------------------------------------------------------
-        // adding items
-    
-    func addItem(_ item:LayoutItem) {
-        items.append(item)
-    }
+    func addItem(_ item:LayoutItem) {     items.append(item)   }
     
     public func addTextItem() -> ()
     {
@@ -67,26 +53,22 @@ class CGLayout : Codable, Hashable, Identifiable
         //---------------------------------------------------------------------------
         // manage the selection
     
-    func deselectAll() -> ()  {
-        for item in items    { item.selected = false    }
-    }
-    func selectAll() -> ()   {
-        for item in items   {  item.selected = true   }
-    }
+    func deselectAll() -> ()  {   for item in items  { item.selected = false  }    }
+    func selectAll() -> ()    {  for item in items   { item.selected = true   }    }
     
     func selectItem(_  newSel: LayoutItem) -> ()   {
         if !anyModifiers() { deselectAll() }
         newSel.selected = true
     }
-    func deleteSelection() -> ()       {
-        items.removeAll (where:  { $0.selected } )
-    }
+    func deleteSelection() -> ()       {    items.removeAll (where:  { $0.selected } )    }
+ 
     func moveSelection( offset: CGPoint) -> ()   {
         for item in items where { item.selected }()   {
             item.position = item.position + item.tmpOffset
             item.tmpOffset = .zero
         }
     }
+    
     func nudgeSelection( offset: CGPoint) -> ()
     {
         for item in items where { item.selected }()  {
@@ -180,10 +162,11 @@ public class LayoutItem: Codable, Identifiable, Equatable
     
     
     //public
-    init(position: CGPoint, node: AnalysisNode?) {
+    init(position: CGPoint, node: AnalysisNode?, type: ELayoutType) {
         self.node = node
         self.position = position
-    }
+        self.type = type
+ }
     
     init(position: CGPoint, type: ELayoutType) {
         self.position = position
@@ -205,7 +188,7 @@ public class LayoutItem: Codable, Identifiable, Equatable
     }
 
     convenience init(data: Data?) {
-        self.init(position: CGPoint.zero, node: nil )
+        self.init(position: CGPoint.zero, node: nil, type: ELayoutType.table )
          self.data = data
       }
 

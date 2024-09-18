@@ -23,17 +23,10 @@ struct LayoutItemWrappper: View, Identifiable {
         let displayOffset = item.position + item.tmpOffset
         let editing = editableItem.wrappedValue == item
         VStack {
-            switch item {
-                case let item as CText:
-                    CTextView(parent: parent, item: item, editing: editing).background(.purple.opacity(0.8))
-                case let item as CChart:
-                    CChartView(parent: parent, item: item, editing: editing).background(.green.opacity(0.8))
-                case let item as CTable:
-                    CTableView(parent: parent, item: item, editing: editing).background(.orange.opacity(0.8))
-                        //                case let item as LayoutItem:
-                        //                    LayoutItemView(item: item)
-                default:
-                    Text("<Unknown layout item type")
+            switch item.type {
+                case .text:   CTextView(parent: parent, item: item, editing: editing).background(.purple.opacity(0.8))
+                case .chart:  CChartView(parent: parent, item: item, editing: editing).background(.green.opacity(0.8))
+                case .table:  CTableView(parent: parent, item: item, editing: editing).background(.orange.opacity(0.8))
             }
         }
         .allowsHitTesting(true)
@@ -48,9 +41,7 @@ struct LayoutItemWrappper: View, Identifiable {
     var dragSelectedItems: some Gesture {
         DragGesture()
             .onChanged { info in
-//print("dragging")   // if starting and optionKey(), clone selection
-                if dragStartPosition == nil && optionKey()
-                {
+                if dragStartPosition == nil && optionKey()  {
                     parent.layoutModel.cloneSelection()
                 }
                 dragStartPosition = info.location
@@ -68,11 +59,11 @@ struct LayoutItemWrappper: View, Identifiable {
 }
 
 //--------------------------------------------------------------------
-// TEXTBOX
+// TEXT
 
 struct CTextView : View {
     var parent: CGLayoutView
-    let item: CText
+    let item: LayoutItem
     let editing: Bool
         //    @State private var selection: TextSelection?          MacOS 15+
     
@@ -96,12 +87,12 @@ struct CTextView : View {
         
     }
 }
-    //--------------------------------------------------------------------
-    // CHART
+//--------------------------------------------------------------------
+// CHART
 
 struct CChartView : View {
     var parent: CGLayoutView
-    let item: CChart
+    let item: LayoutItem
     let editing: Bool
     
     @Environment(CytegeistCoreAPI.self) var core:CytegeistCoreAPI
@@ -128,12 +119,12 @@ struct CChartView : View {
     }
 }
 
-    //--------------------------------------------------------------------
-    // TABLE
+//--------------------------------------------------------------------
+// TABLE
 
 struct CTableView : View {
     var parent: CGLayoutView
-    let item: CTable
+    let item: LayoutItem
     let editing: Bool
     @State var columnCustomization = TableColumnCustomization<User>()
     @State var selection = Set<User.ID>()
@@ -169,6 +160,7 @@ struct CTableView : View {
         var number: Double
         var marker: String
     }
+    
     @State private var  users = [
         User(id: 1, name: "Taylor", score: 95, number: 9.32, marker: "CD34"),
         User(id: 2, name: "Justin", score: 80, number: Double.pi, marker: "CD3"),

@@ -17,21 +17,13 @@ public class TreeNode
     public var children = [TreeNode]()
     public var text = ""
     
-    public init(_   t: String )    {
-        value = t
-    }
-    public func add(child: TreeNode) {
-        children.append(child)
-    }
-    public var deepCount: Int {
-        1 + children.reduce(0) { $0 + $1.deepCount }
-    }
+    public init(_  t: String )          {    value = t    }
+    public func add(child: TreeNode)    {    children.append(child)    }
+    public var deepCount: Int           {    1 + children.reduce(0) { $0 + $1.deepCount }    }
     
     public func findChild(value: String) -> TreeNode?
     {
-        children.first(where: {
-            node  in node.value == value
-        })
+        children.first(where: {   node  in node.value == value        })
     }
     
     public func findChildren(value: String) -> [TreeNode]    {

@@ -10,9 +10,7 @@ import SwiftUI
 import CytegeistCore
 import CytegeistLibrary
 
-
-
-    //-------------------------------------------------------------------------------
+ //-------------------------------------------------------------------------------
 struct AnalysisList: View {
     @Environment(Experiment.self) var experiment
     
@@ -141,37 +139,7 @@ public struct PieChartShape : Shape {
 //        p.addLine(to: center + CGPoint(x: r, y:0))
         p.addArc(center: center, radius: r, startAngle: startAngle, endAngle: startAngle - .radians(twoPi * freq), clockwise: true)
         p.addLine(to: center)
-        
         p.closeSubpath()
-//        p.addArc(center: CGPoint(x: r, y:r), radius: r, startAngle: .radians(0), endAngle: .radians(twoPi), clockwise: true)
         return p
     }
 }
-
-
-//        //where Node: Hashable, Node: Identifiable, Node: CustomStringConvertible
-//    
-//    struct NodeOutlineGroup<AnalysisNode>: View {
-//        let node: AnalysisNode
-//        let childKeyPath: KeyPath<AnalysisNode, [AnalysisNode]?>
-//        @State var isExpanded: Bool = true
-//        
-//        var body: some View {
-//            if node[keyPath: childKeyPath] != nil {
-//                DisclosureGroup(
-//                    isExpanded: $isExpanded,
-//                    content: {
-//                        if isExpanded {
-//                            ForEach(node[keyPath: childKeyPath]!) { childNode in
-//                                NodeOutlineGroup(node: childNode, childKeyPath: childKeyPath, isExpanded: isExpanded)
-//                            }
-//                        }
-//                    },
-//                    label: { Text(node.name) })
-//            } else {
-//                Text(node.description)
-//            }
-//        }
-//    }
-
-
