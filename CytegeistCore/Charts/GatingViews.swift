@@ -159,7 +159,7 @@ struct GateView<GateType:GateDef> : View where GateType:ViewableGate {
 
     @Environment(\.lineWidth) var lineWidth
     @Environment(\.isEditing) var editing
-    @Bindable var node: PopulationNode
+    @Bindable var node: AnalysisNode
     let normalizers:Tuple2<AxisNormalizer?>
     let chartSize:CGSize
     let chartCenter:CGSize
@@ -173,7 +173,7 @@ struct GateView<GateType:GateDef> : View where GateType:ViewableGate {
         castBinding($node.gate)
     }
     
-    public init(node: PopulationNode, axes: Tuple2<AxisNormalizer?>, chartSize: CGSize) {
+    public init(node: AnalysisNode, axes: Tuple2<AxisNormalizer?>, chartSize: CGSize) {
         self.node = node
         self.normalizers = axes
         self.chartSize = chartSize
@@ -279,14 +279,14 @@ struct GateView<GateType:GateDef> : View where GateType:ViewableGate {
 protocol ViewableGate: GateDef {
     associatedtype ViewType = GateView<Self>
     
-    func chartView(_ node:PopulationNode, chartSize:CGSize, chartDims:Tuple2<CDimension?>) -> any View
+    func chartView(_ node:AnalysisNode, chartSize:CGSize, chartDims:Tuple2<CDimension?>) -> any View
     func viewContent(_ view:GateView<Self>, viewCenter: inout CGPoint) -> (any View)?
     func isValid(for chartDims: Tuple2<CDimension?>) -> Bool
     mutating func nudge(_ node:PopulationNode, axes: Tuple2<AxisNormalizer?>, offset:CGPoint)
 }
 
 extension ViewableGate {
-    func chartView(_ node:PopulationNode, chartSize:CGSize, chartDims:Tuple2<CDimension?>) -> any View {
+    func chartView(_ node:AnalysisNode, chartSize:CGSize, chartDims:Tuple2<CDimension?>) -> any View {
         let visibility = visibility(for:chartDims)
         precondition(visibility != .none)
         // TODO support .transposed
@@ -547,7 +547,7 @@ public struct Polygon : Shape {
 
 
 struct GateLabel: View {
-    let node:PopulationNode
+    let node:AnalysisNode
 
     var body: some View {
         Text(node.name)

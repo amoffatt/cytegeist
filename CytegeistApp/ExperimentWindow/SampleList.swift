@@ -59,7 +59,7 @@ struct SampleList: View {
 
     @Environment(App.self) var app: App
     
-    @SceneStorage("viewMode") private var mode: ViewMode = .table
+    @SceneStorage("viewMode") private var mode: SampleListMode = .table
     @State var searchText: String = ""
     @State var sortOrder: [KeyPathComparator<Sample>] = [    .init(\.id, order: SortOrder.forward) ]
     @State private var draggedItem: String?

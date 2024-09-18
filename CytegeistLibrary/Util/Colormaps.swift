@@ -169,3 +169,33 @@ extension SIMD3<Float> {
         CGColor(red: CGFloat(x), green: CGFloat(y), blue: CGFloat(z), alpha: 1)
     }
 }
+
+
+    //COMING
+    //import TextRenderer
+    //struct ColorfulRender: TextRenderer {
+    //    func draw(layout: Text.Layout, in context: inout GraphicsContext) {
+    //            // Iterate through RunSlice and their indices
+    //        for (index, slice) in layout.flattenedRunSlices.enumerated() {
+    //                // Calculate the angle of color adjustment based on the index
+    //            let degree = Angle.degrees(360 / Double(index + 1))
+    //                // Create a copy of GraphicsContext
+    //            var copy = context
+    //                // Apply hue rotation filter
+    //            copy.addFilter(.hueRotation(degree))
+    //                // Draw the current Slice in the context
+    //            copy.draw(slice)
+    //        }
+    //    }
+    //}
+    //
+    //struct ColorfulDemo: View {
+    //    var body: some View {
+    //        Text("Hello World")
+    //            .font(.title)
+    //            .fontWeight(.heavy)
+    //            .foregroundStyle(.red)
+    //            .textRenderer(ColorfulRender())
+    //    }
+    //}
+

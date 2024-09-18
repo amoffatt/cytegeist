@@ -85,7 +85,7 @@ import CytegeistLibrary
 
     //-----------------------------------------------------
 
-public typealias AnyGate = (any GateDef)
+public typealias AnyGate = (any GateDef) 
 
 public protocol GateDef : Codable, Hashable, Equatable
 {

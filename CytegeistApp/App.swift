@@ -24,7 +24,7 @@ final class App {
     
     var experiments: [Experiment] = []
     var selectedExperiment: Experiment.ID?
-    var mode: ViewMode = .table
+    var mode: SampleListMode = .table
     var reportMode: ReportMode = .gating
     
 //    private var applicationSupportDirectory: URL {

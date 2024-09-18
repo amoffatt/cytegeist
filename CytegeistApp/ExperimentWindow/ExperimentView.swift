@@ -11,10 +11,11 @@ import CytegeistCore
 
 
     // switch between table and gallery views in the sampleList
-enum ViewMode: String, CaseIterable, Identifiable {
+enum SampleListMode: String, CaseIterable, Identifiable {
     var id: Self { self }
     case gallery
     case table
+    case compact
 }
 
     // switch between gating, table and layout views in the rightmost view
@@ -25,6 +26,7 @@ enum ReportMode: String, CaseIterable, Identifiable {
     case layout
 }
 
+//----------------------------------------------------------------------------------
 
 
 struct ExperimentView : View {
@@ -34,8 +36,7 @@ struct ExperimentView : View {
     var mode:ReportMode { app.reportMode }
     
 //    @State private var path = [Int]()
-        //----------------------------------------------------------------------------------
-    
+     
 
     var body: some View {
         @Bindable var app = app
@@ -83,7 +84,11 @@ struct ExperimentView : View {
                 VStack {        // AM: VStack leads to better compile error messages than Group when the below code breaks (!?)
                     switch mode {
                     case .table:  TableBuilder()
-                    case .gating: gatingBuilder(experiment)
+                    case .gating:  VStack {
+                                        if let node = experiment.focusedAnalysisNode {
+                                            GatingView(population:node)
+                                        }
+                                    }
                     case .layout: LayoutBuilder()
                     }
                     
@@ -104,15 +109,8 @@ struct ExperimentView : View {
             app.getSelectedExperiment(autoselect: true, createIfNil: true)
         }
     }
-//===================================================================
+}
     
-    func gatingBuilder(_ exp: Experiment) -> some View {
-        VStack {
-            if let node = exp.focusedAnalysisNode {
-                GatingView(population:node)
-            }
-        }
-    }
-//===================================================================
+    //===================================================================
 
-    }
+  

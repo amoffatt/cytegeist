@@ -38,12 +38,17 @@ struct CytegeistApp: SwiftUI.App {
                 PairChartsPreview()
             }
             
-            Window("SaveOpenView", id: "SaveOpen")
-            {
-                SaveOpenView()
-            }
+        Window("SaveOpenView", id: "SaveOpen")
+        {
+            SaveOpenView()
+        }
         
-     
+        Window("Experiment Browser", id: "browse")
+        {
+            ExperimentBrowser()
+        }
+        
+
         #endif
 
 //        ImmersiveSpace(id: appModel.immersiveSpaceID) {

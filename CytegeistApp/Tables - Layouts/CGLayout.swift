@@ -47,7 +47,7 @@ class CGLayout : Codable, Hashable, Identifiable
     
     public func newTextItem(name: String, position:CGPoint)
     {
-        let layoutItem = CText(value: name)
+        let layoutItem = LayoutItem(value: name)
         layoutItem.selected = true
         addItem(layoutItem)
     }
@@ -60,7 +60,7 @@ class CGLayout : Codable, Hashable, Identifiable
     
     public func newTable(name: String, position:CGPoint)
     {
-        let item = CTable(position: position)
+        let item = LayoutItem(position: position, type: .table)
         item.selected = true
         addItem(item)
     }
@@ -148,6 +148,12 @@ class CGLayout : Codable, Hashable, Identifiable
 //---------------------------------------------------------------------
 // base class for CText, CTable, CChart
 
+enum ELayoutType : Codable {
+    case text
+    case chart
+    case table
+}
+
 @Observable
 public class LayoutItem: Codable, Identifiable, Equatable
 {
@@ -156,6 +162,12 @@ public class LayoutItem: Codable, Identifiable, Equatable
     var size: CGSize = .zero
     var position: CGPoint = .zero
     var tmpOffset: CGPoint = .zero
+    var type: ELayoutType = .text
+    var value: String = ""
+    var xAxis: AxisNormalizer?
+    var yAxis: AxisNormalizer?
+    var data: Data?
+
 // save scale, rotation, background, stroke, etc
     
     var selected:Bool = false
@@ -173,13 +185,31 @@ public class LayoutItem: Codable, Identifiable, Equatable
         self.position = position
     }
     
-    init(position: CGPoint, node: AnalysisNode?, size: CGSize, tmpOffset: CGPoint) {
+    init(position: CGPoint, type: ELayoutType) {
+        self.position = position
+        self.type = type
+        
+    }
+    init(value: String) {
+        self.value = value
+        self.type = .text
+        
+    }
+    
+    init(position: CGPoint, type: ELayoutType, node: AnalysisNode?, size: CGSize, tmpOffset: CGPoint) {
         self.node = node
         self.position = position
+        self.type = type
         self.size = size
         self.tmpOffset = tmpOffset
     }
 
+    convenience init(data: Data?) {
+        self.init(position: CGPoint.zero, node: nil )
+         self.data = data
+      }
+
+    
      public required init(from decoder: any Decoder) throws {
         
         fatalError("init(from:) has not been implemented")
@@ -187,7 +217,7 @@ public class LayoutItem: Codable, Identifiable, Equatable
     
     public func clone() -> LayoutItem
     {
-        LayoutItem(position: self.position, node: self.node,
+        LayoutItem(position: self.position, type: self.type, node: self.node,
                    size: self.size, tmpOffset: self.tmpOffset)
     }
 
@@ -195,94 +225,94 @@ public class LayoutItem: Codable, Identifiable, Equatable
 
 
 //---------------------------------------------------------------------
-@Observable
-public class CText: LayoutItem {
-    var value: String = ""
-    
-    init(value: String) {
-        self.value = value
-        super.init(position: CGPoint(x: 200, y: 200), node: nil )
-    }
-    
-    
-    init(value: String, position: CGPoint) {
-        super.init(position: position, node: nil )
-        self.value = value
-   }
-
-    public  required init(from decoder: any Decoder) throws {
-        fatalError("init(from:) has not been implemented")
-    }
-    
-    override public func clone() -> CText    {
-        return .init(value: value, position: position)
-   }
-
-}
+//@Observable
+//public class CText: LayoutItem {
+//    var value: String = ""
+//    
+//    init(value: String) {
+//        self.value = value
+//        super.init(position: CGPoint(x: 200, y: 200), node: nil )
+//    }
+//    
+//    
+//    init(value: String, position: CGPoint) {
+//        super.init(position: position, node: nil )
+//        self.value = value
+//   }
+//
+//    public  required init(from decoder: any Decoder) throws {
+//        fatalError("init(from:) has not been implemented")
+//    }
+//    
+//    override public func clone() -> CText    {
+//        return .init(value: value, position: position)
+//   }
+//
+//}
     //---------------------------------------------------------------------
 
-@Observable
-class CChart : LayoutItem
-{
-    var xAxis: AxisNormalizer?
-    var yAxis: AxisNormalizer?
-
-    init() {
-        super.init(position: CGPoint.zero, node: nil )
-    }
-   
-    init(xAxis: AxisNormalizer?, yAxis: AxisNormalizer?
-         , position:CGPoint = .zero, node: AnalysisNode?) {
- 
-        self.xAxis = xAxis;
-        self.yAxis = yAxis;
-        super.init(position: position, node: node )
- 
-    }
-    
-    init(node: AnalysisNode, position:CGPoint = .zero) {
-        super.init(position: position, node: node )
-    }
-    
-    
-    required init(from decoder: any Decoder) throws {
-        fatalError("init(from:) has not been implemented")
-    }
-    
-    override public func clone() -> CChart
-    {
-        return .init(xAxis: xAxis, yAxis: yAxis, position: position, node: node)
-    }
-
-}
+//@Observable
+//class CChart : LayoutItem
+//{
+//    var xAxis: AxisNormalizer?
+//    var yAxis: AxisNormalizer?
+//
+//    init() {
+//        super.init(position: CGPoint.zero, node: nil )
+//    }
+//   
+//    init(xAxis: AxisNormalizer?, yAxis: AxisNormalizer?
+//         , position:CGPoint = .zero, node: AnalysisNode?) {
+// 
+//        self.xAxis = xAxis;
+//        self.yAxis = yAxis;
+//        super.init(position: position, node: node )
+// 
+//    }
+//    
+//    init(node: AnalysisNode, position:CGPoint = .zero) {
+//        super.init(position: position, node: node )
+//    }
+//    
+//    
+//    required init(from decoder: any Decoder) throws {
+//        fatalError("init(from:) has not been implemented")
+//    }
+//    
+//    override public func clone() -> CChart
+//    {
+//        return .init(xAxis: xAxis, yAxis: yAxis, position: position, node: node)
+//    }
+//
+//}
 //---------------------------------------------------------------------
-
-@Observable
-class CTable : LayoutItem
-{
-    var data: Data?      
-    init(position: CGPoint) {
-        self.data = nil
-        super.init(position: CGPoint.zero, node: nil )
-    }
-    init(data: Data?) {
-        super.init(position: CGPoint.zero, node: nil )
-        self.data = data
-    }
-    
-    init(data: Data?, position: CGPoint, node: AnalysisNode?)
-    {
-        super.init(position: position, node: node )
-       self.data = data
-    }
-
-    required init(from decoder: any Decoder) throws {
-        fatalError("init(from:) has not been implemented")
-    }
-    
-    override public func clone() -> CTable
-    {
-        return .init(data: data, position: position, node: node)
-    }
-
-}
+//
+//@Observable
+//class CTable : LayoutItem
+//{
+//    var data: Data?      
+//    init(position: CGPoint) {
+//        self.data = nil
+//        super.init(position: CGPoint.zero, node: nil )
+//    }
+//    init(data: Data?) {
+//        super.init(position: CGPoint.zero, node: nil )
+//        self.data = data
+//    }
+//    
+//    init(data: Data?, position: CGPoint, node: AnalysisNode?)
+//    {
+//        super.init(position: position, node: node )
+//       self.data = data
+//    }
+//
+//    required init(from decoder: any Decoder) throws {
+//        fatalError("init(from:) has not been implemented")
+//    }
+//    
+//    override public func clone() -> CTable
+//    {
+//        return .init(data: data, position: position, node: node)
+//    }
+//
+//}

@@ -20,32 +20,25 @@ struct Smoother
     var kernelSizes = [Int] ()
 
 //------------------------------------------------------------------------
-    func matrixSize( bins: Int, hiRes: Bool) -> Int
+//------------------------------------------------------------------------
+    init()
+    {
+        for idx in 1 ... 2 * nMatrices
+        {
+            let hiRes =  idx > nMatrices
+            let nElements = matrixSize(bins: idx, hiRes: hiRes);
+            kernelSizes[idx] = nElements
+            kernels[idx] = kernel(bins: idx, mxSize: nElements, hiRes: hiRes)
+        }
+    }
+
+    private func matrixSize( bins: Int, hiRes: Bool) -> Int
     {
         let radius = hiRes ?  radHighRes : radLowRes;
         let sq = sqrt(sqrt(Double(bins)))
         return  Int(Double(radius) / sq + 0.9999);
     }
-//------------------------------------------------------------------------
-    init()
-    {
-        for idx in 1 ... nMatrices          // low res
-        {
-            let binCt = idx;
-            let nElements = matrixSize(bins: binCt, hiRes: false);
-            kernelSizes[idx] = nElements;
-            kernels[idx] = kernel(bins: binCt, mxSize: nElements, hiRes: false);
-        }
-        
-        for idx  in nMatrices + 1 ... 2 * nMatrices           // high res
-        {
-            let binCt = idx;
-            let nElements = matrixSize(bins: binCt, hiRes: true);
-            kernelSizes[idx] = nElements;
-            kernels[idx] = kernel(bins: binCt,  mxSize: nElements, hiRes: true);
-        }
-    }
- //------------------------------------------------------------------------
+   
     private func kernel(bins: Int, mxSize: Int, hiRes: Bool) -> [Double]
     {
         let radius = hiRes ?  radHighRes : radLowRes;
@@ -53,7 +46,7 @@ struct Smoother
         let nDevs = 2.4
         let x = nDevs/Double(radius)
         let factor = -0.5 * sq * x * x
-        var matrix:[Double] = (0 ..< mxSize).map( { exp(factor * Double($0 * $0)) } )
+        let matrix:[Double] = (0 ..< mxSize).map( { exp(factor * Double($0 * $0)) } )
         
         var matrixTotal = 0.0
         for i in -mxSize...mxSize {
@@ -70,7 +63,6 @@ struct Smoother
     {
         let kernelIdxOffset = hiRes ? nMatrices : 0
         let radius:Int = hiRes ?  radHighRes : radLowRes
-        let matrixBins = nBins + 2 * radius
         var destArray = [Double]()
         var kernel1D = [Double]()
         var nElements: Int
@@ -152,9 +144,7 @@ struct Smoother
                     nElements = matrixSize(bins: intBinHeight, hiRes: hiRes)
                     kernel2D = kernel(bins: intBinHeight, mxSize: nElements, hiRes: hiRes)
                 }
-                
-                
-                
+                 
                 destMatrix[row * matrixCols + col] += kernel2D[0] * kernel2D[0] * binHeight    // x = y = 0
                 
                 for i in 1 ..< nElements

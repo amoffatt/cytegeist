@@ -7,12 +7,12 @@ The experiment display mode picker found in the toolbar.
 
 import SwiftUI
 
-struct DisplayModePicker: View {
-    @Binding var mode: ViewMode
+struct SampleListModePicker: View {
+    @Binding var mode: SampleListMode
 
     var body: some View {
         Picker("Display Mode", selection: $mode) {
-            ForEach(ViewMode.allCases) { viewMode in
+            ForEach(SampleListMode.allCases) { viewMode in
                 viewMode.label
                     .labelStyle(.iconOnly)
             }
@@ -21,12 +21,13 @@ struct DisplayModePicker: View {
     }
 }
 
-extension ViewMode {
+extension SampleListMode {
 
     var labelContent: (name: String, systemImage: String) {
         switch self {
         case .table:        return ("Table", "tablecells")
         case .gallery:      return ("Gallery", "photo")
+        case .compact:      return ("Table", "tablecells")
         }
     }
 
