@@ -210,11 +210,10 @@ struct GatingView: View {
             default: break
         }
     }
-    func addGate(_ gate: AnyGate)
+    func addGate(_ gate: Gate)
     {
             //        self.candidateGateName = getCandidateGateName()
         let node = AnalysisNode(gate:gate)
-        node.gate = gate
         node.name = "T Cells"
         confirmGate = node
     }
@@ -354,7 +353,7 @@ struct GatingView: View {
     
     func addRangeGate(_ dim:String, _ min: CGFloat, _ max: CGFloat)
     {
-        addGate(RangeGateDef(dim, min, max))
+        addGate(Gate(.range(min, max), dim))
     }
     
     func add2RangeGates(_ dim:String, _ x: CGFloat)
@@ -366,22 +365,22 @@ struct GatingView: View {
     
     func addRectGate(_ dims:Tuple2<String>, _ rect: CGRect)
     {
-        addGate(RectGateDef(dims, rect))
+//        addGate(RectGateDef(dims, rect))
     }
     
     func addRadialGate(_ dims:Tuple2<String>, _ start: CGPoint, _ radius: CGFloat)
     {
-        addGate(RadialGateDef(dims, start.x, start.y, radius))
+//        addGate(RadialGateDef(dims, start.x, start.y, radius))
     }
     
     func addEllipseGate(_ dims:Tuple2<String>, _ axes:Tuple2<AxisNormalizer>, _ start: CGPoint, _ end: CGPoint)
     {
-        var gate = EllipsoidGateDef(dims,
-                                    .init(vertex0: start.normalize(axes),
-                                          vertex1: end.normalize(axes),
-                                          widthRatio: 0.6),
-                                    axes: axes)
-        addGate(gate)
+//        var gate = EllipsoidGateDef(dims,
+//                                    .init(vertex0: start.normalize(axes),
+//                                          vertex1: end.normalize(axes),
+//                                          widthRatio: 0.6),
+//                                    axes: axes)
+//        addGate(gate)
     }
     
     

@@ -9,6 +9,7 @@ import Foundation
 import SwiftUI
 import Charts
 
+public typealias CColor = SIMD4<Float>
 
 public struct Colormap {
     public let lookup:[Color]
@@ -57,8 +58,8 @@ public struct Colormap {
 }
 
 
-extension Colormap {
-    public static let jet = Colormap(colors: [
+public extension Colormap {
+    static let jet = Colormap(colors: [
         Color(red: 0, green: 0, blue: 0.5, opacity: 0.0),
         Color(red: 0, green: 0, blue: 1),
         Color(red: 0, green: 0.5, blue: 1),
@@ -74,7 +75,7 @@ extension Colormap {
 
 
 
-extension Gradient {
+public extension Gradient {
     func color(at location: Float) -> Color {
         color(at:CGFloat(location))
     }
@@ -109,7 +110,7 @@ extension Gradient {
     
 }
 
-extension Color {
+public extension Color {
     static func cmyka2rgba(_ components:[CGFloat]) -> SIMD4<Float> {
         precondition(components.count == 5)
         
@@ -150,7 +151,7 @@ extension Color {
     
 }
 
-extension SIMD4<Float> {
+public extension SIMD4<Float> {
     var color: Color {
         Color(cgColor)
     }
@@ -160,7 +161,7 @@ extension SIMD4<Float> {
     }
 }
 
-extension SIMD3<Float> {
+public extension SIMD3<Float> {
     var color: Color {
         Color(cgColor)
     }

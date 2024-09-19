@@ -22,7 +22,7 @@ public enum SampleError : Error {
 //---------------------------------------------------------
 //@Model
 //@MainActor
-@Observable
+@Model
 public class Sample : Identifiable, Codable, Hashable
 {
     public static func == (lhs: Sample, rhs: Sample) -> Bool {
@@ -40,6 +40,7 @@ public class Sample : Identifiable, Codable, Hashable
     
 //    @CodableIgnored
 //    @ObservationIgnored
+    @Transient
     var error:Error? = nil
     
     public func encode(to encoder: any Encoder) throws {

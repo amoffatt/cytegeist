@@ -8,11 +8,12 @@ import Foundation
 import SwiftUI
 import UniformTypeIdentifiers.UTType
 import CytegeistLibrary
+import SwiftData
 
 public extension UTType {  static var population = UTType(exportedAs: "cytegeist.population")   }
 enum AnalysisNodeError : Error {  case noSampleRef      }
 //---------------------------------------------------------
-@Observable
+@Model
 public class AnalysisNode : Codable, Transferable, Identifiable, Hashable
 {
     public var id = UUID()
@@ -32,15 +33,17 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable
         }
     }
         //  these fields are only applicable to populations
-    @ObservationIgnored
-    @CodableIgnored
-    public var gate: AnyGate? = nil                      // the predicate to filter ones parent
-    @ObservationIgnored
-    @CodableIgnored
-    public var color: Color? = nil
+    public var gate: Gate? = nil                      // the predicate to filter ones parent
+    // AM DEBUGGING
+    @Transient
+    public var color: CColor? = nil
     public var opacity: Double = 1.0
-    public var labelOffset: CGPoint = .zero
+    public var labelOffset: CGPoint = CGPoint.zero
     public var invert: Bool = false
+    
+    public func encode(to encoder: any Encoder) throws {
+        fatalError()
+    }
     
                                            
 //--------------------------------------------------------
@@ -53,19 +56,19 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable
     public init() {    }
     
     public required init(from decoder: any Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        self._id = try container.decode(UUID.self, forKey: ._id)
-        self._name = try container.decode(String.self, forKey: ._name)
-        self._sample = try container.decodeIfPresent(Sample.self, forKey: ._sample)
-        self._graphDef = try container.decode(ChartDef.self, forKey: ._graphDef)
-        self._statistics = try container.decode([String : Double].self, forKey: ._statistics)
-        self._children = try container.decode([AnalysisNode].self, forKey: ._children)
-        self.__parent = try container.decodeIfPresent(AnalysisNode.self, forKey: .__parent)
-        self._gate = try container.decode(CodableIgnored<AnyGate>.self, forKey: .gate)
-        self._color = try container.decode(CodableIgnored<Color>.self, forKey: .color)
-        self._opacity = try container.decode(Double.self, forKey: ._opacity)
-        self._labelOffset = try container.decode(CGPoint.self, forKey: ._labelOffset)
-        self._invert = try container.decode(Bool.self, forKey: ._invert)
+//        let container = try decoder.container(keyedBy: CodingKeys.self)
+//        self._id = try container.decode(UUID.self, forKey: ._id)
+//        self._name = try container.decode(String.self, forKey: ._name)
+//        self._sample = try container.decodeIfPresent(Sample.self, forKey: ._sample)
+//        self._graphDef = try container.decode(ChartDef.self, forKey: ._graphDef)
+//        self._statistics = try container.decode([String : Double].self, forKey: ._statistics)
+//        self._children = try container.decode([AnalysisNode].self, forKey: ._children)
+//        self.__parent = try container.decodeIfPresent(AnalysisNode.self, forKey: .__parent)
+//        self._gate = try container.decode(CodableIgnored<AnyGate>.self, forKey: .gate)
+//        self._color = try container.decode(CodableIgnored<Color>.self, forKey: .color)
+//        self._opacity = try container.decode(Double.self, forKey: ._opacity)
+//        self._labelOffset = try container.decode(CGPoint.self, forKey: ._labelOffset)
+//        self._invert = try container.decode(Bool.self, forKey: ._invert)
     }
     
     public init(children: [AnalysisNode]? = nil)  {
@@ -76,10 +79,10 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable
         self.sample  = sample
     }
     
-    public init(gate: AnyGate? = nil, invert: Bool = false, color: Color? = nil, opacity: Double = 0.2) {
+    public init(gate: Gate? = nil, invert: Bool = false, color: CColor? = nil, opacity: Double = 0.2) {
         self.gate = gate
         self.invert = invert
-        self.color = color ?? .green
+        self.color = color ?? Color.green.rgba
         self.opacity = opacity
     }
     
@@ -138,17 +141,19 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable
     }
     
      public func chartView(chart: ChartDef, dims:Tuple2<CDimension?>) -> ChartAnnotation? {
-        guard let gate = gate,
-              let gate = gate as? any ViewableGate,
-              gate.isValid(for: dims)
-        else {    return nil   }
-        
-        return ChartAnnotation(
-            id:id.uuidString,
-            name: "\(name) gate",
-            view: { chartSize, editing in
-                gate.chartView(self, chartSize:chartSize, chartDims:dims)
-            }, remove: self.remove
-        )
+         return nil
+         // AM DEBUGGING
+//        guard let gate = gate,
+//              let gate = gate as? any ViewableGate,
+//              gate.isValid(for: dims)
+//        else {    return nil   }
+//        
+//        return ChartAnnotation(
+//            id:id.uuidString,
+//            name: "\(name) gate",
+//            view: { chartSize, editing in
+//                gate.chartView(self, chartSize:chartSize, chartDims:dims)
+//            }, remove: self.remove
+//        )
     }
 }

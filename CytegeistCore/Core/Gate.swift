@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 import CytegeistLibrary
+import SwiftData
 
     //--------------------------------------------------------
 //public struct Gate : Codable, Hashable
@@ -86,27 +87,54 @@ import CytegeistLibrary
 
     //-----------------------------------------------------
 
-public typealias AnyGate = (any GateDef)
+//public typealias AnyGate = (any GateDef)
 
-public protocol GateDef : Codable, Hashable, Equatable
+@Model
+public class Gate : Codable, Hashable, Equatable
 {
-//    static func == (lhs: GateDef, rhs: GateDef) -> Bool {
-//        return lhs.hashValue == rhs.hashValue
-//    }
-//    func hash(into hasher: inout Hasher) {
-//        hasher.combine(dims)
+    public static func == (lhs: Gate, rhs: Gate) -> Bool {
+        return lhs.hashValue == rhs.hashValue
+    }
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(dims)
 //        hasher.combine(id)
-//    }
-    var dims:[String] { get }
+    }
+    public var dims:[String] = []
+    public var def:GateDef? = nil
+    
+    func isGateDefEqualTo(_ other: Gate?) -> Bool {
+        guard let otherGate = other as? Self else { return false }
+        return self.def == otherGate.def
+    }
+    
+    public init(_ def: GateDef, _ dims:String...) {
+        self.def = def
+        self.dims = dims
+    }
+    
+    public required init(from decoder: any Decoder) throws {
+        fatalError()
+    }
+
+    public func encode(to encoder: any Encoder) throws {
+        fatalError()
+    }
+    
 //    var id = "-1"
 //    init (dims:[String] = [])
 //    {
 //        self.dims = dims
 //    }
     
-    func probability(of:EventData) -> PValue
-//        fatalError("Implemented")
-//    }
+    public func function(_ invert:Bool) -> GateFunc? {
+        guard let rawF = def?.function() else {
+            return { e in .one }
+        }
+        
+        return invert
+        ? { rawF($0).inverted }
+        : rawF
+    }
     
     /// self is a binding for the gate's view to be able to edit the gate itself through
 //    func chartView(_ self:Binding<AnyGate?>, chart:ChartDef) -> ChartAnnotation?
@@ -132,179 +160,184 @@ public protocol GateDef : Codable, Hashable, Equatable
 //    }
 //}
 
-public extension GateDef {
-    func isEqualTo(_ other: (any GateDef)?) -> Bool {
-        guard let otherGate = other as? Self else { return false }
-        return self == otherGate
-    }
-}
-
-
-public struct RangeGateDef : GateDef
-{
-    private var _min: ValueType
-    private var _max: ValueType
-//    private var _max: ValueType
-    public var dims: [String]
+public enum GateDef : Codable, Equatable {
+    case range(_ min:ValueType, _ max:ValueType)
     
-    public var min: ValueType {
-        get { _min }
-        set { (_min, _max) = sort(newValue, _max) }
-    }
     
-    public var max: ValueType {
-        get { _max }
-        set { (_min, _max) = sort(_min, newValue) }
-    }
-    
-    public init(_ dim:String, _ min: ValueType, _ max: ValueType)
-    {
-        (_min, _max) = sort(min, max)
-        self.dims = [dim]
-    }
-
-    public func probability(of event:EventData) -> PValue
-    {
-        event.values[0] >= min && event.values[0] <= max ? .one : .zero
-    }
-
-}
-
-public struct RectGateDef : GateDef
-{
-    public var rect:CRect
-    
-//    public var minX: ValueType
-//    public var maxX: ValueType
-//    public var minY: ValueType
-//    public var maxY: ValueType
-    public var dims:[String]
-//    public var rect: CGRect {
-//        get {.init(from:min, to:max) }
-//        set {
-//            min = newValue.min
-//            max = newValue.max
-//        }
-//    }
-
-    public init(_ dims: Tuple2<String>, _ rect: CGRect)
-    {
-        self.rect = rect
-        self.dims = dims.values
-    }
-    
-    public init(_ dims: Tuple2<String>, _ minX: ValueType, _ maxX: ValueType, _ minY: ValueType, _ maxY: ValueType)
-    {
-        self.init(dims, CRect(from:.init(minX, minY), to:.init(maxX, maxY)))
-    }
-    
-    public init(from decoder: any Decoder) throws {
-        fatalError("init(from:) has not been implemented")
-    }
-    
-//    override func hash(into hasher: inout Hasher) {
-//        super.hash(into: &hasher)
-//        hasher.combineMany(minX, maxX, minY, maxY)
-//    }
-    
-    public func probability(of event:EventData) -> PValue
-    {
-            //  for d in dimensions where d.name?
-        let point = CPoint(event.values[0], event.values[1])
-        if rect.contains(point) {
-            return .one
+    func function() -> GateFunc {
+        switch self {
+            case .range(let min, let max):
+                return { event in event.values[0] >= min && event.values[0] <= max ? .one : .zero }
         }
-        return .zero
-//        if !(minX...maxX).contains(event.values[0]) {
-//            return .zero
-//        }
-//        if !(minY...maxY).contains(event.values[1]) {
-//            return .zero
-//        }
     }
+}
 
-//    public func chartView(_ node: PopulationNode, chartSize: CGSize, chartDims: Tuple2<CDimension?>) -> any View {
-//            Text("Rect gate not yet supported")
-//        guard let xAxis = chart.xAxis?.name, xAxis == dims.get(index:0),
-//              let yAxis = chart.yAxis?.name, yAxis == dims.get(index:1)
-//        else {
-//            return nil
-//        }
-//        return .init(id:id) { sampleMeta, chartSize, editing in
-//            if let xNormalizer = sampleMeta.parameter(named: xAxis)?.normalizer,
-//               let yNormalizer = sampleMeta.parameter(named: yAxis)?.normalizer {
-//                return RectGateView(gate: castBinding(self),
-//                                    normalizers: .init(xNormalizer, yNormalizer),
-//                                    chartSize: chartSize)
-//            }
-//            return EmptyView()
-//        } remove: {}
-        
+//public struct RangeGateDef : GateDef
+//{
+//    private var _min: ValueType
+//    private var _max: ValueType
+////    private var _max: ValueType
+//    public var dims: [String]
+//    
+//    public var min: ValueType {
+//        get { _min }
+//        set { (_min, _max) = sort(newValue, _max) }
 //    }
-}
+//    
+//    public var max: ValueType {
+//        get { _max }
+//        set { (_min, _max) = sort(_min, newValue) }
+//    }
+//    
+//    public init(_ dim:String, _ min: ValueType, _ max: ValueType)
+//    {
+//        (_min, _max) = sort(min, max)
+//        self.dims = [dim]
+//    }
+//
+//    public func probability(of event:EventData) -> PValue
+//    {
+//        event.values[0] >= min && event.values[0] <= max ? .one : .zero
+//    }
+//}
 
-public struct RadialGateDef : GateDef
-{
-    var centerX: CGFloat
-    var centerY: CGFloat
-    var radius: CGFloat
-    public var dims:[String]
-    
-    public init(_ dims: Tuple2<String>, _ centerX: CGFloat, _ centerY: CGFloat, _ radius: CGFloat)
-    {
-        self.centerX = centerX
-        self.centerY = centerY
-        self.radius = radius
-        self.dims = dims.values
-    }
-    
-    public  static func == (lhs: RadialGateDef, rhs: RadialGateDef) -> Bool {
-                return lhs.hashValue == rhs.hashValue
-            }
-    public func probability(of event:EventData) -> PValue
-    {
-        let pt = CGPoint(event.values[0], event.values[1])
-        let center = CGPoint(centerX, centerY)
-       return distance(pt, center) < radius
-        ? PValue.one
-        : PValue.zero
-    }
-    
-    public init(from decoder: any Decoder) throws {
-        fatalError("init(from:) has not been implemented")
-    }
-    
-}
+public typealias GateFunc = (EventData) -> PValue
 
-public protocol PathGate : GateDef {
-    func normalizedPath() -> [CPoint]
-}
+//public struct RectGateDef : GateDef
+//{
+//    public var rect:CRect
+//    
+////    public var minX: ValueType
+////    public var maxX: ValueType
+////    public var minY: ValueType
+////    public var maxY: ValueType
+//    public var dims:[String]
+////    public var rect: CGRect {
+////        get {.init(from:min, to:max) }
+////        set {
+////            min = newValue.min
+////            max = newValue.max
+////        }
+////    }
+//
+//    public init(_ dims: Tuple2<String>, _ rect: CGRect)
+//    {
+//        self.rect = rect
+//        self.dims = dims.values
+//    }
+//    
+//    public init(_ dims: Tuple2<String>, _ minX: ValueType, _ maxX: ValueType, _ minY: ValueType, _ maxY: ValueType)
+//    {
+//        self.init(dims, CRect(from:.init(minX, minY), to:.init(maxX, maxY)))
+//    }
+//    
+//    public init(from decoder: any Decoder) throws {
+//        fatalError("init(from:) has not been implemented")
+//    }
+//    
+////    override func hash(into hasher: inout Hasher) {
+////        super.hash(into: &hasher)
+////        hasher.combineMany(minX, maxX, minY, maxY)
+////    }
+//    
+//    public func probability(of event:EventData) -> PValue
+//    {
+//            //  for d in dimensions where d.name?
+//        let point = CPoint(event.values[0], event.values[1])
+//        if rect.contains(point) {
+//            return .one
+//        }
+//        return .zero
+////        if !(minX...maxX).contains(event.values[0]) {
+////            return .zero
+////        }
+////        if !(minY...maxY).contains(event.values[1]) {
+////            return .zero
+////        }
+//    }
+//
+////    public func chartView(_ node: PopulationNode, chartSize: CGSize, chartDims: Tuple2<CDimension?>) -> any View {
+////            Text("Rect gate not yet supported")
+////        guard let xAxis = chart.xAxis?.name, xAxis == dims.get(index:0),
+////              let yAxis = chart.yAxis?.name, yAxis == dims.get(index:1)
+////        else {
+////            return nil
+////        }
+////        return .init(id:id) { sampleMeta, chartSize, editing in
+////            if let xNormalizer = sampleMeta.parameter(named: xAxis)?.normalizer,
+////               let yNormalizer = sampleMeta.parameter(named: yAxis)?.normalizer {
+////                return RectGateView(gate: castBinding(self),
+////                                    normalizers: .init(xNormalizer, yNormalizer),
+////                                    chartSize: chartSize)
+////            }
+////            return EmptyView()
+////        } remove: {}
+//        
+////    }
+//}
 
-public struct EllipsoidGateDef: PathGate {
-    public var dims: [String]
-    public var normalizedShape:Ellipsoid
-    public var axes:Tuple2<AxisNormalizer>
-    public init(_ dims: Tuple2<String>, _ normalizedShape:Ellipsoid, axes:Tuple2<AxisNormalizer>)
-    {
-        self.dims = dims.values
-        self.normalizedShape = normalizedShape
-        self.axes = axes
-    }
-    
-    public func probability(of event: EventData) -> PValue {
-        let normalizedPoint = CPoint(
-            axes.x.normalize(event.values[0]),
-            axes.y.normalize(event.values[1])
-        )
-        return normalizedShape.distanceSqr(of: normalizedPoint) <= 1 ? .one : .zero
-    }
-    
-    public func normalizedPath() -> [CPoint] {
-        normalizedShape
-            .path(subdivisions:100)
-//            .map { $0.unnormalize(axes) }
-    }
-}
+//public struct RadialGateDef : GateDef
+//{
+//    var centerX: CGFloat
+//    var centerY: CGFloat
+//    var radius: CGFloat
+//    public var dims:[String]
+//    
+//    public init(_ dims: Tuple2<String>, _ centerX: CGFloat, _ centerY: CGFloat, _ radius: CGFloat)
+//    {
+//        self.centerX = centerX
+//        self.centerY = centerY
+//        self.radius = radius
+//        self.dims = dims.values
+//    }
+//    
+//    public  static func == (lhs: RadialGateDef, rhs: RadialGateDef) -> Bool {
+//                return lhs.hashValue == rhs.hashValue
+//            }
+//    public func probability(of event:EventData) -> PValue
+//    {
+//        let pt = CGPoint(event.values[0], event.values[1])
+//        let center = CGPoint(centerX, centerY)
+//       return distance(pt, center) < radius
+//        ? PValue.one
+//        : PValue.zero
+//    }
+//    
+//    public init(from decoder: any Decoder) throws {
+//        fatalError("init(from:) has not been implemented")
+//    }
+//    
+//}
+
+//public protocol PathGate : GateDef {
+//    func normalizedPath() -> [CPoint]
+//}
+
+//public struct EllipsoidGateDef: PathGate {
+//    public var dims: [String]
+//    public var normalizedShape:Ellipsoid
+//    public var axes:Tuple2<AxisNormalizer>
+//    public init(_ dims: Tuple2<String>, _ normalizedShape:Ellipsoid, axes:Tuple2<AxisNormalizer>)
+//    {
+//        self.dims = dims.values
+//        self.normalizedShape = normalizedShape
+//        self.axes = axes
+//    }
+//    
+//    public func probability(of event: EventData) -> PValue {
+//        let normalizedPoint = CPoint(
+//            axes.x.normalize(event.values[0]),
+//            axes.y.normalize(event.values[1])
+//        )
+//        return normalizedShape.distanceSqr(of: normalizedPoint) <= 1 ? .one : .zero
+//    }
+//    
+//    public func normalizedPath() -> [CPoint] {
+//        normalizedShape
+//            .path(subdivisions:100)
+////            .map { $0.unnormalize(axes) }
+//    }
+//}
 
 public struct Ellipsoid: Codable, Hashable {
     public var center:CPoint
@@ -384,19 +417,19 @@ public struct Ellipsoid: Codable, Hashable {
 }
 
 
-public struct PolygonGateDef : GateDef {
-    public var points : [CPoint] = []
-    public var dims:[String]
-    public init(_ dims:[String], points: [CPoint])
-    {
-        self.dims = dims
-        self.points = points
-    }
-    
-    public func probability(of: EventData) -> PValue {
-        fatalError()
-    }
-}
+//public struct PolygonGateDef : GateDef {
+//    public var points : [CPoint] = []
+//    public var dims:[String]
+//    public init(_ dims:[String], points: [CPoint])
+//    {
+//        self.dims = dims
+//        self.points = points
+//    }
+//    
+//    public func probability(of: EventData) -> PValue {
+//        fatalError()
+//    }
+//}
 
 //public class SplineGateDef : GateDef
 //{

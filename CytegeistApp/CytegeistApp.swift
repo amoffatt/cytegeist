@@ -28,7 +28,8 @@ struct CytegeistApp: SwiftUI.App {
             {
                 ExperimentView()
                     .environment(appModel)
-//                     .modelContainer(for:  Experiment.self, isUndoEnabled: true)
+//                    .modelContainer(for:  Experiment.self, isUndoEnabled: true)
+                    .modelContainer(for:  AnalysisNode.self, isUndoEnabled: true)
             }
                 //        Settings {
                 //            SettingsView()

@@ -302,11 +302,8 @@ public class CytegeistCoreAPI {
             return data
         case .gated(let parent, let gate, let invert, _):
             let parentData = try await self.populationCache.get(parent)
-                if let gate {
-                    let f:(EventData) -> PValue = invert
-                    ? { gate.probability(of:$0).inverted }
-                    : gate.probability
-                    
+                if let gate,
+                   let f = gate.function(invert) {
                     return try parentData.multiply(filterDims: gate.dims, filter: f)
                 }
                 return parentData
@@ -460,7 +457,7 @@ public indirect enum PopulationRequest: Hashable, CustomStringConvertible {
             case (.sample(let lhsSample), .sample(let rhsSample)):
                 return lhsSample == rhsSample
             case (.gated(let lhsParent, let lhsGate, let lhsInvert, _), .gated(let rhsParent, let rhsGate, let rhsInvert, _)):
-                return lhsParent == rhsParent && lhsGate?.isEqualTo(rhsGate) ?? false && lhsInvert == rhsInvert
+                return lhsParent == rhsParent && lhsGate?.isGateDefEqualTo(rhsGate) ?? false && lhsInvert == rhsInvert
 //            case (.union(let lhsParents), .union(let rhsParents)):
 //                return lhsParents.sorted() == rhsParents.sorted() // Compare sorted parents for order independence
 //                fatalError()
@@ -493,7 +490,7 @@ public indirect enum PopulationRequest: Hashable, CustomStringConvertible {
     }
 
     case sample(_ sample: SampleRef)
-    case gated(_ parent: PopulationRequest, gate:(any GateDef)?, invert:Bool, name:String)
+    case gated(_ parent: PopulationRequest, gate:Gate?, invert:Bool, name:String)
     case union(_ parent: PopulationRequest, union: [PopulationRequest])
     
     func getSample() -> SampleRef? {
