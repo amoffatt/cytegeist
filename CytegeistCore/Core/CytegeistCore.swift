@@ -13,7 +13,7 @@ import CytegeistLibrary
 public enum APIError : Error {
     var message: String {
         switch self {
-            case .creatingChart(let cause):      "Error creating chart: \(cause)"
+            case .computingQuery(let cause):      "Error creating chart: \(cause)"
             case .parameterNotFound(let name):   "Parameter '\(name) not found"
             case .creatingImage:                 "Could not create 2D image"
             case .noDataComputed:                "No data computed"
@@ -386,10 +386,20 @@ public class CytegeistCoreAPI {
         let histogram = try await _statisticHistogram(r.population, r.dim)
         // Stats based on a histogram
         switch r.statistic {
-            case .percentile(let p):     return histogram.percentile(p)
-            case .median:                return histogram.percentile(0.5)
-            case .cv:                     print("not implemented")
-            case .mean:                return histogram.mean()
+            case .percentile(let p):
+                return histogram.percentile(p)
+            default: break
+        }
+        
+        let basicStats = try await cache(_basicHistogramStats).get(.init(r.population, Tuple1(r.dim)))
+        
+        switch r.statistic {
+            case .median:
+                return basicStats.median
+            case .cv:
+                return basicStats.cv
+            case .mean:
+                return basicStats.mean
                 
             default: break
         }
@@ -403,7 +413,11 @@ public class CytegeistCoreAPI {
         let histogram = try await self.histogram1DCache.get(histogramRequest)
         return histogram.histogram
     }
-
+        
+    nonisolated private func _basicHistogramStats(_ request:HistogramRequest<X>) async throws -> BasicHistogramStats {
+        let histogram = try await self._statisticHistogram(request.population, request.dims.x)
+        return BasicHistogramStats(data:histogram)
+    }
 }
 
 public struct SampleRequest : Identifiable, Hashable {
@@ -445,8 +459,8 @@ public indirect enum PopulationRequest: Hashable, CustomStringConvertible {
         switch (lhs, rhs) {
             case (.sample(let lhsSample), .sample(let rhsSample)):
                 return lhsSample == rhsSample
-            case (.gated(let lhsParent, let lhsGate, _), .gated(let rhsParent, let rhsGate, _)):
-                return lhsParent == rhsParent && lhsGate?.isEqualTo(rhsGate) ?? false
+            case (.gated(let lhsParent, let lhsGate, let lhsInvert, _), .gated(let rhsParent, let rhsGate, let rhsInvert, _)):
+                return lhsParent == rhsParent && lhsGate?.isEqualTo(rhsGate) ?? false && lhsInvert == rhsInvert
 //            case (.union(let lhsParents), .union(let rhsParents)):
 //                return lhsParents.sorted() == rhsParents.sorted() // Compare sorted parents for order independence
 //                fatalError()
@@ -459,9 +473,10 @@ public indirect enum PopulationRequest: Hashable, CustomStringConvertible {
         switch self {
             case .sample(let sample):
                 sample.hash(into: &hasher)
-            case .gated(let parent, let gate,  _):
+            case .gated(let parent, let gate, let invert, _):
                 parent.hash(into: &hasher)
                 gate?.hash(into: &hasher)
+                invert.hash(into: &hasher)
 //            case .union(_, union: let union):
 //                fatalError()
             default:  fatalError()
@@ -471,14 +486,14 @@ public indirect enum PopulationRequest: Hashable, CustomStringConvertible {
     public var name: String {
         switch self {
         case .sample(let sampleRef):            sampleRef.url.absoluteString
-        case .gated(_, _, let name):         name
+        case .gated(_, _, _, let name):         name
         case .union(let parents, union: []):    "Union"
         default:                                 ""
         }
     }
 
     case sample(_ sample: SampleRef)
-    case gated(_ parent: PopulationRequest, gate:(any GateDef)?, name:String)
+    case gated(_ parent: PopulationRequest, gate:(any GateDef)?, invert:Bool, name:String)
     case union(_ parent: PopulationRequest, union: [PopulationRequest])
     
     func getSample() -> SampleRef? {
@@ -493,7 +508,7 @@ public indirect enum PopulationRequest: Hashable, CustomStringConvertible {
     func getParent() -> PopulationRequest? {
         switch self {
             case .sample: return nil
-            case .gated(let parent, _, _), .union(let parent, _):
+            case .gated(let parent, _, _, _), .union(let parent, _):
                 return parent
         }
     }

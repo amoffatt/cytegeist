@@ -17,7 +17,7 @@ class CGLayout : Codable, Hashable, Identifiable
     init() {    }
     init(_ xml: TreeNode)    {    }
     //-------------------------------------------------------------
-    static func == (lhs: CGLayoutModel, rhs: CGLayoutModel) -> Bool {       lhs.id == rhs.id   }
+    static func == (lhs: CGLayout, rhs: CGLayout) -> Bool {       lhs.id == rhs.id   }
     func hash(into hasher: inout Hasher) {     hasher.combine(id)   }
 
     //-------------------------------------------------------------
@@ -33,7 +33,7 @@ class CGLayout : Codable, Hashable, Identifiable
     
     public func newTextItem(name: String, position:CGPoint)
     {
-        let layoutItem = LayoutItem(value: name)
+        let layoutItem = LayoutItem(.text(name))
         layoutItem.selected = true
         addItem(layoutItem)
     }
@@ -46,7 +46,7 @@ class CGLayout : Codable, Hashable, Identifiable
     
     public func newTable(name: String, position:CGPoint)
     {
-        let item = LayoutItem(position: position, type: .table)
+        let item = LayoutItem(.table, position: position)
         item.selected = true
         addItem(item)
     }
@@ -130,9 +130,9 @@ class CGLayout : Codable, Hashable, Identifiable
 //---------------------------------------------------------------------
 // base class for CText, CTable, CChart
 
-enum ELayoutType : Codable {
-    case text
-    case chart
+public enum ELayoutType : Codable {
+    case text(String)
+    case chart(ChartDef?)
     case table
 }
 
@@ -144,66 +144,59 @@ public class LayoutItem: Codable, Identifiable, Equatable
     var size: CGSize = .zero
     var position: CGPoint = .zero
     var tmpOffset: CGPoint = .zero
-    var type: ELayoutType = .text
-    var value: String = ""
-    var xAxis: AxisNormalizer?
-    var yAxis: AxisNormalizer?
-    var data: Data?
+    var type: ELayoutType
+//    var value: String = ""              //Text
+//    var xAxis: AxisNormalizer?          //Chart
+//    var yAxis: AxisNormalizer?
+//    var data: Data?                     //Table
 
 // save scale, rotation, background, stroke, etc
     
     var selected:Bool = false
     private(set) var node:AnalysisNode?
-//
+
     var name:String {
         get { node != nil ? node!.name : "n/a"}
         set { if node != nil { node!.name = newValue }}
     }
+
+//    init(_ type: ELayoutType, position: CGPoint = .zero, node: AnalysisNode? = nil) {
+//        self.node = node
+//        self.position = position
+//        self.type = type
+//    }
     
+//    init(position: CGPoint, type: ELayoutType) {
+//        self.position = position
+//        self.type = type
+//        
+//    }
+//    init(value: String) {
+//        self.value = value
+//        self.type = .text
+//    }
     
-    //public
-    init(position: CGPoint, node: AnalysisNode?, type: ELayoutType) {
-        self.node = node
-        self.position = position
-        self.type = type
- }
-    
-    init(position: CGPoint, type: ELayoutType) {
-        self.position = position
-        self.type = type
-        
-    }
-    init(value: String) {
-        self.value = value
-        self.type = .text
-        
-    }
-    
-    init(position: CGPoint, type: ELayoutType, node: AnalysisNode?, size: CGSize, tmpOffset: CGPoint) {
+    public init(_ type: ELayoutType, node: AnalysisNode? = nil, position: CGPoint = .zero, size: CGSize = .init(100)) {
         self.node = node
         self.position = position
         self.type = type
         self.size = size
-        self.tmpOffset = tmpOffset
+//        self.tmpOffset = tmpOffset
     }
 
-    convenience init(data: Data?) {
-        self.init(position: CGPoint.zero, node: nil, type: ELayoutType.table )
-         self.data = data
-      }
-
+//    convenience init(data: Data?) {
+//        self.init(position: CGPoint.zero, node: nil, type: ELayoutType.table )
+//         self.data = data
+//      }
     
      public required init(from decoder: any Decoder) throws {
-        
         fatalError("init(from:) has not been implemented")
     }
     
     public func clone() -> LayoutItem
     {
-        LayoutItem(position: self.position, type: self.type, node: self.node,
-                   size: self.size, tmpOffset: self.tmpOffset)
+        LayoutItem(self.type, node: self.node, position: self.position, size: self.size)
     }
-
 }
 
 

@@ -13,7 +13,7 @@ import CytegeistCore
 
 
 struct GateConfigView : View {
-    var node:PopulationNode
+    var node:AnalysisNode
     var finalize:() -> Void
     
     
@@ -47,7 +47,7 @@ struct GatingView: View {
     @State private var isHovering = false
     @State private var offset = CGSize.zero
     
-    @State private var confirmGate:PopulationNode? = nil
+    @State private var confirmGate:AnalysisNode? = nil
     @State private var focusedItem:ChartAnnotation? = nil
     @State private var confirmDelete:ChartAnnotation? = nil
 //    var sample: Sample?
@@ -213,7 +213,7 @@ struct GatingView: View {
     func addGate(_ gate: AnyGate)
     {
             //        self.candidateGateName = getCandidateGateName()
-        let node = PopulationNode(gate:gate)
+        let node = AnalysisNode(gate:gate)
         node.gate = gate
         node.name = "T Cells"
         confirmGate = node

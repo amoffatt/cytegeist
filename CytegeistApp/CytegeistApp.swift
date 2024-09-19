@@ -27,6 +27,7 @@ struct CytegeistApp: SwiftUI.App {
             Window("Navigation", id: "nav")
             {
                 ExperimentView()
+                    .environment(appModel)
 //                     .modelContainer(for:  Experiment.self, isUndoEnabled: true)
             }
                 //        Settings {
@@ -38,14 +39,15 @@ struct CytegeistApp: SwiftUI.App {
                 PairChartsPreview()
             }
             
-        Window("SaveOpenView", id: "SaveOpen")
-        {
-            SaveOpenView()
-        }
-        
+//        Window("SaveOpenView", id: "SaveOpen")
+//        {
+//            SaveOpenView()
+//        }
+//        
         Window("Experiment Browser", id: "browse")
         {
             ExperimentBrowser()
+                .environment(appModel)
         }
         
 

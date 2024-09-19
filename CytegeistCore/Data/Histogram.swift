@@ -290,18 +290,56 @@ extension Tuple3:Codable where Value:Codable {}
 //    associatedtype D
 //}
 
+public struct BasicHistogramStats {
+    public var stdev: Double
+    public var cv: Double
+    public var mean: Double
+    public var median: Double
+    // Also quartiles and robust CV?
+
+    
+    public init(data:HistogramData<X>)
+    {
+        let totalCount = data.totalCount
+        let bins = data.bins
+        
+        // TODO figure out if this should be used
+//        let weightedBins = data.counts.map { bin, count in bin.x * Double(count) }
+//        self.mean = weightedBins.sum() / totalCount
+        self.mean = data.totalCount / Double(data.bins.count)
+        self.median = data.percentile(0.5)
+        
+//        let halfSum = totalCount / 2.0
+//        var sum = 0.0
+//        for bin in 0..<bins.count {
+//            sum += bins[bin ]
+//            if sum > halfSum {
+//                let diff = bins[bin] - bins[bin-1]
+//                let ratio = (sum - halfSum) / (sum - diff)
+//                self.median = Double(bin) - ratio
+//                break
+//            }   }
+            // σ = √[(Σ(x - μ)^2) / (n - 1)]
+        
+        var sum = 0.0
+        for bin in 0..<bins.count {
+            sum += (mean - bins[bin]) * (mean - bins[bin])
+        }
+        self.stdev = sqrt(sum / Double( bins.count-1))
+        self.cv = stdev / mean * 100.0
+    }
+    
+
+}
+
 public struct HistogramData<D:Dimensions> {
         //    public typealias Axes = AxesTuple
     
     public var bins:[Double]
-    public var mean: Double?
     public var mode: Int?
     public var modeHeight: Double = 0.0
-    public var median: Double?
-    public var totalCount: Double?
-    public var normalizeCoeff: Double?
-    public var stdev: Double?
-    public var cv: Double?
+    public var totalCount: Double
+    public var normalizeCoeff: Double
 
     public let axes:D.Axes
     public var countAxis:AxisNormalizer?
@@ -316,7 +354,7 @@ public struct HistogramData<D:Dimensions> {
     }
     
     public func normalizedCount(bin: Int) -> Double {
-        return bins[bin] * normalizeCoeff!
+        return bins[bin] * normalizeCoeff
     }
     
     public var counts:some Sequence<(value:D.FloatCoord, count:Double)> {
@@ -326,14 +364,6 @@ public struct HistogramData<D:Dimensions> {
     }
 
     public init(bins: [Double], size: D.IntCoord, axes: D.Axes, countAxis: AxisNormalizer? = nil) {
-               
-        self.bins = bins
-        self.axes = axes
-        self.size = size
-    }
-    
-    private mutating func calculate()
-    {
         var sum = 0.0
         for bin in 0..<bins.count {
             sum += bins[bin]
@@ -343,31 +373,14 @@ public struct HistogramData<D:Dimensions> {
             }
         }
         totalCount = sum
-        mean = totalCount! / Double(bins.count)
-        normalizeCoeff = 1.0 / modeHeight
-        
-        let halfSum = totalCount! / 2.0
-        sum = 0.0
-        for bin in 0..<bins.count {
-            sum += bins[bin ]
-            if sum > halfSum {
-                let diff = bins[bin] - bins[bin-1]
-                let ratio = (sum - halfSum) / (sum - diff)
-                median = Double(bin) - ratio
-                break
-            }   }
-            // σ = √[(Σ(x - μ)^2) / (n - 1)]
-        
-        sum = 0.0
-        for bin in 0..<bins.count {
-            sum += (mean! - bins[bin]) * (mean! - bins[bin])
-        }
-        stdev = sqrt(sum / Double( bins.count-1))
-        cv = stdev! / mean! * 100.0
-        countAxis = countAxis ?? defaultCountAxis(mode: modeHeight)
+        normalizeCoeff = 1.0 / max(1, modeHeight)
 
+        self.bins = bins
+        self.axes = axes
+        self.size = size
+        
+        self.countAxis = countAxis ?? defaultCountAxis(mode: modeHeight)
     }
-    
     
     public init(data: D.Data, probabilities: [PValue]?, size: D.IntCoord, axes: D.Axes, countAxis: AxisNormalizer? = nil) {
         var bins = Array(repeating: Double(0), count: D.inlineArraySize(size:size))
@@ -393,29 +406,29 @@ fileprivate func defaultCountAxis(mode:Double?) -> AxisNormalizer {
 }
 
 
-//public enum HistogramSmoothing {
-//    case off, low, high
-//    
-//    var kernel: Any? {
-//        switch self {
-//            case .off:                nil
+public enum HistogramSmoothing {
+    case off, on
+    
+    var kernel: Any? {
+        switch self {
+            case .off:                nil
+            case .on:                   fatalError()
 //            case .low:                fatalError()
 //            case .high:               fatalError()
-//        }
-//    }
-//}
+        }
+    }
+}
 
-//public extension HistogramData<X> {
-//    func convolute(kernel:Any?) -> HistogramData<X>? {
-//        nil
-//    }
-//}
-//
-//public extension HistogramData<XY> {
-//    func convolute(kernel:Any?) -> HistogramData<XY>? {
-//        nil
-//    }
-//}
+public extension HistogramData<X> {
+    func convolute(kernel:Any?) -> HistogramData<X>? {
+        nil
+    }
+}
+public extension HistogramData<XY> {
+    func convolute(kernel:Any?) -> HistogramData<XY>? {
+        nil
+    }
+}
 
 func smooth()
 {

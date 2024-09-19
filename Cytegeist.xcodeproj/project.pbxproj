@@ -92,6 +92,7 @@
 		DC2473742C9B78E500D2DCA0 /* MIFlowCyt.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC2473732C9B78E500D2DCA0 /* MIFlowCyt.swift */; };
 		DC2473752C9B81E000D2DCA0 /* PairCharts.swift in Sources */ = {isa = PBXBuildFile; fileRef = B68529702C74DC1100EF9EF4 /* PairCharts.swift */; };
 		DC2473762C9B820200D2DCA0 /* SampleInspectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B68529712C74DC1100EF9EF4 /* SampleInspectorView.swift */; };
+		DC2473772C9CB6CE00D2DCA0 /* Statistics.swift in Sources */ = {isa = PBXBuildFile; fileRef = B69001CE2C88CED50083C743 /* Statistics.swift */; };
 		DC6F42FB2C83F7BD00288EB8 /* TabBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC6F42FA2C83F7BD00288EB8 /* TabBar.swift */; };
 		DC861C7C2C8632F000D7C3FB /* CGTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC861C7B2C8632F000D7C3FB /* CGTableView.swift */; };
 		DC861C822C868D8700D7C3FB /* ModelList.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC861C812C868D8700D7C3FB /* ModelList.swift */; };
@@ -464,6 +465,7 @@
 		B65D82A52C44BE7100E4F0A2 /* CytegeistApp */ = {
 			isa = PBXGroup;
 			children = (
+				B6C9A4A82C76820300DB6786 /* Unused UI */,
 				B65D82AA2C44BE7100E4F0A2 /* CytegeistApp.swift */,
 				B6C9A44B2C75CFCB00DB6786 /* App.swift */,
 				B65D82AC2C44BE7100E4F0A2 /* AaronTestContentView.swift */,
@@ -508,7 +510,6 @@
 			isa = PBXGroup;
 			children = (
 				B610A5732C54269A0081C517 /* Util */,
-				B6C9A4A82C76820300DB6786 /* Unused UI */,
 				B6C9A3ED2C75A3EF00DB6786 /* CytegeistLibrary.h */,
 			);
 			path = CytegeistLibrary;
@@ -874,6 +875,7 @@
 				B63EEE922C569CB300E465C9 /* SampleRef.swift in Sources */,
 				DCA66B752C81047200F51C70 /* GatingViews.swift in Sources */,
 				B6C9A4B02C76E2CD00DB6786 /* FCS.swift in Sources */,
+				DC2473772C9CB6CE00D2DCA0 /* Statistics.swift in Sources */,
 				B64173922C58A89A001AA2F4 /* CoreTestUtil.swift in Sources */,
 				DC2473682C9A743A00D2DCA0 /* Statistic.swift in Sources */,
 				DC23F02F2C7D3C0B002FCDC0 /* Gate.swift in Sources */,

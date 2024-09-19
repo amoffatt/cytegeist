@@ -37,19 +37,19 @@ public class Experiment : Usable
     
     var panels = [CPanel]()
     var groups = [CGroup]()
-    var tables = [CGTableModel]()
-    var layouts = [CGLayoutModel]()
+    var tables = [CGTable]()
+    var layouts = [CGLayout]()
     var _core:CytegeistCoreAPI? = nil
-      
+    
     var core:CytegeistCoreAPI {       /// Lazilly created
         if let _core {  return _core   }
         _core = CytegeistCoreAPI()
         return _core!
     }
- //--------------------------------------------------------------------------------
+        //--------------------------------------------------------------------------------
     required public init(from decoder: any Decoder) throws {
         fatalError("Implement decoding")        // TODO AM Write class macro and property wrapper to handle properties with default values
-     }
+    }
     
     init(name: String = "Untitled", version: String = "" )
     {
@@ -60,13 +60,13 @@ public class Experiment : Usable
     public func encode(to encoder: Encoder) throws {
             // Do nothing
     }
-   //--------------------------------------------------------------------------------
+        //--------------------------------------------------------------------------------
     public func addSample(_ sample: Sample)   {
         samples.append(sample)
     }
-
-    func addTable() -> CGTableModel {
-        let table = CGTableModel()
+    
+    func addTable() -> CGTable {
+        let table = CGTable()
         table.name = table.name.generateUnique(existing: tables.map { $0.name })
         tables.append(table)
         return table
@@ -79,7 +79,7 @@ public class Experiment : Usable
         return layout
     }
     
-   //--------------------------------------------------------------------------------
+        //--------------------------------------------------------------------------------
     
     public var focusedSample: Sample? {
             // AM TODO currently will be a random item when multiple selected.
@@ -100,8 +100,8 @@ public class Experiment : Usable
         selectedAnalysisNodes.nodes.removeAll()
         selectedAnalysisNodes.nodes.insert(node)
     }
-   
-    //--------------------------------------------------------------------------------
+    
+        //--------------------------------------------------------------------------------
     func onFCSPicked(_result: Result<[URL], any Error>)
     {
         Task {
@@ -160,7 +160,7 @@ public class Experiment : Usable
             }
         }
     }
-    //--------------------------------------------------------------------------------
+        //--------------------------------------------------------------------------------
     public struct Entry
     {
         var key: String
@@ -196,7 +196,7 @@ public class Experiment : Usable
         print("Nonuniques: ", nonuniques)
         return nonuniques
     }
-        
+    
     func isParameterKey(_ keyword: String) -> Bool
     {
         keyword.starts(with: "$P")      // should check for a digit in 3rd position
@@ -208,7 +208,7 @@ public class Experiment : Usable
             return nil
         }
     }
- 
+}
 
     //--------------------------------------------------------------------------------
 public struct CGroup : Identifiable, Codable
@@ -217,6 +217,7 @@ public struct CGroup : Identifiable, Codable
     var name = ""
     var keyword: String?
     var value: String?
+    @CodableIgnored
     var color: Color?
     
     init(name: String = "name", color: Color?, keyword: String?, value:  String?) {
@@ -233,6 +234,7 @@ struct CPanel : Usable
     var name = ""
     var keyword: String?
     var values: [String]
+    @CodableIgnored
     var color: Color?
     
      public static func == (lhs: CPanel, rhs: CPanel) -> Bool {   lhs.id == rhs.id   }

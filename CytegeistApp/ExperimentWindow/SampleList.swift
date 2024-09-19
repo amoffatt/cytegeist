@@ -9,14 +9,11 @@ import Foundation
 import UniformTypeIdentifiers
 import CytegeistCore
 import CytegeistLibrary
-/*
-See LICENSE folder for this sample’s licensing information.
 
-Abstract:    The sample table view for an experiment.
-*/
 
 import SwiftUI
 
+    // The sample table view for an experiment.
 extension SampleList
 {
         // access to the samples with filter and sort applied
@@ -80,11 +77,6 @@ struct SampleList: View {
     ]
     
     var selection:Set<Sample.ID> { experiment.selectedSamples }
-//    @StateObject var store: Store
-
-//    let colMap = [ ["Name", .tubeName], ["FIL", .experimentName], ["CYT", .cytometer], ["BTIM", .btime],
-//                   ["SYS", .sys], ["Count", .cellCount], ["SETUP", .setup1], ["EXP", .creator] ]
-    
     
     var header: some View {
         
@@ -108,14 +100,6 @@ struct SampleList: View {
                 column.defaultColumn()
                     .customizationID(column.name)
             }
-//            TableColumn("Name", value: \.tubeName)          { sample in Text(sample.tubeName)}.customizationID("tubeName")
-//            TableColumn("$FIL", value: \.experimentName)    { sample in Text(sample.experimentName)  }.customizationID("experimentName")
-//            TableColumn("Count", value: \.cellCount)        { sample in Text(String(sample.cellCount))  }.customizationID("cellCount")
-//            TableColumn("$BTIM", value: \.btime)            { sample in Text(sample.btime)  }.customizationID("btime")
-//            TableColumn("$CYT", value: \.cytometer)         { sample in Text(sample.cytometer)  }.customizationID("cytometer")
-//            TableColumn("$SYS", value: \.sys)               { sample in Text(sample.sys)  }.customizationID("sys")
-//            TableColumn("SETUP", value: \.setup1)           { sample in Text(sample.setup1)  }.customizationID("setup1")
-//            TableColumn("$Creator", value: \.creator)       { sample in Text(sample.creator)  }.customizationID("creator")
         }
         .onDeleteCommand {
             experiment.samples.removeAll { experiment.selectedSamples.contains($0.id) }
@@ -124,19 +108,6 @@ struct SampleList: View {
         .onChange(of: experiment.id) {
             experiment.selectedSamples.removeAll()
         }
-//        rows: {
-//            ForEach(samples) { sample in
-//                TableRow(sample)
-//                    .itemProvider { sample.itemProvider }
-//            }
-//            .onInsert(of: [Sample.draggableType]) { index, providers in
-//                Sample.fromItemProviders(providers) { samples in
-//                    self.experiment.samples.insert(contentsOf: samples, at: index)
-//                }
-//            }
-//            .onDelete(perform: { indexSet in
-//            })
-//        }
     }
     
     var footer: some View {
@@ -146,9 +117,7 @@ struct SampleList: View {
             Text("\(filteredSamples.count) samples \(selectedText)")
         }
     }
-    
  
-
     var body: some View
     {
         @Bindable var experiment = experiment
@@ -200,8 +169,6 @@ struct SampleList: View {
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Buttons.toolbar("Open FCS Files", .add) { showFCSImporter = true }
-//                Buttons.icon("Open FCS Files", .add, action: { showFCSImporter = true } )
-//                    .buttonStyle(DefaultButtonStyle())
             }
 
         }
@@ -223,15 +190,12 @@ struct SampleList: View {
         }
       
         func performDrop(info: DropInfo) -> Bool {
-                //        NSSound(named: "Sosumi")?.play()
             fileInfo = []
             var gotFile = false
-//            print ( info.itemProviders(for: ["public.file-url"]) )
             
             for itemProvider in info.itemProviders(for: ["public.file-url"]) {
                 itemProvider.loadItem(forTypeIdentifier: "public.file-url", options: nil) { (item, error) in
                     if let data = item as? Data {
-//                        print (data)
                         if let url = URL(dataRepresentation: data, relativeTo: nil) {
                             let theInfo = "File: \(url.lastPathComponent) \nPath: \(url.path)\n"
                             let theSizes = FileInfo.reportSizes(url: url)
@@ -251,12 +215,12 @@ struct SampleList: View {
        {
            let path = url.path
            print (path)
-          if url.isDirectory
+           if url.isDirectory
            {
               let resourceKeys : [URLResourceKey] = [.creationDateKey, .isDirectoryKey]
               let enumerator = FileManager.default.enumerator(at: url,
-                                                              includingPropertiesForKeys: resourceKeys,
-                                                              options: [.skipsHiddenFiles], errorHandler: { (url, error) -> Bool in
+                          includingPropertiesForKeys: resourceKeys,
+                          options: [.skipsHiddenFiles], errorHandler: { (url, error) -> Bool in
                   print("directoryEnumerator error at \(url): ", error)
                   return true
               })!
@@ -265,10 +229,8 @@ struct SampleList: View {
               }
               
           }
-           if path.hasSuffix(".fcs")
-           {
-                   //                                    store.readFCSFileLater(url)
-               print ("ADD FCS")
+           if path.hasSuffix(".fcs")  {
+               print ("ADD FCS")  // store.readFCSFileLater(url)
            }
            else { print ("ignored") }
 

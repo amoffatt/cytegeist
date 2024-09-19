@@ -109,7 +109,7 @@ struct CGLayoutView: View {
                     layoutModel.deselectAll()
                 }
                 .onAppear {
-                    layoutModel.addItem( LayoutItem(value: "new text item!"))
+                    layoutModel.addItem( LayoutItem(.text("new text item!")))
                     isFocused = true
                 }
     }
@@ -146,7 +146,7 @@ struct CGLayoutView: View {
     func newChartItem(node:AnalysisNode, position:CGPoint)
     {
         print("new layout item: ", node.name)
-        let layoutItem = LayoutItem(position:position, node:node,type: ELayoutType.chart)
+        let layoutItem = LayoutItem(.chart(nil), node:node, position:position)
         layoutModel.addItem(layoutItem)
     }
     

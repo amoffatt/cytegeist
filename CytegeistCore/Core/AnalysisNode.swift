@@ -17,7 +17,7 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable
 {
     public var id = UUID()
     public var name: String = ""
-    public let sample: Sample?                      // nil except at the root node
+    public var sample: Sample? = nil                      // nil except at the root node
     public var graphDef = ChartDef()              // how this population wants to be shown
     public var statistics =  [String : Double]()         // cache of stats with values
     public private(set) var children: [AnalysisNode] = []        // subpopulations dependent on us
@@ -32,8 +32,17 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable
         }
     }
         //  these fields are only applicable to populations
-    public var gate: AnyGate?                      // the predicate to filter ones parent
-//
+    @ObservationIgnored
+    @CodableIgnored
+    public var gate: AnyGate? = nil                      // the predicate to filter ones parent
+    @ObservationIgnored
+    @CodableIgnored
+    public var color: Color? = nil
+    public var opacity: Double = 1.0
+    public var labelOffset: CGPoint = .zero
+    public var invert: Bool = false
+    
+                                           
 //--------------------------------------------------------
     public static func == (lhs: AnalysisNode, rhs: AnalysisNode) -> Bool {   lhs.id == rhs.id  }
     public func hash(into hasher: inout Hasher) {        hasher.combine(id)    }
@@ -44,7 +53,19 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable
     public init() {    }
     
     public required init(from decoder: any Decoder) throws {
-        fatalError("init(from:) has not been implemented")
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self._id = try container.decode(UUID.self, forKey: ._id)
+        self._name = try container.decode(String.self, forKey: ._name)
+        self._sample = try container.decodeIfPresent(Sample.self, forKey: ._sample)
+        self._graphDef = try container.decode(ChartDef.self, forKey: ._graphDef)
+        self._statistics = try container.decode([String : Double].self, forKey: ._statistics)
+        self._children = try container.decode([AnalysisNode].self, forKey: ._children)
+        self.__parent = try container.decodeIfPresent(AnalysisNode.self, forKey: .__parent)
+        self._gate = try container.decode(CodableIgnored<AnyGate>.self, forKey: .gate)
+        self._color = try container.decode(CodableIgnored<Color>.self, forKey: .color)
+        self._opacity = try container.decode(Double.self, forKey: ._opacity)
+        self._labelOffset = try container.decode(CGPoint.self, forKey: ._labelOffset)
+        self._invert = try container.decode(Bool.self, forKey: ._invert)
     }
     
     public init(children: [AnalysisNode]? = nil)  {
@@ -55,35 +76,35 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable
         self.sample  = sample
     }
     
-    init(gate: AnyGate? = nil, invert: Bool = false, color: Color? = nil, opacity: Double = 0.2) {
+    public init(gate: AnyGate? = nil, invert: Bool = false, color: Color? = nil, opacity: Double = 0.2) {
         self.gate = gate
-//        self.invert = invert
-//        self.color = color ?? .green
-//        self.opacity = opacity
+        self.invert = invert
+        self.color = color ?? .green
+        self.opacity = opacity
     }
     
  //--------------------------------------------------------
-    func getSample() -> Sample? { sample ?? parent?.getSample() }       //AT?
+    public func getSample() -> Sample? { sample ?? parent?.getSample() }       //AT?
 
-    func path() -> String { return parent?.path() ?? "" + name  }   //AT?
+    public func path() -> String { return parent?.path() ?? "" + name  }   //AT?
 //--------------------------------------------------------
-    public func mean(dim: String) -> Double     {   statLookup( EStatistic.mean, dim)    }
-    public func median(dim: String) -> Double   {   statLookup( EStatistic.median, dim)   }
-    public func cv(dim: String) -> Double       {   statLookup( EStatistic.cv, dim)   }
-    public func stdev(dim: String) -> Double     {   statLookup( EStatistic.stdev, dim)   }
-    public func freqOfParent() -> Double        {   statLookup( EStatistic.freqOf, "")    }
-    
-    private func statLookup(_ stat: EStatistic, _ dim: String) -> Double   //AT?
-    {
-        let term = stat.text + dim
-        var value: Double? =  statistics[term]
-        if (value == nil)
-        {
-            value = 2.9   //requestStatQuery(path: path(), stat: stat, dim: dim)
-            statistics[term] = value
-        }
-        return value!
-    }
+//    public func mean(dim: String) -> Double     {   statLookup( EStatistic.mean, dim)    }
+//    public func median(dim: String) -> Double   {   statLookup( EStatistic.median, dim)   }
+//    public func cv(dim: String) -> Double       {   statLookup( EStatistic.cv, dim)   }
+//    public func stdev(dim: String) -> Double     {   statLookup( EStatistic.stdev, dim)   }
+//    public func freqOfParent() -> Double        {   statLookup( EStatistic.freqOf, "")    }
+//    
+//    private func statLookup(_ stat: EStatistic, _ dim: String) -> Double   //AT?
+//    {
+//        let term = stat.text + dim
+//        var value: Double? =  statistics[term]
+//        if (value == nil)
+//        {
+//            value = 2.9   //requestStatQuery(path: path(), stat: stat, dim: dim)
+//            statistics[term] = value
+//        }
+//        return value!
+//    }
 //--------------------------------------------------------
     private func _addChild(_ node:AnalysisNode)     {        children.append(node)    }
     public func addChild(_ node:AnalysisNode)       {        node.parent = self    }
@@ -99,16 +120,21 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable
     }
 
     public func remove() {
-        if parent != nil { _ = parent!.removeChild(self)  }     //AT?
+        // Removes this child from parent in the parent setter
         parent = nil
     }
 
 //--------------------------------------------------------
-     func createRequest() throws -> PopulationRequest {
-        guard let parent = parent else {
-            throw AnalysisNodeError.noSampleRef
+    public func createRequest() throws -> PopulationRequest {
+        // AM could lead to undefined behavior if sample/gate are not set as expected
+        if let gate, let parent {
+            return .gated(try parent.createRequest(), gate: gate, invert: invert, name: name)
         }
-        return .gated(try parent.createRequest(), gate: gate, invert: invert, name: name)
+        if let sample = getSample(),
+           let sampleRef = sample.ref {
+            return .sample(sampleRef)
+        }
+        throw AnalysisNodeError.noSampleRef
     }
     
      public func chartView(chart: ChartDef, dims:Tuple2<CDimension?>) -> ChartAnnotation? {

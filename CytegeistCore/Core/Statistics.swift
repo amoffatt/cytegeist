@@ -9,6 +9,7 @@ import Foundation
 
 public extension HistogramData<X> {
     
+    /// Percentile in range [0, 1.0]
     func percentile(_ percentile:Double) -> Double {
         let searchCount = totalCount * percentile
         var countSum = 0.0
@@ -21,12 +22,6 @@ public extension HistogramData<X> {
         print("Error computing percentile?")
         return .nan
     }
-    
-    func mean() -> Double {
-        let weightedPoints = counts.map { point, count in point.x * Double(count) }
-        return weightedPoints.sum() / totalCount
-    }
-    
     
     
 }

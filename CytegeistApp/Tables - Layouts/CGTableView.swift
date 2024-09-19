@@ -15,7 +15,6 @@ import SwiftUI
 public struct TableBuilder : View
 {
     @Environment(Experiment.self) var experiment
-        //        @State var selectedColumns = Set<TColumn.ID>()
     @State var selectedTable:CGTable? = nil
     
     public var body: some View {
@@ -54,7 +53,7 @@ public struct CGTableView : View {
     @State var sortOrder = [KeyPathComparator(\TColumn.pop, order: .forward), KeyPathComparator(\TColumn.parm, order: .forward)]
     @State var columnCustomization = TableColumnCustomization<TColumn>()
     
-    let table:CGTable
+    let table: CGTable
     
     public var body: some View {
             //            Table (of: TColumn.Type, selection: $selectedColumns)
@@ -107,9 +106,9 @@ public struct CGTableView : View {
 // Model
 
 @Observable
-public class CGTableModel : Usable, Hashable
+public class CGTable : Usable, Hashable
 {
-    public static func == (lhs: CGTableModel, rhs: CGTableModel) -> Bool {
+    public static func == (lhs: CGTable, rhs: CGTable) -> Bool {
         lhs.id == rhs.id
     }
     

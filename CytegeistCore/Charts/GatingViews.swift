@@ -164,8 +164,8 @@ struct GateView<GateType:GateDef> : View where GateType:ViewableGate {
     let chartSize:CGSize
     let chartCenter:CGSize
     
-    var color:Color { node.gate.color }
-    var fillOpacity:Double { (editing ? 1.5 : 1) * node.gate.opacity }
+    var color:Color { node.color ?? .green }
+    var fillOpacity:Double { (editing ? 1.5 : 1) * node.opacity }
     var fillColor:Color { color.opacity(fillOpacity) }
     var strokeColor:Color { color.opacity(0.8) }
 
@@ -191,7 +191,7 @@ struct GateView<GateType:GateDef> : View where GateType:ViewableGate {
                     AnyView(content)
                 }
                 
-                let labelPosition = viewCenter + node.gate.labelOffset * chartSize
+                let labelPosition = viewCenter + node.labelOffset * chartSize
                 GateControlZone("label", position: labelPosition) { (p, _) in
                     let offset = (p - viewCenter) / chartSize
                     node.labelOffset = offset
@@ -555,7 +555,7 @@ struct GateLabel: View {
             .background(.regularMaterial.opacity(0.4))
             .cornerRadius(10)
         // AM this offset may need to be different when gate is transposed
-            .offset(node.gate.labelOffset.asSize)
+            .offset(node.labelOffset.asSize)
     }
 }
 

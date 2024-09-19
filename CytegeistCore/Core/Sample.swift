@@ -124,7 +124,7 @@ public class Sample : Identifiable, Codable, Hashable
     private var _tree:AnalysisNode?
     public func getTree() -> AnalysisNode {
         if _tree == nil {
-            _tree = AnalysisNode(self)
+            _tree = AnalysisNode(sample:self)
         }
         return _tree!
     }

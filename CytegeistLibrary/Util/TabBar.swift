@@ -102,7 +102,7 @@ struct TabBarTest : View {
                 tabs.removeAll { $0 == item }
             }
             VStack {
-                Text("Selected tab: \(selected)")
+                Text("Selected tab: \(String(describing: selected))")
             }
             .fillAvailableSpace()
             .background(.blue.opacity(0.5))

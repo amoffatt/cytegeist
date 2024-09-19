@@ -24,33 +24,16 @@ struct ExperimentBrowser : View {
         }
     content:
         {
-            HSplitView {
-                PanelA()
-                    .frame(minWidth: 100, idealWidth: 600)
-                
-                PanelB()
-                    .frame(minWidth: 250, idealWidth: 600, maxWidth: .infinity, maxHeight: .infinity)
-                    .fillAvailableSpace()
-                
-                VStack {
-                    Text("No experiment selected...")
-                    Button("Create New Experiment") {
-                        app.createNewExperiment()
-                    }
-                }
-            }
-                //            .frame(minWidth: 250, idealWidth: 800, maxWidth: .infinity)
-                //            .fillAvailableSpace()
-            .navigationSplitViewColumnWidth(min: 600, ideal: 1600, max: .infinity)
-            
+            TableBuilder()
+                .navigationSplitViewColumnWidth(min: 600, ideal: 1600, max: .infinity)
         }
     detail: {
         VStack {
-            TableBuilder()
-        }
+            PanelA()
+         }
         .navigationSplitViewColumnWidth(min: 300, ideal: 1200, max: .infinity)
         
-    }
+        }
     }
     
         //

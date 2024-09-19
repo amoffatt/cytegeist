@@ -33,61 +33,37 @@ struct AnalysisList: View {
                         //            NodeOutlineGroup(tree, children: \.children.emptyToNil, isExpanded: true) {  item in
                     
                     AnalysisNodeView(node:item)
-                    .frame(width: 350, height: 30)
-                    .draggable(item) {
-                        Label(item.name, systemImage: "lightbulb")      // this is the drag image
-                            .bold().offset(x: -100)
-                            .foregroundStyle(.orange)
-                            .frame(minWidth: 350, minHeight: 30)
-                    }
-                    .tag(item)
-                } // nog
+                        .frame(width: 350, height: 30)
+                        .draggable(item) {
+                            Label(item.name, systemImage: "lightbulb")      // this is the drag image
+                                .bold().offset(x: -100)
+                                .foregroundStyle(.orange)
+                                .frame(minWidth: 350, minHeight: 30)
+                        }
+                        .tag(item)
+                }
             } //List
         }  //vstack
     }  // list
     
-//    @MainActor
-//    func freqOfParentIcon(_ freq: CGFloat) -> PieChartShape {
-            //    precondition( {freq > 0 && freq < 1.0} )
-//        let twoPi = 2.0 * CGFloat.pi
-//        let r = 30.0
-//        let center = CGPoint(x: r, y:r)
-//        let path = Path { p in
-//            p.move(to: center)
-//            p.addLine(to: CGPoint(x: r, y:0))
-//            p.addArc(center: CGPoint(x: r, y:r), radius: r, startAngle: .radians(0), endAngle: .radians(twoPi * freq), clockwise: true)
-//            p.addLine(to: center)
-//            p.addArc(center: CGPoint(x: r, y:r), radius: r, startAngle: .radians(0), endAngle: .radians(twoPi), clockwise: true)
-//        }.stroke(.green, lineWidth: 2.6)
-//        let renderer = ImageRenderer(content: path)
-//        
-//        if let nsImage = renderer.nsImage{
-//            return  nsImage
-//        }
-//        return NSImage()
-//        
-//        return FreqOfParentIcon(population: )
-//    }
-}
-
-public struct AnalysisNodeView: View {
-    @Environment(CytegeistCoreAPI.self) var core
-    @State var query = APIQuery<StatisticBatch>()
     
-    let node:AnalysisNode
-    let iconSize = 18.0
-
-    public var body: some View {
-        let data = query.data
-        let freqOfParent = data?[.freqOfParent]
-        let freqOfTotal = data?[.freqOfTotal]
+        //-------------------------------------------------------------------------------
+    public struct AnalysisNodeView: View {
+        @Environment(CytegeistCoreAPI.self) var core
+        @State var query = APIQuery<StatisticBatch>()
         
-        let population = self.node as? PopulationNode
-        let populationRequest = try? population?.createRequest()
+        let node:AnalysisNode
+        let iconSize = 18.0
         
-        
-        HStack {
-//            LoadingOverlay(isLoading: query.isLoading, scale: 0.5) {
+        public var body: some View {
+            let data = query.data
+            let freqOfParent = data?[.freqOfParent]
+            let freqOfTotal = data?[.freqOfTotal]
+            let population = self.node as? AnalysisNode
+            let populationRequest = try? population?.createRequest()
+            
+            HStack {
+                    //            LoadingOverlay(isLoading: query.isLoading, scale: 0.5) {
                 ZStack {
                     ZStack {
                         if let freqOfParent, let freqOfTotal {
@@ -100,46 +76,43 @@ public struct AnalysisNodeView: View {
                     .frame(width:iconSize, height:iconSize)
                     .padding(3)
                     
-                    Circle()
-                        .stroke(.blue, lineWidth: 1)
+                    Circle().stroke(.blue, lineWidth: 1)
                     
+                }.fixedSize()
+                Text(node.name)
+                    .font(.system(.title3, design: .rounded))
+                    //                .frame(maxWidth: .infinity, maxHeight: 30, alignment: .leading)
+                if let freqOfParent, freqOfParent.isFinite{
+                    Text(freqOfParent.asPercentage())
+                        .font(.footnote)
+                        .foregroundColor(.secondary)
                 }
-//            }
-            .fixedSize()
-            Text(node.name)
-                .font(.system(.title3, design: .rounded))
-//                .frame(maxWidth: .infinity, maxHeight: 30, alignment: .leading)
-            if let freqOfParent, freqOfParent.isFinite{
-                Text(freqOfParent.asPercentage())
-                    .font(.footnote)
-                    .foregroundColor(.secondary)
+                Spacer()
+                CProgressView(visible: query.isLoading)
+                    .scaleEffect(0.6)
+                
             }
-            Spacer()
-            CProgressView(visible: query.isLoading)
-                .scaleEffect(0.6)
-            
+            .frame(maxWidth: .infinity)
+            .update(query:query,
+                    onChangeOf: populationRequest,
+                    with:core.statistics(populationRequest, "", .freqOfTotal, .freqOfParent)
+            )
         }
-        .frame(maxWidth: .infinity)
-        .update(query:query,
-            onChangeOf: populationRequest,
-            with:core.statistics(populationRequest, "", .freqOfTotal, .freqOfParent)
-        )
     }
-}
-
-public struct PieChartShape : Shape {
-    public let freq: Double
     
-    public func path(in rect: CGRect) -> Path {
-        var p = Path()
-        let center = rect.center
-        let r = rect.width / 2
-        let startAngle = Angle.radians(-CGFloat.pi/2)
-        p.move(to: center)
-//        p.addLine(to: center + CGPoint(x: r, y:0))
-        p.addArc(center: center, radius: r, startAngle: startAngle, endAngle: startAngle - .radians(twoPi * freq), clockwise: true)
-        p.addLine(to: center)
-        p.closeSubpath()
-        return p
+    
+    public struct PieChartShape : Shape {
+        public let freq: Double
+        public func path(in rect: CGRect) -> Path {
+            var p = Path()
+            let center = rect.center
+            let r = rect.width / 2
+            let startAngle = Angle.radians(-CGFloat.pi/2)
+            p.move(to: center)
+            p.addArc(center: center, radius: r, startAngle: startAngle, endAngle: startAngle - .radians(twoPi * freq), clockwise: true)
+            p.addLine(to: center)
+            p.closeSubpath()
+            return p
+        }
     }
 }

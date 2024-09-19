@@ -68,14 +68,21 @@ struct CTextView : View {
         //    @State private var selection: TextSelection?          MacOS 15+
     
     var body: some View {
-        let bindableText:Binding<String> = .init(get: { item.value }, set: { item.value = $0 } )
+        let bindableText:Binding<String> = .init(get: {
+            if case .text(let value) = item.type {
+                return value
+            }
+            return ""
+        }, set: {
+            item.type = .text($0)
+        } )
         
         VStack {
             if editing {
                 TextField("Test Field", text: bindableText) .foregroundColor(.black)       //, selection: $selection
                     .font(.headline).background(.black.opacity(0.8  )).frame(width: 120)
             } else {
-                Text(item.value)
+                Text(bindableText.wrappedValue)
             }
         }   .padding()
             //            .onTapGesture {  parent.selectItem( item)    }

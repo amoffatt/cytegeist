@@ -100,9 +100,6 @@ public struct AxisNormalizer: Hashable, Codable {
             transform.unnormalize,
             calculateTickMarks)
     }
-
-    
-    
     
     public static func == (lhs: AxisNormalizer, rhs: AxisNormalizer) -> Bool {
         lhs.min == rhs.min && lhs.max == rhs.max && lhs.type == rhs.type
@@ -118,7 +115,6 @@ public struct AxisNormalizer: Hashable, Codable {
     public let max: Double
     
     public let type:AxisScaleType
-    
     public var span: Double { max - min }
     
     public let normalize:(_ x:Double) -> Double
