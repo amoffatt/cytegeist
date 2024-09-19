@@ -8,7 +8,7 @@
 import Foundation
 
 
-private let numberFormatter: NumberFormatter = {
+public let numberFormatter: NumberFormatter = {
     let formatter = NumberFormatter()
     formatter.numberStyle = .none
     formatter.hasThousandSeparators = false
@@ -16,7 +16,7 @@ private let numberFormatter: NumberFormatter = {
     return formatter
 }()
 
-private let dateFormatter: DateFormatter = {
+public let dateFormatter: DateFormatter = {
     let formatter = DateFormatter()
     formatter.dateStyle = .short
     formatter.timeStyle = .none

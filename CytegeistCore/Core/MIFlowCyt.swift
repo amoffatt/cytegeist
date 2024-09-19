@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-
+import CytegeistLibrary
 
 struct MIFlowCyt
 {
@@ -34,11 +34,15 @@ struct MIFlowCyt
 
 struct MIFlowCytView : View
 {
-    var rec : MIFlowCyt
+    var rec = MIFlowCyt(ExperimentName: "20241001", Purpose: "Test Experiment", Conclusion: "Browser works", 
+                        Keywords: ["Key", "Value"],  Variables: ["Key", "Value"], Score: 1.0,
+                        StartDate: Date(), EndDate: Date(), Uploaded: Date(), LastUpdated:Date(),
+                        RepositoryID: "ACB", Manuscripts: "Manuscripts",
+                        PrimaryResearcher: "Adam", Manager: "Adam", UploadedBy: "Adam", Organizations: "Cytegeist")
     
-    var body: any View {
+    var body: some View {
         VStack {
-            Text(rec.Keywords)
+            Text(rec.Keywords.joined())
             HStack
             {
                 Text(rec.PrimaryResearcher)
@@ -47,42 +51,42 @@ struct MIFlowCytView : View
             }
             HStack
             {
-                Text("Purpose:").font(.bold)      
+                Text("Purpose:") .font(.title3)
                 Text(rec.Purpose)
             }
             HStack
             {
-                Text("Conclusion:") .font(.bold)     
+                Text("Conclusion:")  .font(.title3)
                 Text(rec.Conclusion)
             }
             HStack
             {
-                Text("Variables:").font(.bold)      
-                Text(rec.Variables)
+                Text("Variables:") .font(.title3)
+                Text(rec.Variables.joined())
             }
             HStack
             {
-                Text("Organizations:").font(.bold)     
+                Text("Organizations:") .font(.title3)
                 Text(rec.Organizations)
             }
             HStack
             {
-                Text("Start:").font(.bold)
-                Text(rec.StartDate)
-                Text("End:").font(.bold)
-                Text(rec.EndDate)
-                Text("Uploaded:").font(.bold)
-                Text(rec.Uploaded)
-                Text("Last Update:").font(.bold)
-                Text(rec.LastUpdated)
-            }.border(0.4)
+                Text("Start:") .font(.title3)
+                Text(dateFormatter.string(from: rec.StartDate))
+                Text("End:").font(.title3)
+                Text(dateFormatter.string(from: rec.EndDate))
+                Text("Uploaded:").font(.title3)
+                Text(dateFormatter.string(from: rec.Uploaded))
+                Text("Last Update:").font(.title3)
+                Text(dateFormatter.string(from: rec.LastUpdated))
+            }//.border()
             
             HStack
             {
-                Text("FlowRepository ID:").font(.bold)
+                Text("FlowRepository ID:").font(.title3)
                 Text(rec.RepositoryID)
                 Text(rec.Manuscripts)
-            }.border(0.4)
+            }//.border(0.4)
         }
     }
     

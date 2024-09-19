@@ -82,7 +82,30 @@ import CytegeistLibrary
 ////    }
 //
 //}
-
+//
+//var _invert: Bool = false
+//var invert: Bool {
+//    get { _invert }
+//    set { _invert = newValue }
+//}
+//
+//var _color: Color = .gray
+//var color: Color {
+//    get { _color }
+//    set { _color = newValue }
+//}
+//
+//var _opacity: Double = 1.0
+//var opacity: Double {
+//    get { _opacity }
+//    set { _opacity = newValue }
+//}
+//
+//var _labelOffset: CGPoint = .zero
+//var labelOffset: CGPoint {
+//    get { _labelOffset }
+//    set { _labelOffset = newValue }
+//}
     //-----------------------------------------------------
 
 public typealias AnyGate = (any GateDef) 
@@ -169,30 +192,7 @@ public struct RangeGateDef : GateDef
             //  for d in dimensions where d.name?
         event.values[0] >= min && event.values[0] <= max ? .one : .zero
     }
-    
-    var _invert: Bool
-    var invert: Bool {
-        get { _invert }
-        set { _invert = newValue }
-    }
-    
-//    var _color: Color
-//    var color: Color {
-//        get { _color }
-//        set { _color = newValue }
-//    }
-    
-    var _opacity: Double
-    var opacity: Double {
-        get { _opacity }
-        set { _opacity = newValue }
-    }
-    
-    var _labelOffset: CGPoint
-    var labelOffset: CGPoint {
-        get { _labelOffset }
-        set { _labelOffset = newValue }
-    }
+
 }
 
 public struct RectGateDef : GateDef
