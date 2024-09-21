@@ -53,20 +53,13 @@ struct GatingView: View {
 //    var sample: Sample?
     var population: AnalysisNode?
     
-    @State var chartDef: ChartDef = {
-        var c = ChartDef()
-        c.xAxis = .init(dim:"FSC-A")
-        c.yAxis = .init(dim:"SSC-A")
-        return c
-    }()
-    
     @Environment(Experiment.self) var experiment
     
     func visibleChildren() -> [ChartAnnotation] {
         let dims = dimensions()
         if let children = population?.children {
             let result = children.compactMap { child in
-                child.chartView(chart: chartDef, dims:dims)
+                child.chartView(chart: population?.graphDef, dims:dims)
             }
             return result
         }
@@ -86,12 +79,24 @@ struct GatingView: View {
             confirmDelete = focusedItem
         }
     }
+    
+    
+    var chartDef: ChartDef? { population?.graphDef }
+    var chartDefBinding: Binding<ChartDef?> {
+        .init(get: { chartDef },
+              set: {
+            if let chartDef = $0 {
+                population?.graphDef = chartDef
+            }}
+        )
+    }
+
 
 
 //    var selectedSample: Sample
     func chart(_ request: PopulationRequest, _ meta: FCSMetadata) -> some View {
         
-        return ChartView(population: request, config: $chartDef) {
+        return ChartView(population: request, config: chartDefBinding) {
             VStack {
                 GeometryReader { proxy in
                     let size = proxy.size
@@ -124,6 +129,9 @@ struct GatingView: View {
 //            .opacity(mode == ReportMode.gating ? 1.0 : 0.0)
             .focusable()
             .focusEffectDisabled()
+            .border(.black)
+            .focusedValue(\.analysisNode, population)
+        
             .onDeleteCommand(perform: deleteSelectedAnnotation)
         
             .confirmationDialog("Enter new gate name", isPresented: isNonNilBinding($confirmGate)) {
@@ -138,6 +146,13 @@ struct GatingView: View {
                 }
                 Buttons.cancel()
             }
+            .onChange(of: population, initial:true) {
+                if chartDef?.xAxis == nil && chartDef?.yAxis == nil {
+                    chartDefBinding.wrappedValue?.xAxis = AxisDef(dim:"FSC-A")
+                    chartDefBinding.wrappedValue?.yAxis = AxisDef(dim:"SSC-A")
+                }
+            }
+        
     }
     
     var sampleMeta: FCSMetadata? {
@@ -149,8 +164,8 @@ struct GatingView: View {
             return .init(nil, nil)
         }
         
-        let xAxis = chartDef.xAxis?.name
-        let yAxis = chartDef.yAxis?.name
+        let xAxis = chartDef?.xAxis?.name
+        let yAxis = chartDef?.yAxis?.name
         
         return .init(
             sampleMeta.parameter(named: xAxis.nonNil),
@@ -167,12 +182,12 @@ struct GatingView: View {
     {
         let normalizers = axisNormalizers()
         
-        var start = (start / areaPixelSize).invertedY().unnormalize(normalizers)
-        var end = (location / areaPixelSize).invertedY().unnormalize(normalizers)
+        let start = (start / areaPixelSize).invertedY().unnormalize(normalizers)
+        let end = (location / areaPixelSize).invertedY().unnormalize(normalizers)
 
         let rect = CGRect(from:start, to:end)
         
-        guard let xDim = chartDef.xAxis?.name else {
+        guard let xDim = chartDef?.xAxis?.name else {
             print("No x axis for gate")
             return
         }
@@ -185,7 +200,7 @@ struct GatingView: View {
             default: break
         }
         
-        guard let yDim = chartDef.yAxis?.name else {
+        guard let yDim = chartDef?.yAxis?.name else {
             print("No y axis for gate")
             return
         }

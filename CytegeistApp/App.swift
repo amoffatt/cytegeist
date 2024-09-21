@@ -24,8 +24,8 @@ final class App {
     
     var experiments: [Experiment] = []
     var selectedExperiment: Experiment.ID?
-    var mode: SampleListMode = .table
-    var reportMode: ReportMode = .gating
+//    var mode: SampleListMode = .table
+//    var reportMode: ReportMode = .gating
     
 //    private var applicationSupportDirectory: URL {
 //        FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
@@ -111,15 +111,15 @@ final class App {
                 return exp
             }
         }
-        if autoselect, let recent = recentExperiments.first {
-            selectedExperiment = recent.id
-            return recent
-        }
-        if createIfNil {
-            let exp = recentExperiments.first ?? createNewExperiment()
-            selectedExperiment = exp.id
-            return exp
-        }
+//        if autoselect, let recent = recentExperiments.first {
+//            selectedExperiment = recent.id
+//            return recent
+//        }
+//        if createIfNil {
+//            let exp = recentExperiments.first ?? createNewExperiment()
+//            selectedExperiment = exp.id
+//            return exp
+//        }
         return nil
     }
     
@@ -165,8 +165,8 @@ final class App {
     }
  }
 
-
-
+//
+//
 extension App {
     
     func experimentsModified(year: Int) -> [Experiment] {
@@ -176,18 +176,18 @@ extension App {
     var recentExperiments:[Experiment] {
         experiments.sorted(by: \.modifiedDate)
     }
-    
-    var experimentsByYearCreated:[(year:Int, experiments:[Experiment])] {
-        let calender = Calendar.current
-        let grouped = Dictionary(grouping: experiments, by: { $0.modifiedDate[.year] })
-        return grouped
-            // sort years
-            .sorted { $0.key < $1.key }
-            // Sort experiments within group
-            .map { (year, experiments) in
-                (year, experiments.sorted { $0.modifiedDate < $1.modifiedDate })
-            }
-    }
+//    
+//    var experimentsByYearCreated:[(year:Int, experiments:[Experiment])] {
+//        let calender = Calendar.current
+//        let grouped = Dictionary(grouping: experiments, by: { $0.modifiedDate[.year] })
+//        return grouped
+//            // sort years
+//            .sorted { $0.key < $1.key }
+//            // Sort experiments within group
+//            .map { (year, experiments) in
+//                (year, experiments.sorted { $0.modifiedDate < $1.modifiedDate })
+//            }
+//    }
 
 //    var currentYear: Int { 2021 }
 //

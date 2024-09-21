@@ -31,10 +31,10 @@ public struct AxisNormalizer: Hashable, Codable {
         func calculateTickMarks(desiredTicks: Int) -> [MajorAxisTick] {
             let range = max - min
             let roughTickInterval = range / Double(desiredTicks - 1)
-            let tickInterval = niceNumber(roughTickInterval, round: true)
+            let tickInterval = niceNumber(roughTickInterval, round: false)
             
             let minTick = floor(min / tickInterval) * tickInterval
-            let maxTick = ceil(max / tickInterval) * tickInterval
+            let maxTick = floor(max / tickInterval) * tickInterval      // AT - was ceil
             
             var ticks: [Double] = []
             var tick = minTick

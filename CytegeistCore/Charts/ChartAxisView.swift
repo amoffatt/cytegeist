@@ -28,7 +28,7 @@ public struct ChartAxisView: View {
                     ForEach(availableParameters, id: \.name) { p in
                         Text(p.displayName)
                             .tag(p.name)
-                    }
+                    }.frame(maxWidth: 50, maxHeight: 200)
                 }
                 .pickerStyle(.menu)
             }
@@ -42,13 +42,11 @@ public struct ChartAxisView: View {
             ForEach(ticks) { majorTick in
                 let x = size.width * CGFloat(majorTick.normalizedValue)
                 Rectangle()
-//                    .fill(.blue)
                     .frame(width: 2, height: 10)
                     .position(x: x, y: 5)
                 
                 Text(majorTick.label)
                     .position(x: x, y: 20)
-//                    .fontWidth(Font.Width(2))
 
             }
             .frame(width: size.width, height: 50)

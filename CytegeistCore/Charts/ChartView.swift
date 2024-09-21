@@ -26,7 +26,7 @@ public struct ChartView<Overlay>: View where Overlay:View {
     @Environment(CytegeistCoreAPI.self) var core: CytegeistCoreAPI
     
     let population: PopulationRequest
-    var config: Binding<ChartDef>
+    var config: Binding<ChartDef?>
     let chartOverlay:() -> Overlay
     
     @State var sampleQuery: APIQuery<FCSFile>? = nil
@@ -35,20 +35,20 @@ public struct ChartView<Overlay>: View where Overlay:View {
     @State var errorMessage:String = ""
     
     
-    public init(population: PopulationRequest, config:Binding<ChartDef>, overlay:@escaping () -> Overlay = { EmptyView() }){
+    public init(population: PopulationRequest, config:Binding<ChartDef?>, overlay:@escaping () -> Overlay = { EmptyView() }){
         self.population = population
         self.config = config
         self.chartOverlay = overlay
     }
     
     @MainActor
-    func axisBinding(_ chartDef:Binding<ChartDef>, _ axis:WritableKeyPath<ChartDef, AxisDef?>) -> Binding<String> {
+    func axisBinding(_ chartDef:Binding<ChartDef?>, _ axis:WritableKeyPath<ChartDef, AxisDef?>) -> Binding<String> {
         Binding(get: {
-            let axisDef = chartDef.wrappedValue[keyPath:axis]
+            let axisDef = chartDef.wrappedValue?[keyPath:axis]
             return axisDef?.name ?? ""
         }, set: {
             var value = chartDef.wrappedValue
-            value[keyPath:axis] = AxisDef(dim: $0)
+            value?[keyPath:axis] = AxisDef(dim: $0)
             chartDef.wrappedValue = value
         })
     }
@@ -74,20 +74,18 @@ public struct ChartView<Overlay>: View where Overlay:View {
 //                    GridRow {
                     HStack {
                         switch chartQuery {
-                            case nil:
-                                VStack {}
-                                    .fillAvailableSpace()
-                            case .histogram1D(let query):
-                                HistogramView(query: query)
-                                    .overlay(chartOverlay())
-                                    .fillAvailableSpace()
-                            case .histogram2D(let query):
-                                Histogram2DView(query: query)
-                                    .overlay(chartOverlay())
-                                    .fillAvailableSpace()
-                                    //                        Rectangle()
-                                    //                            .fill(.blue)
-                                    //                            .fillAvailableSpace()
+                            case nil:                          VStack {}
+                                                                    .fillAvailableSpace()
+                            case .histogram1D(let query):      HistogramView(query: query)
+                                                                    .overlay(chartOverlay())
+                                                                    .border(.black)
+                                                                    .background(.white)
+                                                                  .fillAvailableSpace()
+                         case .histogram2D(let query):      Histogram2DView(query: query)
+                                                                    .border(.black)
+                                                                    .background(.white)
+                                                                    .overlay(chartOverlay())
+                                                                    .fillAvailableSpace()
                         }
 
                         GeometryReader { proxy in
@@ -100,6 +98,8 @@ public struct ChartView<Overlay>: View where Overlay:View {
                         .frame(width: 80)
                         .frame(maxHeight: .infinity)
                     }
+                    .aspectRatio(CGSize(width: 3, height: 2), contentMode: .fill)
+
 //                    }
 //                    .fillAvailableSpace()
                     
@@ -148,12 +148,15 @@ public struct ChartView<Overlay>: View where Overlay:View {
         chartQuery = nil
         errorMessage = ""
         let config = self.config.wrappedValue
+        
+        guard let config else {    return   }
+        
         if let meta = sampleQuery?.data?.meta {
             if isEmpty(config.yAxis?.name),
                let axis = config.xAxis, !axis.name.isEmpty {
                 
                 if let dim = meta.parameter(named: axis.name) {
-                    chartQuery = .histogram1D(core.histogram(.init(population, .init(axis.name))))
+                    chartQuery = .histogram1D(core.histogram(.init(population, .init(axis.name), smoothing: config.smoothing)))
                     chartDims = .init(dim, nil)
                 } else {
                     errorMessage = "X axis dimension not in dataset"
@@ -164,14 +167,12 @@ public struct ChartView<Overlay>: View where Overlay:View {
                 let xDim = meta.parameter(named: xAxis.name)
                 let yDim = meta.parameter(named: yAxis.name)
                 
-                if xDim == nil {
-                    errorMessage = "X axis dimension not in dataset"
-                } else if yDim == nil {
-                    errorMessage = "Y axis dimension not in dataset"
-                } else {
+                if xDim == nil {        errorMessage = "X axis dimension not in dataset"  }
+               else if yDim == nil {    errorMessage = "Y axis dimension not in dataset"  }
+               else {
                     print("Creating chart for \(population.name)")
                     chartQuery = .histogram2D(core.histogram2D(
-                        HistogramRequest(population, .init(xAxis.name, yAxis.name))))
+                        HistogramRequest(population, .init(xAxis.name, yAxis.name), smoothing: config.smoothing)))
                     chartDims = .init(xDim, yDim)
                 }
             }

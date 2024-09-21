@@ -26,4 +26,13 @@ extension FocusedValues {
     private struct FocusedExperimentSelectionKey: FocusedValueKey {
         typealias Value = Binding<Set<Sample.ID>>
     }
+    
+    var analysisNode: AnalysisNode?? {
+        get { self[FocusedAnalysisNodeKey.self] }
+        set { self[FocusedAnalysisNodeKey.self] = newValue }
+    }
+    
+    private struct FocusedAnalysisNodeKey: FocusedValueKey {
+        typealias Value = AnalysisNode?
+    }
 }

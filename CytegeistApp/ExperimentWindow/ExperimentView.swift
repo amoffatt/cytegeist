@@ -11,7 +11,7 @@ import CytegeistCore
 
 
     // switch between table and gallery views in the sampleList
-enum SampleListMode: String, CaseIterable, Identifiable {
+enum SampleListMode: String, CaseIterable, Identifiable, Codable {
     var id: Self { self }
     case gallery
     case table
@@ -19,7 +19,7 @@ enum SampleListMode: String, CaseIterable, Identifiable {
 }
 
     // switch between gating, table and layout views in the rightmost view
-enum ReportMode: String, CaseIterable, Identifiable {
+enum ReportMode: String, CaseIterable, Identifiable, Codable {
     var id: Self { self }
     case gating
     case table
@@ -33,7 +33,7 @@ struct ExperimentView : View {
    
     @Environment(App.self) var app: App
 
-    var mode:ReportMode { app.reportMode }
+//    var mode:ReportMode { app.reportMode }
     
 //    @State private var path = [Int]()
      
@@ -82,7 +82,8 @@ struct ExperimentView : View {
         detail: {
             if let experiment = app.getSelectedExperiment() {
                 VStack {        // AM: VStack leads to better compile error messages than Group when the below code breaks (!?)
-                    switch mode {
+                    switch experiment.reportMode {
+              
                     case .table:  TableBuilder()
                     case .gating:  VStack {
                                         if let node = experiment.focusedAnalysisNode {
@@ -97,7 +98,11 @@ struct ExperimentView : View {
                 .environment(experiment.core)
                 .navigationSplitViewColumnWidth(min: 300, ideal: 1200, max: .infinity)
                 .toolbar {
-                    ReportModePicker(mode: $app.reportMode)
+                    let binding = Binding(
+                        get: { experiment.reportMode },
+                        set: { experiment.reportMode = $0 }
+                    )
+                    ReportModePicker(mode: binding)
                 }
             }
             else {

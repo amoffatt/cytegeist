@@ -406,38 +406,29 @@ fileprivate func defaultCountAxis(mode:Double?) -> AxisNormalizer {
 }
 
 
-public enum HistogramSmoothing {
-    case off, on
-    
-    var kernel: Any? {
-        switch self {
-            case .off:                nil
-            case .on:                   fatalError()
-//            case .low:                fatalError()
-//            case .high:               fatalError()
-        }
-    }
+public enum HistogramSmoothing:Codable, Equatable {
+    case off, low, high
 }
+//
+//public extension HistogramData<X> {
+//    func convolute(kernel:Any?) -> HistogramData<X>? {
+//        nil
+//    }
+//}
+//public extension HistogramData<XY> {
+//    func convolute(kernel:Any?) -> HistogramData<XY>? {
+//        nil
+//    }
+//}
 
-public extension HistogramData<X> {
-    func convolute(kernel:Any?) -> HistogramData<X>? {
-        nil
-    }
-}
-public extension HistogramData<XY> {
-    func convolute(kernel:Any?) -> HistogramData<XY>? {
-        nil
-    }
-}
-
-func smooth()
-{
+//func smooth()
+//{
 //    for i in 0..<size  {
 //        for j in 0..<size  {
 //            kernelSmooth(i,j)
 //        }
 //    }
-}
+//}
 
 
 //public struct Histogram2DData {

@@ -164,7 +164,7 @@ struct GateView<GateType:GateDef> : View where GateType:ViewableGate {
     let chartSize:CGSize
     let chartCenter:CGSize
     
-    var color:Color { node.color ?? .green }
+    var color:Color = Color.black  //{ node.color ?? .green }
     var fillOpacity:Double { (editing ? 1.5 : 1) * node.opacity }
     var fillColor:Color { color.opacity(fillOpacity) }
     var strokeColor:Color { color.opacity(0.8) }
@@ -221,8 +221,8 @@ struct GateView<GateType:GateDef> : View where GateType:ViewableGate {
         
         if gate.dims.get(index:1) == nil,
            normalizers.y == nil {
-            fatalError("Y axis normalizer not availble for gate \(gate)")
-//            return false
+//            fatalError("Y axis normalizer not availble for gate \(gate)")
+            return false
         }
 
         return true
@@ -533,15 +533,6 @@ public struct Polygon : Shape {
         Path(points:points)
     }
 }
-
-//        Path { path in
-//            path.move(to: .init(rect.minX, rect.minY))
-//            path.addLine(to: .init(rect.maxX, rect.minY))
-//            path.addLine(to: .init(rect.maxX, rect.maxY))
-//            path.addLine(to: .init(rect.minX, rect.maxY))
-//            path.closeSubpath()
-//        }
-
 
 
 

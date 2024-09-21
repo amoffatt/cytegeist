@@ -22,7 +22,8 @@ public struct HistogramView: View {
                 if let error = query.error {
                     Text("Error: \(error.message)")
                 }
-                if let histogram = query.data?.histogram {
+                let data = query.data
+                if let histogram = data?.smoothed ?? data?.histogram {
                     let resolution = histogram.size.x
                     Chart(0..<resolution, id: \.self) { bin in
                         AreaMark(

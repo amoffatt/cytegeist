@@ -27,7 +27,12 @@ struct AnalysisList: View {
         @Bindable var selection = experiment.selectedAnalysisNodes
         
         return VStack {
-            Text("Analysis for \(sample.tubeName): selected: \(selection.nodes.count)").frame(width: 150)
+            HStack {
+                Text("Analysis for \(sample.tubeName): selected: \(selection.nodes.count)").frame(width: 150)
+                Spacer()
+                Button("<< Copy", action: copyToGroup)
+                    .padding(4)
+            }
             List(selection: $selection.nodes) {
                 OutlineGroup(tree, children: \.children.emptyToNil) {  item in
                         //            NodeOutlineGroup(tree, children: \.children.emptyToNil, isExpanded: true) {  item in
@@ -45,7 +50,8 @@ struct AnalysisList: View {
             } //List
         }  //vstack
     }  // list
-    
+    func copyToGroup () { print("copy to group")
+        }
     
         //-------------------------------------------------------------------------------
     public struct AnalysisNodeView: View {

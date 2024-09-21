@@ -223,6 +223,7 @@ public class CytegeistCoreAPI {
     private var histogram1DCache:ComputeCache<HistogramRequest<X>, CachedHistogram<X>> { cache(_histogram) }
 //    private var histogram2DCache:ComputeCache<HistogramRequest<XY>, CachedHistogram<XY>>! = nil
     private var _caches:[ObjectIdentifier:Any] = [:]
+    private let _histogramSmoother = Smoother()
 
     nonisolated public init() {
     }
@@ -332,7 +333,12 @@ public class CytegeistCoreAPI {
                                  probabilities: population.probabilities,
                                  size: request.size ?? .init(defaultHistogramResolution),
                                  axes: .init(x.meta.normalizer))
-        let smoothed = h.convolute(kernel: request.smoothing.kernel)
+        
+        var smoothed:HistogramData<X>? = nil
+        if request.smoothing != .off {
+            let smoothedBins = _histogramSmoother.smooth1D(srcMatrix: h.bins, nBins: h.bins.count, hiRes: request.smoothing == .high)
+            smoothed = HistogramData(bins: smoothedBins, size: h.size, axes: h.axes)
+        }
         return CachedHistogram(h, smoothed, view: nil)
     }
     
@@ -350,12 +356,19 @@ public class CytegeistCoreAPI {
             size: request.size ?? .init(defaultHistogramResolution, defaultHistogramResolution),
             axes: .init(x.meta.normalizer, y.meta.normalizer))
         
-        guard let image = h.toImage(colormap: .jet) else {
-            throw APIError.creatingImage
+        var smoothed:HistogramData<XY>? = nil
+        if request.smoothing != .off {
+            let smoothedBins = _histogramSmoother.smooth2D(srcMatrix: h.bins, size:h.size, hiRes: request.smoothing == .high)
+            smoothed = HistogramData(bins: smoothedBins, size: h.size, axes: h.axes)
         }
         
-        let smoothed = h.convolute(kernel: request.smoothing.kernel)
-        return CachedHistogram(h, smoothed, view: AnyView(image.resizable().scaleEffect(y: -1)))
+        guard let image = (smoothed ?? h).toImage(colormap: .jet) else {
+            throw APIError.creatingImage
+        }
+
+        let view = image.resizable().scaleEffect(y: -1)
+        
+        return CachedHistogram(h, smoothed, view: AnyView(view))
     }
     
     nonisolated private func _statistic(_ r:StatisticRequest) async throws -> Double {

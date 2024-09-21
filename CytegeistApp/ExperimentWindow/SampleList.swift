@@ -68,7 +68,7 @@ struct SampleList: View {
     @State private var columns:[TableColumnField<Sample>] = [
         .init("Name", \.tubeName),
         .init(keyword: FCSKeys.fil),
-        .init("Count", \.eventCountString ),
+//        .init("Count", \.eventCountString ),
         .init(keyword: FCSKeys.btim),
         .init(keyword: FCSKeys.cyt),
         .init(keyword: FCSKeys.sys),
@@ -100,6 +100,9 @@ struct SampleList: View {
                 column.defaultColumn()
                     .customizationID(column.name)
             }
+            TableColumn("Count", value:\.eventCount) { item in
+                Text("\(item.eventCount)")
+            }
         }
         .onDeleteCommand {
             experiment.samples.removeAll { experiment.selectedSamples.contains($0.id) }
@@ -111,10 +114,11 @@ struct SampleList: View {
     }
     
     var footer: some View {
+        let totalCount = filteredSamples.map { $0.eventCount }.sum()
         let selectedText = selection.isEmpty ? "" : " (\(selection.count) selected)"
         return HStack {
             Spacer()
-            Text("\(filteredSamples.count) samples \(selectedText)")
+            Text("\(filteredSamples.count) samples \(selectedText) (\(totalCount) total events)")
         }
     }
  
@@ -168,8 +172,12 @@ struct SampleList: View {
         }
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
-                Buttons.toolbar("Open FCS Files", .add) { showFCSImporter = true }
-            }
+                HStack {
+                    Buttons.toolbar("Open FCS Files", .add) { showFCSImporter = true }
+                    Buttons.toolbar("Dictionary", Icon("pencil")) {
+                    _ = experiment.buildVaribleKeyDictionary()
+                    }
+                } }
 
         }
 

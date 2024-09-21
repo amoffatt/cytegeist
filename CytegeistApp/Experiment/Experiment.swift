@@ -30,7 +30,9 @@ public class Experiment : Usable
     var creationDate:Date = Date.now
     var modifiedDate:Date = Date.now
     var name = "All Samples"
-    
+    var mode: SampleListMode = .table
+    var reportMode: ReportMode = .gating
+
     var samples:[Sample] = [Sample]()
     var selectedSamples = Set<Sample.ID>()
     var selectedAnalysisNodes = AnalysisNodeSelection()
@@ -170,38 +172,60 @@ public class Experiment : Usable
             self.key = key
             self.vals.append(val)
         }
+        init (_ keyPair: StringField){
+            self.key = keyPair.name
+            self.vals.append(keyPair.value)
+        }
     }
     
-    public func buildVaribleKeyDictionary() -> [Entry]
+    var keywords = [String]()
+    var entries = [Entry]()
+    public func buildVaribleKeyDictionary() /// -> [Entry]
     {
         var union: [Entry] = []
+        var allKeywords: Set<String> = []
         for sample in samples {
-            var keywords = sample.meta?.keywords.filter( {!isParameterKey($0.name) } )           // exclude parameter keywords
+            let keywords = sample.meta?.keywords.filter( {!isParameterKey($0.name) && !isExcludedKey($0.name) } )           // exclude parameter keywords
+            for s in keywords! {
+                allKeywords.insert(s.name)
+            }
+           
             for keyPair in keywords! {
                 if let entry = union.firstIndex(where: { $0.key == keyPair.name} ) {
                     union[entry].vals.append(keyPair.value)
                 }
-                else {   union.append(Entry(keyPair.name,keyPair.value))  }
+                else {   union.append(Entry(keyPair))  }
             }
         }
         
-        let ct = union.count            // number of keywords in all samples
+//        let ct = union.count            // number of keywords in all samples
+
+        keywords.append(contentsOf: allKeywords)
+        entries.append(contentsOf: union)
+
         let sampleCt = samples.count
-        
         let multivals = union.filter( { Set($0.vals).count > 1 })
         let uniques = multivals.filter( { Set($0.vals).count == sampleCt })
         let nonuniques = multivals.filter( { Set($0.vals).count < sampleCt })
         
-        print("Uniques: ", uniques)
-        print("Nonuniques: ", nonuniques)
-        return nonuniques
+        print("Uniques: ", uniques.map({ $0.key}))
+        print("Nonuniques: ", nonuniques.map({ $0.key}), nonuniques.map({ Set($0.vals) }))
+ //       return nonuniques
     }
+    
     
     func isParameterKey(_ keyword: String) -> Bool
     {
         keyword.starts(with: "$P")      // should check for a digit in 3rd position
     }
-    
+    func isExcludedKey(_ keyword: String) -> Bool
+    {
+        if  ["$BEGINDATA", "$ENDDATA", "$TOT", "$COMP", "$BTIM", "$ETIM"].contains(keyword)    {
+             return true
+         }
+        return false
+    }
+
     subscript(sampleId: Sample.ID?) -> Sample? {
         get {
             if let id = sampleId {  return samples.first(where: { $0.id == id })!  }

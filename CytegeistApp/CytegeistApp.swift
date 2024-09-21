@@ -16,6 +16,8 @@ struct CytegeistApp: SwiftUI.App {
     @State private var appModel = App()
 //    @StateObject  var store = Store()
     @Environment(\.undoManager) var undoManager
+    
+    @FocusedValue(\.analysisNode) var focusedAnalysisNode
 
     var body: some Scene {
 //            AaronTestContentView()
@@ -29,6 +31,18 @@ struct CytegeistApp: SwiftUI.App {
                 ExperimentView()
                     .environment(appModel)
 //                     .modelContainer(for:  Experiment.self, isUndoEnabled: true)
+            }
+            .commands {
+                if let focusedAnalysisNode,
+                   let focusedAnalysisNode {
+                    
+                    CommandMenu("Chart") {
+                        Button("Toggle Smoothing") {
+                            let smoothing = focusedAnalysisNode.graphDef.smoothing
+                            focusedAnalysisNode.graphDef.smoothing = smoothing == .off ? .low : .off
+                        }
+                    }
+                }
             }
                 //        Settings {
                 //            SettingsView()

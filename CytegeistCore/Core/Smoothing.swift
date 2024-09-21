@@ -23,20 +23,34 @@ struct Smoother
 //------------------------------------------------------------------------
     init()
     {
-        for idx in 1 ... 2 * nMatrices
+        kernels.append([1])
+        kernelSizes.append(0)
+        
+        let totalKernels = 2 * nMatrices
+        for idx in 1 ... totalKernels
         {
             let hiRes =  idx > nMatrices
             let nElements = matrixSize(bins: idx, hiRes: hiRes);
-            kernelSizes[idx] = nElements
-            kernels[idx] = kernel(bins: idx, mxSize: nElements, hiRes: hiRes)
+            kernelSizes.append(nElements)
+            kernels.append(kernel(bins: idx, mxSize: nElements, hiRes: hiRes))
         }
     }
 
     private func matrixSize( bins: Int, hiRes: Bool) -> Int
     {
+//        let radius = hiRes ?  radHighRes : radLowRes;
+//        let sq = sqrt(sqrt(Double(bins)))
+//        return  Int(Double(radius) / sq + 0.9999);
+        
+        
         let radius = hiRes ?  radHighRes : radLowRes;
-        let sq = sqrt(sqrt(Double(bins)))
-        return  Int(Double(radius) / sq + 0.9999);
+        let sqrtZ = sqrt(Double(bins));
+        let r = Double(radius) / (sqrt(sqrtZ));
+        var matrixElements = Int(r);
+        if (r - Double(matrixElements) > 0.0) {
+            matrixElements += 1;
+        }
+        return matrixElements;
     }
    
     private func kernel(bins: Int, mxSize: Int, hiRes: Bool) -> [Double]
@@ -46,7 +60,7 @@ struct Smoother
         let nDevs = 2.4
         let x = nDevs/Double(radius)
         let factor = -0.5 * sq * x * x
-        let matrix:[Double] = (0 ..< mxSize).map( { exp(factor * Double($0 * $0)) } )
+        let matrix:[Double] = (0 ... mxSize).map( { exp(factor * Double($0 * $0)) } )
         
         var matrixTotal = 0.0
         for i in -mxSize...mxSize {
@@ -63,15 +77,17 @@ struct Smoother
     {
         let kernelIdxOffset = hiRes ? nMatrices : 0
         let radius:Int = hiRes ?  radHighRes : radLowRes
-        var destArray = [Double]()
-        var kernel1D = [Double]()
-        var nElements: Int
+        let destBinsCount = nBins + 2 * radius + 1
+        var destArray = [Double](repeating:0, count: destBinsCount)
         
         for bin in radius ..< radius + nBins
         {
             let binHeight = srcMatrix[bin - radius]
             let intBinHeight = Int(binHeight)
             if intBinHeight == 0 { continue }
+            
+            var kernel1D:[Double]
+            var nElements:Int
             
             if intBinHeight <= nMatrices
             {
@@ -81,40 +97,42 @@ struct Smoother
             }
             else                                            // not precomputed
             {
-               debug("binHeight > 256")             // looks hinky, should be a dictionary of height to cached kernel
+                debug("binHeight > 256")             // looks hinky, should be a dictionary of height to cached kernel
                 nElements = matrixSize(bins: Int(binHeight), hiRes: hiRes)
                 kernel1D = kernel(bins: Int(binHeight), mxSize: nElements, hiRes: hiRes)
             }
             
             destArray[bin] += kernel1D[0] * binHeight;    // 0 point
-            for i in 1 ..< nElements        // points to either side
+            for i in 1 ... nElements        // points to either side
             {
                 let k3 = kernel1D[i] * binHeight;
                 destArray[bin + i] += k3;
                 destArray[bin - i] += k3;
             }
+        }
             
-            if reflect
+        if reflect
+        {
+            for i in 1 ... radius
             {
-                for i in 1 ..< radius
-                {
-                    let leftEdge = radius;
-                    let rightEdge = radius + nBins;
-                    destArray[leftEdge + i - 1] += destArray[leftEdge - i];
-                    destArray[rightEdge - i + 1] += destArray[rightEdge + i];
-                }
+                let leftEdge = radius;
+                let rightEdge = radius + nBins;
+                destArray[leftEdge + i - 1] += destArray[leftEdge - i];
+                destArray[rightEdge - i + 1] += destArray[rightEdge + i];
             }
+        }
                 //                // used to copy the destMatrix back onto srcMatrix
                 //            for bin in radius ..< radius + inNBins {
                 //                destBins[bin-radius] = matrix[bin]
                 //            }
-        }
-        return destArray
-    }   
+        return Array(destArray[radius...(nBins + radius)])
+    }
 //------------------------------------------------------------------------
     
-    public func smooth2D(srcMatrix: [Double], rows: Int, cols: Int, hiRes: Bool) -> [Double]
+    public func smooth2D(srcMatrix: [Double], size:Tuple2<Int>, hiRes: Bool) -> [Double]
     {
+        let rows = size.y
+        let cols = size.x
         let idxOffset = hiRes ? nMatrices : 0
         let radius: Int = hiRes ?  radHighRes : radLowRes
         let matrixCols = cols + 2 * radius
@@ -169,20 +187,22 @@ struct Smoother
                     }
                 }
             }
-            
-            if (reflect) {
-                reflectMargins(destMatrix: &destMatrix,rows: rows, cols: cols, margin: radius)
-            }
- //
-//                // copy the destMatrix back onto srcMatrix
-//            for row in radius ..< (radius + inRows) {
-//                for col in radius ..< radius + inCols    {
-//                    let idx = (row-radius) * inCols + (col-radius);
-//                    srcMatrix[idx] = destMatrix[row * matrixCols + col];
-//                }
-//            }
         }
-        return destMatrix
+        
+        if (reflect) {
+            reflectMargins(destMatrix: &destMatrix,rows: rows, cols: cols, margin: radius)
+        }
+        
+        var output = [Double](repeating:0, count:srcMatrix.count)
+            // copy the destMatrix back onto srcMatrix
+        for row in radius ..< (radius + rows) {
+            for col in radius ..< radius + cols    {
+                let idx = (row-radius) * cols + (col-radius);
+                output[idx] = destMatrix[index(col, row)];
+            }
+        }
+
+        return output
   }
     
     

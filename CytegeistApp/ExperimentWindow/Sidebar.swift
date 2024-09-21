@@ -88,7 +88,12 @@ struct Sidebar : View {
                     TextField("Key", text: $keyword).frame(width: 80)
                     TextField("Value", text: $value).frame(width: 80)
                 }
-            }.background(.black.opacity(0.04))
+            }.opacity(1.0)
+                .frame(maxWidth: .infinity, maxHeight: 100)
+                .border(.black)
+            
+//                .draggable(any Transferable())
+            
             
             @State var experimentselection: SidebarExperimentSelection? = nil
             List(selection: $experimentselection) {
@@ -104,9 +109,9 @@ struct Sidebar : View {
     }
 //--------------------------------------------------------------------------------------------------------------
 //    
-//    var toprowButtons : any  View {
+//    var toprowButtons :   View {
 //        var body :  any View {
-//          return  HStack
+//            HStack
 //            { Button("All", action: allSamples)
 //                    .dropDestination(for: AnalysisNode.self) { (items, position) in
 //                        addNodesToGroup(items, "All Samples")
@@ -125,7 +130,7 @@ struct Sidebar : View {
 //            }
 //        }
 //    }
-//    
+    
 //    
 //    var groupDefinitionDivider: any View {
 //        var body : any View {

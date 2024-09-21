@@ -13,11 +13,11 @@ import SwiftUI
 
 struct ExperimentBrowser : View {
     
-    @Environment(App.self) var app: App
+//    @Environment(App.self) var app: App
     
     
     var body: some View {
-        @Bindable var app = app
+//        @Bindable var app = app
         
         NavigationSplitView {
             BrowserSidebar()

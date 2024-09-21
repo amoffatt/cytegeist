@@ -8,7 +8,7 @@
 import Foundation
 import CytegeistLibrary
 
-public struct ChartDef : Hashable, Codable//, Transferable
+public struct ChartDef : Hashable, Codable, Equatable//, Transferable
 {
 //    static var transferRepresentation: some TransferRepresentation {
 //        CodableRepresentation(contentType: UTType.appleArchive)
@@ -21,6 +21,8 @@ public struct ChartDef : Hashable, Codable//, Transferable
     public var xAxis: AxisDef? = nil
     public var yAxis: AxisDef? = nil
     public var zAxis: AxisDef? = nil
+    
+    public var smoothing:HistogramSmoothing = .low
     
     public init()
     {

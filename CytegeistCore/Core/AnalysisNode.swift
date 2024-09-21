@@ -137,7 +137,8 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable
         throw AnalysisNodeError.noSampleRef
     }
     
-     public func chartView(chart: ChartDef, dims:Tuple2<CDimension?>) -> ChartAnnotation? {
+
+     public func chartView(chart: ChartDef?, dims:Tuple2<CDimension?>) -> ChartAnnotation? {
         guard let gate = gate,
               let gate = gate as? any ViewableGate,
               gate.isValid(for: dims)
