@@ -77,7 +77,7 @@ public class Sample : Identifiable, Codable, Hashable
     //read from JSON
     
     public required init(from decoder: any Decoder) throws {
-        fatalError("AM: Implement decoding")
+//        fatalError("AM: Implement decoding")
 }
     
         //-------------------------------------------------------------------------

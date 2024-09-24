@@ -30,8 +30,8 @@ public class Experiment : Usable
     var creationDate:Date = Date.now
     var modifiedDate:Date = Date.now
     var name = "All Samples"
-    var mode: SampleListMode = .table
-    var reportMode: ReportMode = .gating
+    var mode: SampleListMode = SampleListMode.table
+    var reportMode: ReportMode = ReportMode.gating
 
     var samples:[Sample] = [Sample]()
     var selectedSamples = Set<Sample.ID>()

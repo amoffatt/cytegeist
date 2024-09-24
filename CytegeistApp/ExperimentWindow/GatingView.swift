@@ -36,25 +36,26 @@ struct GateConfigView : View {
 
 
 struct GatingView: View {
-
-//    @State private var mode = ReportMode.gating
+    
+        //    @State private var mode = ReportMode.gating
     @State var curTool = GatingTool.range
     @State private var isDragging = false
- 
+    
     @State public var startLocation = CGPoint.zero
     @State public var mouseLocation = CGPoint.zero
     @State public var mouseTranslation = CGPoint.zero
     @State private var isHovering = false
     @State private var offset = CGSize.zero
     
-    @State private var confirmGate:AnalysisNode? = nil
+    @State private var confirmedGate:AnalysisNode? = nil
     @State private var focusedItem:ChartAnnotation? = nil
     @State private var confirmDelete:ChartAnnotation? = nil
-//    var sample: Sample?
+        //    var sample: Sample?
     var population: AnalysisNode?
     
     @Environment(Experiment.self) var experiment
-    
+    @Environment(CytegeistCoreAPI.self) var core
+
     func visibleChildren() -> [ChartAnnotation] {
         let dims = dimensions()
         if let children = population?.children {
@@ -64,36 +65,33 @@ struct GatingView: View {
             return result
         }
         return []
-//        guard let children:[PopulationNode] = population?.getChildren() else {
-//            return []
-//        }
-        
-//        children.filter { child in
-//            let gate = child.gate
-////            gate.dims.
-//        }
     }
-
+    
     func deleteSelectedAnnotation() {
         if let focusedItem, focusedItem.remove != nil {
             confirmDelete = focusedItem
         }
     }
     
-    
     var chartDef: ChartDef? { population?.graphDef }
     var chartDefBinding: Binding<ChartDef?> {
         .init(get: { chartDef },
-              set: {
-            if let chartDef = $0 {
-                population?.graphDef = chartDef
-            }}
+              set: { if let chartDef = $0 { population?.graphDef = chartDef  }}
         )
     }
+         //    var selectedSample: Sample
+    func thumbnails() -> some View {
+        let parentImages = population!.parentImages()
+        let depth = parentImages.count
+        return ScrollView {
+            HStack(spacing: 4) {
+                ForEach(parentImages) { img in
+                    Image(nsImage: img.image)
+                }
+            }
+            .frame(height: depth > 0 ? 80 : 0)
+        } }
 
-
-
-//    var selectedSample: Sample
     func chart(_ request: PopulationRequest, _ meta: FCSMetadata) -> some View {
         
         return ChartView(population: request, config: chartDefBinding) {
@@ -115,43 +113,39 @@ struct GatingView: View {
                             let editing = child == focusedItem
                             AnyView(child.view(size, editing))
                                 .environment(\.isEditing, editing)
-                            .onTapGesture {
-                                focusedItem = child
-                            }
+                                .onTapGesture {
+                                    focusedItem = child
+                                }
                         }
                     }
                 }
             }
             .fillAvailableSpace()
+        }
+        .padding(40)
+        .allowsHitTesting(true)
+            //            .opacity(mode == ReportMode.gating ? 1.0 : 0.0)
+        .focusable()
+        .focusEffectDisabled()
+        .border(.black)
+        .focusedValue(\.analysisNode, population)
+        .onDeleteCommand(perform: deleteSelectedAnnotation)
+        .confirmationDialog("Enter new gate name", isPresented: isNonNilBinding($confirmedGate)) {
+            if let confirmedGate {
+                GateConfigView(node:confirmedGate, finalize: finalizeCandidateGate)
             }
-            .padding(40)
-            .allowsHitTesting(true)
-//            .opacity(mode == ReportMode.gating ? 1.0 : 0.0)
-            .focusable()
-            .focusEffectDisabled()
-            .border(.black)
-            .focusedValue(\.analysisNode, population)
-        
-            .onDeleteCommand(perform: deleteSelectedAnnotation)
-        
-            .confirmationDialog("Enter new gate name", isPresented: isNonNilBinding($confirmGate)) {
-                if let confirmGate {
-                    GateConfigView(node:confirmGate, finalize: finalizeCandidateGate)
-                }
-            }
-            .confirmationDialog("Are you sure you want to delete \(confirmDelete?.name ?? "")",
-                                isPresented: isNonNilBinding($confirmDelete)) {
-                Buttons.delete() {
-                    confirmDelete?.remove?()
-                }
-                Buttons.cancel()
-            }
-            .onChange(of: population, initial:true) {
-                if chartDef?.xAxis == nil && chartDef?.yAxis == nil {
-                    chartDefBinding.wrappedValue?.xAxis = AxisDef(dim:"FSC-A")
-                    chartDefBinding.wrappedValue?.yAxis = AxisDef(dim:"SSC-A")
-                }
-            }
+        }
+        .confirmationDialog("Are you sure you want to delete \(confirmDelete?.name ?? "")",
+                            isPresented: isNonNilBinding($confirmDelete)) {
+            Buttons.delete() {    confirmDelete?.remove?()   }
+            Buttons.cancel()
+        }
+                            .onChange(of: population, initial:true) {
+                                if chartDef?.xAxis == nil && chartDef?.yAxis == nil {
+                                    chartDefBinding.wrappedValue?.xAxis = AxisDef(dim:"FSC-A")
+                                    chartDefBinding.wrappedValue?.yAxis = AxisDef(dim:"SSC-A")
+                                }
+                            }
         
     }
     
@@ -177,22 +171,20 @@ struct GatingView: View {
         dimensions().map { $0?.normalizer }
     }
     
-    
     func makeGate(_ start: CGPoint, _ location: CGPoint, areaPixelSize:CGSize)
     {
         let normalizers = axisNormalizers()
         
         let start = (start / areaPixelSize).invertedY().unnormalize(normalizers)
         let end = (location / areaPixelSize).invertedY().unnormalize(normalizers)
-
+        
         let rect = CGRect(from:start, to:end)
         
         guard let xDim = chartDef?.xAxis?.name else {
             print("No x axis for gate")
             return
         }
-        
-
+         
         switch curTool
         {
             case .range:        addRangeGate(xDim, rect.minX, rect.maxX); return
@@ -214,15 +206,14 @@ struct GatingView: View {
         let dims = Tuple2(xDim, yDim)
         let normalizersNonNil = Tuple2(xNormalizer, yNormalizer)
         
-
         switch curTool {
             case .rectangle:    addRectGate(dims, rect)
             case .ellipse:      addEllipseGate(dims, normalizersNonNil, start, end)
+            case .radius:       addRadialGate(dims,  start, distance(start, location))
                     //            case .quads:        addQuadGates(gateName, start, location)
                     //            case .polygon:      addPolygonGate(gateName, start, location)
                     //            case .spline:       addSplineGate(gateName, start, location)
-            case .radius:       addRadialGate(dims,  start, distance(start, location))
-            default: break
+           default: break
         }
     }
     func addGate(_ gate: AnyGate)
@@ -230,26 +221,36 @@ struct GatingView: View {
             //        self.candidateGateName = getCandidateGateName()
         let node = AnalysisNode(gate:gate)
         node.gate = gate
-        node.name = "T Cells"
-        confirmGate = node
+        node.name = "T Cells"                 // TBD - generatePopulationName
+        confirmedGate = node
     }
     
+   @MainActor
     func finalizeCandidateGate() {
         guard let population,
-              let confirmGate
+              let confirmedGate
         else {
             print("No population selected")
             return
         }
         
-        let graphDef = population.graphDef            // change axes?
-        confirmGate.graphDef = graphDef
+print("adding \(confirmedGate.name) to \(population.name)")
 
-        
-        print("adding \(confirmGate.name) to \(population.name)")
-        population.addChild(confirmGate)
-        experiment.selectedAnalysisNodes.nodes = [confirmGate]
-        self.confirmGate = nil
+        confirmedGate.parentImage = snapshot()
+        confirmedGate.graphDef = population.graphDef     //TBD -  findUnusedParameters
+        population.addChild(confirmedGate)
+        experiment.selectedAnalysisNodes.nodes = [confirmedGate]
+        self.confirmedGate = nil
+    }
+    
+
+    @MainActor 
+    func snapshot() -> NSImage?
+    {
+        if true {    return nil  }
+        let renderer = ImageRenderer(content: self)
+        renderer.scale = 0.25
+        return renderer.nsImage
     }
     
     func toParent() -> ()
@@ -258,20 +259,20 @@ struct GatingView: View {
             if let parent = pop.parent {
                 experiment.setAnalysisNodeSelection(parent)
             } }
-//        print ("toParent")
+            //        print ("toParent")
     }
- 
+    
     func toChild() -> ()
     {
         if let pop = population {
             if let child = pop.children.first {
                 experiment.setAnalysisNodeSelection(child)
             } }
-       print ("TODO  toChild -- using first child, not selected")
+        print ("TODO  toChild -- using first child, not selected")
     }
-
+    
     var icons = ["None","triangle.righthalf.fill","pencil","square.and.pencil","ellipsis.circle", "skew", "scribble" ]
-
+    
     var  GatingTools: some View {
         HStack{
             Spacer()
@@ -285,26 +286,26 @@ struct GatingView: View {
                 HStack{ Button("Up",  systemImage: "arrowtriangle.up.square.fill", action: { toParent() })
                     Button("Down",  systemImage: "arrowtriangle.down.square.fill", action: { toChild() })
                 }
-//                Button("Quads", systemImage: "person.crop.square",   action: { curTool = GatingTool.quads})
-//                Button("Polygon", systemImage: "skew",   action: { curTool = GatingTool.polygon})
-//                Button("Spline", systemImage: "scribble",   action: {curTool = GatingTool.spline })
+                    //                Button("Quads", systemImage: "person.crop.square",   action: { curTool = GatingTool.quads})
+                    //                Button("Polygon", systemImage: "skew",   action: { curTool = GatingTool.polygon})
+                    //                Button("Spline", systemImage: "scribble",   action: {curTool = GatingTool.spline })
             }
             .background(Color.gray.opacity(0.3))
         }
     }
     enum GatingTool {
         var id: Self { self }
-            case range
-            case split
-            case rectangle
-            case ellipse
-            case quads
-            case polygon
-            case spline
-            case radius
-        }
- 
-
+        case range
+        case split
+        case rectangle
+        case ellipse
+        case quads
+        case polygon
+        case spline
+        case radius
+    }
+    
+    
     var body: some View {
         var request:PopulationRequest? = nil
         var requestError:Error? = nil
@@ -314,12 +315,12 @@ struct GatingView: View {
         } catch {
             requestError = error
         }
-
+        
         return VStack {
-//            Text("Gating Prototype")
+                //            Text("Gating Prototype")
             if let sample = population?.getSample() {
                 Text("Sample: \(sample.tubeName), population: \((population?.name).nonNil)")
-                
+                thumbnails()
                 if let meta = sample.meta {
                     if let request {
                         chart(request, meta)
@@ -329,28 +330,28 @@ struct GatingView: View {
                 } else { Text("Sample metadata not found")  }
             }
             else {Text("Select a sample")  }
-
+            
         }.toolbar {  GatingTools   }
     }
-    //------------------------------------------------------
-//
-//var drag: some Gesture {
-//    DragGesture()
-//        .onChanged { _ in self.isDragging = true }
-//        .onEnded { _ in self.isDragging = false }
-//}
+        //------------------------------------------------------
+        //
+        //var drag: some Gesture {
+        //    DragGesture()
+        //        .onChanged { _ in self.isDragging = true }
+        //        .onEnded { _ in self.isDragging = false }
+        //}
     func makeDragGesture(areaSize: CGSize) -> some Gesture {
         DragGesture()
             .onChanged { value in offset = value.translation
                 isDragging = true
-    //            print(offset)
+                    //            print(offset)
                 mouseLocation = value.location
                 mouseTranslation = CGPoint( x:offset.width, y: offset.height)
                 if (startLocation == CGPoint.zero)
                 {
                     startLocation = value.location
                 }
-
+                
             }
             .onEnded { value in
                 isDragging = false
@@ -374,7 +375,7 @@ struct GatingView: View {
     
     func add2RangeGates(_ dim:String, _ x: CGFloat)
     {
-//        addGate(Gate(spec: BifurGateDef(x), color: Color.yellow, opacity: 0.2))
+            //        addGate(Gate(spec: BifurGateDef(x), color: Color.yellow, opacity: 0.2))
             //        addGate(Gate(spec: RangeGateDef(,0, x), color: Color.yellow, opacity: 0.2))
             //        addGate(Gate(spec: RangeGateDef(x, 2 * x), color: Color.red, opacity: 0.2))         // TODO MAX value
     }
@@ -391,7 +392,7 @@ struct GatingView: View {
     
     func addEllipseGate(_ dims:Tuple2<String>, _ axes:Tuple2<AxisNormalizer>, _ start: CGPoint, _ end: CGPoint)
     {
-        var gate = EllipsoidGateDef(dims,
+        let gate = EllipsoidGateDef(dims,
                                     .init(vertex0: start.normalize(axes),
                                           vertex1: end.normalize(axes),
                                           widthRatio: 0.6),
@@ -402,22 +403,22 @@ struct GatingView: View {
     
     
     let DEBUG = false
-    //------------------------------------------------------
-    // we need the size of the parent View to offset ourself
+        //------------------------------------------------------
+        // we need the size of the parent View to offset ourself
     func gateRect(siz: CGSize ) -> some View {
         let startLocation = startLocation
         let translation = mouseLocation - startLocation
         return Rectangle()
-           .stroke(style: StrokeStyle(lineWidth: 1.8, dash: [15, 5]))
+            .stroke(style: StrokeStyle(lineWidth: 1.8, dash: [15, 5]))
             .foregroundColor(.red)
             .opacity(DEBUG || (isDragging && (curTool == .rectangle)) ? 1.0 : 0.0)
             .offset(x: startLocation.x, y: startLocation.y)
             .offset(x:          min(translation.x,0),  y: min(translation.y, 0) )
             .frame(maxWidth:     abs(translation.x),    maxHeight: abs(translation.y),
                    alignment: Alignment.center)         // DOESNT SEEM TO MATTER
-         .allowsHitTesting(false)
+            .allowsHitTesting(false)
     }
-
+    
     func gateRange(siz: CGSize ) -> some View {
         let start = startLocation.x
         let end = mouseLocation.x
@@ -428,7 +429,7 @@ struct GatingView: View {
             .opacity(DEBUG || (isDragging && (curTool == .range)) ? 1.0 : 0.0)
             .position(x: min(start, end), y: 0)
             .offset(x: width / 2, y: siz.height / 2 )
-            .frame(width: width,  height: siz.height, alignment: Alignment.topLeading)  
+            .frame(width: width,  height: siz.height, alignment: Alignment.topLeading)
             .allowsHitTesting(false)
     }
     
@@ -464,38 +465,41 @@ struct GatingView: View {
                        height: 2 * distance,
                        alignment: Alignment.center)         // DOESNT SEEM TO MATTER
                 .allowsHitTesting(false)
-        } 
+        }
         .opacity((isDragging && curTool == .radius)  ? 1.0 : 0.0)
-
+        
     }
-//    func gatePolygon(siz: CGSize ) -> some View {
-//        Path()
-//            .move(to: startLocation)
-//            .addLine(to: startLocation)
-//            .stroke(style: StrokeStyle(lineWidth: 3, dash: [15, 5]))
-//            .foregroundColor(.orange)
-//            .opacity(DEBUG || (isDragging && curTool == .polygon)  ? 1.0 : 0.0)
-//            .offset(x: startLocation.x-siz.width/2, y: startLocation.y-siz.height/2)
-//            .offset(x:-mouseTranslation.x/2, y: -mouseTranslation.y/2)
-//            .frame(maxWidth: abs(mouseTranslation.x),
-//                   maxHeight: abs(mouseTranslation.y),
-//                   alignment: Alignment.center)         // DOESNT SEEM TO MATTER
-//            .allowsHitTesting(false)
-//    }
-    //------------------------------------------------------
+        //    func gatePolygon(siz: CGSize ) -> some View {
+        //        Path()
+        //            .move(to: startLocation)
+        //            .addLine(to: startLocation)
+        //            .stroke(style: StrokeStyle(lineWidth: 3, dash: [15, 5]))
+        //            .foregroundColor(.orange)
+        //            .opacity(DEBUG || (isDragging && curTool == .polygon)  ? 1.0 : 0.0)
+        //            .offset(x: startLocation.x-siz.width/2, y: startLocation.y-siz.height/2)
+        //            .offset(x:-mouseTranslation.x/2, y: -mouseTranslation.y/2)
+        //            .frame(maxWidth: abs(mouseTranslation.x),
+        //                   maxHeight: abs(mouseTranslation.y),
+        //                   alignment: Alignment.center)         // DOESNT SEEM TO MATTER
+        //            .allowsHitTesting(false)
+        //    }
+        //------------------------------------------------------
     func crosshair(location: CGPoint, size:CGSize) -> some View
     {
-        ZStack { dashedLine(
+        var outOfBounds:Bool = (location.x < 2 || location.y < 2 ||
+                                location.x > size.width || location.y > size.height)
+        print(location, size)
+        return ZStack { dashedLine(
             from:CGPoint(x: location.x, y:0),
-            to:CGPoint(x: location.x,  y: size.height-40))      // TODO FUDGE FOR X axis
+            to:CGPoint(x: location.x,  y: size.height))
             
             dashedLine(
                 from:CGPoint(x: 0,      y: location.y),
-                to:CGPoint(x: size.width-20, y: location.y))          // TODO FUDGE FOR Y axis
+                to:CGPoint(x: size.width, y: location.y))
             .opacity((curTool == .range) ? 0.0 : 1.0)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .opacity(isDragging ? 0.0 : 1.0)
+        .opacity((isDragging || outOfBounds) ? 0.0 : 1.0)
         .onHover(perform: { hovering in isHovering = true  })
         .onContinuousHover { phase in
             switch phase {
@@ -504,6 +508,7 @@ struct GatingView: View {
                     isHovering = true
                 case .ended:
                     isHovering = false
+                    outOfBounds = true
                     break
             }
         }

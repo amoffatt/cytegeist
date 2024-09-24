@@ -73,32 +73,34 @@ public struct ChartView<Overlay>: View where Overlay:View {
 //                Grid {
 //                    GridRow {
                     HStack {
-                        switch chartQuery {
-                            case nil:                          VStack {}
-                                                                    .fillAvailableSpace()
-                            case .histogram1D(let query):      HistogramView(query: query)
-                                                                    .overlay(chartOverlay())
-                                                                    .border(.black)
-                                                                    .background(.white)
-                                                                  .fillAvailableSpace()
-                         case .histogram2D(let query):      Histogram2DView(query: query)
-                                                                    .border(.black)
-                                                                    .background(.white)
-                                                                    .overlay(chartOverlay())
-                                                                    .fillAvailableSpace()
-                        }
+                        ZStack {
+                            switch chartQuery {
+                                case nil:                          VStack {}
+                                        .fillAvailableSpace()
+                                case .histogram1D(let query):      HistogramView(query: query)
+                                        .overlay(chartOverlay())
+                                        .border(.black)
+                                        .background(.white)
+                                        .fillAvailableSpace()
+                                case .histogram2D(let query):      Histogram2DView(query: query)
+                                        .border(.black)
+                                        .background(.white)
+                                        .overlay(chartOverlay())
+                                        .fillAvailableSpace()
+                            }
+                        } .aspectRatio(CGSize(width: 1, height: 1), contentMode: .fill)
 
                         GeometryReader { proxy in
                             let axisWidth = proxy.size.height
                             ChartAxisView(dim: axisBinding(config, \.yAxis), normalizer: chartDims.y?.normalizer, sampleMeta: sampleMeta)
                                 .frame(width: axisWidth, height: 80)
                                 .rotationEffect(.degrees(-90), anchor: .topLeading)
-                                .offset(y: axisWidth)
+                                .offset(x: -8, y: axisWidth-1)   // AT?
                         }
                         .frame(width: 80)
                         .frame(maxHeight: .infinity)
                     }
-                    .aspectRatio(CGSize(width: 3, height: 2), contentMode: .fill)
+                   
 
 //                    }
 //                    .fillAvailableSpace()

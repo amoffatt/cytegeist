@@ -9,15 +9,16 @@ import SwiftUI
 import CytegeistCore
 import CytegeistLibrary
 
-enum ListSection: String, Identifiable, Hashable {
-    var id: String { rawValue }
-    
-    case current
-    case history
-}
 
 struct Sidebar : View {
-    
+ 
+    enum ListSection: String, Identifiable, Hashable {
+        var id: String { rawValue }
+        
+        case current
+        case history
+    }
+
     @Environment(App.self) var app: App
     @SceneStorage("expansionState1") var expansionState1 = ExpansionState()
     @SceneStorage("expansionState2") var expansionState2 = ExpansionState()
@@ -77,7 +78,7 @@ struct Sidebar : View {
             
 //            groupDefinitionDivider
             
- 
+//            let menuitems: [MenuItem] = [MenuItem("a")]
             VStack {
                 HStack  {
                     Button("Add", systemImage: "plus", action: addGroup)
@@ -86,10 +87,21 @@ struct Sidebar : View {
                 }
                 HStack {
                     TextField("Key", text: $keyword).frame(width: 80)
+                    Menu(""){
+                        Button("Patient", action: {})
+                        Button("SampleID", action: {})
+                        Button("Date", action: {})
+                        Menu("Advanced") {
+                            Button("FITC", action: {})
+                            Button("PE", action: {})
+                            Button("APC", action: {})
+                            Button("APC-Cy7", action: {})
+                        }
+                    }.frame(width: 20, height: 30, alignment: .topLeading)
                     TextField("Value", text: $value).frame(width: 80)
                 }
             }.opacity(1.0)
-                .frame(maxWidth: .infinity, maxHeight: 100)
+                .frame(maxWidth: .infinity, maxHeight: 80)
                 .border(.black)
             
 //                .draggable(any Transferable())

@@ -98,27 +98,6 @@ public extension View {
 }
 
 
-
-//Button("Open FCS Files", systemImage: "plus", action: { showFCSImporter = true } )
-
-//public struct IconButton : View{
-//    let name:String
-//    let icon:String
-//    let action: () -> Void
-//    
-//    public init(_ name: String, icon: String, action: @escaping () -> Void) {
-//        self.name = name
-//        self.icon = icon
-//        self.action = action
-//    }
-//    
-//    public var body: some View {
-//        Button(name, systemImage: icon, action:action)
-//    }
-//}
-
-
-
 public struct Icon {
     public static let
     add = Icon("plus", scaling:1.4),
@@ -175,8 +154,6 @@ public class Buttons {
         text("Delete", role:.destructive, action:action)
             .keyboardShortcut(.defaultAction)
     }
-    
-//    public static func
     
 }
 

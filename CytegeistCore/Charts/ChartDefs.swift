@@ -23,7 +23,8 @@ public struct ChartDef : Hashable, Codable, Equatable//, Transferable
     public var zAxis: AxisDef? = nil
     
     public var smoothing:HistogramSmoothing = .low
-    
+    public var contours:Bool = false
+
     public init()
     {
         

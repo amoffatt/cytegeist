@@ -294,6 +294,7 @@ public struct BasicHistogramStats {
     public var stdev: Double
     public var cv: Double
     public var mean: Double
+    public var meanHeight: Double
     public var median: Double
     // Also quartiles and robust CV?
 
@@ -304,9 +305,9 @@ public struct BasicHistogramStats {
         let bins = data.bins
         
         // TODO figure out if this should be used
-//        let weightedBins = data.counts.map { bin, count in bin.x * Double(count) }
-//        self.mean = weightedBins.sum() / totalCount
-        self.mean = data.totalCount / Double(data.bins.count)
+        let weightedBins = data.counts.map { bin, count in bin.x * Double(count) }
+        self.mean = weightedBins.sum() / totalCount
+        self.meanHeight = data.totalCount / Double(data.bins.count)
         self.median = data.percentile(0.5)
         
 //        let halfSum = totalCount / 2.0
@@ -548,8 +549,30 @@ extension HistogramData<XY> {
             )
             return context?.makeImage()
         }
-        
         return cgImage?.image
     }
 }
 
+extension HistogramData<XY> {
+    func toView(chartDef: ChartDef) -> any View
+    {
+        if chartDef.contours {
+            return BadgeBackground()
+        }
+        return AnyView(toImage(colormap: .jet))
+    }
+}
+        
+struct BadgeBackground: View {
+    var body: some View {
+        let path =  Path { path in
+            var width: CGFloat = 500.0
+            let height = width
+            path.move( to: CGPoint( x: width * 0.95, y: height * 0.20 ))
+            path.addLine( to: CGPoint( x: width * 0.15, y: height * 0.20 ))
+            path.addLine( to: CGPoint( x: width * 0.35, y: height * 0.80 ))
+            path.addLine( to: CGPoint( x: width * 0.95, y: height * 0.20 ))
+        }.stroke(lineWidth: 3)
+    }
+
+}

@@ -24,9 +24,9 @@ struct LayoutItemWrappper: View, Identifiable {
         let editing = editableItem.wrappedValue == item
         VStack {
             switch item.type {
-                case .text:   CTextView(parent: parent, item: item, editing: editing).background(.purple.opacity(0.8))
-                case .chart:  CChartView(parent: parent, item: item, editing: editing).background(.green.opacity(0.8))
-                case .table:  CTableView(parent: parent, item: item, editing: editing).background(.orange.opacity(0.8))
+                case .text:   CTextView(parent: parent, item: item, editing: editing).background(.purple.opacity(0.3))
+                case .chart:  CChartView(parent: parent, item: item, editing: editing).background(.green.opacity(0.2))
+                case .table:  CTableView(parent: parent, item: item, editing: editing).background(.orange.opacity(0.2))
             }
         }
         .allowsHitTesting(true)
@@ -110,13 +110,7 @@ struct CChartView : View {
         
         VStack {
 //            ChartView_Penguins()
-//            HistogramView(query: core.histogram(.init(PopulationRequest(sampleRef), .init("FSC-A"))))
-                //            if editing {
-                //                TextField("Test Field", text: bindableText) .foregroundColor(.black)       //, selection: $selection
-                //                    .font(.headline).background(.black.opacity(0.8  )).frame(width: 120)
-                //            } else {
-            Text(item.name)
-            
+//            HistogramView(query: core.histogram(.init(PopulationRequest(sampleRef), .init("FSC-A"))))            
         }  .frame(width: 100, height: 100)
             .padding()
             .onTapGesture {   parent.layoutModel.selectItem( item)    }

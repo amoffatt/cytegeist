@@ -111,7 +111,13 @@ struct SampleList: View {
         .onChange(of: experiment.id) {
             experiment.selectedSamples.removeAll()
         }
-    }
+        .contextMenu(forSelectionType: Sample.ID.self) { items in
+                // ...  AT -- adding SampleInspectorView to double click of sample row
+        } primaryAction: { items in
+
+            for i in items { print(i) }
+//            SampleInspectorView(core, sample: items.first())
+        }  }
     
     var footer: some View {
         let totalCount = filteredSamples.map { $0.eventCount }.sum()
@@ -175,7 +181,7 @@ struct SampleList: View {
                 HStack {
                     Buttons.toolbar("Open FCS Files", .add) { showFCSImporter = true }
                     Buttons.toolbar("Dictionary", Icon("pencil")) {
-                    _ = experiment.buildVaribleKeyDictionary()
+                        experiment.buildVaribleKeyDictionary()
                     }
                 } }
 

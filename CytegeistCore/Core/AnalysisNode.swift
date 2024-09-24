@@ -13,10 +13,12 @@ public extension UTType {  static var population = UTType(exportedAs: "cytegeist
 enum AnalysisNodeError : Error {  case noSampleRef      }
 //---------------------------------------------------------
 @Observable
-public class AnalysisNode : Codable, Transferable, Identifiable, Hashable
+public class AnalysisNode : Codable, Transferable, Identifiable, Hashable, CustomStringConvertible
 {
+    
     public var id = UUID()
     public var name: String = ""
+    public var description: String = ""
     public var sample: Sample? = nil                      // nil except at the root node
     public var graphDef = ChartDef()              // how this population wants to be shown
     public var statistics =  [String : Double]()         // cache of stats with values
@@ -37,19 +39,23 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable
     public var gate: AnyGate? = nil                      // the predicate to filter ones parent
     @ObservationIgnored
     @CodableIgnored
+    public var parentImage: NSImage? = nil            // a picture of parent pop showing our gate
+    @ObservationIgnored
+    @CodableIgnored
     public var color: Color? = nil
     public var opacity: Double = 1.0
     public var labelOffset: CGPoint = .zero
     public var invert: Bool = false
+//    public var isExpanded: Bool = true
     
-                                           
-//--------------------------------------------------------
+    
+        //--------------------------------------------------------
     public static func == (lhs: AnalysisNode, rhs: AnalysisNode) -> Bool {   lhs.id == rhs.id  }
     public func hash(into hasher: inout Hasher) {        hasher.combine(id)    }
     public static var transferRepresentation: some TransferRepresentation {
         CodableRepresentation(contentType: UTType.population)
     }
- //--------------------------------------------------------
+        //--------------------------------------------------------
     public init() {    }
     
     public required init(from decoder: any Decoder) throws {
@@ -83,15 +89,39 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable
         self.opacity = opacity
     }
     
- //--------------------------------------------------------
+        //--------------------------------------------------------
     public func getSample() -> Sample? { sample ?? parent?.getSample() }       //AT?
-
+    
     public func path() -> String { return parent?.path() ?? "" + name  }   //AT?
+    
+    public func depth() -> Int {
+        if (parent == nil)  { return 0 }
+        return 1 + parent!.depth()
+    }                                                            //AT?
+    
+
+    public struct MyImage : Identifiable
+    {
+        public var id =  UUID()
+        public var image: NSImage
+        
+        init (_ nsImage: NSImage)   {
+            self.image = nsImage
+        }
+    }
+    public func parentImages() -> [MyImage] {                  //AT?
+        if (parent == nil)  { return [] }
+        var ancestry = parent!.parentImages()
+        if let img = parentImage {
+            ancestry.append(MyImage(img))
+        }
+        return ancestry
+    }
 //--------------------------------------------------------
 //    public func mean(dim: String) -> Double     {   statLookup( EStatistic.mean, dim)    }
 //    public func median(dim: String) -> Double   {   statLookup( EStatistic.median, dim)   }
 //    public func cv(dim: String) -> Double       {   statLookup( EStatistic.cv, dim)   }
-//    public func stdev(dim: String) -> Double     {   statLookup( EStatistic.stdev, dim)   }
+//    public func stdev(dim: String) -> Double    {   statLookup( EStatistic.stdev, dim)   }
 //    public func freqOfParent() -> Double        {   statLookup( EStatistic.freqOf, "")    }
 //    
 //    private func statLookup(_ stat: EStatistic, _ dim: String) -> Double   //AT?
@@ -107,9 +137,11 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable
 //    }
 //--------------------------------------------------------
     private func _addChild(_ node:AnalysisNode)     {        children.append(node)    }
-    public func addChild(_ node:AnalysisNode)       {        node.parent = self    }
+    public func addChild(_ node:AnalysisNode)       {        node.parent = self  }
     public func getChildren() -> [AnalysisNode]     {        children   }
     private func _removeChild(_ node: AnalysisNode) {        children.removeAll { $0 == node }    }
+
+    public func remove() {   parent = nil  }     // Removes this child from parent in the parent setter
     public func removeChild(_ node: AnalysisNode?) -> Bool {
         guard let node else {    return false     }
         if node.parent == self {
@@ -118,11 +150,8 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable
         }
         return false
     }
-
-    public func remove() {
-        // Removes this child from parent in the parent setter
-        parent = nil
-    }
+     
+   
 
 //--------------------------------------------------------
     public func createRequest() throws -> PopulationRequest {

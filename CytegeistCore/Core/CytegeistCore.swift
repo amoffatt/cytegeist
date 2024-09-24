@@ -361,15 +361,22 @@ public class CytegeistCoreAPI {
             let smoothedBins = _histogramSmoother.smooth2D(srcMatrix: h.bins, size:h.size, hiRes: request.smoothing == .high)
             smoothed = HistogramData(bins: smoothedBins, size: h.size, axes: h.axes)
         }
-        
-        guard let image = (smoothed ?? h).toImage(colormap: .jet) else {
-            throw APIError.creatingImage
+        var theView: AnyView
+        if request.contours // || true
+        {
+           theView = AnyView(BadgeBackground())
+        } else
+        {
+            guard let image = (smoothed ?? h).toImage(colormap: .jet) else {
+                throw APIError.creatingImage
+            }
+            let view = image.resizable().scaleEffect(y: -1)
+            theView = AnyView(view)
         }
-
-        let view = image.resizable().scaleEffect(y: -1)
         
-        return CachedHistogram(h, smoothed, view: AnyView(view))
+        return CachedHistogram(h, smoothed, view: theView)
     }
+
     
     nonisolated private func _statistic(_ r:StatisticRequest) async throws -> Double {
         
@@ -399,22 +406,17 @@ public class CytegeistCoreAPI {
         let histogram = try await _statisticHistogram(r.population, r.dim)
         // Stats based on a histogram
         switch r.statistic {
-            case .percentile(let p):
-                return histogram.percentile(p)
+            case .median:               return histogram.percentile(0.5)
+           case .percentile(let p):     return histogram.percentile(p)
             default: break
         }
         
         let basicStats = try await cache(_basicHistogramStats).get(.init(r.population, Tuple1(r.dim)))
         
         switch r.statistic {
-            case .median:
-                return basicStats.median
-            case .cv:
-                return basicStats.cv
-            case .mean:
-                return basicStats.mean
-                
-            default: break
+            case .cv:           return basicStats.cv
+            case .mean:         return basicStats.mean
+            default:            break
         }
         
         print("Unsupported statistic \(r.statistic)")
@@ -552,12 +554,14 @@ public struct HistogramRequest<D:Dimensions> : Hashable {
     public let dims:D.Strings
     public let size:D.IntCoord?
     public let smoothing:HistogramSmoothing
+    public let contours:Bool
     
-    public init(_ population: PopulationRequest, _ dims: D.Strings, size:D.IntCoord? = nil, smoothing:HistogramSmoothing = .off) {
+    public init(_ population: PopulationRequest, _ dims: D.Strings, size:D.IntCoord? = nil, smoothing:HistogramSmoothing = .off, contours:Bool = false) {
         self.population = population
         self.dims = dims
         self.size = size
         self.smoothing = smoothing
+        self.contours = contours
     }
 }
 
@@ -570,7 +574,7 @@ public struct CachedHistogram<D:Dimensions> {
     public init(_ histogram: HistogramData<D>, _ smoothed:HistogramData<D>?, view: AnyView? =  nil) {
         self.histogram = histogram
         self.smoothed = smoothed
-        self.view = view
+       self.view = view
     }
 }
 

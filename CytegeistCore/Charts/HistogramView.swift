@@ -57,59 +57,20 @@ public struct Histogram2DView: View {
                     Text("Error: \(error.message)")
                 }
                 if let data = query.data {
-//                    let size = data.histogram.size
-//                    Print("Resolution: \(size)")
-//                    let bins = EnumeratedArray(data.bins)
-                    Chart() {
-//                        let point = data.bin(bin1d: bin.element)
-//                        
-//                        RectangleMark(
-//                            xStart: .value("X", Float(point.x)),
-//                            xEnd: .value("X", Float(point.x) + 1.5),
-//                            yStart: .value("Y", Float(point.y)),
-//                            yEnd: .value("Y", Float(point.y) + 1.5)
-//                        )
-//                        .foregroundStyle(
-//                            by: .value(
-//                                "Count",
-//                                bin.value
-//                            )
-//                        )
-                    }
+                    Chart() { }
                     .fillAvailableSpace()
                     .background(.clear)
                     .chartBackground { proxy in
                         VStack {
                             let plotSize = proxy.plotSize
-//                            let frame = proxy.
-//                            if let frame = proxy.plotFrame {
-                                data.view
-                                    .frame(width:plotSize.width, height: plotSize.height)
-//                            }
+                            data.view
+                                .frame(width:plotSize.width, height: plotSize.height)
                         }
-//                        Rectangle()
-//                            .fill(.blue)
-//                            .frame(width: 100, height: 100)
-                        
-                        
                     }
-//                        .chartXScale(
-//                            domain: 0...size.x
-//                        )
-//                        .chartYScale(
-//                            domain: 0...size.y
-////                            domain: 1...resolution.y,
-////                            type: .log
-//                        )
-//                        .chartForegroundStyleScale(
-//                            range: Colormap.jet
-//                        )
-                        .chartLegend(.hidden)
+                    .chartLegend(.hidden)
                 }
             }
-            .onDisappear {
-                query.dispose()
-            }
+            .onDisappear {  query.dispose()  }
         }
     }
 }

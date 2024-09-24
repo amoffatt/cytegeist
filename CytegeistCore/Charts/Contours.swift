@@ -276,7 +276,7 @@ public struct Histo2D
         func binHeight(_ y: Int, _ x: Int) -> Float   {   return  bins[y * nCols + x].height      }
 
         if centerX < 0 || centerY < 0                  {   return []  }
-        if centerX >= nCols-1 || centerY >= nRows-1    {    return [] }
+        if centerX >= nCols-1 || centerY >= nRows-1    {   return [] }
             
         let h1 = binHeight(centerY, centerX)
         let h2 = binHeight(centerY, centerX+1)

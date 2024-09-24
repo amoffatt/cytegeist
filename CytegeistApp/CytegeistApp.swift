@@ -14,22 +14,14 @@ import SwiftData
 struct CytegeistApp: SwiftUI.App {
 
     @State private var appModel = App()
-//    @StateObject  var store = Store()
     @Environment(\.undoManager) var undoManager
-    
     @FocusedValue(\.analysisNode) var focusedAnalysisNode
 
-    var body: some Scene {
-//            AaronTestContentView()
-//                .environment(appModel)
-//        }
-        
-        
+    var body: some Scene {        
         #if os(macOS)
             Window("Navigation", id: "nav")
             {
-                ExperimentView()
-                    .environment(appModel)
+                ExperimentView().environment(appModel)
 //                     .modelContainer(for:  Experiment.self, isUndoEnabled: true)
             }
             .commands {
@@ -41,33 +33,28 @@ struct CytegeistApp: SwiftUI.App {
                             let smoothing = focusedAnalysisNode.graphDef.smoothing
                             focusedAnalysisNode.graphDef.smoothing = smoothing == .off ? .low : .off
                         }
+                        Button("Toggle Contours") {
+                            let contours = focusedAnalysisNode.graphDef.contours
+                            focusedAnalysisNode.graphDef.contours = contours ? false : true
+                        }
                     }
                 }
             }
-                //        Settings {
-                //            SettingsView()
-                //                .environmentObject(store)
-                //        }
-            
+             
             Window("Pair Charts", id: "pair-charts") {
                 PairChartsPreview()
             }
             
-//        Window("SaveOpenView", id: "SaveOpen")
-//        {
-//            SaveOpenView()
-//        }
-//        
         Window("Experiment Browser", id: "browse")
         {
-            ExperimentBrowser()
-                .environment(appModel)
+            ExperimentBrowser().environment(appModel)
         }
-        
-
         #endif
 
-//        ImmersiveSpace(id: appModel.immersiveSpaceID) {
+//       Window("SaveOpenView", id: "SaveOpen") {   SaveOpenView()  }
+//        Settings {    SettingsView().environmentObject(store)    }
+
+            //        ImmersiveSpace(id: appModel.immersiveSpaceID) {
 //            ImmersiveView()
 //                .environment(appModel)
 //                .onAppear {
