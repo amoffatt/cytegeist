@@ -37,9 +37,9 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable, Custo
     @ObservationIgnored
     @CodableIgnored
     public var gate: AnyGate? = nil                      // the predicate to filter ones parent
-    @ObservationIgnored
-    @CodableIgnored
-    public var parentImage: NSImage? = nil            // a picture of parent pop showing our gate
+//    @ObservationIgnored
+//    @CodableIgnored
+//    public var parentImage: NSImage? = nil            // a picture of parent pop showing our gate
     @ObservationIgnored
     @CodableIgnored
     public var color: Color? = nil
@@ -91,6 +91,9 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable, Custo
     
         //--------------------------------------------------------
     public func getSample() -> Sample? { sample ?? parent?.getSample() }       //AT?
+    public func getSampleMeta() -> FCSMetadata? { getSample()?.meta }
+    
+
     
     public func path() -> String { return parent?.path() ?? "" + name  }   //AT?
     
@@ -99,24 +102,34 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable, Custo
         return 1 + parent!.depth()
     }                                                            //AT?
     
+    public func ancestry() -> [AnalysisNode] {
+        var ancestry = [AnalysisNode]()
+        var node:AnalysisNode? = self
+        while node != nil {
+            ancestry.append(node!)
+            node = node!.parent
+        }
+        return ancestry.reversed()
+    }
 
-    public struct MyImage : Identifiable
-    {
-        public var id =  UUID()
-        public var image: NSImage
-        
-        init (_ nsImage: NSImage)   {
-            self.image = nsImage
-        }
-    }
-    public func parentImages() -> [MyImage] {                  //AT?
-        if (parent == nil)  { return [] }
-        var ancestry = parent!.parentImages()
-        if let img = parentImage {
-            ancestry.append(MyImage(img))
-        }
-        return ancestry
-    }
+//    public struct MyImage : Identifiable
+//    {
+//        public var id =  UUID()
+//        public var image: NSImage
+//        
+//        init (_ nsImage: NSImage)   {
+//            self.image = nsImage
+//        }
+//    }
+//    public func parentImages() -> [MyImage] {                  //AT?
+//        if (parent == nil)  { return [] }
+//        var ancestry = parent!.parentImages()
+//        if let img = parentImage {
+//            ancestry.append(MyImage(img))
+//        }
+//        return ancestry
+//    }
+    
 //--------------------------------------------------------
 //    public func mean(dim: String) -> Double     {   statLookup( EStatistic.mean, dim)    }
 //    public func median(dim: String) -> Double   {   statLookup( EStatistic.median, dim)   }
@@ -181,4 +194,29 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable, Custo
             }, remove: self.remove
         )
     }
+    
+
+    public func visibleChildren(_ chartDef:ChartDef) -> [ChartAnnotation] {
+        let dims = getChartDimensions(chartDef)
+        let result = children.compactMap { child in
+            child.chartView(chart: chartDef, dims:dims)
+        }
+        return result
+    }
+
+    
+    public func getChartDimensions(_ chartDef:ChartDef?) -> Tuple2<CDimension?> {
+        guard let chartDef, let sampleMeta = getSampleMeta() else {
+            return .init(nil, nil)
+        }
+        
+        let xAxis = chartDef.xAxis?.dim
+        let yAxis = chartDef.yAxis?.dim
+        
+        return .init(
+            sampleMeta.parameter(named: xAxis.nonNil),
+            sampleMeta.parameter(named: yAxis.nonNil)
+        )
+    }
+    
 }

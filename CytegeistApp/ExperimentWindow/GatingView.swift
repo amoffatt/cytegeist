@@ -14,7 +14,7 @@ import CytegeistCore
 
 struct GateConfigView : View {
     var node:AnalysisNode
-    var finalize:() -> Void
+    var finalize:@MainActor () -> Void
     
     
         //    init(name: String, finalize: @escaping (String) -> Void) {
@@ -50,22 +50,14 @@ struct GatingView: View {
     @State private var confirmedGate:AnalysisNode? = nil
     @State private var focusedItem:ChartAnnotation? = nil
     @State private var confirmDelete:ChartAnnotation? = nil
+    
+    @FocusState var isFocused
+    
         //    var sample: Sample?
     var population: AnalysisNode?
     
     @Environment(Experiment.self) var experiment
     @Environment(CytegeistCoreAPI.self) var core
-
-    func visibleChildren() -> [ChartAnnotation] {
-        let dims = dimensions()
-        if let children = population?.children {
-            let result = children.compactMap { child in
-                child.chartView(chart: population?.graphDef, dims:dims)
-            }
-            return result
-        }
-        return []
-    }
     
     func deleteSelectedAnnotation() {
         if let focusedItem, focusedItem.remove != nil {
@@ -79,56 +71,31 @@ struct GatingView: View {
               set: { if let chartDef = $0 { population?.graphDef = chartDef  }}
         )
     }
-         //    var selectedSample: Sample
-    func thumbnails() -> some View {
-        let parentImages = population!.parentImages()
-        let depth = parentImages.count
-        return ScrollView {
-            HStack(spacing: 4) {
-                ForEach(parentImages) { img in
-                    Image(nsImage: img.image)
-                }
-            }
-            .frame(height: depth > 0 ? 80 : 0)
-        } }
 
-    func chart(_ request: PopulationRequest, _ meta: FCSMetadata) -> some View {
+    func chart(_ meta: FCSMetadata) -> some View {
         
-        return ChartView(population: request, config: chartDefBinding) {
-            VStack {
-                GeometryReader { proxy in
-                    let size = proxy.size
-                    ZStack(alignment: .topLeading) {
-                        gateRadius(siz: proxy.size)
-                        gateRange(siz: proxy.size)
-                        gateRect(siz: proxy.size)
-                        gateEllipse(siz: proxy.size)
-                        crosshair(location: mouseLocation, size: proxy.size )
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
-                            .gesture(makeDragGesture(areaSize: proxy.size))
-                            .gesture(makeTapGesture())
-                        
-                        
-                        ForEach(visibleChildren(), id:\.self) { child in
-                            let editing = child == focusedItem
-                            AnyView(child.view(size, editing))
-                                .environment(\.isEditing, editing)
-                                .onTapGesture {
-                                    focusedItem = child
-                                }
-                        }
-                    }
-                }
+        return ChartView(population: population, config: chartDefBinding) { size in
+            ZStack(alignment: .topLeading) {
+                gateRadius(siz: size)
+                gateRange(siz: size)
+                gateRect(siz: size)
+                gateEllipse(siz: size)
+                crosshair(location: mouseLocation, size: size )
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .gesture(makeDragGesture(areaSize: size))
+                    .gesture(makeTapGesture())
             }
-            .fillAvailableSpace()
         }
         .padding(40)
         .allowsHitTesting(true)
             //            .opacity(mode == ReportMode.gating ? 1.0 : 0.0)
         .focusable()
+        .focused($isFocused)
         .focusEffectDisabled()
-        .border(.black)
         .focusedValue(\.analysisNode, population)
+        .onAppear {
+            isFocused = true
+        }
         .onDeleteCommand(perform: deleteSelectedAnnotation)
         .confirmationDialog("Enter new gate name", isPresented: isNonNilBinding($confirmedGate)) {
             if let confirmedGate {
@@ -149,26 +116,8 @@ struct GatingView: View {
         
     }
     
-    var sampleMeta: FCSMetadata? {
-        population?.getSample()?.meta
-    }
-    
-    func dimensions() -> Tuple2<CDimension?> {
-        guard let sampleMeta else {
-            return .init(nil, nil)
-        }
-        
-        let xAxis = chartDef?.xAxis?.name
-        let yAxis = chartDef?.yAxis?.name
-        
-        return .init(
-            sampleMeta.parameter(named: xAxis.nonNil),
-            sampleMeta.parameter(named: yAxis.nonNil)
-        )
-    }
-    
     func axisNormalizers() -> Tuple2<AxisNormalizer?> {
-        dimensions().map { $0?.normalizer }
+        population?.getChartDimensions(chartDef).map { $0?.normalizer } ?? .init(nil, nil)
     }
     
     func makeGate(_ start: CGPoint, _ location: CGPoint, areaPixelSize:CGSize)
@@ -180,7 +129,7 @@ struct GatingView: View {
         
         let rect = CGRect(from:start, to:end)
         
-        guard let xDim = chartDef?.xAxis?.name else {
+        guard let xDim = chartDef?.xAxis?.dim else {
             print("No x axis for gate")
             return
         }
@@ -192,7 +141,7 @@ struct GatingView: View {
             default: break
         }
         
-        guard let yDim = chartDef?.yAxis?.name else {
+        guard let yDim = chartDef?.yAxis?.dim else {
             print("No y axis for gate")
             return
         }
@@ -236,7 +185,7 @@ struct GatingView: View {
         
 print("adding \(confirmedGate.name) to \(population.name)")
 
-        confirmedGate.parentImage = snapshot()
+//        confirmedGate.parentImage = snapshot()
         confirmedGate.graphDef = population.graphDef     //TBD -  findUnusedParameters
         population.addChild(confirmedGate)
         experiment.selectedAnalysisNodes.nodes = [confirmedGate]
@@ -244,14 +193,13 @@ print("adding \(confirmedGate.name) to \(population.name)")
     }
     
 
-    @MainActor 
-    func snapshot() -> NSImage?
-    {
-        if true {    return nil  }
-        let renderer = ImageRenderer(content: self)
-        renderer.scale = 0.25
-        return renderer.nsImage
-    }
+//    @MainActor 
+//    func snapshot() -> NSImage?
+//    {
+//        let renderer = ImageRenderer(content: self)
+//        renderer.scale = 0.25
+//        return renderer.nsImage
+//    }
     
     func toParent() -> ()
     {
@@ -307,25 +255,25 @@ print("adding \(confirmedGate.name) to \(population.name)")
     
     
     var body: some View {
-        var request:PopulationRequest? = nil
-        var requestError:Error? = nil
-        
-        do {
-            request = try population?.createRequest()
-        } catch {
-            requestError = error
-        }
+//        var request:PopulationRequest? = nil
+//        var requestError:Error? = nil
+//        
+//        do {
+//            request = try population?.createRequest()
+//        } catch {
+//            requestError = error
+//        }
         
         return VStack {
                 //            Text("Gating Prototype")
             if let sample = population?.getSample() {
                 Text("Sample: \(sample.tubeName), population: \((population?.name).nonNil)")
-                thumbnails()
                 if let meta = sample.meta {
-                    if let request {
-                        chart(request, meta)
+                    if let population {
+                        AncestryView(population, height:160)
+                        chart(meta)
                     } else {
-                        Text("Error creating chart: \(requestError?.localizedDescription ?? "")")
+                        Text("No population selected")
                     }
                 } else { Text("Sample metadata not found")  }
             }
@@ -488,7 +436,6 @@ print("adding \(confirmedGate.name) to \(population.name)")
     {
         var outOfBounds:Bool = (location.x < 2 || location.y < 2 ||
                                 location.x > size.width || location.y > size.height)
-        print(location, size)
         return ZStack { dashedLine(
             from:CGPoint(x: location.x, y:0),
             to:CGPoint(x: location.x,  y: size.height))
@@ -498,7 +445,7 @@ print("adding \(confirmedGate.name) to \(population.name)")
                 to:CGPoint(x: size.width, y: location.y))
             .opacity((curTool == .range) ? 0.0 : 1.0)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .fillAvailableSpace()
         .opacity((isDragging || outOfBounds) ? 0.0 : 1.0)
         .onHover(perform: { hovering in isHovering = true  })
         .onContinuousHover { phase in

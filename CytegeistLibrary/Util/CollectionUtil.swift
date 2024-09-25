@@ -4,6 +4,7 @@
 //
 //  Created by Aaron Moffatt on 7/14/24.
 //
+import Foundation
 
 
 public extension RandomAccessCollection {

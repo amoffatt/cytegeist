@@ -57,17 +57,17 @@ public struct Histogram2DView: View {
                     Text("Error: \(error.message)")
                 }
                 if let data = query.data {
-                    Chart() { }
-                    .fillAvailableSpace()
-                    .background(.clear)
-                    .chartBackground { proxy in
-                        VStack {
-                            let plotSize = proxy.plotSize
+//                    Chart() { }
+//                    .background(.clear)
+//                    .chartBackground { proxy in
+//                        VStack {
+//                            let plotSize = proxy.plotSize
                             data.view
-                                .frame(width:plotSize.width, height: plotSize.height)
-                        }
-                    }
-                    .chartLegend(.hidden)
+//                                .frame(width:plotSize.width, height: plotSize.height)
+//                        }
+//                    }
+                        .fillAvailableSpace()
+//                    .chartLegend(.hidden)
                 }
             }
             .onDisappear {  query.dispose()  }

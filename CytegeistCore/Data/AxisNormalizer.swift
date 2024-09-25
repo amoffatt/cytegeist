@@ -31,7 +31,7 @@ public struct AxisNormalizer: Hashable, Codable {
         func calculateTickMarks(desiredTicks: Int) -> [MajorAxisTick] {
             let range = max - min
             let roughTickInterval = range / Double(desiredTicks - 1)
-            let tickInterval = niceNumber(roughTickInterval, round: false)
+            let (tickInterval, minorTickCount) = niceNumber(roughTickInterval, round: false)
             
             let minTick = floor(min / tickInterval) * tickInterval
             let maxTick = floor(max / tickInterval) * tickInterval      // AT - was ceil
@@ -44,10 +44,19 @@ public struct AxisNormalizer: Hashable, Codable {
             }
             
             return ticks.map { value in
-                .init(
+                let minorTickInterval = tickInterval / Double(minorTickCount + 1)
+                let minorTicks = (1...minorTickCount).compactMap { i in
+                    let tickValue = value + Double(i) * minorTickInterval
+                    if tickValue >= min && tickValue <= max {
+                        return Float(normalize(tickValue))
+                    }
+                    return nil
+                }
+
+                return .init(
                     normalizedValue: Float(normalize(value)),
                     label: String(value),
-                    minorTicks: [])
+                    minorTicks: minorTicks)
             }
         }
 
@@ -157,26 +166,27 @@ public struct MajorAxisTick: Identifiable {
 public class LinearAxis {
 }
 //---------------------------------------------------------------------------
-func niceNumber(_ x: Double, round: Bool) -> Double {
+func niceNumber(_ x: Double, round: Bool) -> (interval:Double, minorTicks:Int) {
     let exp = floor(log10(x))
     let f = x / pow(10, exp)
     var nf: Double
+    var minorTicks: Int = 4
     
     if round {
         if f < 1.5      {  nf = 1
-        } else if f < 3 {  nf = 2
-        } else if f < 7 {  nf = 5
+        } else if f < 3 {  nf = 2; minorTicks = 3
+        } else if f < 7 {  nf = 5;
         } else {          nf = 10
         }
     } else {
         if f <= 1 {        nf = 1
-        } else if f <= 2 { nf = 2
-        } else if f <= 5 { nf = 5
+        } else if f <= 2 { nf = 2; minorTicks = 3
+        } else if f <= 5 { nf = 5;
         } else {           nf = 10
         }
     }
     
-    return nf * pow(10, exp)
+    return (nf * pow(10, exp), minorTicks)
 }
     //---------------------------------------------------------------------------
 

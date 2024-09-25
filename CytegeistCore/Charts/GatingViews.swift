@@ -219,7 +219,7 @@ struct GateView<GateType:GateDef> : View where GateType:ViewableGate {
 //            return false
         }
         
-        if gate.dims.get(index:1) == nil,
+        if gate.dims.get(index:1) != nil,
            normalizers.y == nil {
 //            fatalError("Y axis normalizer not availble for gate \(gate)")
             return false
@@ -488,7 +488,7 @@ extension EllipsoidGateDef : ViewableGate {
             } content: { state in
                 shape
                     .fill(v.fillColor)
-                    .stroke(v.strokeColor)
+                    .stroke(v.strokeColor, lineWidth: v.lineWidth)
                     .contentShape(shape)
             }
 //            handle: { state in
@@ -538,6 +538,8 @@ public struct Polygon : Shape {
 
 
 struct GateLabel: View {
+    @Environment(\.annotationScale) var scale
+    
     let node:AnalysisNode
 
     var body: some View {
@@ -545,6 +547,7 @@ struct GateLabel: View {
             .padding()
             .background(.regularMaterial.opacity(0.4))
             .cornerRadius(10)
+            .scaleEffect(scale)
         // AM this offset may need to be different when gate is transposed
             .offset(node.labelOffset.asSize)
     }
@@ -552,7 +555,27 @@ struct GateLabel: View {
 
 
 struct LineWidthEnvironmentKey: EnvironmentKey {
-    static let defaultValue: Double = 3.0
+    static let defaultValue: Double = 1.5
+}
+
+struct HandleSizeEnvironmentKey: EnvironmentKey {
+    static let defaultValue: Double = 20
+}
+
+struct GateColorEnvironmentKey: EnvironmentKey {
+    static let defaultValue = Color.green
+}
+
+struct ControlStateEnvironmentKey: EnvironmentKey {
+    static let defaultValue:ControlState = (false, false)
+}
+
+struct IsEditingEnvironmentKey: EnvironmentKey {
+    static let defaultValue:Bool = false
+}
+
+struct AnnotationScaleEnvironmentKey: EnvironmentKey {
+    static let defaultValue:CGFloat = 1.0
 }
 
 public extension EnvironmentValues {
@@ -560,47 +583,31 @@ public extension EnvironmentValues {
         get { self[LineWidthEnvironmentKey.self] }
         set { self[LineWidthEnvironmentKey.self] = newValue }
     }
-}
-
-struct HandleSizeEnvironmentKey: EnvironmentKey {
-    static let defaultValue: Double = 20
-}
-
-public extension EnvironmentValues {
+    
     var handleSize: Double {
         get { self[HandleSizeEnvironmentKey.self] }
         set { self[HandleSizeEnvironmentKey.self] = newValue }
     }
-}
-
-struct GateColorEnvironmentKey: EnvironmentKey {
-    static let defaultValue = Color.green
-}
-
-public extension EnvironmentValues {
+    
     var gateColor: Color {
         get { self[GateColorEnvironmentKey.self] }
         set { self[GateColorEnvironmentKey.self] = newValue }
     }
-}
-struct ControlStateEnvironmentKey: EnvironmentKey {
-    static let defaultValue:ControlState = (false, false)
-}
-
-public extension EnvironmentValues {
+    
     internal var controlState: ControlState {
         get { self[ControlStateEnvironmentKey.self] }
         set { self[ControlStateEnvironmentKey.self] = newValue }
     }
-}
-
-struct IsEditingEnvironmentKey: EnvironmentKey {
-    static let defaultValue:Bool = false
-}
-
-public extension EnvironmentValues {
+    
     var isEditing: Bool {
         get { self[IsEditingEnvironmentKey.self] }
         set { self[IsEditingEnvironmentKey.self] = newValue }
     }
+    
+    var annotationScale: CGFloat {
+        get { self[AnnotationScaleEnvironmentKey.self] }
+        set { self[AnnotationScaleEnvironmentKey.self] = newValue }
+    }
 }
+
+

@@ -110,6 +110,9 @@ public extension String {
         return uniqueName
     }
     
+    func nonEmpty(_ defaultValue:String) -> String {
+        self.isEmpty ? defaultValue : self
+    }
 
 }
 
@@ -131,6 +134,9 @@ public extension Double {
 
 public extension Optional where Wrapped == String {
     var nonNil:String { self ?? "" }
+    func nonEmpty(_ defaultValue:String) -> String {
+        self.nonNil.isEmpty ? defaultValue : self!
+    }
 }
 
 public extension Data {

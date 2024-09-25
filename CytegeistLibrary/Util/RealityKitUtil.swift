@@ -16,7 +16,7 @@ public extension Entity {
         var path = ""
         var parent:Entity? = self
         while parent != nil {
-            path = "\(parent!.name)/\(path)"
+            path = "\(parent!.dim)/\(path)"
             parent = parent!.parent
         }
         return path
@@ -89,9 +89,9 @@ public struct EntityInstanceArray<Element:EntityWrapper<Entity>> {
 
 open class EntityWrapper<T:Entity> {
     public let entity:T
-    public var name:String {
-        get { entity.name }
-        set { entity.name = newValue }
+    public var dim:String {
+        get { entity.dim }
+        set { entity.dim = newValue }
     }
     public var components:Entity.ComponentSet { entity.components }
     
@@ -119,8 +119,8 @@ open class SimpleObjectEntity: EntityWrapper<Entity> {
     
     public func setMaterialProperties(_ values:MaterialProperty...) throws {
         var material = self.material
-        for (name, value) in values {
-            try material.setParameter(name: name, value: value)
+        for (dim, value) in values {
+            try material.setParameter(dim: dim, value: value)
         }
         self.material = material
     }

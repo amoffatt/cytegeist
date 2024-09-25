@@ -45,15 +45,23 @@ public struct AxisDef : Hashable, Codable//, Transferable
 
 //    var extraAttributes = AttributeStore()
     
-    public var name:String
-    public var label:String
+    public var dim:String
+    public var customLabel:String
     public var auto:Bool
+    public var showTicks:Bool
+    public var showTickLabels:Bool
+    public var showLabel:Bool
+    public var scale:CGFloat?
 
-    public init(dim: String = "", label: String = "", auto: Bool = true)
+    public init(dim: String = "", label: String = "", auto: Bool = true, showTicks: Bool = true, showTickLabels: Bool = true, showLabel: Bool = true, scale: CGFloat? = nil)
     {
-        self.name = dim
-        self.label = label.isEmpty ? dim : label
+        self.dim = dim
+        self.customLabel = label
         self.auto = auto
+        self.showTicks = showTicks
+        self.showTickLabels = showTickLabels
+        self.showLabel = showLabel
+        self.scale = scale
     }
 
 }

@@ -104,9 +104,9 @@ public struct Icon {
     delete = Icon("trash")
     
     let systemImage:String
-    let scaling: Float
+    let scaling: CGFloat
     
-    public init(_ systemImage: String, scaling: Float = 1) {
+    public init(_ systemImage: String, scaling: CGFloat = 1) {
         self.systemImage = systemImage
         self.scaling = scaling
     }
@@ -198,6 +198,12 @@ public func isNonNilBinding<T>(_ src:Binding<T?>) -> Binding<Bool> {
     })
 }
 
+public func readOnlyBinding<T>(_ value:@escaping @autoclosure () -> T) -> Binding<T> {
+    .init {
+        value()
+    } set: { _ in }
+}
+
 
 
 public extension View {
@@ -275,3 +281,12 @@ public extension Path {
 //        set { self[DeleteValueKey.self] = newValue }
 //    }
 //}
+
+
+public extension String {
+    func sizeOfString(usingFont font: Font) -> CGSize {
+        let fontAttributes = [NSAttributedString.Key.font: font]
+        let size = self.size(withAttributes: fontAttributes)
+        return size
+    }
+}

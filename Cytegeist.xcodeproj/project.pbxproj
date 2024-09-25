@@ -29,12 +29,7 @@
 		B65D82B12C44BE7200E4F0A2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B65D82B02C44BE7200E4F0A2 /* Assets.xcassets */; };
 		B65D82B42C44BE7200E4F0A2 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B65D82B32C44BE7200E4F0A2 /* Preview Assets.xcassets */; };
 		B68529692C74DBB500EF9EF4 /* ComputeCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = B68529682C74DBB500EF9EF4 /* ComputeCache.swift */; };
-		B691FCDE2CA28EDC00B0CFC9 /* Sample+ImportImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4702C75D04800DB6786 /* Sample+ImportImage.swift */; };
-		B691FCDF2CA28EDC00B0CFC9 /* SaveOpenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4A62C76814F00DB6786 /* SaveOpenView.swift */; };
-		B691FCE02CA28EDC00B0CFC9 /* Sample+ItemProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4672C75D04800DB6786 /* Sample+ItemProvider.swift */; };
-		B691FCE12CA28EDC00B0CFC9 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4842C75D09A00DB6786 /* SettingsView.swift */; };
-		B691FCE22CA28EDC00B0CFC9 /* ProtoStartupScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4852C75D09A00DB6786 /* ProtoStartupScreen.swift */; };
-		B691FCE32CA28EDC00B0CFC9 /* Store+ReferenceFileDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4712C75D04900DB6786 /* Store+ReferenceFileDocument.swift */; };
+		B6902A1B2CA4BDC4004DBE33 /* AncestryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6902A1A2CA4BDC4004DBE33 /* AncestryView.swift */; };
 		B691FCE42CA2913000B0CFC9 /* Chart3DView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B691FCDC2CA28B1B00B0CFC9 /* Chart3DView.swift */; };
 		B691FCE82CA29F4E00B0CFC9 /* RealityKitUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = B691FCE72CA29F4E00B0CFC9 /* RealityKitUtil.swift */; };
 		B691FCEA2CA2A0D900B0CFC9 /* ScatterChart3DEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = B691FCE92CA2A0D900B0CFC9 /* ScatterChart3DEntity.swift */; };
@@ -264,6 +259,7 @@
 		B68529702C74DC1100EF9EF4 /* PairCharts.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PairCharts.swift; sourceTree = "<group>"; };
 		B68529712C74DC1100EF9EF4 /* SampleInspectorView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SampleInspectorView.swift; sourceTree = "<group>"; };
 		B69001CE2C88CED50083C743 /* Statistics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Statistics.swift; sourceTree = "<group>"; };
+		B6902A1A2CA4BDC4004DBE33 /* AncestryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AncestryView.swift; sourceTree = "<group>"; };
 		B691FCDC2CA28B1B00B0CFC9 /* Chart3DView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Chart3DView.swift; sourceTree = "<group>"; };
 		B691FCE72CA29F4E00B0CFC9 /* RealityKitUtil.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RealityKitUtil.swift; sourceTree = "<group>"; };
 		B691FCE92CA2A0D900B0CFC9 /* ScatterChart3DEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScatterChart3DEntity.swift; sourceTree = "<group>"; };
@@ -465,6 +461,7 @@
 				B6C9A4B72C77D9AA00DB6786 /* ChartAxisView.swift */,
 				DCA66B742C81047200F51C70 /* GatingViews.swift */,
 				DCB768372C92663A0003CB64 /* Contours.swift */,
+				B6902A1A2CA4BDC4004DBE33 /* AncestryView.swift */,
 			);
 			path = Charts;
 			sourceTree = "<group>";
@@ -1018,6 +1015,7 @@
 				B64173922C58A89A001AA2F4 /* CoreTestUtil.swift in Sources */,
 				DC2473682C9A743A00D2DCA0 /* Statistic.swift in Sources */,
 				DC23F02F2C7D3C0B002FCDC0 /* Gate.swift in Sources */,
+				B6902A1B2CA4BDC4004DBE33 /* AncestryView.swift in Sources */,
 				B63D164C2C55E54500E81C2F /* DataBufferReader.swift in Sources */,
 				B63EEE902C569C7700E465C9 /* CytegeistCore.swift in Sources */,
 				B691FCEA2CA2A0D900B0CFC9 /* ScatterChart3DEntity.swift in Sources */,

@@ -114,7 +114,7 @@ public extension CGPoint {
 }
 
 public extension CGSize {
-    init(_ size: Float) {
+    init(_ size: CGFloat) {
         self.init(size, size)
     }
     init(_ width: Float, _ height: Float) {
