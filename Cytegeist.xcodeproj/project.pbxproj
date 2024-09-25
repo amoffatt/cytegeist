@@ -25,7 +25,6 @@
 		B641739D2C5C4E00001AA2F4 /* ParameterInspectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B641739C2C5C4E00001AA2F4 /* ParameterInspectorView.swift */; };
 		B65D82A92C44BE7100E4F0A2 /* RealityKitContent in Frameworks */ = {isa = PBXBuildFile; platformFilters = (xros, ); productRef = B65D82A82C44BE7100E4F0A2 /* RealityKitContent */; settings = {ATTRIBUTES = (Weak, ); }; };
 		B65D82AB2C44BE7100E4F0A2 /* CytegeistApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B65D82AA2C44BE7100E4F0A2 /* CytegeistApp.swift */; };
-		B65D82AD2C44BE7100E4F0A2 /* AaronTestContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B65D82AC2C44BE7100E4F0A2 /* AaronTestContentView.swift */; };
 		B65D82AF2C44BE7100E4F0A2 /* ImmersiveView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B65D82AE2C44BE7100E4F0A2 /* ImmersiveView.swift */; };
 		B65D82B12C44BE7200E4F0A2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B65D82B02C44BE7200E4F0A2 /* Assets.xcassets */; };
 		B65D82B42C44BE7200E4F0A2 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B65D82B32C44BE7200E4F0A2 /* Preview Assets.xcassets */; };
@@ -80,7 +79,6 @@
 		B6C9A4BA2C77DB3700DB6786 /* AxisNormalizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4B92C77DB3700DB6786 /* AxisNormalizer.swift */; };
 		DC05A3D12C798EC900C08BBF /* Smoothing.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC05A3D02C798EC900C08BBF /* Smoothing.swift */; };
 		DC23F02F2C7D3C0B002FCDC0 /* Gate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4692C75D04800DB6786 /* Gate.swift */; };
-		DC2473652C9A25E700D2DCA0 /* ExperimentBrowser.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC2473642C9A25E700D2DCA0 /* ExperimentBrowser.swift */; };
 		DC2473682C9A743A00D2DCA0 /* Statistic.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC2473662C9A72A700D2DCA0 /* Statistic.swift */; };
 		DC2473692C9A7B0D00D2DCA0 /* ProtoStartupScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4852C75D09A00DB6786 /* ProtoStartupScreen.swift */; };
 		DC24736A2C9A7B0D00D2DCA0 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4842C75D09A00DB6786 /* SettingsView.swift */; };
@@ -89,7 +87,6 @@
 		DC2473702C9A7B5C00D2DCA0 /* Sample+ImportImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4702C75D04800DB6786 /* Sample+ImportImage.swift */; };
 		DC2473712C9A7B7800D2DCA0 /* Sample+ItemProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4672C75D04800DB6786 /* Sample+ItemProvider.swift */; };
 		DC2473722C9A7CDD00D2DCA0 /* TreeNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A48D2C75D24B00DB6786 /* TreeNode.swift */; };
-		DC2473742C9B78E500D2DCA0 /* MIFlowCyt.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC2473732C9B78E500D2DCA0 /* MIFlowCyt.swift */; };
 		DC2473752C9B81E000D2DCA0 /* PairCharts.swift in Sources */ = {isa = PBXBuildFile; fileRef = B68529702C74DC1100EF9EF4 /* PairCharts.swift */; };
 		DC2473762C9B820200D2DCA0 /* SampleInspectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B68529712C74DC1100EF9EF4 /* SampleInspectorView.swift */; };
 		DC2473772C9CB6CE00D2DCA0 /* Statistics.swift in Sources */ = {isa = PBXBuildFile; fileRef = B69001CE2C88CED50083C743 /* Statistics.swift */; };
@@ -100,6 +97,8 @@
 		DCA66B762C810BF200F51C70 /* AnalysisNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A46F2C75D04800DB6786 /* AnalysisNode.swift */; };
 		DCA66B772C810C0E00F51C70 /* Sample.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A46D2C75D04800DB6786 /* Sample.swift */; };
 		DCB768382C92663A0003CB64 /* Contours.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCB768372C92663A0003CB64 /* Contours.swift */; };
+		DCF6FBAE2CA389E30001C9AF /* ExperimentBrowser.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCF6FBAB2CA389E30001C9AF /* ExperimentBrowser.swift */; };
+		DCF6FBAF2CA389E30001C9AF /* MIFlowCyt.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCF6FBAC2CA389E30001C9AF /* MIFlowCyt.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -214,7 +213,6 @@
 		B65D82A32C44BE7100E4F0A2 /* CytegeistApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CytegeistApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B65D82A72C44BE7100E4F0A2 /* RealityKitContent */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = RealityKitContent; sourceTree = "<group>"; };
 		B65D82AA2C44BE7100E4F0A2 /* CytegeistApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CytegeistApp.swift; sourceTree = "<group>"; };
-		B65D82AC2C44BE7100E4F0A2 /* AaronTestContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AaronTestContentView.swift; sourceTree = "<group>"; };
 		B65D82AE2C44BE7100E4F0A2 /* ImmersiveView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImmersiveView.swift; sourceTree = "<group>"; };
 		B65D82B02C44BE7200E4F0A2 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B65D82B32C44BE7200E4F0A2 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
@@ -272,14 +270,14 @@
 		B6C9A4B72C77D9AA00DB6786 /* ChartAxisView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartAxisView.swift; sourceTree = "<group>"; };
 		B6C9A4B92C77DB3700DB6786 /* AxisNormalizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AxisNormalizer.swift; sourceTree = "<group>"; };
 		DC05A3D02C798EC900C08BBF /* Smoothing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Smoothing.swift; sourceTree = "<group>"; };
-		DC2473642C9A25E700D2DCA0 /* ExperimentBrowser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExperimentBrowser.swift; sourceTree = "<group>"; };
 		DC2473662C9A72A700D2DCA0 /* Statistic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Statistic.swift; sourceTree = "<group>"; };
-		DC2473732C9B78E500D2DCA0 /* MIFlowCyt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MIFlowCyt.swift; sourceTree = "<group>"; };
 		DC6F42FA2C83F7BD00288EB8 /* TabBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabBar.swift; sourceTree = "<group>"; };
 		DC861C7B2C8632F000D7C3FB /* CGTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGTableView.swift; sourceTree = "<group>"; };
 		DC861C812C868D8700D7C3FB /* ModelList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelList.swift; sourceTree = "<group>"; };
 		DCA66B742C81047200F51C70 /* GatingViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GatingViews.swift; sourceTree = "<group>"; };
 		DCB768372C92663A0003CB64 /* Contours.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Contours.swift; sourceTree = "<group>"; };
+		DCF6FBAB2CA389E30001C9AF /* ExperimentBrowser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ExperimentBrowser.swift; sourceTree = "<group>"; };
+		DCF6FBAC2CA389E30001C9AF /* MIFlowCyt.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MIFlowCyt.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -417,7 +415,6 @@
 				B6C9A4692C75D04800DB6786 /* Gate.swift */,
 				B68529682C74DBB500EF9EF4 /* ComputeCache.swift */,
 				B63EEE8F2C569C7600E465C9 /* CytegeistCore.swift */,
-				DC2473732C9B78E500D2DCA0 /* MIFlowCyt.swift */,
 				DC05A3D02C798EC900C08BBF /* Smoothing.swift */,
 				B69001CE2C88CED50083C743 /* Statistics.swift */,
 			);
@@ -468,7 +465,6 @@
 				B6C9A4A82C76820300DB6786 /* Unused UI */,
 				B65D82AA2C44BE7100E4F0A2 /* CytegeistApp.swift */,
 				B6C9A44B2C75CFCB00DB6786 /* App.swift */,
-				B65D82AC2C44BE7100E4F0A2 /* AaronTestContentView.swift */,
 				B6C9A4302C75B66500DB6786 /* Experiment */,
 				B6C9A45A2C75D01300DB6786 /* ExperimentWindow */,
 				B6C9A44F2C75D01300DB6786 /* Tables - Layouts */,
@@ -500,8 +496,8 @@
 		B68529722C74DC1100EF9EF4 /* UI */ = {
 			isa = PBXGroup;
 			children = (
+				DCF6FBAD2CA389E30001C9AF /* Experiment Browser */,
 				B6C9A4AC2C768C5800DB6786 /* Immersive */,
-				DC2473642C9A25E700D2DCA0 /* ExperimentBrowser.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -607,6 +603,15 @@
 				B65D82AE2C44BE7100E4F0A2 /* ImmersiveView.swift */,
 			);
 			path = Immersive;
+			sourceTree = "<group>";
+		};
+		DCF6FBAD2CA389E30001C9AF /* Experiment Browser */ = {
+			isa = PBXGroup;
+			children = (
+				DCF6FBAB2CA389E30001C9AF /* ExperimentBrowser.swift */,
+				DCF6FBAC2CA389E30001C9AF /* MIFlowCyt.swift */,
+			);
+			path = "Experiment Browser";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -861,7 +866,6 @@
 				DC2473762C9B820200D2DCA0 /* SampleInspectorView.swift in Sources */,
 				B6C9A4B82C77D9AA00DB6786 /* ChartAxisView.swift in Sources */,
 				B6C9A4B42C77CA5400DB6786 /* ChartDefs.swift in Sources */,
-				DC2473742C9B78E500D2DCA0 /* MIFlowCyt.swift in Sources */,
 				DC2473752C9B81E000D2DCA0 /* PairCharts.swift in Sources */,
 				DCA66B762C810BF200F51C70 /* AnalysisNode.swift in Sources */,
 				B6C9A4BA2C77DB3700DB6786 /* AxisNormalizer.swift in Sources */,
@@ -905,7 +909,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B65D82AD2C44BE7100E4F0A2 /* AaronTestContentView.swift in Sources */,
 				DC861C7C2C8632F000D7C3FB /* CGTableView.swift in Sources */,
 				B6C9A49B2C767FAF00DB6786 /* CGLayout.swift in Sources */,
 				B6C9A4622C75D01300DB6786 /* ExperimentView.swift in Sources */,
@@ -922,7 +925,6 @@
 				B6C9A4612C75D01300DB6786 /* GatingView.swift in Sources */,
 				B6C9A4662C75D01300DB6786 /* Sidebar.swift in Sources */,
 				B6C9A4602C75D01300DB6786 /* ExperimentHistoryOutline.swift in Sources */,
-				DC2473652C9A25E700D2DCA0 /* ExperimentBrowser.swift in Sources */,
 				B65D82AB2C44BE7100E4F0A2 /* CytegeistApp.swift in Sources */,
 				B6C9A4652C75D01300DB6786 /* SampleList.swift in Sources */,
 				DC2473722C9A7CDD00D2DCA0 /* TreeNode.swift in Sources */,
@@ -930,8 +932,10 @@
 				B6C9A45E2C75D01300DB6786 /* SampleListModePicker.swift in Sources */,
 				B6C9A45D2C75D01300DB6786 /* AnalysisList.swift in Sources */,
 				B6C9A45F2C75D01300DB6786 /* ExpansionState.swift in Sources */,
+				DCF6FBAF2CA389E30001C9AF /* MIFlowCyt.swift in Sources */,
 				B6C9A44C2C75CFCB00DB6786 /* App.swift in Sources */,
 				B65D82AF2C44BE7100E4F0A2 /* ImmersiveView.swift in Sources */,
+				DCF6FBAE2CA389E30001C9AF /* ExperimentBrowser.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

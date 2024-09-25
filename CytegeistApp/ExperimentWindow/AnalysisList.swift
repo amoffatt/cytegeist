@@ -29,7 +29,11 @@ struct AnalysisList: View {
         @Bindable var selection = experiment.selectedAnalysisNodes
         
         return VStack {
-            Text("For \(sample.tubeName): selected: \(selection.nodes.count)") //.frame(width: 150)
+            HStack {
+                Text("For \(sample.tubeName): selected: \(selection.nodes.count)") //.frame(width: 150)
+                Spacer()
+                Button("<< Copy", action: copyToGroup)
+            }
             List(selection: $selection.nodes) {
                 NodeOutlineGroup<AnalysisNode>(node: tree, childKeyPath: \.children.emptyToNil, isExpanded: true)
 //                OutlineGroup(tree, children: \.children.emptyToNil) {  item in
@@ -82,26 +86,21 @@ struct AnalysisList: View {
                 } else {
                     AnalysisNodeView(node: anode)
                         .frame(width: 350, height: 30)
-                        .draggable(item) {
-                            Label(item.name, systemImage: "lightbulb")      // this is the drag image
                         .draggable(anode) {
-                            Label(anode.name, systemImage: "lightbulb")      // this is the drag image
-                                .bold().offset(x: -100)
-                                .foregroundStyle(.orange)
-                                .frame(minWidth: 350, minHeight: 30)
+                                    Label(anode.name, systemImage: "lightbulb")      // this is the drag image
+                                        .bold().offset(x: -100)
+                                        .foregroundStyle(.orange)
+                                        .frame(minWidth: 350, minHeight: 30)
+                                }
+                                .tag(anode)
                         }
-                        .tag(item)
-                }
-            } //List
-        }  //vstack
-    }  // list
-    func copyToGroup () { print("copy to group")
-                        .tag(anode)
-                    }
-            }
-            else {  Text("AnalysisNode missing")  }
-        }
+            }  //vstack
+        }  // list
     }
+    func copyToGroup () { print("copy to group")
+                      
+                    }
+
     
         //-------------------------------------------------------------------------------
     public struct AnalysisNodeView: View {
