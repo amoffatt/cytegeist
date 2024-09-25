@@ -21,6 +21,8 @@ public struct ChartDef : Hashable, Codable, Equatable//, Transferable
     public var xAxis: AxisDef? = nil
     public var yAxis: AxisDef? = nil
     public var zAxis: AxisDef? = nil
+    public var colorAxis: AxisDef? = nil
+    public var sizeAxis: AxisDef? = nil
     
     public var smoothing:HistogramSmoothing = .low
     public var contours:Bool = false

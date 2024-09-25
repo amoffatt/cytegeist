@@ -118,8 +118,7 @@ public struct ChartView<Overlay>: View where Overlay:View {
                 .fillAvailableSpace()
 //                .border(.yellow)
         }
-        
-        .onChange(of: population.getSample(), initial: true, updateSampleQuery)
+        .updateSampleQuery(core, population, query: $sampleQuery)
         
         .onChange(of: population, initial: true, updateChartQuery)
         .onChange(of: config.wrappedValue, updateChartQuery)
@@ -136,14 +135,6 @@ public struct ChartView<Overlay>: View where Overlay:View {
 //        return stateHash.finalize()
 //    }
     
-    @MainActor func updateSampleQuery() {
-        sampleQuery?.dispose()
-        sampleQuery = nil
-        if let sample = population.getSample() {
-            let r = SampleRequest(sample, includeData: false)
-            sampleQuery = core.loadSample(r)
-        }
-    }
             
     @MainActor func updateChartQuery()  {
         chartQuery?.dispose()
@@ -188,6 +179,28 @@ public struct ChartView<Overlay>: View where Overlay:View {
         }
     }
 }
+
+extension View {
+//    var population: PopulationRequest { get }
+//    var chartDef: Binding<ChartDef> { get }
+    @MainActor
+    func updateSampleQuery(_ core:CytegeistCoreAPI, _ population:PopulationRequest, query:Binding<APIQuery<FCSFile>?>) -> some View {
+        self.onChange(of: population.getSample(), initial: true) {
+            query.wrappedValue?.dispose()
+            query.wrappedValue = nil
+            if let sample = population.getSample() {
+                let r = SampleRequest(sample, includeData: false)
+                query.wrappedValue = core.loadSample(r)
+            }
+        }
+    }
+    
+    
+}
+
+//extension View {
+//    func updateSampleQuery
+//}
 
 //#Preview {
 //    let core = CytegeistCoreAPI()

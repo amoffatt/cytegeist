@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import CytegeistLibrary
 
 let radLowRes:Int = 8
 let radHighRes:Int = 24

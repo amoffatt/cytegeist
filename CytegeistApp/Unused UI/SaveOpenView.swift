@@ -6,6 +6,8 @@
 //  https://serialcoder.dev
 //
 
+#if os(macOS)
+
 import SwiftUI
 import UniformTypeIdentifiers
 
@@ -94,3 +96,4 @@ struct SaveOpenView_Previews: PreviewProvider {
         SaveOpenView()
     }
 }
+#endif

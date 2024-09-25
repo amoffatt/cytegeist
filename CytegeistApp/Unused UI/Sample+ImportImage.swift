@@ -5,9 +5,9 @@ Abstract:
 The sample extension to support importing an image.
 */
 
-import AppKit
-import Foundation
-import UniformTypeIdentifiers
+//import AppKit
+//import Foundation
+//import UniformTypeIdentifiers
 //
 //extension Sample {
 //    static var importImageTypes = NSImage.imageTypes.compactMap { UTType($0) }

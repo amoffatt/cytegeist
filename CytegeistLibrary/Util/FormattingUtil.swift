@@ -11,7 +11,7 @@ import Foundation
 public let numberFormatter: NumberFormatter = {
     let formatter = NumberFormatter()
     formatter.numberStyle = .none
-    formatter.hasThousandSeparators = false
+//    formatter.hasThousandSeparators = false
     formatter.usesSignificantDigits = true
     return formatter
 }()
