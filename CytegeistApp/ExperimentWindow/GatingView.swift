@@ -55,17 +55,6 @@ struct GatingView: View {
     
     @Environment(Experiment.self) var experiment
     @Environment(CytegeistCoreAPI.self) var core
-
-    func visibleChildren() -> [ChartAnnotation] {
-        let dims = dimensions()
-        if let children = population?.children {
-            let result = children.compactMap { child in
-                child.chartView(chart: population?.graphDef, dims:dims)
-            }
-            return result
-        }
-        return []
-    }
     
     func deleteSelectedAnnotation() {
         if let focusedItem, focusedItem.remove != nil {
@@ -81,20 +70,30 @@ struct GatingView: View {
     }
          //    var selectedSample: Sample
     func thumbnails() -> some View {
-        let parentImages = population!.parentImages()
-        let depth = parentImages.count
-        return ScrollView {
-            HStack(spacing: 4) {
-                ForEach(parentImages) { img in
-                    Image(nsImage: img.image)
+        let ancestry = population?.ancestry()
+        return Group {
+            if let ancestry, !ancestry.isEmpty {
+                
+                ScrollView {
+                    HStack(spacing: 4) {
+                        ForEach(ancestry) { ancestor in
+//                            @Bindable var ancestor = ancestor
+                            let chartDef:Binding<ChartDef?> = .init {
+                                ancestor.graphDef
+                            } set: { _ in }
+//                            Image(nsImage: img.image)
+                            ChartView(population: ancestor, config: chartDef)   // TODO ensure chartDef axes match the viewed gate
+                        }
+                    }
+                    .frame(height:80)
                 }
             }
-            .frame(height: depth > 0 ? 80 : 0)
-        } }
+        }
+    }
 
-    func chart(_ request: PopulationRequest, _ meta: FCSMetadata) -> some View {
+    func chart(_ meta: FCSMetadata) -> some View {
         
-        return ChartView(population: request, config: chartDefBinding) {
+        return ChartView(population: population, config: chartDefBinding) {
             VStack {
                 GeometryReader { proxy in
                     let size = proxy.size
@@ -109,14 +108,6 @@ struct GatingView: View {
                             .gesture(makeTapGesture())
                         
                         
-                        ForEach(visibleChildren(), id:\.self) { child in
-                            let editing = child == focusedItem
-                            AnyView(child.view(size, editing))
-                                .environment(\.isEditing, editing)
-                                .onTapGesture {
-                                    focusedItem = child
-                                }
-                        }
                     }
                 }
             }
@@ -149,26 +140,8 @@ struct GatingView: View {
         
     }
     
-    var sampleMeta: FCSMetadata? {
-        population?.getSample()?.meta
-    }
-    
-    func dimensions() -> Tuple2<CDimension?> {
-        guard let sampleMeta else {
-            return .init(nil, nil)
-        }
-        
-        let xAxis = chartDef?.xAxis?.name
-        let yAxis = chartDef?.yAxis?.name
-        
-        return .init(
-            sampleMeta.parameter(named: xAxis.nonNil),
-            sampleMeta.parameter(named: yAxis.nonNil)
-        )
-    }
-    
     func axisNormalizers() -> Tuple2<AxisNormalizer?> {
-        dimensions().map { $0?.normalizer }
+        population?.getChartDimensions(chartDef).map { $0?.normalizer } ?? .init(nil, nil)
     }
     
     func makeGate(_ start: CGPoint, _ location: CGPoint, areaPixelSize:CGSize)
@@ -236,7 +209,7 @@ struct GatingView: View {
         
 print("adding \(confirmedGate.name) to \(population.name)")
 
-        confirmedGate.parentImage = snapshot()
+//        confirmedGate.parentImage = snapshot()
         confirmedGate.graphDef = population.graphDef     //TBD -  findUnusedParameters
         population.addChild(confirmedGate)
         experiment.selectedAnalysisNodes.nodes = [confirmedGate]
@@ -244,14 +217,13 @@ print("adding \(confirmedGate.name) to \(population.name)")
     }
     
 
-    @MainActor 
-    func snapshot() -> NSImage?
-    {
-        if true {    return nil  }
-        let renderer = ImageRenderer(content: self)
-        renderer.scale = 0.25
-        return renderer.nsImage
-    }
+//    @MainActor 
+//    func snapshot() -> NSImage?
+//    {
+//        let renderer = ImageRenderer(content: self)
+//        renderer.scale = 0.25
+//        return renderer.nsImage
+//    }
     
     func toParent() -> ()
     {
@@ -307,14 +279,14 @@ print("adding \(confirmedGate.name) to \(population.name)")
     
     
     var body: some View {
-        var request:PopulationRequest? = nil
-        var requestError:Error? = nil
-        
-        do {
-            request = try population?.createRequest()
-        } catch {
-            requestError = error
-        }
+//        var request:PopulationRequest? = nil
+//        var requestError:Error? = nil
+//        
+//        do {
+//            request = try population?.createRequest()
+//        } catch {
+//            requestError = error
+//        }
         
         return VStack {
                 //            Text("Gating Prototype")
@@ -322,10 +294,10 @@ print("adding \(confirmedGate.name) to \(population.name)")
                 Text("Sample: \(sample.tubeName), population: \((population?.name).nonNil)")
                 thumbnails()
                 if let meta = sample.meta {
-                    if let request {
-                        chart(request, meta)
+                    if let population {
+                        chart(population, meta)
                     } else {
-                        Text("Error creating chart: \(requestError?.localizedDescription ?? "")")
+                        Text("No population selected")
                     }
                 } else { Text("Sample metadata not found")  }
             }

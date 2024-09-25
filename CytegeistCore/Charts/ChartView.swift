@@ -25,9 +25,9 @@ fileprivate enum ChartDataRequest {
 public struct ChartView<Overlay>: View where Overlay:View {
     @Environment(CytegeistCoreAPI.self) var core: CytegeistCoreAPI
     
-    let population: PopulationRequest
+    let population: AnalysisNode
     var config: Binding<ChartDef?>
-    let chartOverlay:() -> Overlay
+    let _chartOverlay:() -> Overlay
     
     @State var sampleQuery: APIQuery<FCSFile>? = nil
     @State fileprivate var chartQuery: ChartDataRequest? = nil
@@ -35,10 +35,10 @@ public struct ChartView<Overlay>: View where Overlay:View {
     @State var errorMessage:String = ""
     
     
-    public init(population: PopulationRequest, config:Binding<ChartDef?>, overlay:@escaping () -> Overlay = { EmptyView() }){
+    public init(population: AnalysisNode, config:Binding<ChartDef?>, overlay:@escaping () -> Overlay = { EmptyView() }){
         self.population = population
         self.config = config
-        self.chartOverlay = overlay
+        self._chartOverlay = overlay
     }
     
     @MainActor
@@ -78,14 +78,14 @@ public struct ChartView<Overlay>: View where Overlay:View {
                                 case nil:                          VStack {}
                                         .fillAvailableSpace()
                                 case .histogram1D(let query):      HistogramView(query: query)
-                                        .overlay(chartOverlay())
+                                        .overlay(chartOverlay)
                                         .border(.black)
                                         .background(.white)
                                         .fillAvailableSpace()
                                 case .histogram2D(let query):      Histogram2DView(query: query)
                                         .border(.black)
                                         .background(.white)
-                                        .overlay(chartOverlay())
+                                        .overlay(chartOverlay)
                                         .fillAvailableSpace()
                             }
                         } .aspectRatio(CGSize(width: 1, height: 1), contentMode: .fill)
@@ -126,6 +126,22 @@ public struct ChartView<Overlay>: View where Overlay:View {
         .onChange(of: sampleQuery?.data?.meta, updateChartQuery)
     }
     
+    @ViewBuilder
+    private var chartOverlay: some View {
+        if let chartDef = config.wrappedValue {
+            ForEach(population.visibleChildren(chartDef), id:\.self) { child in
+                let editing = child == focusedItem
+                AnyView(child.view(size, editing))
+                    .environment(\.isEditing, editing)
+                    .onTapGesture {
+                        focusedItem = child
+                    }
+            }
+        }
+        
+        _chartOverlay()
+    }
+    
 //    var sampleRef: SampleRef? { population.getSample() }
     
 //    var stateHash: Int {
@@ -139,7 +155,7 @@ public struct ChartView<Overlay>: View where Overlay:View {
     @MainActor func updateSampleQuery() {
         sampleQuery?.dispose()
         sampleQuery = nil
-        if let sample = population.getSample() {
+        if let sample = population.getSample()?.ref {
             let r = SampleRequest(sample, includeData: false)
             sampleQuery = core.loadSample(r)
         }
@@ -154,11 +170,19 @@ public struct ChartView<Overlay>: View where Overlay:View {
         guard let config else {    return   }
         
         if let meta = sampleQuery?.data?.meta {
+            var populationRequest: PopulationRequest
+            do {
+                populationRequest = try population.createRequest()
+            } catch {
+                errorMessage = "Error creating chart: \(error)"
+                return
+            }
+            
             if isEmpty(config.yAxis?.name),
                let axis = config.xAxis, !axis.name.isEmpty {
                 
                 if let dim = meta.parameter(named: axis.name) {
-                    chartQuery = .histogram1D(core.histogram(.init(population, .init(axis.name), smoothing: config.smoothing)))
+                    chartQuery = .histogram1D(core.histogram(.init(populationRequest, .init(axis.name), smoothing: config.smoothing)))
                     chartDims = .init(dim, nil)
                 } else {
                     errorMessage = "X axis dimension not in dataset"
@@ -174,16 +198,13 @@ public struct ChartView<Overlay>: View where Overlay:View {
                else {
                     print("Creating chart for \(population.name)")
                     chartQuery = .histogram2D(core.histogram2D(
-                        HistogramRequest(population, .init(xAxis.name, yAxis.name), smoothing: config.smoothing)))
+                        HistogramRequest(populationRequest, .init(xAxis.name, yAxis.name), smoothing: config.smoothing)))
                     chartDims = .init(xDim, yDim)
                 }
             }
             else {
                 errorMessage = "Unsupported chart configuration"
             }
-                    
-            
-            
             
         }
     }
