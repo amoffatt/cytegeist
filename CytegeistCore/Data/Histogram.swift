@@ -513,7 +513,7 @@ public enum HistogramSmoothing:Codable, Equatable {
 
 
 extension HistogramData<XY> {
-    func toImage(colormap:Colormap) -> Image? {
+    private func toImage(colormap:Colormap) -> Image? {
         // TODO OPTIMIZE
         // Set pixels with UInt32 array instead of UInt8
         // Colormap would cache UInt32 color values.
@@ -551,17 +551,24 @@ extension HistogramData<XY> {
         }
         return cgImage?.image
     }
-}
-
-extension HistogramData<XY> {
-    func toView(chartDef: ChartDef) -> any View
+    
+    func toView(chartDef:ChartDef?) -> (any View)?
     {
-        if chartDef.contours {
-            return BadgeBackground()
+        var view:(any View)? = {
+            if chartDef?.contours ?? false {
+                return BadgeBackground()
+            }
+            
+            return toImage(colormap: chartDef?.colormap ?? .jet)?.resizable()
+        }()
+        
+        if let view {
+            return view.scaleEffect(y: -1)
         }
-        return AnyView(toImage(colormap: .jet))
+        return nil
     }
 }
+
         
 struct BadgeBackground: View {
     var body: some View {
@@ -573,6 +580,8 @@ struct BadgeBackground: View {
             path.addLine( to: CGPoint( x: width * 0.35, y: height * 0.80 ))
             path.addLine( to: CGPoint( x: width * 0.95, y: height * 0.20 ))
         }.stroke(lineWidth: 3)
+            .fill(.blue)
+        return path
     }
 
 }

@@ -10,7 +10,7 @@ import SwiftUI
 import Charts
 
 
-public struct Colormap {
+public struct Colormap: Equatable, Hashable {
     public let lookup:[Color]
     public let uint8Lookup:[SIMD4<UInt8>]
     public let gradient:Gradient

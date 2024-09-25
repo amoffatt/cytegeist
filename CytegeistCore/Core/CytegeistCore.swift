@@ -335,8 +335,8 @@ public class CytegeistCoreAPI {
                                  axes: .init(x.meta.normalizer))
         
         var smoothed:HistogramData<X>? = nil
-        if request.smoothing != .off {
-            let smoothedBins = _histogramSmoother.smooth1D(srcMatrix: h.bins, nBins: h.bins.count, hiRes: request.smoothing == .high)
+        if request.chartDef?.smoothing != .off {
+            let smoothedBins = _histogramSmoother.smooth1D(srcMatrix: h.bins, nBins: h.bins.count, hiRes: request.chartDef?.smoothing == .high)
             smoothed = HistogramData(bins: smoothedBins, size: h.size, axes: h.axes)
         }
         return CachedHistogram(h, smoothed, view: nil)
@@ -357,24 +357,16 @@ public class CytegeistCoreAPI {
             axes: .init(x.meta.normalizer, y.meta.normalizer))
         
         var smoothed:HistogramData<XY>? = nil
-        if request.smoothing != .off {
-            let smoothedBins = _histogramSmoother.smooth2D(srcMatrix: h.bins, size:h.size, hiRes: request.smoothing == .high)
+        if request.chartDef?.smoothing != .off {
+            let smoothedBins = _histogramSmoother.smooth2D(srcMatrix: h.bins, size:h.size, hiRes: request.chartDef?.smoothing == .high)
             smoothed = HistogramData(bins: smoothedBins, size: h.size, axes: h.axes)
         }
-        var theView: AnyView
-        if request.contours // || true
-        {
-           theView = AnyView(BadgeBackground())
-        } else
-        {
-            guard let image = (smoothed ?? h).toImage(colormap: .jet) else {
-                throw APIError.creatingImage
-            }
-            let view = image.resizable().scaleEffect(y: -1)
-            theView = AnyView(view)
+        
+        guard let view = (smoothed ?? h).toView(chartDef:request.chartDef) else {
+            throw APIError.creatingImage
         }
         
-        return CachedHistogram(h, smoothed, view: theView)
+        return CachedHistogram(h, smoothed, view: AnyView(view))
     }
 
     
@@ -424,7 +416,7 @@ public class CytegeistCoreAPI {
     }
     
     nonisolated private func _statisticHistogram(_ population: PopulationRequest, _ dim:String) async throws -> HistogramData<X> {
-        let histogramRequest = HistogramRequest<X>(population, Tuple1(dim), smoothing: .off)
+        let histogramRequest = HistogramRequest<X>(population, Tuple1(dim))
         let histogram = try await self.histogram1DCache.get(histogramRequest)
         return histogram.histogram
     }
@@ -553,15 +545,16 @@ public struct HistogramRequest<D:Dimensions> : Hashable {
     let population:PopulationRequest
     public let dims:D.Strings
     public let size:D.IntCoord?
-    public let smoothing:HistogramSmoothing
-    public let contours:Bool
+    public let chartDef: ChartDef?
+//    public let smoothing:HistogramSmoothing
+//    public let contours:Bool
+//    public var colormap:Colormap { .jet }
     
-    public init(_ population: PopulationRequest, _ dims: D.Strings, size:D.IntCoord? = nil, smoothing:HistogramSmoothing = .off, contours:Bool = false) {
+    public init(_ population: PopulationRequest, _ dims: D.Strings, size:D.IntCoord? = nil, chartDef: ChartDef? = nil) {
         self.population = population
         self.dims = dims
         self.size = size
-        self.smoothing = smoothing
-        self.contours = contours
+        self.chartDef = chartDef
     }
 }
 

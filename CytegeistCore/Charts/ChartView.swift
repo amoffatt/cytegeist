@@ -158,7 +158,7 @@ public struct ChartView<Overlay>: View where Overlay:View {
                let axis = config.xAxis, !axis.name.isEmpty {
                 
                 if let dim = meta.parameter(named: axis.name) {
-                    chartQuery = .histogram1D(core.histogram(.init(population, .init(axis.name), smoothing: config.smoothing)))
+                    chartQuery = .histogram1D(core.histogram(.init(population, .init(axis.name), chartDef: config)))
                     chartDims = .init(dim, nil)
                 } else {
                     errorMessage = "X axis dimension not in dataset"
@@ -174,7 +174,7 @@ public struct ChartView<Overlay>: View where Overlay:View {
                else {
                     print("Creating chart for \(population.name)")
                     chartQuery = .histogram2D(core.histogram2D(
-                        HistogramRequest(population, .init(xAxis.name, yAxis.name), smoothing: config.smoothing)))
+                        HistogramRequest(population, .init(xAxis.name, yAxis.name), chartDef: config)))
                     chartDims = .init(xDim, yDim)
                 }
             }

@@ -24,6 +24,9 @@ public struct ChartDef : Hashable, Codable, Equatable//, Transferable
     
     public var smoothing:HistogramSmoothing = .low
     public var contours:Bool = false
+    public var showOutliers:Bool = false
+    
+    public var colormap:Colormap? { .jet }
 
     public init()
     {
