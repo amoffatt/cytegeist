@@ -113,14 +113,8 @@ public struct ContourBuilder
         for i in 0 ..< nBins   {
             positionBins.append(PositionBin(row: i / nCols, col: i % nCols, height: bins[i]))
         }
-        sortedBins = positionBins.filter({ $0.height > 0.0 }).sorted(by: >)
-   }
-    
-        //------------------------------------------------------------------------
-    func calcLevelHeights() -> [Double]
-    {
-        var levels: [Double]  = Array(repeating: Double(0.0), count: nLevels)
-       var level: Int = nLevels-1
+        sortedBins = positionBins.filter({ $0.height > 0.5 }).sorted(by: >)
+        var level: Int = nLevels-1
         var deaccumulator  = eventsPerLevel
         for sortedBin in sortedBins {
             let ct = sortedBin.height
@@ -134,8 +128,9 @@ public struct ContourBuilder
                 if level < 0 { break }
             }
         }
-        return levels
     }
+    
+        //------------------------------------------------------------------------
     func  testPath() -> Path
     {
         let pointList: [CGPoint] = [CGPoint(3,5), CGPoint(30,50),CGPoint(45,55),CGPoint(33,33),CGPoint(30,25),CGPoint(3,9)]
@@ -153,21 +148,25 @@ public struct ContourBuilder
     public func buildPathList() -> PathList
     {
         var list = PathList()
-        list.paths.append(testPath())
+//        list.paths.append(testPath())
         for i in (0 ..< nLevels).reversed() {
             let level = levels[i]
-           
-            let segments = segments(level)
-//            print("segments: \(segments.count)  @ level \(i) = \(level)")
-            let uniqueSegments = removeDuplicates(segments: segments)
-//            print("uniqueSegments: \(uniqueSegments.count) ")
-//            for seg in uniqueSegments {
-//                print(segString(seg))
-//            }
-            
-            //.formatted(.number.notation(.compactName).precision(.significantDigits(2))
-            let  temp = PathList(segments: uniqueSegments)
-            list.paths.append(contentsOf: temp.paths)
+            let prevlevel = (i < nLevels-1) ?  levels[i+1] : -1.0
+            if level > 0 {
+                let segments = segments(level: level, prevLevel: prevlevel)
+                print("segments: \(segments.count)  @ level \(i) = \(level)")
+                let uniqueSegments = removeDuplicates(segments: segments)
+                print("uniqueSegments: \(uniqueSegments.count) ")
+                    //            for seg in uniqueSegments {
+                    //                print(segString(seg))
+                    //            }
+                
+                if  let temp2 = list.makePathRAW(segments: uniqueSegments) {
+                    list.paths.append(temp2)
+                }
+            }
+//            let  temp = PathList(segments: uniqueSegments)
+//            list.paths.append(contentsOf: temp.paths)
 //            print("paths: \(list.paths.count)")
             
         }
@@ -264,15 +263,15 @@ public struct ContourBuilder
         return  positionBins[y * nCols + x].height
     }
 
-    func segments(_ level: Double) -> [Segment]
+    func segments( level: Double,  prevLevel: Double) -> [Segment]
     {
+        assert(prevLevel > level || prevLevel < 0)
         var segments =  [Segment]()
-        
-        for bin in sortedBins where (bin.height > level && bin.height < level + eventsPerLevel)
+        let binsAtThisLevel = sortedBins.filter( { $0.height >= level  &&  ($0.height < prevLevel || prevLevel < 0) })
+        for bin in binsAtThisLevel
         {
-//            print ("bin: ( \(bin.col), \(bin.row) ) = \(bin.height)")
+            print ("bin: ( \(bin.col), \(bin.row) ) = \(bin.height)")
             let crossings = addCrossings(level, bin.col, bin.row)
-//            print (crossings)
             segments.append(contentsOf: crossings)
         }
 //        
@@ -388,17 +387,25 @@ public struct ContourBuilder
                 }
                 
                 if points.count == 0   { continue }
-                if points.count == 2   { segments.append(Segment(points[1], points[0], isHead[0]))   }
-                if points.count == 4     {    //  double crossing
+                else if points.count == 2   { segments.append(Segment(points[1], points[0], isHead[0]))   }
+                else if points.count == 4     {    //  double crossing
                     if (h1 > level)  {
                         segments.append(Segment(points[3],points[0], isHead[0]))
                         segments.append(Segment(points[2],points[1], isHead[1]))
                     }
-                    segments.append(Segment(points[1],points[0], isHead[0]))
-                    segments.append(Segment(points[3],points[2], isHead[2]))
+                    else {
+                        segments.append(Segment(points[1],points[0], isHead[0]))
+                        segments.append(Segment(points[3],points[2], isHead[2]))
+                    }
                 }
             }
         }
+//        if segments.count > 0 {             //debug
+//            print( "addCrossings")
+//            for seg in segments {
+//                print( segString(seg))
+//            }
+//        }
         return segments
   }
     
@@ -465,7 +472,8 @@ public struct ContourBuilder
         var bottom = 256
        let width = 256.0, height = 256.0
         var paths : [Path] = [Path]()
-        
+        var pointList =  [CGPoint]()
+
        public func getBinResolution() -> (CGFloat, CGFloat){    return (256.0, 256.0)  }
        public func getGraphRect() -> CGRect{    .init(x: 0,y: 0, width: 256, height: 256)    }
 
@@ -475,93 +483,103 @@ public struct ContourBuilder
         
         init(segments: [Segment])
         {
-            var local = segments.filter({ quickDistance($0.start, $0.end) > 0 })
-            print("\(local.count)  segments in local")
-            var pointList =  [CGPoint]()
+//            var local = segments.filter({ quickDistance($0.start, $0.end) > 0 })
+//            print("\(local.count)  segments in local")
             
 //            pointList =  segments.map { CGPoint($0.start.x, 256 - $0.start.y)}
 //            pointList = pointList.sorted(by: { $0.x > $1.x} )
 //
-            while (true)
-            {
-                print("\(local.count)  segments in local")
-                if local.isEmpty { break }
-                let i = tail(local)
-//                if (i == -1)   {  i = 0  }
-                if (i > 256 )   {  break  }
-
-                var segment = local.remove(at: i)
-                pointList.append(segment.start)
-                var pt = segment.end
-                
-                var done = false
-                while !done
-                {
-                    if let idx = local.firstIndex(where: { quickDistance($0.start, pt) <= 2.0 } )
-                    {
-                      segment = local.remove(at: idx)
-//                        print("gap \(quickDistance(segment.start, pt) )")
-//                        print("len  \(quickDistance(segment.start, segment.end) )")
-                        pointList.append(segment.start)
-                        print(segment.start)
-                       pt = segment.end
-                        
-                    }
-                    else { done = true }
-                }
-//                print ("\(pointList.count)  points")
-//                if  quickDistance(pointList[0], pt) < 1.0  { break }
-            }
-            if pointList.count >  2 {
-                if let path = makePath(pointList: pointList) {
-                    paths.append(path)
-                    print("adding path from \(pointList.count) points")
-
-                }
-            }
-            print("\(local.count) segments left")
-            pointList.removeAll()
+//            while (true)
+//            {
+////                print("\(local.count)  segments in local")
+//                if local.isEmpty { break }
+//                let i = tail(local)
+////                if (i == -1)   {  i = 0  }
+//                if (i > 256 )   {  break  }
+//
+//                var segment = local.remove(at: i)
+//                pointList.append(segment.start)
+//                var pt = segment.end
+//                
+//                var done = false
+//                while !done
+//                {
+//                    if let idx = local.firstIndex(where: { quickDistance($0.start, pt) <= 2.0 } )
+//                    {
+//                      segment = local.remove(at: idx)
+////                        print("gap \(quickDistance(segment.start, pt) )")
+////                        print("len  \(quickDistance(segment.start, segment.end) )")
+//                        pointList.append(segment.start)
+//                        print(segment.start)
+//                       pt = segment.end
+//                        
+//                    }
+//                    else { done = true }
+//                }
+////                print ("\(pointList.count)  points")
+////                if  quickDistance(pointList[0], pt) < 1.0  { break }
+//            }
+//            if pointList.count >  2 {
+//                if let path = makePath(pointList: pointList) {
+//                    paths.append(path)
+//                    print("adding path from \(pointList.count) points")
+//
+//                }
+//            }
+//            print("\(local.count) segments left")
+//            pointList.removeAll()
         }
         
-        func quickDistance(_ a: CGPoint,_  b: CGPoint) -> Double {
-//             (abs(a.x - b.x) + abs(a.y - b.y))
-        return sqrt ((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y))
+//        func quickDistance(_ a: CGPoint,_  b: CGPoint) -> Double {
+////             (abs(a.x - b.x) + abs(a.y - b.y))
+//        return sqrt ((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y))
+//        }
+//        
+//       func tail(_ segments: [Segment]) -> Int
+//       {
+//           for i in 0 ..< segments.count
+//           {
+//               let line = segments[i]
+//               let x = line.start.x
+//               if (x == 0 || x == width)    {    return i }
+//               let y = line.start.y
+//               if (y == 0 || y == height)    {    return i }
+//           }
+//           return 0
+//       }
+//       
+//       func  makePath(pointList: [CGPoint]) -> Path?
+//       {
+//           print("\(pointList.count) points to makePath")
+//           if pointList.count < 3 { return nil }
+//           let rect = getGraphRect()
+//           let (nRows, nCols) = getBinResolution()
+//           let widthPerBin =  rect.width / nCols
+//           let heightPerBin = rect.height / nRows
+//           let insetRect = CGRect(x: rect.minX + widthPerBin / 2.0, y: rect.minY + heightPerBin / 2.0, width: rect.width,height: rect.height)
+//           
+//           var path = Path()
+//           let startpt = pointList[0]
+//           path.move(to: CGPoint(insetRect.minX + startpt.x * widthPerBin, insetRect.minY - startpt.y * heightPerBin))
+//           for i in 1..<pointList.count  {
+//               let pt = pointList[i]
+//               path.addLine(to: CGPoint(insetRect.minX + pt.x * widthPerBin, insetRect.minY - pt.y * heightPerBin) )
+//           }
+//           path.closeSubpath()
+//           
+//           return path
+//       }
+        func  makePathRAW(segments: [Segment]) -> Path?
+        {
+            print("\(segments.count) segments to makePath")
+            if segments.count < 3 { return nil }
+            var path = Path()
+            for seg in segments  {
+                path.move(to: seg.start)
+                path.addLine(to: seg.end )
+            }
+            path.closeSubpath()
+            return path
         }
-        
-       func tail(_ segments: [Segment]) -> Int
-       {
-           for i in 0 ..< segments.count
-           {
-               let line = segments[i]
-               let x = line.start.x
-               if (x == 0 || x == width)    {    return i }
-               let y = line.start.y
-               if (y == 0 || y == height)    {    return i }
-           }
-           return 0
-       }
-       
-       func  makePath(pointList: [CGPoint]) -> Path?
-       {
-           print("\(pointList.count) points to makePath")
-           if pointList.count < 3 { return nil }
-           let rect = getGraphRect()
-           let (nRows, nCols) = getBinResolution()
-           let widthPerBin =  rect.width / nCols
-           let heightPerBin = rect.height / nRows
-           let insetRect = CGRect(x: rect.minX + widthPerBin / 2.0, y: rect.minY + heightPerBin / 2.0, width: rect.width,height: rect.height)
-           
-           var path = Path()
-           let startpt = pointList[0]
-           path.move(to: CGPoint(insetRect.minX + startpt.x * widthPerBin, insetRect.minY - startpt.y * heightPerBin))
-           for i in 1..<pointList.count  {
-               let pt = pointList[i]
-               path.addLine(to: CGPoint(insetRect.minX + pt.x * widthPerBin, insetRect.minY - pt.y * heightPerBin) )
-           }
-           path.closeSubpath()
-           
-           return path
-       }
    }
-        
 }

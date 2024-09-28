@@ -558,6 +558,7 @@ extension HistogramData<XY> {
             if chartDef?.contours ?? false {
                 return ContoursView(bins: bins, size: size)      //width: size.x, height: size.y
 //                    .scaleEffect(y: -1)
+//                    .offset(y: 100)
             }
             
             return toImage(colormap: chartDef?.colormap ?? .jet)?.resizable()
@@ -580,16 +581,23 @@ extension HistogramData<XY> {
        
         var body: some View {
             
-            let contours = ContourBuilder(bins: bins, width: size.x, height: size.y)
-            let pathlist = contours.buildPathList()
-            let bigPath =  Path { p in
-                for path in pathlist.paths {
-                    p.addPath(path)  //, transform: CGAffineTransform = .init(Translation(50, 0)
-                }
-//                if let apath = pathlist.paths.first
-//                { p.addPath(apath) }
-            }.stroke(lineWidth: 1).fill(.purple)
-            return bigPath
+            GeometryReader { proxy in
+                VStack {
+                    let  viewSize = proxy.size
+                    let sx = viewSize.width / 256
+                    let sy = viewSize.height / 256
+                    let contours = ContourBuilder(bins: bins, width: size.x, height: size.y)
+                    let pathlist = contours.buildPathList()
+                    let bigPath =  Path { p in
+                        for path in pathlist.paths {
+                            p.addPath(path)  //, transform: CGAffineTransform = .init(Translation(50, 0)
+                        }
+                            //                if let apath = pathlist.paths.first
+                            //                { p.addPath(apath) }
+                    }.stroke(lineWidth: 1).fill(.purple).scaleEffect(x: sx,y:  sy, anchor: .topLeading)
+                return bigPath
+            }
+            }
         }
     }
 //
