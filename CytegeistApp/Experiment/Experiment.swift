@@ -26,14 +26,14 @@ public class Experiment : Usable
     
     public var id = UUID()
     
-    var version:String? = "0.01"
-    var creationDate:Date = Date.now
-    var modifiedDate:Date = Date.now
+    var version: String? = "0.01"
+    var creationDate: Date = Date.now
+    var modifiedDate: Date = Date.now
     var name = "All Samples"
     var mode: SampleListMode = SampleListMode.table
     var reportMode: ReportMode = ReportMode.gating
 
-    var samples:[Sample] = [Sample]()
+    var samples: [Sample] = [Sample]()
     var selectedSamples = Set<Sample.ID>()
     var selectedAnalysisNodes = AnalysisNodeSelection()
     
@@ -41,9 +41,9 @@ public class Experiment : Usable
     var groups = [CGroup]()
     var tables = [CGTable]()
     var layouts = [CGLayout]()
-    var _core:CytegeistCoreAPI? = nil
+    var _core: CytegeistCoreAPI? = nil
     
-    var core:CytegeistCoreAPI {       /// Lazilly created
+    var core: CytegeistCoreAPI {       /// Lazilly created
         if let _core {  return _core   }
         _core = CytegeistCoreAPI()
         return _core!
@@ -102,6 +102,22 @@ public class Experiment : Usable
         selectedAnalysisNodes.nodes.removeAll()
         selectedAnalysisNodes.nodes.insert(node)
     }
+
+    public func getSamplesInCurrentGroup() -> [Sample]          // TODO implement group sets
+    {
+        return samples
+    }
+    
+    
+    public func copyToGroup() -> ()   {
+        if let root = focusedSample?.getTree() {
+            let samplesInGroup = getSamplesInCurrentGroup()
+            for sample in samplesInGroup {
+                sample.addTree(root.cloneDeep())
+            }
+        }
+    }
+    
     
         //--------------------------------------------------------------------------------
     func onFCSPicked(_result: Result<[URL], any Error>)

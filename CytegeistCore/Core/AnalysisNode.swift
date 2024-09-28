@@ -89,6 +89,21 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable, Custo
         self.opacity = opacity
     }
     
+    public init(_ original:  AnalysisNode ) {
+        self.gate = original.gate
+        self.description = original.description
+        self.sample = original.sample
+        self.graphDef = original.graphDef
+        self.statistics = [:]
+        self.children = []
+        self.parent = nil
+        self.gate = original.gate
+        self.invert = original.invert
+        self.color = original.color ?? .green
+        self.opacity = original.opacity
+   }
+
+
         //--------------------------------------------------------
     public func getSample() -> Sample? { sample ?? parent?.getSample() }       //AT?
     public func getSampleMeta() -> FCSMetadata? { getSample()?.meta }
@@ -101,6 +116,14 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable, Custo
         if (parent == nil)  { return 0 }
         return 1 + parent!.depth()
     }                                                            //AT?
+        public func cloneDeep() -> AnalysisNode
+    {
+        let newNode = AnalysisNode(self)
+        for child in children {
+            newNode.addChild(child.cloneDeep())
+        }
+        return newNode
+    }
     
     public func ancestry() -> [AnalysisNode] {
         var ancestry = [AnalysisNode]()
@@ -149,11 +172,24 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable, Custo
 //        return value!
 //    }
 //--------------------------------------------------------
-    private func _addChild(_ node:AnalysisNode)     {        children.append(node)    }
-    public func addChild(_ node:AnalysisNode)       {        node.parent = self  }
     public func getChildren() -> [AnalysisNode]     {        children   }
-    private func _removeChild(_ node: AnalysisNode) {        children.removeAll { $0 == node }    }
 
+  
+    private func _addChild(_ node:AnalysisNode)     {        children.append(node)    }
+    public func addChild(_ node:AnalysisNode)       {        node.parent = self  }      // setter adds node as a child
+    
+    public func addChildDeep(_ node:AnalysisNode)
+    {
+        for child in node.children {   addChildDeep(child)    }
+        if name != node.name {
+            addChild(AnalysisNode(node))
+        }
+        
+    }
+
+
+
+    private func _removeChild(_ node: AnalysisNode) {        children.removeAll { $0 == node }    }
     public func remove() {   parent = nil  }     // Removes this child from parent in the parent setter
     public func removeChild(_ node: AnalysisNode?) -> Bool {
         guard let node else {    return false     }
@@ -163,8 +199,7 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable, Custo
         }
         return false
     }
-     
-   
+
 
 //--------------------------------------------------------
     public func createRequest() throws -> PopulationRequest {

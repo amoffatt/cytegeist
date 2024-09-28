@@ -129,7 +129,18 @@ public class Sample : Identifiable, Codable, Hashable
         return _tree!
     }
 
- 
+    public func addTree(_ node: AnalysisNode)           //, _ deep: Bool = true
+    {
+        print ("addTree")
+        getTree().addChild(node)
+//        if tree.name != node.name {
+//        }
+//        if deep {
+//            for child in node.children {
+//                clone.addTree(child, deep)
+//            }
+//        }
+    }
 }
 
 import UniformTypeIdentifiers

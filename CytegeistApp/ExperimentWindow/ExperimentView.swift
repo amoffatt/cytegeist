@@ -48,7 +48,7 @@ struct ExperimentView : View {
         content:
         {
                 Group {
-                    if let selected = app.getSelectedExperiment() {
+                    if let selected = app.getSelectedExperiment(createIfNil: true) {
                         HSplitView {
                             SampleList(experiment: selected)
                                 .frame(minWidth: 100, idealWidth: 600)

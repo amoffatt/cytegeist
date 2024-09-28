@@ -267,7 +267,11 @@ print("adding \(confirmedGate.name) to \(population.name)")
         return VStack {
                 //            Text("Gating Prototype")
             if let sample = population?.getSample() {
-                Text("Sample: \(sample.tubeName), population: \((population?.name).nonNil)")
+                HStack {
+                    Text("Sample: \(sample.tubeName), population: \((population?.name).nonNil)")
+                    Button("Contours", action: toggleContours)
+                    Button("Smoothing", action: toggleSmoothing)
+                }
                 if let meta = sample.meta {
                     if let population {
                         AncestryView(population, height:160)
@@ -280,6 +284,15 @@ print("adding \(confirmedGate.name) to \(population.name)")
             else {Text("Select a sample")  }
             
         }.toolbar {  GatingTools   }
+    }
+    
+    func toggleContours() {
+         let contours = population!.graphDef.contours
+            population!.graphDef.contours = contours ? false : true
+    }
+    func toggleSmoothing() {
+        let smoothing = population!.graphDef.smoothing
+        population!.graphDef.smoothing = smoothing == .off ? .low : .off
     }
         //------------------------------------------------------
         //
@@ -436,6 +449,7 @@ print("adding \(confirmedGate.name) to \(population.name)")
     {
         var outOfBounds:Bool = (location.x < 2 || location.y < 2 ||
                                 location.x > size.width || location.y > size.height)
+//        print(location, size)
         return ZStack { dashedLine(
             from:CGPoint(x: location.x, y:0),
             to:CGPoint(x: location.x,  y: size.height))
@@ -446,7 +460,7 @@ print("adding \(confirmedGate.name) to \(population.name)")
             .opacity((curTool == .range) ? 0.0 : 1.0)
         }
         .fillAvailableSpace()
-        .opacity((isDragging || outOfBounds) ? 0.0 : 1.0)
+        .opacity((isDragging || outOfBounds) ? 0.0 : 0.3)
         .onHover(perform: { hovering in isHovering = true  })
         .onContinuousHover { phase in
             switch phase {

@@ -8,7 +8,7 @@
 import Foundation
 import SwiftUI
 
-struct Segment : Equatable
+public struct Segment : Equatable
 {
     var start, end: CGPoint
  
@@ -33,143 +33,205 @@ struct Segment : Equatable
         self.init(  CGPoint(Double(startX), Double(startY)),
                     CGPoint(Double(endX), Double(endY)))
     }
+    init ( _ startX: Double, _ startY : Double, _ endX: Double, _ endY: Double)
+    {
+        self.init(  CGPoint(startX, startY), CGPoint(endX, endY))
+        if (startX == endX) && (startY == endY)
+        {
+            print("0 length")
+        }
+    }
+    init ( _ startX: Double, _ startY : Double)
+    {
+        self.init(  CGPoint(startX, startY), CGPoint.zero)
+    }
+    mutating func addEndpoint(_ levelX: Double, _ levelY : Double)
+    {
+        self.end = CGPoint(levelX, levelY)
+    }
 
 }
-    //------------------------------------------------------------------------
+//------------------------------------------------------------------------
 
-public struct Bin : Comparable
+public struct PositionBin : Comparable
 {
-    public static func < (lhs: Bin, rhs: Bin) -> Bool {
+    public static func < (lhs: PositionBin, rhs: PositionBin) -> Bool {
         lhs.height < rhs.height
     }
     
     var row, col: Int
-    var height: Float
-    init(row: Int, col: Int, height: Float) {
+    var height: Double
+    init(row: Int, col: Int, height: Double) {
         self.row = row
         self.col = col
         self.height = height
     }
 }
 
-public func binsSortedByHeight(_ bins: [Bin], _ nRows: Int,_ nCols: Int)   -> [Bin]
-{
-    let minimum: Float = 3.0
-    let nBins = nRows * nCols
-    var taggedBins = [Bin]()
-    
-    for i in 0 ..< nBins
-    {
-        let height = bins[i].height
-        if height > minimum {
-            taggedBins.append(Bin(row: i / nCols, col: i % nCols, height: height))
-        }
-    }
-    taggedBins.sort()
-    return taggedBins
-}
+//public func binsSortedByHeight(_ bins: [Double], _ nRows: Int,_ nCols: Int)   -> [PositionBin]
+//{
+//    let nBins = nRows * nCols
+//    var taggedBins = [PositionBin]()
+//    
+//    for i in 0 ..< nBins   {
+//        taggedBins.append(PositionBin(row: i / nCols, col: i % nCols, height: bins[i]))
+//    }
+//    return taggedBins.sorted(by: >)
+//}
+
+
     //------------------------------------------------------------------------
 
-func isLogPlot()   -> Bool {    false }
-func getNEvents() -> Float  {    100000.0 }
-public struct Histo2D
+func isLogPlot()   -> Bool {    true }
+func getNEvents() -> Double  {    100000.0 }
+public struct ContourBuilder
 {
-     let nCols = 256
-    let nRows = 256
-    let nEvents = getNEvents()
-        //------------------------------------------------------------------------
+    let nCols: Int
+    let nRows: Int
+    var nEvents: Double = 0.0
+    let nLevels: Int = 4
+    var levels: [Double]
+    var eventsPerLevel: Double = 0
+    var positionBins: [PositionBin]
+    var sortedBins: [PositionBin]
+//    public var paths: PathList
     
-//    
-//    func makeContourPlot(showOutliers: Bool) -> Path
-//    {
-//        smooth()
-//        let polygons = polygonList(binsSortedByHeight())
-// 
-//        for poly in polygons {    poly.path()    }
-//        
-//        if showOutliers
-//        {
-//             var  nPolys = 0
-//            var  polys = [Polygon]()
-//            var spPolys = [CGPoint]
-//            for i in polys {
-//                spPolys.append(CGPointSet(i))
-//            }
-//            drawDotsMasked(contourPlot, spPolys, nPolys)
-//        }
-//                                   
-//            
-//// finalize Image
-//        return path
-//    }
-//                                   
-    let nLevels: Float = 20
-
-//------------------------------------------------------------------------
-    func polygonList(bins: [Bin]) -> PathList
+    init(bins: [Double], width: Int, height: Int)
     {
-        let eventsPerLevel: Float = nEvents / nLevels
-        var level: Float = 1.0
-        var list = PathList()
-        
-        var threshold = getThreshold( bins, level)
-
-        for bin in 0 ..< bins.count  {
-            let curBin = bins[bin]
-            let h = curBin.height
-            let prev = bin > 0 ? bins[bin-1].height : 0.0
-
-            threshold -= h
-            var  fire = thresholdTrigger(h, prev, threshold)
-            while  (fire)
+        nCols = width
+        nRows = height
+        for x in 0..<nCols {
+            for y in 0..<nRows {
+                let idx = x + nCols * y
+                nEvents += bins[idx]
+            }
+        }
+        self.eventsPerLevel = nEvents / Double(nLevels)
+        let nBins = nRows * nCols
+        positionBins = [PositionBin]()
+        levels = Array(repeating: Double(0.0), count: nLevels)
+        for i in 0 ..< nBins   {
+            positionBins.append(PositionBin(row: i / nCols, col: i % nCols, height: bins[i]))
+        }
+        sortedBins = positionBins.filter({ $0.height > 0.0 }).sorted(by: >)
+   }
+    
+        //------------------------------------------------------------------------
+    func calcLevelHeights() -> [Double]
+    {
+        var levels: [Double]  = Array(repeating: Double(0.0), count: nLevels)
+       var level: Int = nLevels-1
+        var deaccumulator  = eventsPerLevel
+        for sortedBin in sortedBins {
+            let ct = sortedBin.height
+            deaccumulator -= ct
+            if (deaccumulator  < 0)
             {
-                let levelHeight = getLevelHeight(h, prev, threshold)
-                let segments = segments(bins, levelHeight)
-                let prunedSegments = removeDuplicates(segments: segments)
-                list.paths.append(contentsOf: PathList(segments: prunedSegments).paths)
-                threshold += eventsPerLevel
-//                threshold = getThreshold()
-                fire = threshold < 0.0
-             }
+                let interpolated = ct + (deaccumulator / eventsPerLevel)
+                levels[level] = interpolated
+                deaccumulator += eventsPerLevel
+                level -= 1
+                if level < 0 { break }
+            }
+        }
+        return levels
+    }
+    func  testPath() -> Path
+    {
+        let pointList: [CGPoint] = [CGPoint(3,5), CGPoint(30,50),CGPoint(45,55),CGPoint(33,33),CGPoint(30,25),CGPoint(3,9)]
+        var path = Path()
+        path.move(to: pointList[0])
+        for i in 1..<pointList.count  {
+            let pt = pointList[i]
+            path.addLine(to: pt)
+        }
+        path.closeSubpath()
+        
+        return path
+    }
+    
+    public func buildPathList() -> PathList
+    {
+        var list = PathList()
+        list.paths.append(testPath())
+        for i in (0 ..< nLevels).reversed() {
+            let level = levels[i]
+           
+            let segments = segments(level)
+//            print("segments: \(segments.count)  @ level \(i) = \(level)")
+            let uniqueSegments = removeDuplicates(segments: segments)
+//            print("uniqueSegments: \(uniqueSegments.count) ")
+//            for seg in uniqueSegments {
+//                print(segString(seg))
+//            }
+            
+            //.formatted(.number.notation(.compactName).precision(.significantDigits(2))
+            let  temp = PathList(segments: uniqueSegments)
+            list.paths.append(contentsOf: temp.paths)
+//            print("paths: \(list.paths.count)")
+            
         }
         return list
     }
-
-    func thresholdTrigger(_ height: Float, _ prev: Float, _ threshold: Float) -> Bool
+    func segString(_ seg: Segment) -> String
     {
-        var level = threshold
-        let minLogLevel: Float = 6.0
-        
-        if isLogPlot()
-        {
-            let below = (height < level)
-            if below
-            {
-                if level == prev     {
-                    level = level - 0.001 * (prev - height)
-                }
-                
-                level = level * (Float(nLevels))/100.0
-                if level < minLogLevel
-                {    return false   }
-            }
-            return below
-        }
-        return (threshold < 0.0)
+        return("(" +
+        String(format: "%.2f", seg.start.x) + ", " +
+        String(format: "%.2f", seg.start.y) + ") : (" +
+        String(format: "%.2f", seg.end.x) + ", " +
+        String(format: "%.2f", seg.end.y) + ")"
+        )
     }
-    
-    func getLevelHeight(_ height: Float, _ prev: Float, _ threshold: Float) -> Float
-    {
-        let binDifference = height - prev
-        if !isLogPlot()
-        {
-            if binDifference < 0.0 {
-                return     height + threshold / height * binDifference * 0.999
-            }
-        }
-        return height - 0.5 * binDifference
-    }
-   //------------------------------------------------------------------------
+        //
+        //
+        //
+        //for bin in 0 ..< positionBins.count  {
+        //    let curBin = positionBins[bin]
+        //    let h = curBin.height
+        //    let prev = bin > 0 ? positionBins[bin-1].height : 0.0
+        //
+        //    print("threshold: \(threshold)")
+        //    threshold -= h
+        //    var  fire = thresholdTrigger(h, prev, threshold)
+        //    while  (fire)
+        //    {
+        //        let levelHeight = getLevelHeight(h, prev, threshold)
+        //        print("levelHeight: \(levelHeight)")
+        //    func thresholdTrigger(_ height: Double, _ prev: Double, _ threshold: Double) -> Bool
+        //    {
+        //        var level = threshold
+        //        let minLogLevel: Double = 6.0
+        //
+        //        if isLogPlot()
+        //        {
+        //            let below = (height < level)
+        //            if below
+        //            {
+        //                if level == prev     {
+        //                    level = level - 0.001 * (prev - height)
+        //                }
+        //
+        //                level = level * (Double(nLevels))/100.0
+        //                if level < minLogLevel
+        //                {    return false   }
+        //            }
+        //            return below
+        //        }
+        //        return (threshold < 0.0)
+        //    }
+        //
+        //    func getLevelHeight(_ height: Double, _ prev: Double, _ threshold: Double) -> Double
+        //    {
+        //        let binDifference = height - prev
+        //        if !isLogPlot()
+        //        {
+        //            if binDifference < 0.0 {
+        //                return     height + threshold / height * binDifference * 0.999
+        //            }
+        //        }
+        //        return height - 0.5 * binDifference
+        //    }
+        //------------------------------------------------------------------------
     enum Direction : CaseIterable {
         case east
         case south
@@ -177,7 +239,7 @@ public struct Histo2D
         case north
     }
     
-   func getDeltas( dir: Direction) -> (Int, Int)
+    func getDeltas( dir: Direction) -> (Int, Int)
     {
         switch dir {
             case .east:  return (1, 0)
@@ -186,7 +248,7 @@ public struct Histo2D
             case .north: return (0, -1)
         }
     }
-  
+    
     func getPosition( dir: Direction) -> (Int, Int)
     {
         switch dir {
@@ -196,191 +258,210 @@ public struct Histo2D
             case .north: return (nRows-1, 0)
         }
     }
+    func binHeight( x: Int, y: Int) -> Double   {
+        if x < 0 || y < 0  { return 0.0}
+        if x >= nRows || y >= nCols { return 0.0 }
+        return  positionBins[y * nCols + x].height
+    }
 
-     func segments(_ bins: [Bin], _ level: Float) -> [Segment]
+    func segments(_ level: Double) -> [Segment]
     {
-        func binHeight(_ y: Int, _ x: Int) -> Float   {   return  bins[y * nCols + x].height      }
         var segments =  [Segment]()
         
-        for bin in bins
+        for bin in sortedBins where (bin.height > level && bin.height < level + eventsPerLevel)
         {
-            let centerX: Int = bin.col
-            let centerY: Int = bin.row
-            segments.append(contentsOf: addEdges(bins, level, centerX, centerY))
-            segments.append(contentsOf: addEdges(bins, level, centerX-1, centerY))
-            segments.append(contentsOf: addEdges(bins, level, centerX, centerY-1))
-            segments.append(contentsOf: addEdges(bins, level, centerX-1, centerY-1))
+//            print ("bin: ( \(bin.col), \(bin.row) ) = \(bin.height)")
+            let crossings = addCrossings(level, bin.col, bin.row)
+//            print (crossings)
+            segments.append(contentsOf: crossings)
         }
-        
-        var startX, startY : Float
-
-        for direction in Direction.allCases
-        {
-            let (x1,y1) = getPosition(dir: direction)
-            let (dx,dy) = getDeltas(dir: direction)
-            let ct = (direction == .east || direction == .west) ? nCols : nRows
-            
-            var aboveLevel = (binHeight(x1, y1) > level)
-            if aboveLevel    {
-                startX = Float(x1)
-                startY = Float(y1)
-            }
-            
-            var y = y1
-            var x = x1
-            var levelX: Float = 0.0
-            var levelY: Float = 0.0
-
-            startX = Float(x)
-            startY = Float(y)
-           while (ct > 1)
-            {
-                let h1 = binHeight(x,y)
-                let h2 = binHeight(x + dx, y + dy)
-                if (inBetween(level, h1, h2))
-                {
-                    let fx = Float(x)
-                    if (dx == 0)        { levelX = fx }
-                    else if (dx == -1)  { levelX = (fx - 1.0) + (level - h2) / (h1 - h2) }
-                    else                { levelX = fx + (level - h1) / (h2 - h1) }
-                    
-                    let fy = Float(y)
-                    if (dy == 0)        { levelY = fy }
-                    else if (dy == -1)  { levelY = (fy - 1.0) + (level - h2) / (h1 - h2) }
-                    else                { levelY = fy + (level - h1) / (h2 - h1) }
-                    
-                    if (aboveLevel)   {
-                        segments.append( Segment( startX, startY, levelX, levelY))
-                    }
-                    else {
-                        startX = levelX
-                        startY = levelY
-                    }
-                    aboveLevel = !aboveLevel
-                }
-                y += dy
-                x += dx
-            }
-            if (aboveLevel)  {
-                segments.append( Segment( startX, startY, levelX, levelY) )
-            }
-           
-        }
+//        
+//        for direction in Direction.allCases
+//        {
+//            let (x1,y1) = getPosition(dir: direction)
+//            let (dx,dy) = getDeltas(dir: direction)
+//            var ct = (direction == .east || direction == .west) ? nCols-1 : nRows-1
+//            var segmentInProgress: Segment? = nil
+//            var aboveLevel = binHeight(x: x1,y: y1) > level
+//            if aboveLevel    {
+//                segmentInProgress = Segment(Double(x1), Double(y1))
+//            }
+//            
+//            var x = x1, y = y1
+//            segmentInProgress = Segment(Double(x), Double(y))
+//            
+//            var levelX: Double = 0.0
+//            var levelY: Double = 0.0
+//
+//            while (ct > 1)
+//            {
+//                let h1 = binHeight(x: x,y: y)
+//                let h2 = binHeight(x: x + dx, y: y + dy)
+//                if inBetween(level, h1, h2)  {
+//                   
+//                    print(" \(h1) <-> \(h2) crossing level: \(level) dir: \(direction.self)")
+//                   let fx = Double(x)
+//                    let diff = h1 - h2
+//                    if (dx == 0)        { levelX = fx }
+//                    else if (dx == -1)  { levelX = (fx - 1.0) + (level - h2) / diff }
+//                    else                { levelX = fx - (level - h1) / diff}
+//                    
+//                    let fy = Double(y)
+//                    if (dy == 0)        { levelY = fy }
+//                    else if (dy == -1)  { levelY = (fy - 1.0) + (level - h2) / diff }
+//                    else                { levelY = fy - (level - h1) / diff }
+//                    
+//                    
+//                    if segmentInProgress == nil {
+//                        segmentInProgress = Segment( levelX, levelY)
+//                    }
+//                    else {
+//                        segmentInProgress!.addEndpoint(levelX, levelY)
+//                        segments.append(segmentInProgress!)
+//                        segmentInProgress = nil
+//                  }
+//                }
+//                y += dy
+//                x += dx
+//                ct -= 1
+//            }
+//            if segmentInProgress != nil  {
+//                segmentInProgress!.addEndpoint(levelX, levelY)
+//                segments.append( segmentInProgress! )
+//                segmentInProgress = nil
+//            }
+//           
+//        }
         return segments
     }
 
    //------------------------------------------------------------------------
     
-    func addEdges(_ bins: [Bin],_  level: Float, _ centerX: Int,_ centerY: Int) -> [Segment]
+    func addCrossings(_  level: Double, _ centerX: Int,_ centerY: Int) -> [Segment]
     {
-        func binHeight(_ y: Int, _ x: Int) -> Float   {   return  bins[y * nCols + x].height      }
-
-        if centerX < 0 || centerY < 0                  {   return []  }
-        if centerX >= nCols-1 || centerY >= nRows-1    {   return [] }
-            
-        let h1 = binHeight(centerY, centerX)
-        let h2 = binHeight(centerY, centerX+1)
-        let h3 = binHeight(centerY+1, centerX)
-        let h4 = binHeight(centerY+1, centerX+1)
+        var segments:[Segment] = []
         
-        var points =  [CGPoint]()
-        var isHead = [Bool]()
-                           
-        
-        if inBetween(level, h1,  h2)
-        {
-            let ratio: Float = (level - h1) / (h2 - h1)
-            let fx = Float(centerX) + ratio
-            points.append(CGPoint(Double(fx), Double(centerY)))
-            isHead.append(h1 < h2)
-       }
-        if inBetween(level, h2,  h4)
-        {
-            let ratio: Float = (level - h2) / (h4 - h2)
-            let fy = Float(centerY) + ratio
-            points.append(CGPoint(Double(centerX + 1), Double(fy)))
-            isHead.append( h2 < h4)
-        }
-        if inBetween(level, h3,  h4)
-        {
-            let ratio: Float = (level - h3) / (h4 - h3)
-            let fx = Float(centerX) + ratio
-            points.append(CGPoint( Double(fx), Double(centerY + 1) ))
-            isHead.append(h4 < h3)
-        }
-        if (inBetween(level, h1,  h3))
-        {
-            let ratio: Float = (level - h1) / (h3 - h1)
-            let fy = Float(centerY) + ratio
-            points.append(CGPoint(Double(centerX + 1), Double(fy)))
-            isHead.append(h3 < h1)
-        }
-        
-        if points.count == 0   { return [] }
-        if points.count == 2   { return [Segment(points[1], points[0], isHead[0])]   }
-        if points.count == 4     {    //  double crossing
-            if (h1 > level)  {
-                return[Segment(points[3],points[0], isHead[0]), 
-                       Segment(points[2],points[1], isHead[1])]
+        for x in (-1...0) {
+            for y in (-1...0) {
+                
+                let X = centerX + x
+                let Y =  centerY + y
+                if X < 0 || Y < 0                  {   continue  }
+                if X >= nCols-1 || Y >= nRows-1    {   continue }
+                
+                let h1 = binHeight(x: X,  y: Y)
+                if h1 == 0                         {   continue }
+                let h2 = binHeight(x: X+1, y: Y)
+                let h3 = binHeight(x: X,   y: Y+1)
+                let h4 = binHeight(x: X+1, y: Y+1)
+                
+                var points =  [CGPoint]()
+                var isHead = [Bool]()
+                
+                if inBetween(level, h1,  h2)
+                {
+                    let ratio: Double = (level - h1) / (h2 - h1)
+                    let fx = Double(X) + ratio
+                    points.append(CGPoint(Double(fx), Double(Y)))
+                    isHead.append(h1 < h2)
+                }
+                if inBetween(level, h2,  h4)
+                {
+                    let ratio: Double = (level - h2) / (h4 - h2)
+                    let fy = Double(Y) + ratio
+                    points.append(CGPoint(Double(X + 1), Double(fy)))
+                    isHead.append( h2 < h4)
+                }
+                if inBetween(level, h3,  h4)
+                {
+                    let ratio: Double = (level - h3) / (h4 - h3)
+                    let fx = Double(X) + ratio
+                    points.append(CGPoint( Double(fx), Double(Y + 1) ))
+                    isHead.append(h4 < h3)
+                }
+                if (inBetween(level, h1,  h3))
+                {
+                    let ratio: Double = (level - h1) / (h3 - h1)
+                    let fy = Double(Y) + ratio
+                    points.append(CGPoint(Double(X + 1), Double(fy)))
+                    isHead.append(h3 < h1)
+                }
+                
+                if points.count == 0   { continue }
+                if points.count == 2   { segments.append(Segment(points[1], points[0], isHead[0]))   }
+                if points.count == 4     {    //  double crossing
+                    if (h1 > level)  {
+                        segments.append(Segment(points[3],points[0], isHead[0]))
+                        segments.append(Segment(points[2],points[1], isHead[1]))
+                    }
+                    segments.append(Segment(points[1],points[0], isHead[0]))
+                    segments.append(Segment(points[3],points[2], isHead[2]))
+                }
             }
-            return[Segment(points[1],points[0], isHead[0]), 
-                   Segment(points[3],points[2], isHead[2])]
         }
-        return []  // error
-    }
-   
+        return segments
+  }
+    
    //------------------------------------------------------------------------
    func removeDuplicates(segments: [Segment]) -> [Segment]
     {
-        var pruned = [Segment]()
-        for seg in 0 ..< segments.count
+        var unique = [Segment]()
+        for seg in segments
         {
-            let z = segments[seg]
-            let extant = pruned.first( where:  { z == $0 })
-            if extant == nil     {  pruned.append(z)}
+            let extant = unique.first( where:  { matches(seg, $0) })
+            if extant == nil     {
+                unique.append(seg)
+            }
         }
-        return pruned
+        return unique
         
     }
-   
-                         
-    func inBetween(_ x: Float, _ a: Float,_  b: Float) -> Bool
+    func matches(_ a: Segment,_ b: Segment) -> Bool
+    {
+        let eps = 0.001
+        if abs(a.start.x - b.start.x) > eps { return false }
+        if abs(a.end.x - b.end.x) > eps     { return false }
+        if abs(a.start.y - b.start.y) > eps { return false }
+        if abs(a.end.y - b.end.y) > eps     { return false }
+        return true
+    }
+
+    func inBetween(_ x: Double, _ a: Double,_  b: Double) -> Bool
     {
         return  x >= min(a,b) && x < max(a,b)             // we dont know if a < b
     }
         //------------------------------------------------------------------------
-    func segCompare(_ a: Segment ,_ b:  Segment) -> Bool
-    {
-        let aStart = a.start, bStart = b.start
-        let aEnd = a.end, bEnd = b.end
-        
-        if (aStart == bStart)   {   return aEnd == bEnd  }
-        if (aStart == bEnd)     {   return aEnd == bStart  }
-        return false
-    }
-                       
+//    func segCompare(_ a: Segment ,_ b:  Segment) -> Bool
+//    {
+//        let aStart = a.start, bStart = b.start
+//        let aEnd = a.end, bEnd = b.end
+//        
+//        if (aStart == bStart)   {   return aEnd == bEnd  }
+//        if (aStart == bEnd)     {   return aEnd == bStart  }
+//        return false
+//    }
+//                       
  //------------------------------------------------------------------------
     
     
     
-     
-     func getThreshold(_ bins: [Bin],_  level: Float) -> Float
-    {
-        let logPlot = isLogPlot()
-        if (logPlot)   {      return level / 2.0       }
-        
-        let contourLevel = (bins[0].height / level)
-        if contourLevel > 0
-        {
-            return bins[0].height - contourLevel * level
-        }
-        return 0.0
-    }
-    
+//     
+//     func getThreshold(_ bins: [PositionBin],_  level: Double) -> Double
+//    {
+//        let logPlot = isLogPlot()
+//        if (logPlot)   {      return level / 2.0       }
+//        
+//        let contourLevel = (bins[0].height / level)
+//        if contourLevel > 0
+//        {
+//            return bins[0].height - contourLevel * level
+//        }
+//        return 0.0
+//    }
+//    
 //------------------------------------------------------------------------
-   struct PathList
+    public struct PathList
     {
-        var nLevels = 20
         var bottom = 256
        let width = 256.0, height = 256.0
         var paths : [Path] = [Path]()
@@ -394,14 +475,21 @@ public struct Histo2D
         
         init(segments: [Segment])
         {
-            var local = segments
+            var local = segments.filter({ quickDistance($0.start, $0.end) > 0 })
+            print("\(local.count)  segments in local")
             var pointList =  [CGPoint]()
+            
+//            pointList =  segments.map { CGPoint($0.start.x, 256 - $0.start.y)}
+//            pointList = pointList.sorted(by: { $0.x > $1.x} )
+//
             while (true)
             {
-                var seg  = 0
-                let i = tail(segments)
-                if (i == -1)   {  break  }
-                    
+                print("\(local.count)  segments in local")
+                if local.isEmpty { break }
+                let i = tail(local)
+//                if (i == -1)   {  i = 0  }
+                if (i > 256 )   {  break  }
+
                 var segment = local.remove(at: i)
                 pointList.append(segment.start)
                 var pt = segment.end
@@ -409,22 +497,37 @@ public struct Histo2D
                 var done = false
                 while !done
                 {
-                    if let idx = local.firstIndex(where: { $0.start == pt})
+                    if let idx = local.firstIndex(where: { quickDistance($0.start, pt) <= 2.0 } )
                     {
-                        segment = local.remove(at: idx)
+                      segment = local.remove(at: idx)
+//                        print("gap \(quickDistance(segment.start, pt) )")
+//                        print("len  \(quickDistance(segment.start, segment.end) )")
                         pointList.append(segment.start)
-                        pt = segment.end
+                        print(segment.start)
+                       pt = segment.end
+                        
                     }
                     else { done = true }
                 }
-                if  pointList[0] == pt  { break }
+//                print ("\(pointList.count)  points")
+//                if  quickDistance(pointList[0], pt) < 1.0  { break }
             }
-            if pointList.count >  5 {
+            if pointList.count >  2 {
                 if let path = makePath(pointList: pointList) {
                     paths.append(path)
+                    print("adding path from \(pointList.count) points")
+
                 }
             }
+            print("\(local.count) segments left")
+            pointList.removeAll()
         }
+        
+        func quickDistance(_ a: CGPoint,_  b: CGPoint) -> Double {
+//             (abs(a.x - b.x) + abs(a.y - b.y))
+        return sqrt ((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y))
+        }
+        
        func tail(_ segments: [Segment]) -> Int
        {
            for i in 0 ..< segments.count
@@ -440,6 +543,7 @@ public struct Histo2D
        
        func  makePath(pointList: [CGPoint]) -> Path?
        {
+           print("\(pointList.count) points to makePath")
            if pointList.count < 3 { return nil }
            let rect = getGraphRect()
            let (nRows, nCols) = getBinResolution()

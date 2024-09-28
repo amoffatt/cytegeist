@@ -115,11 +115,11 @@ final class App {
 //            selectedExperiment = recent.id
 //            return recent
 //        }
-//        if createIfNil {
-//            let exp = recentExperiments.first ?? createNewExperiment()
-//            selectedExperiment = exp.id
-//            return exp
-//        }
+        if createIfNil {
+            let exp = recentExperiments.first ?? createNewExperiment()
+            selectedExperiment = exp.id
+            return exp
+        }
         return nil
     }
     

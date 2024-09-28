@@ -554,9 +554,10 @@ extension HistogramData<XY> {
     
     func toView(chartDef:ChartDef?) -> (any View)?
     {
-        var view:(any View)? = {
+        let view:(any View)? = {
             if chartDef?.contours ?? false {
-                return BadgeBackground()
+                return ContoursView(bins: bins, size: size)      //width: size.x, height: size.y
+//                    .scaleEffect(y: -1)
             }
             
             return toImage(colormap: chartDef?.colormap ?? .jet)?.resizable()
@@ -567,21 +568,49 @@ extension HistogramData<XY> {
         }
         return nil
     }
-}
 
-        
-struct BadgeBackground: View {
-    var body: some View {
-        let path =  Path { path in
-            var width: CGFloat = 500.0
-            let height = width
-            path.move( to: CGPoint( x: width * 0.95, y: height * 0.20 ))
-            path.addLine( to: CGPoint( x: width * 0.15, y: height * 0.20 ))
-            path.addLine( to: CGPoint( x: width * 0.35, y: height * 0.80 ))
-            path.addLine( to: CGPoint( x: width * 0.95, y: height * 0.20 ))
-        }.stroke(lineWidth: 3)
-            .fill(.blue)
-        return path
+
+
+    //------------------------------------------------------------------------
+
+
+    struct ContoursView:  View {
+        var bins: [Double]
+        var size: D.IntCoord
+       
+        var body: some View {
+            
+            let contours = ContourBuilder(bins: bins, width: size.x, height: size.y)
+            let pathlist = contours.buildPathList()
+            let bigPath =  Path { p in
+                for path in pathlist.paths {
+                    p.addPath(path)  //, transform: CGAffineTransform = .init(Translation(50, 0)
+                }
+//                if let apath = pathlist.paths.first
+//                { p.addPath(apath) }
+            }.stroke(lineWidth: 1).fill(.purple)
+            return bigPath
+        }
     }
+//
+//
+//struct BadgeBackground: View {
+//    var body: some View {
+//        let path =  Path { path in
+//            let width: CGFloat = 500.0
+//            let height = width
+//            path.move( to: CGPoint( x: width * 0.95, y: height * 0.20 ))
+//            path.addLine( to: CGPoint( x: width * 0.15, y: height * 0.20 ))
+//            path.addLine( to: CGPoint( x: width * 0.35, y: height * 0.80 ))
+//            path.addLine( to: CGPoint( x: width * 0.95, y: height * 0.20 ))
+//            
+//            
+//            
+//            path.addLines(getContours1())
+//        }.stroke(lineWidth: 3)
+//            .fill(.blue)
+//        return path
+//    }
 
+//}
 }

@@ -32,7 +32,7 @@ struct AnalysisList: View {
             HStack {
                 Text("For \(sample.tubeName): selected: \(selection.nodes.count)") //.frame(width: 150)
                 Spacer()
-                Button("<< Copy", action: copyToGroup)
+                Button("<< Copy", action: experiment.copyToGroup)
             }
             List(selection: $selection.nodes) {
                 NodeOutlineGroup<AnalysisNode>(node: tree, childKeyPath: \.children.emptyToNil, isExpanded: true)
@@ -97,9 +97,6 @@ struct AnalysisList: View {
             }  //vstack
         }  // list
     }
-    func copyToGroup () { print("copy to group")
-                      
-                    }
 
     
         //-------------------------------------------------------------------------------

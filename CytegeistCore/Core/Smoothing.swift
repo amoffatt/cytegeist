@@ -97,7 +97,7 @@ struct Smoother
             }
             else                                            // not precomputed
             {
-                debug("binHeight > 256")             // looks hinky, should be a dictionary of height to cached kernel
+                print("binHeight > 256")             // looks hinky, should be a dictionary of height to cached kernel
                 nElements = matrixSize(bins: Int(binHeight), hiRes: hiRes)
                 kernel1D = kernel(bins: Int(binHeight), mxSize: nElements, hiRes: hiRes)
             }

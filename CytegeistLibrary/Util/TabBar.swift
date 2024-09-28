@@ -105,7 +105,7 @@ struct TabBarTest : View {
                 Text("Selected tab: \(String(describing: selected))")
             }
             .fillAvailableSpace()
-            .background(.blue.opacity(0.5))
+            .background(.blue.opacity(0.15))
         }
     }
 }

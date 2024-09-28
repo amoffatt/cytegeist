@@ -13,7 +13,7 @@ import CytegeistLibrary
 struct Sidebar : View {
  
     enum ListSection: String, Identifiable, Hashable {
-        var id: String { rawValue }
+        var id: String  { rawValue }
         
         case current
         case history
@@ -172,7 +172,7 @@ struct Sidebar : View {
     {
         print ("Adding \(nodes.count) to the group: " + groupName)
     }
-    
+
         //    func makePanel()
         //    {
         //        print ("makePanel")
