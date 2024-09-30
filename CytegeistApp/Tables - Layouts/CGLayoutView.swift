@@ -67,7 +67,15 @@ struct CGLayoutView: View {
     @State var viewportSize:CGSize = .zero
 
      //---------------------------------------------------------------------------
-     
+    var LayoutTools : some View {
+        
+        HStack {
+            Button("Add Text Block", systemImage: "plus", action:  layoutModel.addTextItem  )
+            Button("Add Table", systemImage: "plus", action:  layoutModel.addTable  )
+            ItemSizeSlider(size: $size)
+        }
+    }
+
     var body: some View {
         
         let step =  shiftKey() ? 20 : optionKey() ? 1.0 : 5.0           //  PREFS
@@ -112,6 +120,7 @@ struct CGLayoutView: View {
                     layoutModel.addItem( LayoutItem(.text("new text item!")))
                     isFocused = true
                 }
+                .toolbar { LayoutTools }
     }
     
     func layoutBackdrop() -> some View {

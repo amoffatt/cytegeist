@@ -225,6 +225,7 @@ print("adding \(confirmedGate.name) to \(population.name)")
         HStack{
             Spacer()
             HStack{
+                Spacer()
                 Button("Range", systemImage: "pencil",  action: { curTool = GatingTool.range }).background(curTool == .range ? .yellow : .gray)
                 Button("Split", systemImage: "triangle.righthalf.fill",   action: {curTool = GatingTool.split })
                 Button("Radius", systemImage: "triangle.righthalf.fill",   action: {curTool = GatingTool.radius }).background(curTool == .radius ? .yellow : .gray)

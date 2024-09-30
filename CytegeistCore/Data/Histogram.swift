@@ -573,34 +573,50 @@ extension HistogramData<XY> {
 
 
     //------------------------------------------------------------------------
-
-
+    struct MyShape: Shape {
+        var path: Path
+        
+        func path(in rect: CGRect) -> Path {   path  }
+    }
+    
+   
     struct ContoursView:  View {
         var bins: [Double]
         var size: D.IntCoord
-       
-        var body: some View {
+        func getLineWidth(_ index: Int) -> CGFloat
+        {
+            index % 4 == 0 ? 0.5 : 0.8
             
+        }
+        func getColor(_ index: Int) -> Color
+        {
+            index % 4 == 0 ? Color.blue : Color.gray
+        }
+        
+        var body: some View {
+
             GeometryReader { proxy in
                 VStack {
                     let  viewSize = proxy.size
-                    let sx = viewSize.width / 256
+                    let sx = viewSize.width / 256           // TODO hardcoded
                     let sy = viewSize.height / 256
                     let contours = ContourBuilder(bins: bins, width: size.x, height: size.y)
                     let pathlist = contours.buildPathList()
-                    let bigPath =  Path { p in
-                        for path in pathlist.paths {
-                            p.addPath(path)  //, transform: CGAffineTransform = .init(Translation(50, 0)
+                      
+                    
+                    ZStack {
+                        ForEach(0..<pathlist.paths.count, id: \.self) { index in
+                            MyShape(path: pathlist.paths[index])
+                                .stroke(lineWidth: getLineWidth(index))
+                                .foregroundColor(getColor(index))
+                                .scaleEffect(x: sx,y:  sy, anchor: .topLeading)
                         }
-                            //                if let apath = pathlist.paths.first
-                            //                { p.addPath(apath) }
-                    }.stroke(lineWidth: 1).fill(.purple).scaleEffect(x: sx,y:  sy, anchor: .topLeading)
-                return bigPath
-            }
+                    }
+                }
             }
         }
+        
     }
-//
 //
 //struct BadgeBackground: View {
 //    var body: some View {

@@ -12,12 +12,23 @@ import CytegeistLibrary
 import SwiftUI
 
 
+
 public struct TableBuilder : View
 {
     @Environment(Experiment.self) var experiment
     @State var selectedTable:CGTable? = nil
     
-    public var body: some View {
+    var TableTools : some View {
+        
+        HStack {
+            Button("Median", action: {addStat(name: "median")}).buttonBorderShape(.capsule)
+            Button("CV", action: {addStat(name: "cv")}).buttonBorderShape(.capsule)
+            Button("Mean", action: {addStat(name: "mean")}).buttonBorderShape(.capsule)
+            Button("StDev", action: { addStat(name: "stdev")}).buttonBorderShape(.capsule)
+            Button("Batch", action: {   doBatch()   }).buttonBorderShape(.capsule)
+        }
+    }
+        public var body: some View {
         return VStack {
             TabBar(experiment.tables, selection:$selectedTable) { table in
                 Text(table.name)
@@ -42,7 +53,17 @@ public struct TableBuilder : View
             if experiment.tables.isEmpty {
                 selectedTable = experiment.addTable()
             }
-        }
+        }.toolbar { TableTools }
+    }
+    
+    func doBatch()
+    {
+       print("doBatch")
+    }
+
+    func addStat(name: String)
+    {
+        print("addStat" + name)
     }
 }
 //------------------------------------------------------------------------------------
@@ -97,7 +118,7 @@ public struct CGTableView : View {
         table.items.append(TColumn("", parm: "Keyword", stat: "Date"))
         table.items.append(TColumn(node.name, parm: "CD3", stat: "Median"))
         table.items.append(TColumn(node.name, parm: "CD3", stat: "CV"))
-        print("new table item: ", node.name)
+//        print("new table item: ", node.name)
     }
     
     
