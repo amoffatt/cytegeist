@@ -28,12 +28,12 @@ class CGLayout : Codable, Hashable, Identifiable
     public func addTextItem() -> ()
     {
         if !optionKey() { deselectAll()  }
-        newTextItem(name: "some text", position: CGPoint.zero)
+        newTextItem(name: "some text", position: CGPoint(100,100))
     }
     
     public func newTextItem(name: String, position:CGPoint)
     {
-        let layoutItem = LayoutItem(.text(name))
+        let layoutItem = LayoutItem(.text(name), position: position)
         layoutItem.selected = true
         addItem(layoutItem)
     }

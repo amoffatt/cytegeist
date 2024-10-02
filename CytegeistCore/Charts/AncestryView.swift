@@ -49,7 +49,7 @@ public struct AncestryView: View {
             }
         }
     }
-    
+    // TODO -- doesnt set graph type
     private func ancestorChartDef(_ gate:AnyGate) -> ChartDef? {
         var chartDef = ChartDef()
         if let xDim = gate.dims.get(index: 0) {
@@ -64,9 +64,4 @@ public struct AncestryView: View {
     private func ancestorAxisDef(dim:String) -> AxisDef {
         .init(dim:dim, showTickLabels: false, scale: 0.7)
     }
-    
 }
-
-//#Preview {
-//    SwiftUIView()
-//}

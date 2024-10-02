@@ -106,11 +106,13 @@ struct CChartView : View {
     
     var body: some View {
             //        let bindableText:Binding<String> = .init(get: { item.value }, set: { item.value = $0 } )
-        let sampleRef = SampleRef(url: DemoData.facsDivaSample0!)
+//        let sampleRef = SampleRef(url: DemoData.facsDivaSample0!)
         
         VStack {
-//            ChartView_Penguins()
-//            HistogramView(query: core.histogram(.init(PopulationRequest(sampleRef), .init("FSC-A"))))            
+            ChartView(population: item.node, config: readOnlyBinding(item.node?.graphDef), editable: false)
+                .padding(4)
+                .background(.black.opacity(0.1))
+                .cornerRadius(8)
         }  .frame(width: 100, height: 100)
             .padding()
             .onTapGesture {   parent.layoutModel.selectItem( item)    }

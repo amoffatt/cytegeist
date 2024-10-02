@@ -117,7 +117,7 @@ struct CGLayoutView: View {
                     layoutModel.deselectAll()
                 }
                 .onAppear {
-                    layoutModel.addItem( LayoutItem(.text("new text item!")))
+//                    layoutModel.addItem( LayoutItem(.text("new text item!")))
                     isFocused = true
                 }
                 .toolbar { LayoutTools }

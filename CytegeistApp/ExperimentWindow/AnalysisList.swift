@@ -21,7 +21,7 @@ struct AnalysisList: View {
             if let sample = experiment.focusedSample {
                 list(sample, sample.getTree())
             }
-            else { Text("Select a sample")  }
+            else { Text("No Sample Selected").opacity(0.2)  }
         }
     }
     

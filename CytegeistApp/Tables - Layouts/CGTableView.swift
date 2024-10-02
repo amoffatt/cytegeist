@@ -21,31 +21,42 @@ public struct TableBuilder : View
     var TableTools : some View {
         
         HStack {
-            Button("Median", action: {addStat(name: "median")}).buttonBorderShape(.capsule)
-            Button("CV", action: {addStat(name: "cv")}).buttonBorderShape(.capsule)
-            Button("Mean", action: {addStat(name: "mean")}).buttonBorderShape(.capsule)
-            Button("StDev", action: { addStat(name: "stdev")}).buttonBorderShape(.capsule)
-            Button("Batch", action: {   doBatch()   }).buttonBorderShape(.capsule)
+            Spacer()
+            Text("        ")
+            Menu("Populations"){
+                Button("All Cells", action: {})
+                Button("Lymphocytes", action: {})
+                Button("TCells", action: {})
+            }
+            Menu("Parameters"){
+                Button("FSC", action: {})
+                Button("SSC", action: {})
+                Button("PE", action: {})
+                Button("FITC", action: {})
+                Button("Cy7-PE", action: {})
+            }
+            Button("Median", action: {  addStat(stat: "median")}).buttonBorderShape(.capsule)
+            Button("CV",    action: {   addStat(stat: "cv")}).buttonBorderShape(.capsule)
+            Button("...",    action: {  }).buttonBorderShape(.capsule)
+//            Button("Mean", action: {    addStat(name: "mean")}).buttonBorderShape(.capsule)
+//            Button("StDev", action: {   addStat(name: "stdev")}).buttonBorderShape(.capsule)
+//            Button("5%, 95%", action: {   addStat(name: "percentile595")}).buttonBorderShape(.capsule)
+            Spacer()
+           Button("Batch", action: {   doBatch()   }).buttonBorderShape(.capsule)
         }
     }
         public var body: some View {
         return VStack {
             TabBar(experiment.tables, selection:$selectedTable) { table in
                 Text(table.name)
-            } add: {
-                let table = CGTable()
-                table.name = table.name.generateUnique(existing: experiment.tables.map { $0.name })
-                experiment.tables.append(table)
-                selectedTable = table
-            } remove: { table in
-                experiment.tables.removeAll { $0 == table }
-            }
+            } 
+            add:    {  addTable()   }
+            remove: {  table in experiment.tables.removeAll { $0 == table } }
+            
             VStack {
                 if let selectedTable {
                     CGTableView(table:selectedTable)
-                } else {
-                    Text("Select a Table")
-                }
+                } else {  Text("Select a Table") }
             }
             .fillAvailableSpace()
         }
@@ -56,14 +67,56 @@ public struct TableBuilder : View
         }.toolbar { TableTools }
     }
     
-    func doBatch()
+        //---------------------------------------------------------------------------
+    func addStat(stat: String)
     {
-       print("doBatch")
+            //        table.addNode(node)
+    }
+    func addTable()
+    {
+        let table = CGTable()
+        table.name = table.name.generateUnique(existing: experiment.tables.map { $0.name })
+        experiment.tables.append(table)
+        selectedTable = table
+
+    }
+    
+    func addTable(cols: [TColumn], rows: [[String]])
+    {
+        let table = CGTable(cols: cols, rows: rows)
+        table.name = table.name.generateUnique(existing: experiment.tables.map { $0.name })
+        experiment.tables.append(table)
+        selectedTable = table
     }
 
-    func addStat(name: String)
+    //---------------------------------------------------------------------------
+    func stat(_  sample: Sample, _  col: TColumn) -> String
     {
-        print("addStat" + name)
+        return ("stat (\(col.parm), \(col.pop), \(col.stat))")
+    }
+    
+    func doBatch()
+    {
+        if let selectedTable {
+            var cells = [[String]]()
+//            let cols = selectedTable.items.map( { $0.toString() })
+           let activeSamples = experiment.getSamplesInCurrentGroup()
+            if !activeSamples.isEmpty {
+                
+                for sample in activeSamples {
+                    var row = [String]()
+                    row.append(sample.tubeName)
+                    for col in selectedTable.items {
+                        row.append(stat(sample, col))
+                    }
+                    cells.append(row)
+                }
+                addTable(cols: selectedTable.items, rows: cells)
+                for row in cells { print( row)    }
+                
+            } else { print("no samples in current group")   }
+            
+        } else { print("doBatch with no selected table")   }
     }
 }
 //------------------------------------------------------------------------------------
@@ -115,13 +168,11 @@ public struct CGTableView : View {
     
     func newTableItem(node:AnalysisNode, position:CGPoint)
     {
-        table.items.append(TColumn("", parm: "Keyword", stat: "Date"))
-        table.items.append(TColumn(node.name, parm: "CD3", stat: "Median"))
-        table.items.append(TColumn(node.name, parm: "CD3", stat: "CV"))
-//        print("new table item: ", node.name)
+        table.addNode(node)
     }
     
-    
+ 
+
 }
 //---------------------------------------------------------------------------
 // Model
@@ -140,29 +191,44 @@ public class CGTable : Usable, Hashable
     public var id = UUID()
     public  var name = "Untitled Table"
     public var items = [TColumn]()
+    public var rows: [[String]]?
+    public var isTemplate = true
         //    var info = BatchInfo()
     
     init() {    }
+    init(cols: [TColumn], rows: [[String]]? )
+    {
+        self.items = cols
+        self.rows = rows
+    }
+    
+    public func addNode(_ node: AnalysisNode)
+    {
+        items.append(TColumn(node.name, stat: "Freq"))
+    }
 }
 
 //---------------------------------------------------------------------------
-// model for an individual column, which is actually a row in the table editor
+// model for an individual column, which is a row in the table editor
+// and a column in the result of a batch
+
 public struct TColumn : Identifiable, Hashable, Codable
 {
     public var id = UUID()
     public var pop: String = " "
-    var parm: String = " "
     var stat: String = " "
+    var parm: String = " "
     var arg: String = " "
  
-    init(_ name: String, parm: String, stat: String, arg: String = " ")
+    init(_ name: String, stat: String, parm: String = "", arg: String = "")
     {
         self.pop = name
-        self.parm = parm
         self.stat = stat
+        self.parm = parm
         self.arg = arg
     }
 
+    public func toString() -> String {   "\(pop)\n \(stat) \(parm) \(arg)"   }
     public func hash(into hasher: inout Hasher) {
         hasher.combineMany(id, pop, parm, stat, arg)
     }

@@ -165,6 +165,7 @@ struct GatingView: View {
            default: break
         }
     }
+    
     func addGate(_ gate: AnyGate)
     {
             //        self.candidateGateName = getCandidateGateName()
@@ -182,10 +183,6 @@ struct GatingView: View {
             print("No population selected")
             return
         }
-        
-print("adding \(confirmedGate.name) to \(population.name)")
-
-//        confirmedGate.parentImage = snapshot()
         confirmedGate.graphDef = population.graphDef     //TBD -  findUnusedParameters
         population.addChild(confirmedGate)
         experiment.selectedAnalysisNodes.nodes = [confirmedGate]
@@ -201,6 +198,22 @@ print("adding \(confirmedGate.name) to \(population.name)")
 //        return renderer.nsImage
 //    }
     
+    func nextSample() -> ()
+    {
+        if let pop = population {
+            experiment.nextSample(path: population!.path())
+        }
+        //        print ("nextSample")
+}
+
+func prevSample() -> ()
+{
+    if let pop = population {
+        experiment.prevSample(path: population!.path())
+    }
+    //        print ("nextSample")
+}
+
     func toParent() -> ()
     {
         if let pop = population {
@@ -232,14 +245,12 @@ print("adding \(confirmedGate.name) to \(population.name)")
                 Button("Rectangle", systemImage: "square.and.pencil",   action: { curTool = GatingTool.rectangle}).background(curTool == .rectangle ? .yellow : .gray)
                 Button("Ellipse", systemImage: "ellipsis.circle",   action: {curTool = GatingTool.ellipse }).background(curTool == .ellipse ? .yellow : .gray)
                 Spacer(minLength: 50)
-                HStack{ Button("Up",  systemImage: "arrowtriangle.up.square.fill", action: { toParent() })
-                    Button("Down",  systemImage: "arrowtriangle.down.square.fill", action: { toChild() })
-                }
-                    //                Button("Quads", systemImage: "person.crop.square",   action: { curTool = GatingTool.quads})
+                     //                Button("Quads", systemImage: "person.crop.square",   action: { curTool = GatingTool.quads})
                     //                Button("Polygon", systemImage: "skew",   action: { curTool = GatingTool.polygon})
                     //                Button("Spline", systemImage: "scribble",   action: {curTool = GatingTool.spline })
+                NavArrows
             }
-            .background(Color.gray.opacity(0.3))
+//            .background(Color.gray.opacity(0.3))
         }
     }
     enum GatingTool {
@@ -254,17 +265,17 @@ print("adding \(confirmedGate.name) to \(population.name)")
         case radius
     }
     
+    var  NavArrows: some View {
+         ZStack{
+            let offset = 15
+            Button("Up",  systemImage: "arrowtriangle.up.square.fill", action: { toParent() }).offset(CGSize(width: 0,height: -offset))
+            Button("Down",  systemImage: "arrowtriangle.down.square.fill", action: { toChild() }).offset(CGSize(width: 0,height: offset))
+            Button("Prev",  systemImage: "arrowtriangle.left.square.fill", action: {  prevSample() }).offset(CGSize(width: -offset,height: 0))
+            Button("Next",  systemImage: "arrowtriangle.right.square.fill", action: { nextSample() }).offset(CGSize(width: offset,height: 0))
+        }
+    }
     
     var body: some View {
-//        var request:PopulationRequest? = nil
-//        var requestError:Error? = nil
-//        
-//        do {
-//            request = try population?.createRequest()
-//        } catch {
-//            requestError = error
-//        }
-        
         return VStack {
                 //            Text("Gating Prototype")
             if let sample = population?.getSample() {
@@ -277,12 +288,9 @@ print("adding \(confirmedGate.name) to \(population.name)")
                     if let population {
                         AncestryView(population, height:160)
                         chart(meta)
-                    } else {
-                        Text("No population selected")
-                    }
-                } else { Text("Sample metadata not found")  }
-            }
-            else {Text("Select a sample")  }
+                    } else  {   Text("No population selected")   }
+                } else      {   Text("Sample metadata not found")  }
+            }  else         {   Text("Select a sample")  }
             
         }.toolbar {  GatingTools   }
     }
@@ -295,13 +303,8 @@ print("adding \(confirmedGate.name) to \(population.name)")
         let smoothing = population!.graphDef.smoothing
         population!.graphDef.smoothing = smoothing == .off ? .low : .off
     }
-        //------------------------------------------------------
-        //
-        //var drag: some Gesture {
-        //    DragGesture()
-        //        .onChanged { _ in self.isDragging = true }
-        //        .onEnded { _ in self.isDragging = false }
-        //}
+   //------------------------------------------------------
+  
     func makeDragGesture(areaSize: CGSize) -> some Gesture {
         DragGesture()
             .onChanged { value in offset = value.translation
@@ -313,7 +316,6 @@ print("adding \(confirmedGate.name) to \(population.name)")
                 {
                     startLocation = value.location
                 }
-                
             }
             .onEnded { value in
                 isDragging = false
@@ -325,9 +327,7 @@ print("adding \(confirmedGate.name) to \(population.name)")
     
     func makeTapGesture() -> some Gesture {
         TapGesture()
-            .onEnded {
-                focusedItem = nil
-            }
+            .onEnded {  focusedItem = nil  }
     }
     
     func addRangeGate(_ dim:String, _ min: CGFloat, _ max: CGFloat)

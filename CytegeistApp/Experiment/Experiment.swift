@@ -89,8 +89,11 @@ public class Experiment : Usable
         self[selectedSamples.first]
     }
     
+    public func nextSample(path: String) {     print("Experiment.nextSample " + path)   }
+    public func prevSample(path: String) {     print("Experiment.prevSample " + path)    }
+
     public func clearSampleSelection() {       selectedSamples.removeAll()    }
-    
+
     public var focusedAnalysisNode: AnalysisNode? {
         let selectedSample = self[selectedSamples.first]
         return selectedAnalysisNodes.first ?? selectedSample?.getTree()

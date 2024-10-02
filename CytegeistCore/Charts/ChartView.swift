@@ -44,6 +44,10 @@ public struct ChartView<Overlay>: View where Overlay:View {
         self._chartOverlay = overlay
     }
     
+//    public init(population: AnalysisNode, overlay:@escaping (CGSize) -> Overlay = { _ in EmptyView() }){
+//        self.init(population:  population, config: population.graphDef,editable: false, overlay: overlay)
+//    }
+
     @MainActor
     func axisBinding(_ chartDef:Binding<ChartDef?>, _ axis:WritableKeyPath<ChartDef, AxisDef?>) -> Binding<String> {
         Binding(get: {
@@ -55,7 +59,12 @@ public struct ChartView<Overlay>: View where Overlay:View {
             chartDef.wrappedValue = value
         })
     }
-    
+//    struct ErrorText : Text
+//    {
+//        var body : some View {
+//        if !errorMessage.isEmpty {Text("\(errorMessage)").foregroundColor(.red)
+//        }
+//    }
     public var body: some View {
         let sampleMeta = sampleQuery?.data?.meta
         let def = config.wrappedValue
@@ -135,12 +144,9 @@ public struct ChartView<Overlay>: View where Overlay:View {
                             let editing = false //child == focusedItem
                             AnyView(child.view(size, editing))
                                 .environment(\.isEditing, editing)
-                                .onTapGesture {
-                                    //                        focusedItem = child
-                                }
+                                .onTapGesture {}       //    focusedItem = child
                         }
                     }
-                    
                     _chartOverlay(size)
                 }
             }
@@ -176,7 +182,7 @@ public struct ChartView<Overlay>: View where Overlay:View {
         
         guard let config, let population else {   return   }
         
-        if let meta = sampleQuery?.data?.meta {
+          if let meta = sampleQuery?.data?.meta {
             let (populationRequest, error) = getPopulationRequest()
             guard let populationRequest else {
                 errorMessage = error.nonNil

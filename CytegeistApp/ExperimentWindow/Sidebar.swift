@@ -71,17 +71,7 @@ struct Sidebar : View {
                             }
 //                        }
 //                        VStack {
-                            @State var groupselection: SidebarGroupSelection? = nil
-                            List(selection: $groupselection) {
-                                if  let exp = app.getSelectedExperiment() {
-                                    DisclosureGroup("Groups", isExpanded: $expansionState2[-1]) {
-                                        ForEach(exp.groups) { group in
-                                            SidebarGroupLabel(sidebar: self, group: group, section: .current)  //
-                                        }
-                                    }
-                                }
-//                            }
-                        }
+
                 }
                 
                 
@@ -112,20 +102,31 @@ struct Sidebar : View {
                 }.opacity(0.8)
                     .frame(maxWidth: .infinity, minHeight: 80, maxHeight: 80)
                     .border(.black)
-                
-                    //                .draggable(any Transferable())
-                
-                @State var experimentselection: SidebarExperimentSelection? = nil
-                List(selection: $experimentselection) {
-                    DisclosureGroup(isExpanded: $expansionState3[-1]) {
-                        ForEach(app.recentExperiments) { experiment in
-                            SidebarExperimentLabel(sidebar: self, experiment: experiment, section: .current)  //
-                                                                                                              //                        .badge(experiment.numberOfPlantsNeedingWater)
+ 
+                @State var groupselection: SidebarGroupSelection? = nil
+                List(selection: $groupselection) {
+                    if  let exp = app.getSelectedExperiment() {
+                        DisclosureGroup("Groups", isExpanded: $expansionState2[-1]) {
+                            ForEach(exp.groups) { group in
+                                SidebarGroupLabel(sidebar: self, group: group, section: .current)  //
+                            }
                         }
                     }
-                label: {    Label("History", systemImage: "arrow.swap")     }
+                        //                            }
                 }
-                .frame(maxWidth: .infinity, minHeight: 80, maxHeight: 800)
+                    //                .draggable(any Transferable())
+                
+//                @State var experimentselection: SidebarExperimentSelection? = nil
+//                List(selection: $experimentselection) {
+//                    DisclosureGroup(isExpanded: $expansionState3[-1]) {
+//                        ForEach(app.recentExperiments) { experiment in
+//                            SidebarExperimentLabel(sidebar: self, experiment: experiment, section: .current)  //
+//                                                                                                              //                        .badge(experiment.numberOfPlantsNeedingWater)
+//                        }
+//                    }
+//                label: {    Label("History", systemImage: "arrow.swap")     }
+//                }
+//                .frame(maxWidth: .infinity, minHeight: 80, maxHeight: 800)
           }
 
         }
