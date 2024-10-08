@@ -17,6 +17,7 @@ public struct TableColumnField<RowValue> : Identifiable, Hashable where RowValue
     
     public var id: String { name }
     public let name:String
+    public var hidden = false
     
 //    public let keyPath: (RowValue) -> String
     public let keyPath: KeyPath<RowValue, String>

@@ -27,7 +27,7 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable, Custo
     public var parent: AnalysisNode? {
         get { _parent }
         set {
-            if newValue == parent {  return }               // AT?  is it ok to prohibit children setting parents?
+            if newValue == parent {  return }
             if let _parent {    _parent._removeChild(self)   }
             _parent = newValue
             if let _parent {    _parent._addChild(self)     }
@@ -105,18 +105,26 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable, Custo
 
 
         //--------------------------------------------------------
-    public func getSample() -> Sample? { sample ?? parent?.getSample() }       //AT?
+    public func getSample() -> Sample? 
+    { 
+        let s: Sample? = sample ?? parent?.getSample()
+        
+        if s != nil {
+            print(s!.tubeName)
+        }
+        else { print("null sample")}
+        return s
+        
+    }       //AT?
     public func getSampleMeta() -> FCSMetadata? { getSample()?.meta }
     
-
-    
-    public func path() -> String { return parent?.path() ?? "" + name  }   //AT?
+    public func path() -> String { return "/" + (parent?.path() ?? name)  }
     
     public func depth() -> Int {
-        if (parent == nil)  { return 0 }
-        return 1 + parent!.depth()
-    }                                                            //AT?
-        public func cloneDeep() -> AnalysisNode
+        return (parent == nil) ? 0 :  1 + parent!.depth()
+    }                                            
+        
+    public func cloneDeep() -> AnalysisNode
     {
         let newNode = AnalysisNode(self)
         for child in children {
@@ -184,10 +192,7 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable, Custo
         if name != node.name {
             addChild(AnalysisNode(node))
         }
-        
     }
-
-
 
     private func _removeChild(_ node: AnalysisNode) {        children.removeAll { $0 == node }    }
     public func remove() {   parent = nil  }     // Removes this child from parent in the parent setter
@@ -200,6 +205,14 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable, Custo
         return false
     }
 
+    public func mergeTree(_ clone: AnalysisNode)
+    {
+        print ("mergeTree")
+        if name != clone.name {
+            addChild(clone)
+        }
+        else {  children.append(contentsOf: clone.children) }
+    }
 
 //--------------------------------------------------------
     public func createRequest() throws -> PopulationRequest {
@@ -213,9 +226,8 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable, Custo
         }
         throw AnalysisNodeError.noSampleRef
     }
-    
-
-     public func chartView(chart: ChartDef?, dims:Tuple2<CDimension?>) -> ChartAnnotation? {
+ 
+     public func chartAnnotation(chart: ChartDef?, dims:Tuple2<CDimension?>) -> ChartAnnotation? {
         guard let gate = gate,
               let gate = gate as? any ViewableGate,
               gate.isValid(for: dims)
@@ -229,17 +241,15 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable, Custo
             }, remove: self.remove
         )
     }
-    
-
+ 
     public func visibleChildren(_ chartDef:ChartDef) -> [ChartAnnotation] {
         let dims = getChartDimensions(chartDef)
         let result = children.compactMap { child in
-            child.chartView(chart: chartDef, dims:dims)
+            child.chartAnnotation(chart: chartDef, dims:dims)
         }
         return result
     }
-
-    
+   
     public func getChartDimensions(_ chartDef:ChartDef?) -> Tuple2<CDimension?> {
         guard let chartDef, let sampleMeta = getSampleMeta() else {
             return .init(nil, nil)

@@ -7,17 +7,19 @@
 
 import Foundation
 import SwiftUI
+import CytegeistCore
+import CytegeistLibrary
 
 @MainActor
 public struct SampleInspectorView: View {
-    let core: CytegeistCoreAPI
+    let experiment: Experiment
     let sample: SampleRef
     @State var query: APIQuery<FCSFile>?
 //    @State var data: FCSFile?
     
     
-    public init(_ core: CytegeistCoreAPI, sample: SampleRef) {
-        self.core = core
+    public init(_ experiment: Experiment, sample: SampleRef) {
+        self.experiment = experiment
         self.sample = sample
     }
     
@@ -45,7 +47,7 @@ public struct SampleInspectorView: View {
             }
         }
         .onChange(of: sample.url, initial: true) {
-            query = core.loadSample(.init(sample))
+            query = experiment.core.loadSample(SampleRequest.init(sample, includeData:false))
         }
     }
     
@@ -63,12 +65,13 @@ public struct SampleInspectorView: View {
         VStack {
             if let metadata = query?.data?.meta {
                 if let parameters = metadata.parameters {
-                    ParameterGalleryView(core:core, sample: sample, parameters: parameters)
+                    ParameterGalleryView(core:experiment.core, sample: sample, parameters: parameters)
                 }
             }
         }
     }
-    
+//    public init() {}
+
     private func dataView() -> some View {
         VStack {
             if let data = query?.data,
@@ -120,13 +123,12 @@ public struct ParameterGalleryView: View {
     let core: CytegeistCoreAPI
     let sample: SampleRef
     let parameters: [CDimension]
-    
     public var body: some View {
         
         ScrollView {
             LazyVGrid(columns: columns, spacing: 20) {
                 ForEach(parameters, id: \.name) { parameter in
-                    ParameterInspectorView(core:core, sample:sample, parameter: parameter)
+//                    ParameterInspectorView(core:core, sample:sample, parameter: parameter)
                 }
             }
             .padding()

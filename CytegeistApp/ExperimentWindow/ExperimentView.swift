@@ -36,7 +36,11 @@ struct ExperimentView : View {
 //    var mode:ReportMode { app.reportMode }
     
 //    @State private var path = [Int]()
-     
+    @State var sampleMinWidth: CGFloat  = 12
+    @State  var sampleIdealWidth: CGFloat  = 800
+    @State var analysisMinWidth: CGFloat  = 12
+    @State  var analysisIdealWidth: CGFloat  = 800
+
 
     var body: some View {
         @Bindable var app = app
@@ -51,11 +55,11 @@ struct ExperimentView : View {
                     if let selected = app.getSelectedExperiment(createIfNil: true) {
                         HSplitView {
                             SampleList(experiment: selected)
-                                .frame(minWidth: 100, idealWidth: 600)
+                                .frame(minWidth: sampleMinWidth, idealWidth: sampleIdealWidth, maxWidth: .infinity, maxHeight: .infinity)
                             
                             AnalysisList()
-                                .frame(minWidth: 250, idealWidth: 600, maxWidth: .infinity, maxHeight: .infinity)
-                                .fillAvailableSpace()
+                                .frame(minWidth: analysisMinWidth, idealWidth: analysisIdealWidth, maxWidth: .infinity, maxHeight: .infinity)
+//                                .fillAvailableSpace()
                         }
                         .environment(selected)
                         .environment(selected.core)
@@ -74,9 +78,9 @@ struct ExperimentView : View {
                         }
                     }
                 }
-                .frame(minWidth: 250, idealWidth: 800, maxWidth: .infinity)
+                .frame(minWidth: 150, idealWidth: 800, maxWidth: .infinity)
                 .fillAvailableSpace()
-                .navigationSplitViewColumnWidth(min: 600, ideal: 1600, max: .infinity)
+                .navigationSplitViewColumnWidth(min: 72, ideal: 1600, max: .infinity)
 
         }
         detail: {
@@ -96,7 +100,7 @@ struct ExperimentView : View {
                 }
                 .environment(experiment)
                 .environment(experiment.core)
-                .navigationSplitViewColumnWidth(min: 300, ideal: 1200, max: .infinity)
+                .navigationSplitViewColumnWidth(min: 12,  ideal: 1200, max: .infinity)
                 .toolbar {
                     let binding = Binding(
                         get: { experiment.reportMode },

@@ -99,7 +99,9 @@ struct AnalysisList: View {
     }
 
     
-        //-------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------
+// one line in the list:
+
     public struct AnalysisNodeView: View {
         @Environment(CytegeistCoreAPI.self) var core
         @State var query = APIQuery<StatisticBatch>()
@@ -138,7 +140,7 @@ struct AnalysisList: View {
                         .foregroundColor(.secondary)
                 }
                 Spacer()
-                CProgressView(visible: query.isLoading) .scaleEffect(0.6)
+                CProgressView(visible: query.isLoading) .scaleEffect(0.3)
                 
             }
             .frame(maxWidth: .infinity)

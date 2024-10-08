@@ -116,7 +116,8 @@ public class Experiment : Usable
         if let root = focusedSample?.getTree() {
             let samplesInGroup = getSamplesInCurrentGroup()
             for sample in samplesInGroup {
-                sample.addTree(root.cloneDeep())
+                if (sample == focusedSample) { continue }
+                sample.getTree().mergeTree(root.cloneDeep())
             }
         }
     }

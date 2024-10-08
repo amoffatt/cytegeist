@@ -55,7 +55,11 @@ struct SampleList: View {
     @State var columnCustomization = TableColumnCustomization<Sample>()
 
     @Environment(App.self) var app: App
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     
+    @State private var isCompact = false
+
+        
     @SceneStorage("viewMode") private var mode: SampleListMode = .table
     @State var searchText: String = ""
     @State var sortOrder: [KeyPathComparator<Sample>] = [    .init(\.id, order: SortOrder.forward) ]
@@ -86,8 +90,12 @@ struct SampleList: View {
                 .textFieldStyle(.roundedBorder)
                 .padding(.trailing, 24)
             Spacer()
+//            Toggle("<>", isOn: $isCompact)
+//                .onChange(of: isCompact) {
+//                    print("Action")
+//                }
             
-//                    DisplayModePicker(mode: $mode)
+            SampleModePicker(mode: $mode)
         }
     }
     
@@ -99,6 +107,7 @@ struct SampleList: View {
             TableColumnForEach(columns) { column in
                 column.defaultColumn()
                     .customizationID(column.name)
+                    .defaultVisibility(column.hidden ? Visibility.hidden : Visibility.visible)
             }
             TableColumn("Count", value:\.eventCount) { item in
                 Text("\(item.eventCount)")
@@ -115,8 +124,11 @@ struct SampleList: View {
                 // ...  AT -- adding SampleInspectorView to double click of sample row
         } primaryAction: { items in
 
-            for i in items { print(i) }
-//            SampleInspectorView(core, sample: items.first())
+            for i in items {
+                print(i)
+//                SampleInspectorView(experiment, sample: i)
+             }
+            
         }  }
     
     var footer: some View {
@@ -158,7 +170,7 @@ struct SampleList: View {
 //        }
 
         .navigationTitle($experiment.name)
-        //        .navigationSubtitle("\(experiment.creationDate)")
+        .navigationSubtitle("\(experiment.creationDate)")
 //        .importsItemProviders(selection.isEmpty ? [] : Sample.importImageTypes) { providers in
 //            Sample.importImageFromProviders(providers) { url in
 //                for sampleID in selection {

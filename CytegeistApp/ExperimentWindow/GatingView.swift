@@ -33,8 +33,6 @@ struct GateConfigView : View {
     }
 }
 
-
-
 struct GatingView: View {
     
         //    @State private var mode = ReportMode.gating
@@ -52,7 +50,7 @@ struct GatingView: View {
     @State private var confirmDelete:ChartAnnotation? = nil
     
     @FocusState var isFocused
-    
+
         //    var sample: Sample?
     var population: AnalysisNode?
     
@@ -71,7 +69,7 @@ struct GatingView: View {
               set: { if let chartDef = $0 { population?.graphDef = chartDef  }}
         )
     }
-
+    
     func chart(_ meta: FCSMetadata) -> some View {
         
         return ChartView(population: population, config: chartDefBinding) { size in
@@ -93,9 +91,7 @@ struct GatingView: View {
         .focused($isFocused)
         .focusEffectDisabled()
         .focusedValue(\.analysisNode, population)
-        .onAppear {
-            isFocused = true
-        }
+        .onAppear {  isFocused = true   }
         .onDeleteCommand(perform: deleteSelectedAnnotation)
         .confirmationDialog("Enter new gate name", isPresented: isNonNilBinding($confirmedGate)) {
             if let confirmedGate {
@@ -120,118 +116,15 @@ struct GatingView: View {
         population?.getChartDimensions(chartDef).map { $0?.normalizer } ?? .init(nil, nil)
     }
     
-    func makeGate(_ start: CGPoint, _ location: CGPoint, areaPixelSize:CGSize)
-    {
-        let normalizers = axisNormalizers()
-        
-        let start = (start / areaPixelSize).invertedY().unnormalize(normalizers)
-        let end = (location / areaPixelSize).invertedY().unnormalize(normalizers)
-        
-        let rect = CGRect(from:start, to:end)
-        
-        guard let xDim = chartDef?.xAxis?.dim else {
-            print("No x axis for gate")
-            return
-        }
-         
-        switch curTool
-        {
-            case .range:        addRangeGate(xDim, rect.minX, rect.maxX); return
-            case .split:        add2RangeGates(xDim, rect.maxX); return
-            default: break
-        }
-        
-        guard let yDim = chartDef?.yAxis?.dim else {
-            print("No y axis for gate")
-            return
-        }
-        
-        guard let xNormalizer = normalizers.x,
-              let yNormalizer = normalizers.y else {
-            print("2D gate has nil normalizer")
-            return
-        }
-        
-        let dims = Tuple2(xDim, yDim)
-        let normalizersNonNil = Tuple2(xNormalizer, yNormalizer)
-        
-        switch curTool {
-            case .rectangle:    addRectGate(dims, rect)
-            case .ellipse:      addEllipseGate(dims, normalizersNonNil, start, end)
-            case .radius:       addRadialGate(dims,  start, distance(start, location))
-                    //            case .quads:        addQuadGates(gateName, start, location)
-                    //            case .polygon:      addPolygonGate(gateName, start, location)
-                    //            case .spline:       addSplineGate(gateName, start, location)
-           default: break
-        }
-    }
+        //    @MainActor
+        //    func snapshot() -> NSImage?
+        //    {
+        //        let renderer = ImageRenderer(content: self)
+        //        renderer.scale = 0.25
+        //        return renderer.nsImage
+        //    }
     
-    func addGate(_ gate: AnyGate)
-    {
-            //        self.candidateGateName = getCandidateGateName()
-        let node = AnalysisNode(gate:gate)
-        node.gate = gate
-        node.name = "T Cells"                 // TBD - generatePopulationName
-        confirmedGate = node
-    }
-    
-   @MainActor
-    func finalizeCandidateGate() {
-        guard let population,
-              let confirmedGate
-        else {
-            print("No population selected")
-            return
-        }
-        confirmedGate.graphDef = population.graphDef     //TBD -  findUnusedParameters
-        population.addChild(confirmedGate)
-        experiment.selectedAnalysisNodes.nodes = [confirmedGate]
-        self.confirmedGate = nil
-    }
-    
-
-//    @MainActor 
-//    func snapshot() -> NSImage?
-//    {
-//        let renderer = ImageRenderer(content: self)
-//        renderer.scale = 0.25
-//        return renderer.nsImage
-//    }
-    
-    func nextSample() -> ()
-    {
-        if let pop = population {
-            experiment.nextSample(path: population!.path())
-        }
-        //        print ("nextSample")
-}
-
-func prevSample() -> ()
-{
-    if let pop = population {
-        experiment.prevSample(path: population!.path())
-    }
-    //        print ("nextSample")
-}
-
-    func toParent() -> ()
-    {
-        if let pop = population {
-            if let parent = pop.parent {
-                experiment.setAnalysisNodeSelection(parent)
-            } }
-            //        print ("toParent")
-    }
-    
-    func toChild() -> ()
-    {
-        if let pop = population {
-            if let child = pop.children.first {
-                experiment.setAnalysisNodeSelection(child)
-            } }
-        print ("TODO  toChild -- using first child, not selected")
-    }
-    
+        //--------------------------------------------------------------------
     var icons = ["None","triangle.righthalf.fill","pencil","square.and.pencil","ellipsis.circle", "skew", "scribble" ]
     
     var  GatingTools: some View {
@@ -245,12 +138,12 @@ func prevSample() -> ()
                 Button("Rectangle", systemImage: "square.and.pencil",   action: { curTool = GatingTool.rectangle}).background(curTool == .rectangle ? .yellow : .gray)
                 Button("Ellipse", systemImage: "ellipsis.circle",   action: {curTool = GatingTool.ellipse }).background(curTool == .ellipse ? .yellow : .gray)
                 Spacer(minLength: 50)
-                     //                Button("Quads", systemImage: "person.crop.square",   action: { curTool = GatingTool.quads})
+                    //                Button("Quads", systemImage: "person.crop.square",   action: { curTool = GatingTool.quads})
                     //                Button("Polygon", systemImage: "skew",   action: { curTool = GatingTool.polygon})
                     //                Button("Spline", systemImage: "scribble",   action: {curTool = GatingTool.spline })
                 NavArrows
             }
-//            .background(Color.gray.opacity(0.3))
+                //            .background(Color.gray.opacity(0.3))
         }
     }
     enum GatingTool {
@@ -266,15 +159,26 @@ func prevSample() -> ()
     }
     
     var  NavArrows: some View {
-         ZStack{
-            let offset = 15
-            Button("Up",  systemImage: "arrowtriangle.up.square.fill", action: { toParent() }).offset(CGSize(width: 0,height: -offset))
-            Button("Down",  systemImage: "arrowtriangle.down.square.fill", action: { toChild() }).offset(CGSize(width: 0,height: offset))
-            Button("Prev",  systemImage: "arrowtriangle.left.square.fill", action: {  prevSample() }).offset(CGSize(width: -offset,height: 0))
-            Button("Next",  systemImage: "arrowtriangle.right.square.fill", action: { nextSample() }).offset(CGSize(width: offset,height: 0))
+        @State var canGoUp = population?.parent != nil
+        @State var canGoDown = false
+        @State var canGoLeftRight = experiment.samples.count > 1
+        let up = { toParent() }
+        let down = { toChild() }
+        let left = { prevSample() }
+        let right = { nextSample() }
+        
+        return ZStack{
+            let offset : CGFloat = 15.0
+            Button("Up",    systemImage: iconName("up"), action: up).offset(off(0,-offset)).disabled(!canGoUp)
+            Button("Down",  systemImage: iconName("down"), action: down).offset(off(0,offset)).disabled(!canGoDown)
+            Button("Prev",  systemImage: iconName("left"), action: left).offset(off( -offset,0)).disabled(!canGoLeftRight)
+            Button("Next",  systemImage: iconName("right"), action: right).offset(off( offset,0)).disabled(!canGoLeftRight)
         }
+        func off(_ x: CGFloat, _ y: CGFloat) -> CGSize { CGSize(width: x, height: y) }
+        func iconName(_ s: String) -> String { "arrowtriangle." + s + ".square.fill"}
     }
     
+        //--------------------------------------------------------------------
     var body: some View {
         return VStack {
                 //            Text("Gating Prototype")
@@ -286,7 +190,7 @@ func prevSample() -> ()
                 }
                 if let meta = sample.meta {
                     if let population {
-                        AncestryView(population, height:160)
+                        AncestryView(population, height:100)
                         chart(meta)
                     } else  {   Text("No population selected")   }
                 } else      {   Text("Sample metadata not found")  }
@@ -295,16 +199,8 @@ func prevSample() -> ()
         }.toolbar {  GatingTools   }
     }
     
-    func toggleContours() {
-         let contours = population!.graphDef.contours
-            population!.graphDef.contours = contours ? false : true
-    }
-    func toggleSmoothing() {
-        let smoothing = population!.graphDef.smoothing
-        population!.graphDef.smoothing = smoothing == .off ? .low : .off
-    }
-   //------------------------------------------------------
-  
+        //------------------------------------------------------
+    
     func makeDragGesture(areaSize: CGSize) -> some Gesture {
         DragGesture()
             .onChanged { value in offset = value.translation
@@ -329,39 +225,7 @@ func prevSample() -> ()
         TapGesture()
             .onEnded {  focusedItem = nil  }
     }
-    
-    func addRangeGate(_ dim:String, _ min: CGFloat, _ max: CGFloat)
-    {
-        addGate(RangeGateDef(dim, min, max))
-    }
-    
-    func add2RangeGates(_ dim:String, _ x: CGFloat)
-    {
-            //        addGate(Gate(spec: BifurGateDef(x), color: Color.yellow, opacity: 0.2))
-            //        addGate(Gate(spec: RangeGateDef(,0, x), color: Color.yellow, opacity: 0.2))
-            //        addGate(Gate(spec: RangeGateDef(x, 2 * x), color: Color.red, opacity: 0.2))         // TODO MAX value
-    }
-    
-    func addRectGate(_ dims:Tuple2<String>, _ rect: CGRect)
-    {
-        addGate(RectGateDef(dims, rect))
-    }
-    
-    func addRadialGate(_ dims:Tuple2<String>, _ start: CGPoint, _ radius: CGFloat)
-    {
-        addGate(RadialGateDef(dims, start.x, start.y, radius))
-    }
-    
-    func addEllipseGate(_ dims:Tuple2<String>, _ axes:Tuple2<AxisNormalizer>, _ start: CGPoint, _ end: CGPoint)
-    {
-        let gate = EllipsoidGateDef(dims,
-                                    .init(vertex0: start.normalize(axes),
-                                          vertex1: end.normalize(axes),
-                                          widthRatio: 0.6),
-                                    axes: axes)
-        addGate(gate)
-    }
-    
+ 
     
     
     let DEBUG = false
@@ -450,7 +314,7 @@ func prevSample() -> ()
     {
         var outOfBounds:Bool = (location.x < 2 || location.y < 2 ||
                                 location.x > size.width || location.y > size.height)
-//        print(location, size)
+            //        print(location, size)
         return ZStack { dashedLine(
             from:CGPoint(x: location.x, y:0),
             to:CGPoint(x: location.x,  y: size.height))
@@ -486,7 +350,155 @@ func prevSample() -> ()
         .foregroundColor(.black)
         .allowsHitTesting(false)
     }
-
-}
-
+    
+    
 //------------------------------------------------------------------------
+//------------------------------------------------------------------------
+// Controller
+    
+    func nextSample() -> ()
+    {
+        if let population {
+            experiment.nextSample(path: population.path())
+        }
+    }
+    
+    func prevSample() -> ()
+    {
+        if let population {
+            experiment.prevSample(path: population.path())
+        }
+    }
+    
+    func toParent() -> ()
+    {
+        if let pop = population {
+            if let parent = pop.parent {
+                experiment.setAnalysisNodeSelection(parent)
+            }
+        }
+    }
+    
+    func toChild() -> ()
+    {
+        if let pop = population {
+            if let child = pop.children.first {
+                experiment.setAnalysisNodeSelection(child)
+            } }
+        print ("TODO  toChild -- using first child, not selected")
+    }
+    
+  //--------------------------------------------------------------------
+    func toggleContours() {
+        let contours = population!.graphDef.contours
+        population!.graphDef.contours = contours ? false : true
+    }
+    func toggleSmoothing() {
+        let smoothing = population!.graphDef.smoothing
+        population!.graphDef.smoothing = smoothing == .off ? .low : .off
+    }
+    
+   //--------------------------------------------------------------------
+
+    
+    func makeGate(_ start: CGPoint, _ location: CGPoint, areaPixelSize:CGSize)
+    {
+        let normalizers = axisNormalizers()
+        
+        let start = (start / areaPixelSize).invertedY().unnormalize(normalizers)
+        let end = (location / areaPixelSize).invertedY().unnormalize(normalizers)
+        
+        let rect = CGRect(from:start, to:end)
+        
+        guard let xDim = chartDef?.xAxis?.dim else {
+            print("No x axis for gate")
+            return
+        }
+        
+        switch curTool
+        {
+            case .range:        addRangeGate(xDim, rect.minX, rect.maxX); return
+            case .split:        add2RangeGates(xDim, rect.maxX); return
+            default: break
+        }
+        
+        guard let yDim = chartDef?.yAxis?.dim else {
+            print("No y axis for gate")
+            return
+        }
+        
+        guard let xNormalizer = normalizers.x,
+              let yNormalizer = normalizers.y else {
+            print("2D gate has nil normalizer")
+            return
+        }
+        
+        let dims = Tuple2(xDim, yDim)
+        let normalizersNonNil = Tuple2(xNormalizer, yNormalizer)
+        
+        switch curTool {
+            case .rectangle:    addRectGate(dims, rect)
+            case .ellipse:      addEllipseGate(dims, normalizersNonNil, start, end)
+            case .radius:       addRadialGate(dims,  start, distance(start, location))
+                    //            case .quads:        addQuadGates(gateName, start, location)
+                    //            case .polygon:      addPolygonGate(gateName, start, location)
+                    //            case .spline:       addSplineGate(gateName, start, location)
+            default: break
+        }
+    }
+    
+    func addGate(_ gate: AnyGate)
+    {
+            //        self.candidateGateName = getCandidateGateName()
+        let node = AnalysisNode(gate:gate)
+        node.gate = gate
+        node.name = "T Cells"                 // TBD - generatePopulationName
+        confirmedGate = node
+    }
+    
+    @MainActor
+    func finalizeCandidateGate() {
+        guard let population,
+              let confirmedGate
+        else {
+            print("No population selected")
+            return
+        }
+        confirmedGate.graphDef = population.graphDef     //TBD -  findUnusedParameters
+        population.addChild(confirmedGate)
+        experiment.selectedAnalysisNodes.nodes = [confirmedGate]
+        self.confirmedGate = nil
+    }
+    
+    func addRangeGate(_ dim:String, _ min: CGFloat, _ max: CGFloat)
+    {
+        addGate(RangeGateDef(dim, min, max))
+    }
+    
+    func add2RangeGates(_ dim:String, _ x: CGFloat)
+    {
+            //        addGate(Gate(spec: BifurGateDef(x), color: Color.yellow, opacity: 0.2))
+            //        addGate(Gate(spec: RangeGateDef(,0, x), color: Color.yellow, opacity: 0.2))
+            //        addGate(Gate(spec: RangeGateDef(x, 2 * x), color: Color.red, opacity: 0.2))         // TODO MAX value
+    }
+    
+    func addRectGate(_ dims:Tuple2<String>, _ rect: CGRect)
+    {
+        addGate(RectGateDef(dims, rect))
+    }
+    
+    func addRadialGate(_ dims:Tuple2<String>, _ start: CGPoint, _ radius: CGFloat)
+    {
+        addGate(RadialGateDef(dims, start.x, start.y, radius))
+    }
+    
+    func addEllipseGate(_ dims:Tuple2<String>, _ axes:Tuple2<AxisNormalizer>, _ start: CGPoint, _ end: CGPoint)
+    {
+        let gate = EllipsoidGateDef(dims,
+                                    .init(vertex0: start.normalize(axes),
+                                          vertex1: end.normalize(axes),
+                                          widthRatio: 0.6),
+                                    axes: axes)
+        addGate(gate)
+    }
+}
