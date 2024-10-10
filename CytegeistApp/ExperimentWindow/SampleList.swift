@@ -56,6 +56,7 @@ struct SampleList: View {
 
     @Environment(App.self) var app: App
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @Environment(\.modelContext) var modelContext
     
     @State private var isCompact = false
 
@@ -95,7 +96,7 @@ struct SampleList: View {
 //                    print("Action")
 //                }
             
-            SampleModePicker(mode: $mode)
+            SampleListModePicker(mode: $mode)
         }
     }
     
@@ -184,7 +185,7 @@ struct SampleList: View {
                        allowsMultipleSelection: true)
         { result in
             switch result {
-            case .success:  experiment.onFCSPicked(_result: result)       // gain access to the directory
+            case .success:  onFCSPicked(_result: result)       // gain access to the directory
             case .failure(let error):  print(error)         // handle error
             }
         }
@@ -199,6 +200,71 @@ struct SampleList: View {
 
         }
 
+    }
+    
+    
+    func onFCSPicked(_result: Result<[URL], any Error>)
+    {
+        Task {
+            do {
+                    //                try print("FCSPicked urls: ", _result.get().map(editStr($0.description)))
+                for url in try _result.get()
+                {
+                    let gotAccess = url.startAccessingSecurityScopedResource()
+                    if !gotAccess { break }
+                    await readFCSFile(url)
+                    url.stopAccessingSecurityScopedResource()     // release access
+                }
+            }
+            catch let error as NSError {
+                debug("Ooops! Something went wrong: \(error)")
+            }
+        }
+    }
+    
+    public func readFCSFile(_ url: URL) async
+    {
+        if  url.isDirectory
+        {
+            let options: FileManager.DirectoryEnumerationOptions = [.skipsHiddenFiles, .skipsPackageDescendants]
+            let fcsFiles = walkDirectory(at: url, options: options).filter {  $0.pathExtension == "fcs"  }
+            for await item in fcsFiles { await readFCSFile(item) }
+            return
+        }
+        
+        do  {
+            let sample = Sample(ref: SampleRef(url: url))
+            sample.setUp(core: experiment.core)
+            addSample(sample)
+        }
+            //        catch let err as NSError {
+            //            debug("Ooops! Something went wrong: \(err)")
+            //        }
+        debug("FCS Read")
+    }
+    
+    public func addSample(_ sample: Sample)   {
+        modelContext.insert(sample)
+        experiment.samples.append(sample)
+    }
+
+    
+        // Recursive iteration
+    func walkDirectory(at url: URL, options: FileManager.DirectoryEnumerationOptions ) -> AsyncStream<URL> {
+        AsyncStream { continuation in
+            Task {
+                let enumerator = FileManager.default.enumerator(at: url, includingPropertiesForKeys: nil, options: options)
+                while let fileURL = enumerator?.nextObject() as? URL {
+                    print(fileURL)
+                    if fileURL.hasDirectoryPath {
+                        for await item in walkDirectory(at: fileURL, options: options) {
+                            continuation.yield(item)
+                        }
+                    } else {  continuation.yield( fileURL )    }
+                }
+                continuation.finish()
+            }
+        }
     }
 
 //--------------------------------------------------------

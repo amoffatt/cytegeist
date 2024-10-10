@@ -7,6 +7,7 @@
 
 import Foundation
 import CytegeistLibrary
+import SwiftUI
 import SwiftData
 
 //---------------------------------------------------------
@@ -20,9 +21,9 @@ public enum SampleError : Error {
 }
 
 //---------------------------------------------------------
-//@Model
+@Model
 //@MainActor
-@Observable
+//@Observable
 public class Sample : Identifiable, Codable, Hashable
 {
     public static func == (lhs: Sample, rhs: Sample) -> Bool {
@@ -40,7 +41,7 @@ public class Sample : Identifiable, Codable, Hashable
     
 //    @CodableIgnored
 //    @ObservationIgnored
-    var error:Error? = nil
+    @Transient var error:Error? = nil
     
     public func encode(to encoder: any Encoder) throws {
         
@@ -52,7 +53,7 @@ public class Sample : Identifiable, Codable, Hashable
     //    var validity = SampleValidityCheck ()
     
     public var imageURL: URL?
-    public var meta:FCSMetadata?
+    @Transient public var meta:FCSMetadata?
     
 //    var keywords:AttributeStore { meta?.keywordLookup ?? [:] }
     public subscript(_ keyword:String) -> String { (meta?.keywordLookup[keyword]).nonNil }
@@ -72,8 +73,7 @@ public class Sample : Identifiable, Codable, Hashable
     public var cytometer:  String { self["$CYT"] }
     public var setup1:  String { self["CST SETUP STATUS"] }
 
-
-        //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
     //read from JSON
     
     public required init(from decoder: any Decoder) throws {
@@ -100,10 +100,10 @@ public class Sample : Identifiable, Codable, Hashable
     }
         //-------------------------------------------------------------------------
         //  iniitialize based on a new FCS File added
-    public func setUp(core:CytegeistCoreAPI)
+    
+    public func setUp( core: CytegeistCoreAPI)
     {
         debug("in SetUp")
-        
         guard let ref else {
             handleError(.noRef)
             return
@@ -115,18 +115,22 @@ public class Sample : Identifiable, Codable, Hashable
                 btime = meta?.keywordLookup["$BTIM"] ?? ""
                 print("Loaded metadata")
             } catch {
+                print(error)
                 handleError(.queryError(error))
             }
         }
         print("sample validity check")
     }
     
-    private var _tree:AnalysisNode?
+    @Transient private var _tree:AnalysisNode = AnalysisNode()
     public func getTree() -> AnalysisNode {
-        if _tree == nil {
-            _tree = AnalysisNode(sample:self)
-        }
-        return _tree!
+        _tree.sample = self
+        return _tree
+
+//        if _tree == nil {
+//            _tree = AnalysisNode(sample:self)
+//        }
+//        return _tree!
     }
 
 //    public func addTree(_ node: AnalysisNode)           //, _ deep: Bool = true

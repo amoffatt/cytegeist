@@ -6,8 +6,10 @@
 
 import Foundation
 import SwiftUI
+import SwiftData
 import UniformTypeIdentifiers.UTType
 import CytegeistLibrary
+
 
 public extension UTType {  static var population = UTType(exportedAs: "cytegeist.population")   }
 enum AnalysisNodeError : Error {  case noSampleRef      }
@@ -18,7 +20,7 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable, Custo
     
     public var id = UUID()
     public var name: String = ""
-    public var description: String = ""
+    public var description: String { name }
     public var sample: Sample? = nil                      // nil except at the root node
     public var graphDef = ChartDef()              // how this population wants to be shown
     public var statistics =  [String : Double]()         // cache of stats with values
@@ -91,7 +93,7 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable, Custo
     
     public init(_ original:  AnalysisNode ) {
         self.gate = original.gate
-        self.description = original.description
+//        self.description = original.description
         self.sample = original.sample
         self.graphDef = original.graphDef
         self.statistics = [:]

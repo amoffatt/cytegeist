@@ -32,6 +32,10 @@ enum ReportMode: String, CaseIterable, Identifiable, Codable {
 struct ExperimentView : View {
    
     @Environment(App.self) var app: App
+    @Environment(\.undoManager) var undoManager
+ 
+    
+//    var core: CytegeistCoreAPI = app.core
 
 //    var mode:ReportMode { app.reportMode }
     
@@ -113,7 +117,7 @@ struct ExperimentView : View {
                 Text("Select an Experiment")
             }
             
-         }
+    }
         .onAppear {
             app.getSelectedExperiment(autoselect: true, createIfNil: true)
         }

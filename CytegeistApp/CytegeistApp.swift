@@ -14,16 +14,18 @@ import SwiftData
 struct CytegeistApp: SwiftUI.App {
 
     @State private var appModel = App()
-    @Environment(\.undoManager) var undoManager
-    @FocusedValue(\.analysisNode) var focusedAnalysisNode
 
-    var body: some Scene {        
+    @FocusedValue(\.analysisNode) var focusedAnalysisNode
+       
+   
+    var body: some Scene {
         #if os(macOS)
             Window("Navigation", id: "nav")
             {
                 ExperimentView().environment(appModel)
-//                     .modelContainer(for:  Experiment.self, isUndoEnabled: true)
+                    .modelContainer(for:  [Experiment.self, Sample.self], isUndoEnabled: true)
             }
+
             .commands {
                 if let focusedAnalysisNode,
                    let focusedAnalysisNode {
@@ -48,6 +50,7 @@ struct CytegeistApp: SwiftUI.App {
         Window("Experiment Browser", id: "browse")
         {
             ExperimentBrowser().environment(appModel)
+//                .environmentObject(core)
         }
         #endif
 
@@ -65,5 +68,5 @@ struct CytegeistApp: SwiftUI.App {
 //                }
 //        }
 //        .immersionStyle(selection: .constant(.mixed), in: .mixed)
-     }
+    }
 }
