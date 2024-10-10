@@ -27,11 +27,12 @@ public struct AncestryView: View {
                             //                            @Bindable var ancestor = ancestor
                             if let gate = ancestor.gate, let parent = ancestor.parent {
                                 let chartDef = ancestorChartDef(gate)
+                                let chartBinding = readOnlyBinding(chartDef)
                                 
                                 VStack {
                                     Text(parent.name.nonEmpty(" ")) // AM Should the name be for the plotted ancestor, or for the gate
-                                    ChartView(population: parent, config: readOnlyBinding(chartDef), editable: false)
-                                        .padding(3)
+                                    ChartView(population: parent, def: chartBinding, editable: false)
+                                        .padding(4)
                                         .frame(width: height, height: height)
                                         .background(.black.opacity(0.1))
                                         .cornerRadius(12)

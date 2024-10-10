@@ -16,7 +16,7 @@ public extension Entity {
         var path = ""
         var parent:Entity? = self
         while parent != nil {
-            path = "\(parent!.dim)/\(path)"
+            path = "\(parent!.name)/\(path)"
             parent = parent!.parent
         }
         return path
@@ -51,10 +51,14 @@ public struct EntityInstanceArray<Element:EntityWrapper<Entity>> {
         set {
             //        var result = entities
             //        print("Updating entity count for \(entityTemplate.entity.name) \(entities.count) -> \(count)")
-            assert(template != nil, "EntityInstanceArray template must be set before count is set")
+            assert(template != nil || newValue == 0, "EntityInstanceArray template must be set before count is set")
             
             while newValue > entities.count {
                 let entity = template.clone(parent:parent)
+                
+                // Ensure invisible til updated
+                entity.entity.scale = .zero
+                
                 entities.append(entity)
             }
             
@@ -70,18 +74,32 @@ public struct EntityInstanceArray<Element:EntityWrapper<Entity>> {
         self.parent = parent
     }
     
-    public func updateAll<DataType>(withData data:[DataType], update:(DataType, Element) throws -> Void) async throws {
-        let count = min(entities.count, data.count)
-        if entities.count != data.count {
-            print("EntityList.updateAll() count mismatch (entity count \(entities.count) != \(data.count))")
-        }
-//        print("parent child count: \(entityCount)")
-       
-        for i in 0..<count {
-            try update(data[i], entities[i])
+    public func updateAll<DataCollection:Collection>(withData data:DataCollection, update:(DataCollection.Element, Element) async throws -> Void) async rethrows {
+        validateUpdateData(data)
+
+        for (i, dataPoint) in data.enumerated() {
+            try await update(dataPoint, entities[i])
             if i % 5 == 0 {
                 await Task.yield()
             }
+        }
+    }
+    
+    public func updateAllOnMainActor<DataCollection:Collection>(withData data:DataCollection, blockSize:Int = 5, update:(DataCollection.Element, Element) throws -> Void) async rethrows where DataCollection.Index == Int {
+        validateUpdateData(data)
+        for i in stride(from: 0, to: data.count, by: blockSize) {
+            try await MainActor.run {
+                for j in i..<min(i+blockSize, data.count) {
+                    try update(data[j], entities[j])
+                }
+            }
+            await Task.yield()
+        }
+    }
+    
+    private func validateUpdateData(_ data:any Collection) {
+        if entities.count != data.count {
+            print("EntityList.updateAll() count mismatch (entity count \(entities.count) != \(data.count))")
         }
     }
 }
@@ -90,8 +108,8 @@ public struct EntityInstanceArray<Element:EntityWrapper<Entity>> {
 open class EntityWrapper<T:Entity> {
     public let entity:T
     public var dim:String {
-        get { entity.dim }
-        set { entity.dim = newValue }
+        get { entity.name }
+        set { entity.name = newValue }
     }
     public var components:Entity.ComponentSet { entity.components }
     
@@ -106,8 +124,8 @@ open class EntityWrapper<T:Entity> {
 
 
 open class SimpleObjectEntity: EntityWrapper<Entity> {
-    let obj:ModelEntity
-    var material:ShaderGraphMaterial {
+    public let obj:ModelEntity
+    public var material:ShaderGraphMaterial {
         get { obj.model!.materials[0] as! ShaderGraphMaterial }
         set { obj.model!.materials[0] = newValue }
     }
@@ -119,8 +137,8 @@ open class SimpleObjectEntity: EntityWrapper<Entity> {
     
     public func setMaterialProperties(_ values:MaterialProperty...) throws {
         var material = self.material
-        for (dim, value) in values {
-            try material.setParameter(dim: dim, value: value)
+        for (name, value) in values {
+            try material.setParameter(name: name, value: value)
         }
         self.material = material
     }

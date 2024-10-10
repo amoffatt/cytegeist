@@ -63,7 +63,7 @@ public extension Comparable {
 }
     //-----------------------------------------------------------------------
 
-public struct PValue : Codable  //ClosedRange<Double> { (0.0...1.0) }       // 0...1 restricted float
+public struct PValue : Codable, Hashable, Sendable  //ClosedRange<Double> { (0.0...1.0) }       // 0...1 restricted float
 {
     public static let zero = PValue(0)
     public static let one = PValue(1)
@@ -131,7 +131,7 @@ public extension ClosedRange where Bound: Strideable {
     //-----------------------------------------------------------------------
 
 
-public struct Logicle : Equatable, Hashable {
+public struct Logicle : Hashable, Sendable {
     static let maxLoops = 1000
     static let initPLowBound = 1e-3
     static let initPUpperBound = 1e6

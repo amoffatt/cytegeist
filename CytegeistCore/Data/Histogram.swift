@@ -174,6 +174,12 @@ public struct Tuple3<Value> {
     public let x:Value
     public let y:Value
     public let z:Value
+    
+    public init(_ x: Value, _ y: Value, _ z: Value) {
+        self.x = x
+        self.y = y
+        self.z = z
+    }
 }
 
 extension Tuple3:Codable where Value:Codable {}
@@ -561,7 +567,7 @@ extension HistogramData<XY> {
 //                    .offset(y: 100)
             }
             
-            return toImage(colormap: chartDef?.colormap ?? .jet)?.resizable()
+            return toImage(colormap: chartDef?.colormap.colormap ?? .jet)?.resizable()
         }()
         
         if let view {

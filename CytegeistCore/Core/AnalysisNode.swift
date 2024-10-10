@@ -118,7 +118,14 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable, Custo
     }       //AT?
     public func getSampleMeta() -> FCSMetadata? { getSample()?.meta }
     
+
+    
     public func path() -> String { return "/" + (parent?.path() ?? name)  }
+    public func fullDisplayName() -> String {
+        let sampleName = getSample()?.displayName ?? ""
+        let path = path()
+        return "\(sampleName):\(path)"
+    }
     
     public func depth() -> Int {
         return (parent == nil) ? 0 :  1 + parent!.depth()

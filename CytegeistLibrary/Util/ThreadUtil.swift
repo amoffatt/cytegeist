@@ -38,7 +38,7 @@ public actor CSemaphore {
 }
 
 
-public class BackgroundUpdater<UpdateData> {
+public class BackgroundUpdater<UpdateData:Sendable> {
     
     public private(set) var updateError:Error?
     private var latestUpdateData: UpdateData?

@@ -71,6 +71,10 @@ public class Sample : Identifiable, Codable, Hashable
     public var sys:  String { self["$SYS"] }
     public var cytometer:  String { self["$CYT"] }
     public var setup1:  String { self["CST SETUP STATUS"] }
+    
+    public var displayName:String {
+        nonEmpty(tubeName, filename, ref?.filename, "<Unnamed Sample>")
+    }
 
 
         //-------------------------------------------------------------------------

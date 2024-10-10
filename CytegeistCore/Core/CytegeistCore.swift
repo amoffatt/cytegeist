@@ -218,8 +218,8 @@ public class CytegeistCoreAPI {
     private let fcsReader:FCSReader = FCSReader()
     
     
-    private var sampleCache:ComputeCache<SampleRequest, FCSFile> { cache(_loadSample) }
-    private var populationCache:ComputeCache<PopulationRequest, CPopulationData> { cache(_population) }
+    private var sampleCache:ComputeCache<SampleRequest, PopulationData> { cache(_loadSample) }
+    private var populationCache:ComputeCache<PopulationRequest, PopulationData> { cache(_population) }
     private var histogram1DCache:ComputeCache<HistogramRequest<X>, CachedHistogram<X>> { cache(_histogram) }
 //    private var histogram2DCache:ComputeCache<HistogramRequest<XY>, CachedHistogram<XY>>! = nil
     private var _caches:[ObjectIdentifier:Any] = [:]
@@ -253,34 +253,37 @@ public class CytegeistCoreAPI {
     }
     
     public func histogram(_ request:HistogramRequest<X>) -> APIQuery<CachedHistogram<X>> {
-        // AM DEBUGGING
-        let query = APIQuery<CachedHistogram<X>>()
-        query.update {
+        query({
             try await self.cache(self._histogram).get(request)
-        }
-        return query
+        })
     }
     
     public func histogram2D( _ request:HistogramRequest<XY>) -> APIQuery<CachedHistogram<XY>> {
-        // AM DEBUGGING
-        let query = APIQuery<CachedHistogram<XY>>()
-        query.update {
+        query({
             try await self.cache(self._histogram2D).get(request)
-        }
-        return query
+        })
     }
     
-    public func loadSample(_ request:SampleRequest) -> APIQuery<FCSFile> {
-        // AM DEBUGGING
-        let query = APIQuery<FCSFile>()
-        query.update {
+    public func loadSample(_ request:SampleRequest) -> APIQuery<PopulationData> {
+        query({
             try await self.cache(self._loadSample).get(request)
-        }
+        })
+    }
+    
+    public func sampledPopulationData(_ request:SampledPopulationRequest) -> APIQuery<SampledPopulationData> {
+        query({
+            try await self.cache(self._sampledPopulationData).get(request)
+        })
+    }
+    
+    private func query<Data>(_ compute: @escaping ComputeAction<Data>) -> APIQuery<Data> {
+        let query = APIQuery<Data>()
+        query.update(compute)
         return query
     }
 
     
-    nonisolated private func _loadSample(_ request: SampleRequest) throws -> FCSFile {
+    nonisolated private func _loadSample(_ request: SampleRequest) throws -> PopulationData {
         try self.fcsReader.readFCSFile(at: request.sampleRef.url, includeData: request.includeData)
     }
     
@@ -294,7 +297,7 @@ public class CytegeistCoreAPI {
         }
     }
     
-    nonisolated private func _population(_ request: PopulationRequest) async throws -> CPopulationData {
+    nonisolated private func _population(_ request: PopulationRequest) async throws -> PopulationData {
         try Task.checkCancellation()
         
         switch request {
@@ -316,17 +319,45 @@ public class CytegeistCoreAPI {
             fatalError("Union gates not implemented")
         }
     }
+
+    nonisolated private func _sampledPopulationData(_ request:SampledPopulationRequest) async throws -> SampledPopulationData {
+        let population = try await self.populationCache.get(request.population)
+        let totalEvents = population.data?.count ?? 0
+        let threshold = request.probabilityThreshold.p
+        
+        // Filter events based on probability threshold
+        let validIndices = (0..<totalEvents)
+            .map { (index: $0, probability: population.probability(of: $0).p) }
+            .filter { $0.probability > threshold }
+        
+        let totalWeight = validIndices.reduce(0.0) { $0 + $1.probability }
+        
+        let sampleSize = min(request.maxEvents, validIndices.count)
+        
+        // Perform weighted random sampling
+        var sampledIndices: [Int] = []
+        var remainingWeight = totalWeight
+        for _ in 0..<sampleSize {
+            let randomValue = Double.random(in: 0..<remainingWeight)
+            var accumulatedWeight = 0.0
+            for (index, weight) in validIndices {
+                accumulatedWeight += weight
+                if accumulatedWeight > randomValue {
+                    sampledIndices.append(index)
+                    remainingWeight -= weight
+                    break
+                }
+            }
+        }
+        
+        return SampledPopulationData(allEvents: population, eventIndices: sampledIndices)
+    }
     
     nonisolated private func _histogram(_ request:HistogramRequest<X>) async throws -> CachedHistogram<X> {
         let population = try await self.populationCache.get(request.population)
         let parameters = try _getParameters(from: population, parameterNames: request.dims.values)
         
         let x = parameters[0]
-//        // AM DEBUGGING
-//        let select = x.data.enumerated().filter { i, x in
-//            population.probability(of: i).p > 0.5
-//        }.map { $0.element }
-        
         try Task.checkCancellation()
         
         let h = HistogramData<X>(data: .init(x.data),
@@ -577,3 +608,33 @@ public struct HistogramStatRequest {
     public let name: String
 }
 
+public struct SampledPopulationRequest: Hashable {
+    public let population: PopulationRequest
+    public let dims: [String]
+    public let maxEvents:Int
+    public let probabilityThreshold:PValue
+
+    public init(_ population: PopulationRequest, _ dims:[String], _ maxEvents:Int, _ probabilityThreshold:PValue) {
+        self.population = population
+        self.dims = dims
+        self.maxEvents = maxEvents
+        self.probabilityThreshold = probabilityThreshold
+    }
+}
+
+
+public struct SampledPopulationData: Equatable {
+    public static func == (lhs: SampledPopulationData, rhs: SampledPopulationData) -> Bool {
+        lhs.id == rhs.id
+    }
+    
+    public let id = UUID()
+    public let allEvents:PopulationData
+    public let eventIndices:[Int]
+    
+    public var count:Int { eventIndices.count }
+    
+    public func dimensions(_ dimIndices:[Int?]) -> SampledPopulationData {
+        .init(allEvents: allEvents.filter(dimensions:dimIndices), eventIndices: self.eventIndices)
+    }
+}

@@ -69,10 +69,26 @@ extension Colormap {
         Color(red: 1, green: 0, blue: 0),
         Color(red: 0.5, green: 0, blue: 0)
     ])
+    
+    public static func zebra(levels: Int) -> Colormap {
+        precondition(levels > 0, "Levels must be greater than 0")
+        
+        var stops: [Gradient.Stop] = []
+        let step = 1.0 / Double(levels)
+        
+        for i in 0..<levels {
+            let location = Double(i) * step
+            let color = i % 2 == 0 ? Color.white : Color.black
+            stops.append(Gradient.Stop(color: color, location: location))
+        }
+        
+        // Ensure the last stop is black for abrupt return
+        stops.append(Gradient.Stop(color: .black, location: 1.0))
+        
+        let gradient = Gradient(stops: stops)
+        return Colormap(gradient: gradient, resolution: levels)
+    }
 }
-
-
-
 
 extension Gradient {
     func color(at location: Float) -> Color {

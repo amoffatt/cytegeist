@@ -64,9 +64,7 @@ public actor ComputeCache<Request:Hashable, Data> : Identifiable {
                 Task {  // Note: don't use Task.detached, otherwise cancellation will not be passed through
                     do {
                         try Task.checkCancellation()
-                        print ("Request beginning compute: \(request)")
                         let result = try await self._compute(request)
-                        print ("  ==> Request finished compute: \(request)")
                         
                         await self.handleSuccess(request, data:result)
                     } catch {

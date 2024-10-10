@@ -8,7 +8,11 @@
 import SwiftUI
 import CytegeistLibrary
 
-fileprivate enum ChartDataRequest {
+protocol ChartDataQuery {
+    func dispose()
+}
+
+fileprivate enum ChartViewDataQuery : ChartDataQuery {
     
     case histogram1D(APIQuery<CachedHistogram<X>>)
     case histogram2D(APIQuery<CachedHistogram<XY>>)
@@ -22,24 +26,111 @@ fileprivate enum ChartDataRequest {
     }
 }
 
+@Observable
+class ChartStateData<Query:ChartDataQuery> {
+    
+    let population: AnalysisNode?
+    let def: Binding<ChartDef?>
+    
+    var sampleQuery: APIQuery<PopulationData>? = nil
+    var chartQuery: Query? = nil
+    var errorMessage:String = ""
+
+    init(_ population:AnalysisNode?, _ def:Binding<ChartDef?>) {
+        self.population = population
+        self.def = def
+    }
+    
+    @MainActor
+    func getPopulationRequest() -> (PopulationRequest?, error:String?) {
+        guard let population else {
+            return (nil, "No population")
+        }
+        do {
+            return (try population.createRequest(), nil)
+        } catch {
+            return (nil, "Error creating chart: \(error)")
+        }
+    }
+    
+    
+    @MainActor
+    func updateChartQuery(_ core:CytegeistCoreAPI)  {
+        chartQuery?.dispose()
+        //        chartQuery = nil
+        errorMessage = ""
+        let config = self.def.wrappedValue
+        
+        guard let config, let population else {   return   }
+        
+        if let meta = sampleQuery?.data?.meta {
+            let (populationRequest, error) = getPopulationRequest()
+            guard let populationRequest else {
+                errorMessage = error.nonNil
+                return
+            }
+            
+            updateChartQuery(core, config, meta, population, populationRequest)
+        }
+    }
+    
+    @MainActor
+    func updateChartQuery(_ core:CytegeistCoreAPI, _ config:ChartDef, _ meta:FCSMetadata, _ population:AnalysisNode, _ populationRequest:PopulationRequest) {
+        fatalError()
+    }
+
+}
+
+fileprivate class ChartViewStateData : ChartStateData<ChartViewDataQuery> {
+    var chartDims: Tuple2<CDimension?> = .init(nil, nil)
+    
+    override func updateChartQuery(_ core:CytegeistCoreAPI, _ config:ChartDef, _ meta:FCSMetadata, _ population:AnalysisNode, _ populationRequest:PopulationRequest) {
+        if isEmpty(config.yAxis?.dim),
+           let axis = config.xAxis, !axis.dim.isEmpty {
+            
+            if let dim = meta.parameter(named: axis.dim) {
+                chartQuery = .histogram1D(core.histogram(.init(populationRequest, .init(axis.dim), chartDef: config)))
+                chartDims = .init(dim, nil)
+            } else {
+                errorMessage = "X axis dimension not in dataset"
+            }
+        }
+        else if let xAxis = config.xAxis, !xAxis.dim.isEmpty,
+                let yAxis = config.yAxis, !yAxis.dim.isEmpty {
+            let xDim = meta.parameter(named: xAxis.dim)
+            let yDim = meta.parameter(named: yAxis.dim)
+            
+            if xDim == nil {        errorMessage = "X axis dimension not in dataset"  }
+            else if yDim == nil {    errorMessage = "Y axis dimension not in dataset"  }
+            else {
+                print("Creating chart for \(population.name)")
+                chartQuery = .histogram2D(core.histogram2D(
+                    HistogramRequest(populationRequest, .init(xAxis.dim, yAxis.dim), chartDef: config)))
+                chartDims = .init(xDim, yDim)
+            }
+        }
+        else {
+            errorMessage = "Unsupported chart configuration"
+        }
+    }
+}
+
+
+
+
+
 public struct ChartView<Overlay>: View where Overlay:View {
     @Environment(CytegeistCoreAPI.self) var core: CytegeistCoreAPI
     
-    let population: AnalysisNode?
-    let config: Binding<ChartDef?>
+    @State private var state: ChartViewStateData
     let editable:Bool
     let _chartOverlay:(CGSize) -> Overlay
     
-    @State var sampleQuery: APIQuery<FCSFile>? = nil
-    @State fileprivate var chartQuery: ChartDataRequest? = nil
-    @State var chartDims: Tuple2<CDimension?> = .init(nil, nil)
-    @State var errorMessage:String = ""
     @State var chartSize:CGSize = CGSize(1)
     
     
-    public init(population: AnalysisNode?, config:Binding<ChartDef?>, editable:Bool = true, overlay:@escaping (CGSize) -> Overlay = { _ in EmptyView() }){
-        self.population = population
-        self.config = config
+    public init(population: AnalysisNode?, def:Binding<ChartDef?>, editable:Bool = true, overlay:@escaping (CGSize) -> Overlay = { _ in EmptyView() }){
+        self.state = ChartViewStateData(population, def)
         self.editable = editable
         self._chartOverlay = overlay
     }
@@ -66,12 +157,12 @@ public struct ChartView<Overlay>: View where Overlay:View {
 //        }
 //    }
     public var body: some View {
-        let sampleMeta = sampleQuery?.data?.meta
-        let def = config.wrappedValue
+        let sampleMeta = state.sampleQuery?.data?.meta
+        let def = state.def.wrappedValue
         
         VStack {
-            if !errorMessage.isEmpty {
-                Text("\(errorMessage)")
+            if !state.errorMessage.isEmpty {
+                Text("\(state.errorMessage)")
                     .foregroundColor(.red)
             }
             
@@ -80,7 +171,7 @@ public struct ChartView<Overlay>: View where Overlay:View {
                     ZStack {
                         GeometryReader { proxy in
                             VStack {
-                                switch chartQuery {
+                                switch state.chartQuery {
                                     case nil:                          VStack {}
                                             .fillAvailableSpace()
                                     case .histogram1D(let query):      HistogramView(query: query)
@@ -107,29 +198,24 @@ public struct ChartView<Overlay>: View where Overlay:View {
                     let axisWidth = chartSize.height
                     let axisHeight = ChartAxisView.height(of: yAxis)
                     ZStack(alignment: .topLeading) {
-                        ChartAxisView(def: yAxis, normalizer: chartDims.y?.normalizer,
+                        ChartAxisView(def: yAxis, normalizer: state.chartDims.y?.normalizer,
                                       sampleMeta: sampleMeta,
                                       width: axisWidth,
-                                      update: editable ? { config.wrappedValue?.yAxis = $0 } : nil)
+                                      update: editable ? { state.def.wrappedValue?.yAxis = $0 } : nil)
                             .rotationEffect(.degrees(-90), anchor: .center)
                     }
                     .frame(width: axisHeight, height: axisWidth)
                     .frame(minHeight: 10)        // Avoid conflicts with the GeometryReader preventing resizing
                 }
                 
-                ChartAxisView(def: def?.xAxis, normalizer: chartDims.x?.normalizer,
-                                  sampleMeta: sampleMeta,
-                                  width: chartSize.width,
-                                  update: editable ? { config.wrappedValue?.xAxis = $0 } : nil)
+                ChartAxisView(def: def?.xAxis, normalizer: state.chartDims.x?.normalizer,
+                              sampleMeta: sampleMeta,
+                              width: chartSize.width,
+                              update: editable ? { state.def.wrappedValue?.xAxis = $0 } : nil)
                         .frame(minWidth: 10)        // Avoid conflicts with the GeometryReader preventing resizing
             }
             .fillAvailableSpace()
         }
-        .updateSampleQuery(core, population, query: $sampleQuery)
-        
-        .onChange(of: population, initial: true, updateChartQuery)
-        .onChange(of: config.wrappedValue, updateChartQuery)
-        .onChange(of: sampleQuery?.data?.meta, updateChartQuery)
     }
     
 //    @ViewBuilder
@@ -138,7 +224,7 @@ public struct ChartView<Overlay>: View where Overlay:View {
             GeometryReader { proxy in
                 let size = proxy.size
                 ZStack(alignment:.topLeading) {
-                    if let population, let chartDef = config.wrappedValue {
+                    if let population = state.population, let chartDef = state.def.wrappedValue {
                         ForEach(population.visibleChildren(chartDef), id:\.self) { child in
                             // AM DEBUGGING
                             let editing = false //child == focusedItem
@@ -162,81 +248,35 @@ public struct ChartView<Overlay>: View where Overlay:View {
 //        return stateHash.finalize()
 //    }
     
-    @MainActor func getPopulationRequest() -> (PopulationRequest?, error:String?) {
-        guard let population else {
-            return (nil, "No population")
-        }
-        do {
-            return (try population.createRequest(), nil)
-        } catch {
-            return (nil, "Error creating chart: \(error)")
-        }
-    }
-    
-            
-    @MainActor func updateChartQuery()  {
-        chartQuery?.dispose()
-//        chartQuery = nil
-        errorMessage = ""
-        let config = self.config.wrappedValue
-        
-        guard let config, let population else {   return   }
-        
-          if let meta = sampleQuery?.data?.meta {
-            let (populationRequest, error) = getPopulationRequest()
-            guard let populationRequest else {
-                errorMessage = error.nonNil
-                return
-            }
-            
-            if isEmpty(config.yAxis?.dim),
-               let axis = config.xAxis, !axis.dim.isEmpty {
-                
-                if let dim = meta.parameter(named: axis.dim) {
-                    chartQuery = .histogram1D(core.histogram(.init(populationRequest, .init(axis.dim), chartDef: config)))
-                    chartDims = .init(dim, nil)
-                } else {
-                    errorMessage = "X axis dimension not in dataset"
-                }
-            }
-            else if let xAxis = config.xAxis, !xAxis.dim.isEmpty,
-                    let yAxis = config.yAxis, !yAxis.dim.isEmpty {
-                let xDim = meta.parameter(named: xAxis.dim)
-                let yDim = meta.parameter(named: yAxis.dim)
-                
-                if xDim == nil {        errorMessage = "X axis dimension not in dataset"  }
-               else if yDim == nil {    errorMessage = "Y axis dimension not in dataset"  }
-               else {
-                    print("Creating chart for \(population.name)")
-                    chartQuery = .histogram2D(core.histogram2D(
-                        HistogramRequest(populationRequest, .init(xAxis.dim, yAxis.dim), chartDef: config)))
-                    chartDims = .init(xDim, yDim)
-                }
-            }
-            else {
-                errorMessage = "Unsupported chart configuration"
-            }
-            
-        }
-    }
 }
 
 extension View {
 //    var population: PopulationRequest { get }
 //    var chartDef: Binding<ChartDef> { get }
-    @MainActor
-    func updateSampleQuery(_ core:CytegeistCoreAPI, _ population:AnalysisNode?, query:Binding<APIQuery<FCSFile>?>) -> some View {
-        let sampleRef = population?.getSample()?.ref
-        return self.onChange(of: sampleRef, initial: true) {
-            query.wrappedValue?.dispose()
-            query.wrappedValue = nil
-            if let sampleRef {
-                let r = SampleRequest(sampleRef, includeData: false)
-                query.wrappedValue = core.loadSample(r)
-            }
-        }
-    }
+//    @MainActor
+//    func updateSampleQuery(_ core:CytegeistCoreAPI, _ population:AnalysisNode?, query:Binding<APIQuery<FCSFile>?>) -> some View {
+//    }
     
+    
+    @MainActor
+    func updateChartQuery<T>(_ core:CytegeistCoreAPI, state:ChartStateData<T>) -> some View {
+        let sampleRef = state.population?.getSample()?.ref
+        
+        return self
+            .onChange(of: state.population, initial: true, { state.updateChartQuery(core) })
+            .onChange(of: state.def.wrappedValue, { state.updateChartQuery(core) })
+            .onChange(of: state.sampleQuery?.data?.meta, { state.updateChartQuery(core) })
+            
+            .onChange(of: sampleRef, initial: true) {
+                state.sampleQuery?.dispose()
+                state.sampleQuery = nil
+                if let sampleRef {
+                    let r = SampleRequest(sampleRef, includeData: false)
+                    state.sampleQuery = core.loadSample(r)
+                }
+            }
+    }
+
     
 }
 

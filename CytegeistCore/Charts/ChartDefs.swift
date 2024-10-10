@@ -8,6 +8,18 @@
 import Foundation
 import CytegeistLibrary
 
+public enum ChartColormap: Hashable, Codable {
+    case jet
+    case zebra
+    
+    var colormap:Colormap {
+        switch self {
+            case .jet: return .jet
+            case .zebra: return .zebra(levels: 10)
+        }
+    }
+}
+
 public struct ChartDef : Hashable, Codable, Equatable//, Transferable
 {
 //    static var transferRepresentation: some TransferRepresentation {
@@ -28,12 +40,10 @@ public struct ChartDef : Hashable, Codable, Equatable//, Transferable
     public var contours:Bool = false
     public var showOutliers:Bool = false
     
-    public var colormap:Colormap? { .jet }
+    public var colormap:ChartColormap = .jet
 
     public init()
     {
-        
-        
     }
  }
 //------------------------------------------------

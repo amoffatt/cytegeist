@@ -8,27 +8,27 @@
 import Foundation
 import CytegeistLibrary
 
-public enum AxisScaleType: Hashable {
+public enum AxisScaleType: Hashable, Sendable {
     case linear
     case log(base:ValueType)
     case biex(_ transform: Logicle)
 }
 
-public struct AxisNormalizer: Hashable, Codable {
+public struct AxisNormalizer: Hashable, Codable, Sendable {
     public static let none = AxisNormalizer(0, 1, .linear, { $0 }, { $0 }, { _ in [] })
     
     public static func linear(min:Double, max:Double) -> AxisNormalizer {
         let span = max - min
         
-        func normalize(_ value: Double) -> Double {
+        @Sendable func normalize(_ value: Double) -> Double {
             clamp01((value - min) / span)
         }
         
-        func unnormalize(_ value: Double) -> Double {
+        @Sendable func unnormalize(_ value: Double) -> Double {
             clamp01(value) * span + min
         }
 
-        func calculateTickMarks(desiredTicks: Int) -> [MajorAxisTick] {
+        @Sendable func calculateTickMarks(desiredTicks: Int) -> [MajorAxisTick] {
             let range = max - min
             let roughTickInterval = range / Double(desiredTicks - 1)
             let (tickInterval, minorTickCount) = niceNumber(roughTickInterval, round: false)
@@ -126,14 +126,14 @@ public struct AxisNormalizer: Hashable, Codable {
     public let type:AxisScaleType
     public var span: Double { max - min }
     
-    public let normalize:(_ x:Double) -> Double
-    public let unnormalize:(_ x:Double) -> Double
-    public let tickMarks:(_ desiredCount: Int) -> [MajorAxisTick]
+    public let normalize:@Sendable (_ x:Double) -> Double
+    public let unnormalize:@Sendable (_ x:Double) -> Double
+    public let tickMarks:@Sendable (_ desiredCount: Int) -> [MajorAxisTick]
     
     fileprivate init(_ min: Double, _ max: Double, _ type: AxisScaleType,
-                     _ normalize: @escaping (Double) -> Double,
-                     _ unnormalize: @escaping (Double) -> Double,
-                     _ ticks: @escaping (_ count: Int) -> [MajorAxisTick]
+                     _ normalize: @escaping @Sendable (Double) -> Double,
+                     _ unnormalize: @escaping @Sendable (Double) -> Double,
+                     _ ticks: @escaping @Sendable (_ count: Int) -> [MajorAxisTick]
     ) {
         self.min = min
         self.max = max

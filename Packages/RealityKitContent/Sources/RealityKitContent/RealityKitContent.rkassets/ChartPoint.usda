@@ -10,26 +10,69 @@
 
 def Xform "Root"
 {
-    def Cube "Cube" (
+    reorder nameChildren = ["Sphere", "Cube"]
+    def Sphere "Sphere" (
         active = true
         prepend apiSchemas = ["MaterialBindingAPI"]
     )
     {
-        rel material:binding = </Root/Cube/DefaultMaterial>
-        double size = 0.2
+        rel material:binding = </Material> (
+            bindMaterialAs = "weakerThanDescendants"
+        )
+        double radius = 0.1
+    }
+}
 
-        def Material "DefaultMaterial"
-        {
-            prepend token outputs:surface.connect = </Root/Cube/DefaultMaterial/DefaultSurfaceShader.outputs:surface>
-
-            def Shader "DefaultSurfaceShader"
-            {
-                uniform token info:id = "UsdPreviewSurface"
-                color3f inputs:diffuseColor = (1, 1, 1)
-                float inputs:roughness = 0.75
-                token outputs:surface
+def Material "Material"
+{
+    color3f inputs:Color = (0.12597649, 0.2590676, 0.46156168) (
+        colorSpace = "srgb_displayp3"
+        customData = {
+            dictionary realitykit = {
+                float2 positionInSubgraph = (-394.63672, 24.433594)
+                float2 sizeInSubgraph = (133, 53)
+                int stackingOrderInSubgraph = 5
             }
         }
+    )
+    prepend token outputs:mtlx:surface.connect = </Material/PreviewSurface.outputs:out>
+    token outputs:realitykit:vertex
+    float2 ui:nodegraph:realitykit:subgraphOutputs:pos = (300, 99.5)
+    float2 ui:nodegraph:realitykit:subgraphOutputs:size = (182, 99)
+
+    def Shader "PreviewSurface"
+    {
+        uniform token info:id = "ND_UsdPreviewSurface_surfaceshader"
+        float inputs:clearcoat = 0.9
+        float inputs:clearcoatRoughness
+        color3f inputs:diffuseColor.connect = </Material.inputs:Color>
+        color3f inputs:emissiveColor.connect = </Material/Multiply.outputs:out>
+        float inputs:ior
+        float inputs:metallic = 0
+        float3 inputs:normal
+        float inputs:occlusion
+        float inputs:opacity
+        float inputs:opacityThreshold
+        float inputs:roughness = 0.1
+        token outputs:out
+        float2 ui:nodegraph:node:pos = (74.5, 99.5)
+        float2 ui:nodegraph:node:size = (160, 307)
+        int ui:nodegraph:node:stackingOrder = 3
+        string[] ui:nodegraph:realitykit:node:attributesShowingChildren = ["inputs:diffuseColor", "Advanced"]
+    }
+
+    def Shader "Multiply"
+    {
+        uniform token info:id = "ND_multiply_color3"
+        color3f inputs:in1.connect = </Material.inputs:Color>
+        color3f inputs:in2 = (0.32251146, 0.32576916, 0.32576916) (
+            colorSpace = "srgb_displayp3"
+        )
+        color3f outputs:out
+        float2 ui:nodegraph:node:pos = (-243.20312, 120.08984)
+        float2 ui:nodegraph:node:size = (61, 36)
+        int ui:nodegraph:node:stackingOrder = 9
+        string[] ui:nodegraph:realitykit:node:attributesShowingChildren = ["inputs:in2"]
     }
 }
 

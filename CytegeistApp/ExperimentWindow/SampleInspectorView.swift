@@ -14,7 +14,7 @@ import CytegeistLibrary
 public struct SampleInspectorView: View {
     let experiment: Experiment
     let sample: SampleRef
-    @State var query: APIQuery<FCSFile>?
+    @State var query: APIQuery<PopulationData>?
 //    @State var data: FCSFile?
     
     

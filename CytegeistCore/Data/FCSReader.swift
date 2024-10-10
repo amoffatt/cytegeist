@@ -9,9 +9,9 @@ import Foundation
 import CoreGraphics
 import CytegeistLibrary
 
-public typealias FCSParameterValueReader = (DataBufferReader) throws -> ValueType
+public typealias FCSParameterValueReader = @Sendable (DataBufferReader) throws -> ValueType
 
-public struct CDimension : Identifiable, Hashable, Codable {
+public struct CDimension : Identifiable, Hashable, Codable, Sendable {
     public var id: String { name }
     
     
@@ -80,12 +80,12 @@ public struct CDimension : Identifiable, Hashable, Codable {
 //    }
 //}
 
-public enum FCSByteOrder: String, Hashable, Codable {
+public enum FCSByteOrder: String, Hashable, Codable, Sendable {
     case bigEndian = "4,3,2,1"
     case littleEndian = "1,2,3,4"
 }
 
-public enum FCSDataType: String, Hashable, Codable {
+public enum FCSDataType: String, Hashable, Codable, Sendable {
     case integer = "I"
     case float = "F"
     case double = "D"
@@ -94,7 +94,7 @@ public enum FCSDataType: String, Hashable, Codable {
 }
 
 
-public struct StringField : Identifiable, Hashable, Codable {
+public struct StringField : Identifiable, Hashable, Codable, Sendable {
     public var id:String { name }
     
     public let name:String
@@ -106,7 +106,7 @@ public struct StringField : Identifiable, Hashable, Codable {
 }
 
 
-public struct FCSMetadata: Hashable, Codable {
+public struct FCSMetadata: Hashable, Codable, Sendable {
     
     public private(set) var keywords: [StringField] = []
     public private(set) var keywordLookup: [String:String] = [:]
@@ -181,43 +181,47 @@ public struct EventData: Identifiable {
 }
 
 
-public struct EventDataTable: BackedRandomAccessCollection {
+public struct EventDataTable: BackedRandomAccessCollection, Sendable {
     
     public typealias Element = EventData
     public typealias SubSequence = EventDataTable
     
-    public var _indexBacking:[ValueType] { data.first ?? [] }
+    public let _indexBacking:[ValueType]
 
     // Subscript to access elements
     public subscript(position: Int) -> EventData {
         precondition(position >= startIndex && position < endIndex, "Index out of bounds")
-        let values = data.map { $0[position] }
+        let values = data.map { $0?[position] ?? .nan }
         return EventData(id: position, values: values)
     }
     
     public subscript(bounds: Range<Int>) -> EventDataTable {
-        let slicedData = data.map { Array($0[bounds]) }
-        return try! EventDataTable(data: slicedData)
+        let slicedData = data.map { $0 == nil ? nil : Array($0![bounds]) }
+        return try! EventDataTable(data: slicedData, sourceDataDimIndices: sourceDataColumnIndices)
     }
     
     
-    public let data:[[ValueType]]
+    public let data:[[ValueType]?]
+    public let sourceDataColumnIndices:[Int?]
 //    public let parameterNames:[String]
     
-    init(data:[[Double]]) throws {
+    init(data:[[Double]?], sourceDataDimIndices:[Int?]) throws {
         self.data = data
+        self.sourceDataColumnIndices = sourceDataDimIndices
         
-        if !data.isEmpty {
-            let length = data[0].count
-            
-            if !data.allSatisfy({ $0.count == length }) {
-                throw EventDataError.inconsistentDimLengths
-            }
+        let nonNil = data.compactMap { $0 }
+        self._indexBacking = nonNil.first ?? []
+        
+        if !nonNil.allSatisfy({ $0.count == count }) {
+            throw EventDataError.inconsistentDimLengths
         }
     }
     
-    public func columns(_ indices:[Int]) throws -> EventDataTable {
-        return try .init(data: indices.map { data[$0] })
+    public func dimensions(_ indices:[Int?]) -> EventDataTable {
+        return try! .init(      // AM try should be safe because the data dimensions we're providing have already been validated when self was created
+            data: indices.map { data.get(index: $0) ?? nil },
+            sourceDataDimIndices: indices.map { sourceDataColumnIndices.get(index:$0) ?? nil }
+        )
     }
     
 }
@@ -227,7 +231,7 @@ public struct FCSParameterData {
     public let data:[ValueType]
 }
 
-public protocol CPopulationData {
+public protocol CPopulationData: Sendable {
     var meta:FCSMetadata { get }
     var data:EventDataTable? { get }
     var count:Double { get }
@@ -237,13 +241,23 @@ public protocol CPopulationData {
 
 public extension CPopulationData {
     
+    var dimensions:[CDimension?] {
+        data?.sourceDataColumnIndices.map { meta.parameters?.get(index: $0) } ?? []
+    }
+    
+    var axisNormalizers: [AxisNormalizer?] {
+        dimensions.map { $0?.normalizer }
+    }
+
     func parameter(named:String) -> FCSParameterData? {
         guard let data,
               let parameters = meta.parameters,
-              let index = meta.parameterLookup[named] else {
+              let index = meta.parameterLookup[named],
+              let dimData = data.data[index]
+        else {
             return nil
         }
-        return .init(meta:parameters[index], data:data.data[index])
+        return .init(meta:parameters[index], data:dimData)
     }
     
     func data(parameterNames:[String]) throws -> EventDataTable? {
@@ -254,12 +268,12 @@ public extension CPopulationData {
         if !indices.allSatisfy({ $0 != nil }) {
             return nil
         }
-        return try data.columns(indices.map { $0! })
+        return data.dimensions(indices.map { $0! })
     }
 
     
     
-    func multiply(filterDims: [String], filter:(EventData) -> PValue) throws -> CPopulationData {
+    func multiply(filterDims: [String], filter:(EventData) -> PValue) throws -> PopulationData {
         guard let filterData = try self.data(parameterNames: filterDims) else {
             throw APIError.noDataAvailable
         }
@@ -273,36 +287,46 @@ public extension CPopulationData {
     }
 }
 
-public struct FCSFile : CPopulationData {
-    
-    public let meta:FCSMetadata
-    public let data:EventDataTable?
-    
-    public var count: Double { Double(data?.count ?? 0)}
-
-    public func probability(of index: Int) -> PValue {
-        .init(1.0)
-    }
-    
-    public var probabilities: [PValue]? { nil }
-}
+//public struct FCSFile : CPopulationData {
+//    
+//    public let meta:FCSMetadata
+//    public let data:EventDataTable?
+//    
+//    public var count: Double { Double(data?.count ?? 0)}
+//
+//    public func probability(of index: Int) -> PValue {
+//        .init(1.0)
+//    }
+//    
+//    public var probabilities: [PValue]? { nil }
+//}
 
 public struct PopulationData : CPopulationData {
     public let meta:FCSMetadata
     public let data:EventDataTable?
     public let count:Double
-    private let _probabilities: [PValue]
-    public var probabilities: [PValue]? { _probabilities }
+    public let probabilities: [PValue]?
     
-    init(meta: FCSMetadata, data: EventDataTable?, probabilities: [PValue]) {
+    init(meta: FCSMetadata, data: EventDataTable?, probabilities: [PValue]? = nil) {
         self.meta = meta
         self.data = data
-        self._probabilities = probabilities
-        self.count = probabilities.map { $0.p }.sum()
+        self.probabilities = probabilities
+        self.count = (probabilities?.map { $0.p }.sum()) ?? Double(data?.count ?? 0)
     }
     
     public func probability(of index: Int) -> PValue {
-        _probabilities[index]
+        probabilities?[index] ?? .one
+    }
+    
+    public func filter(dimensions:[Int?]) -> PopulationData {
+        .init(meta:meta,
+              data: data?.dimensions(dimensions),
+        probabilities: probabilities)
+    }
+    
+    public func filter(dimensions:[String?]) -> PopulationData {
+        let indices = dimensions.map { $0 == nil ? nil : meta.parameterLookup[$0!] }
+        return filter(dimensions: indices)
     }
 }
 
@@ -330,7 +354,7 @@ public class FCSReader {
 //        ExceptionCatcher.catchException {}
     }
     
-    public func readFCSFile(at url: URL, includeData:Bool = true) throws -> FCSFile {
+    public func readFCSFile(at url: URL, includeData:Bool = true) throws -> PopulationData {
         let data = try Data(contentsOf: url)
         var fcs = FCSMetadata()
         
@@ -415,7 +439,7 @@ public class FCSReader {
         }
         
         
-        return FCSFile(
+        return PopulationData(
             meta: fcs,
             data: includeData ? try readEventData(dataSegment: dataSegment, meta: fcs) : nil)
     }
@@ -443,7 +467,7 @@ public class FCSReader {
             }
         }
         
-        return try EventDataTable(data: parameterDataArray)
+        return try EventDataTable(data: parameterDataArray, sourceDataDimIndices: Array(0..<parameterDataArray.count))
     }
     
     private func readParameterInfo(_ metadata:[String: String], n:Int, dataType:FCSDataType) throws -> CDimension {

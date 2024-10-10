@@ -35,6 +35,16 @@ public func nonNil(_ value:String?) -> String {
     value ?? ""
 }
 
+/// Return first non-empty string in the sequence
+public func nonEmpty(_ values:String?...) -> String {
+    for value in values {
+        if let value, !value.isEmpty {
+            return value
+        }
+    }
+    return ""
+}
+
 
 public extension String {
     //    func substring(offset: Int, length: Int) -> String {

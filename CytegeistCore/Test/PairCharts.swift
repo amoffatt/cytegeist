@@ -79,7 +79,7 @@ public struct PairChartsView: View {
 public struct PairChartsPreview: View {
     let sampleRef = SampleRef(url:DemoData.facsDivaSample0!)
     @State var core = CytegeistCoreAPI()
-    @State var query:APIQuery<FCSFile>? = nil
+    @State var query:APIQuery<PopulationData>? = nil
     
     public init() {}
     
