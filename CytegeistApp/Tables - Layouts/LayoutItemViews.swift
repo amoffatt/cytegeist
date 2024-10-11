@@ -109,7 +109,7 @@ struct CChartView : View {
 //        let sampleRef = SampleRef(url: DemoData.facsDivaSample0!)
         
         VStack {
-            ChartView(population: item.node, config: readOnlyBinding(item.node?.graphDef), editable: false)
+            ChartView(population: item.node, def: readOnlyBinding(item.node?.graphDef), editable: false)
                 .padding(4)
                 .background(.black.opacity(0.1))
                 .cornerRadius(8)

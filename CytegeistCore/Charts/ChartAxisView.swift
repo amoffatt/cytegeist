@@ -99,12 +99,14 @@ public struct ChartAxisView: View {
 //                .scaledToFit()
 //                .minimumScaleFactor(0.3)
                 .font(.body)
+#if os(visionOS)
                             .if(immersive) {
                     $0
                         .padding(Self.immersiveLabelPadding)
                         .padding(.horizontal, 8)
                         .glassBackgroundEffect()
                 }
+#endif
 
 
 //                .frame(width: maxLabelWidth, height: Self.tickLabelsHeight, alignment: alignment)
@@ -175,12 +177,14 @@ public struct ChartAxisView: View {
                     .fontWeight(.semibold)
             }
         }
+#if os(visionOS)
         .if(immersive) {
             $0
                 .padding(Self.immersiveLabelPadding)
                 .padding(.horizontal, 20)   // Extra horizontal padding
                 .glassBackgroundEffect()
         }
+#endif
         .padding(.top, 20)
     }
 }

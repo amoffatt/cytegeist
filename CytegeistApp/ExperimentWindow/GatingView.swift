@@ -72,7 +72,7 @@ struct GatingView: View {
     
     func chart(_ meta: FCSMetadata) -> some View {
         
-        return ChartView(population: population, config: chartDefBinding) { size in
+        return ChartView(population: population, def: chartDefBinding) { size in
             ZStack(alignment: .topLeading) {
                 gateRadius(siz: size)
                 gateRange(siz: size)

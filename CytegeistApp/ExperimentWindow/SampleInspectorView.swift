@@ -81,13 +81,13 @@ public struct SampleInspectorView: View {
                     TableColumn("#") { e in
                         Text("\(e.id)")
                     }
-                    if #available(macOS 14.4, *) {
+//                    if #available(macOS 14.4, *) {
                         TableColumnForEach(0..<parameters.count, id: \.self) { index in
                             TableColumn("\(parameters[index].displayName)") { e in
                                 Text(String(format: "%.2f", e.values[index]))
                             }
                         }
-                    }
+//                    }
                 }
             }
             
