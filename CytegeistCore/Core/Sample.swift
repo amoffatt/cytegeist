@@ -37,7 +37,7 @@ public class Sample : Identifiable, Codable, Hashable
     public var id = UUID()
     var sampleId = ""
     
-    var ref:SampleRef? = nil
+    public var ref:SampleRef? = nil
     
 //    @CodableIgnored
 //    @ObservationIgnored

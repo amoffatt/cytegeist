@@ -58,7 +58,7 @@ public class Experiment : Usable
 //    }
         //--------------------------------------------------------------------------------
     required public init(from decoder: any Decoder) throws {
-        fatalError("Implement decoding")        // TODO AM Write class macro and property wrapper to handle properties with default values
+//        fatalError("Implement decoding")        // TODO AM Write class macro and property wrapper to handle properties with default values
     }
     
     init(name: String = "Untitled", version: String = "" )

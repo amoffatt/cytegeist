@@ -46,6 +46,14 @@ struct CytegeistApp: SwiftUI.App {
             Window("Pair Charts", id: "pair-charts") {
                 PairChartsPreview()
             }
+        
+        WindowGroup(id: "sample-inspector", for: ExperimentSamplePair.self) { $sample in
+            if let sample = $sample.wrappedValue, 
+                let ref = sample.sample.ref {
+                SampleInspectorView(sample.experiment, sample:ref)
+            }
+        }
+        
             
         Window("Experiment Browser", id: "browse")
         {

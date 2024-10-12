@@ -109,11 +109,11 @@ struct CChartView : View {
 //        let sampleRef = SampleRef(url: DemoData.facsDivaSample0!)
         
         VStack {
-            ChartView(population: item.node, config: readOnlyBinding(item.node?.graphDef), editable: false)
+            ChartView(population: item.node, config: readOnlyBinding(item.node?.graphDef), editable: true)
                 .padding(4)
                 .background(.black.opacity(0.1))
                 .cornerRadius(8)
-        }  .frame(width: 100, height: 100)
+        }  .frame(width: 300, height: 300)
             .padding()
             .onTapGesture {   parent.layoutModel.selectItem( item)    }
             .border(.red, width: item.selected ? 3.0 : 0.0 )

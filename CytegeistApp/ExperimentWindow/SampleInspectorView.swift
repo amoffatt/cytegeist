@@ -10,6 +10,11 @@ import SwiftUI
 import CytegeistCore
 import CytegeistLibrary
 
+public struct ExperimentSamplePair: Codable, Hashable {
+    public var sample:Sample
+    public var experiment:Experiment
+}
+
 @MainActor
 public struct SampleInspectorView: View {
     let experiment: Experiment
@@ -128,7 +133,7 @@ public struct ParameterGalleryView: View {
         ScrollView {
             LazyVGrid(columns: columns, spacing: 20) {
                 ForEach(parameters, id: \.name) { parameter in
-//                    ParameterInspectorView(core:core, sample:sample, parameter: parameter)
+                    ParameterInspectorView(core:core, sample:sample, parameter: parameter)
                 }
             }
             .padding()

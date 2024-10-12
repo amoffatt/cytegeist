@@ -57,6 +57,7 @@ struct SampleList: View {
     @Environment(App.self) var app: App
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @Environment(\.modelContext) var modelContext
+    @Environment(\.openWindow) var openWindow
     
     @State private var isCompact = false
 
@@ -128,6 +129,9 @@ struct SampleList: View {
             for i in items {
                 print(i)
 //                SampleInspectorView(experiment, sample: i)
+                if let sample = experiment[i] {
+                    openWindow(id: "sample-inspector", value:ExperimentSamplePair(sample: sample, experiment: experiment))
+                }
              }
             
         }  }
