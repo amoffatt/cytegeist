@@ -8,6 +8,7 @@
 import SwiftUI
 import UniformTypeIdentifiers
 import CytegeistCore
+import CytegeistLibrary
 
 
     // switch between table and gallery views in the sampleList
@@ -32,6 +33,7 @@ enum ReportMode: String, CaseIterable, Identifiable, Codable {
 struct ExperimentView : View {
    
     @Environment(App.self) var app: App
+    @Environment(\.undoManager) var undoManager
 
 //    var mode:ReportMode { app.reportMode }
     
@@ -44,6 +46,8 @@ struct ExperimentView : View {
 
     var body: some View {
         @Bindable var app = app
+        
+        Print("App UndoManager: \(undoManager)")
         
         // AM Note: If we need to support Pre-macOS13, see https://developer.apple.com/documentation/swiftui/migrating-to-new-navigation-types
         NavigationSplitView {

@@ -7,7 +7,7 @@
 
 import Foundation
 import CytegeistLibrary
-import SwiftData
+import CObservation
 
 //---------------------------------------------------------
 // CDimension is the analog of a samples parameter
@@ -22,18 +22,13 @@ public enum SampleError : Error {
 //---------------------------------------------------------
 //@Model
 //@MainActor
-@Observable
-public class Sample : Identifiable, Codable, Hashable
+@CObservable
+public class Sample : CObject, Codable
 {
     public static func == (lhs: Sample, rhs: Sample) -> Bool {
         lhs.id == rhs.id
     }
     
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
-    }
-    
-    public var id = UUID()
     var sampleId = ""
     
     var ref:SampleRef? = nil
@@ -84,6 +79,7 @@ public class Sample : Identifiable, Codable, Hashable
     public init(
         ref: SampleRef
     ) {
+        super.init()
         self.ref = ref
         print("Sample \(ref)")
     }

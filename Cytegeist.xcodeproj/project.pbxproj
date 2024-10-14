@@ -3,13 +3,13 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 60;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		B63D16362C55E50E00E81C2F /* CytegeistCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B63D162E2C55E50D00E81C2F /* CytegeistCore.framework */; };
-		B63D16412C55E50E00E81C2F /* CytegeistCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B63D162E2C55E50D00E81C2F /* CytegeistCore.framework */; };
-		B63D16422C55E50E00E81C2F /* CytegeistCore.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = B63D162E2C55E50D00E81C2F /* CytegeistCore.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		B63D16412C55E50E00E81C2F /* CytegeistCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B63D162E2C55E50D00E81C2F /* CytegeistCore.framework */; platformFilters = (macos, xros, ); };
+		B63D16422C55E50E00E81C2F /* CytegeistCore.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = B63D162E2C55E50D00E81C2F /* CytegeistCore.framework */; platformFilters = (macos, xros, ); settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		B63D164C2C55E54500E81C2F /* DataBufferReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = B610A5792C542BB50081C517 /* DataBufferReader.swift */; };
 		B63D164D2C55E54500E81C2F /* FCSReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = B610A56E2C54269A0081C517 /* FCSReader.swift */; };
 		B63D16562C55EC8100E81C2F /* CytegeistCoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B63D16552C55EC8100E81C2F /* CytegeistCoreTests.swift */; };
@@ -28,6 +28,7 @@
 		B65D82AF2C44BE7100E4F0A2 /* ImmersiveView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B65D82AE2C44BE7100E4F0A2 /* ImmersiveView.swift */; };
 		B65D82B12C44BE7200E4F0A2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B65D82B02C44BE7200E4F0A2 /* Assets.xcassets */; };
 		B65D82B42C44BE7200E4F0A2 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B65D82B32C44BE7200E4F0A2 /* Preview Assets.xcassets */; };
+		B661331A2CBCC69F00AAA15B /* CObservation in Frameworks */ = {isa = PBXBuildFile; productRef = B66133192CBCC69F00AAA15B /* CObservation */; };
 		B68529692C74DBB500EF9EF4 /* ComputeCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = B68529682C74DBB500EF9EF4 /* ComputeCache.swift */; };
 		B6902A1B2CA4BDC4004DBE33 /* AncestryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6902A1A2CA4BDC4004DBE33 /* AncestryView.swift */; };
 		B691FCE42CA2913000B0CFC9 /* Chart3DView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B691FCDC2CA28B1B00B0CFC9 /* Chart3DView.swift */; };
@@ -47,8 +48,8 @@
 		B6C9A3F32C75A3F000DB6786 /* CytegeistLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B6C9A3EB2C75A3EF00DB6786 /* CytegeistLibrary.framework */; };
 		B6C9A3FA2C75A3F000DB6786 /* CytegeistLibraryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A3F92C75A3F000DB6786 /* CytegeistLibraryTests.swift */; };
 		B6C9A3FB2C75A3F000DB6786 /* CytegeistLibrary.h in Headers */ = {isa = PBXBuildFile; fileRef = B6C9A3ED2C75A3EF00DB6786 /* CytegeistLibrary.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		B6C9A3FE2C75A3F000DB6786 /* CytegeistLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B6C9A3EB2C75A3EF00DB6786 /* CytegeistLibrary.framework */; };
-		B6C9A3FF2C75A3F000DB6786 /* CytegeistLibrary.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = B6C9A3EB2C75A3EF00DB6786 /* CytegeistLibrary.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		B6C9A3FE2C75A3F000DB6786 /* CytegeistLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B6C9A3EB2C75A3EF00DB6786 /* CytegeistLibrary.framework */; platformFilters = (macos, xros, ); };
+		B6C9A3FF2C75A3F000DB6786 /* CytegeistLibrary.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = B6C9A3EB2C75A3EF00DB6786 /* CytegeistLibrary.framework */; platformFilters = (macos, xros, ); settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		B6C9A4062C75A46800DB6786 /* CollectionUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = B610A5702C54269A0081C517 /* CollectionUtil.swift */; };
 		B6C9A4072C75A46800DB6786 /* Colormaps.swift in Sources */ = {isa = PBXBuildFile; fileRef = B685296A2C74DBD700EF9EF4 /* Colormaps.swift */; };
 		B6C9A4082C75A46800DB6786 /* StringUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = B610A5722C54269A0081C517 /* StringUtil.swift */; };
@@ -252,6 +253,7 @@
 		B65D82B02C44BE7200E4F0A2 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B65D82B32C44BE7200E4F0A2 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		B65D82B52C44BE7200E4F0A2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		B661331B2CBCC79200AAA15B /* CObservation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = CObservation; sourceTree = "<group>"; };
 		B68529682C74DBB500EF9EF4 /* ComputeCache.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ComputeCache.swift; sourceTree = "<group>"; };
 		B685296A2C74DBD700EF9EF4 /* Colormaps.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Colormaps.swift; sourceTree = "<group>"; };
 		B685296B2C74DBD700EF9EF4 /* GraphicsUtil.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GraphicsUtil.swift; sourceTree = "<group>"; };
@@ -333,6 +335,7 @@
 			files = (
 				B69B90BF2CA2A5F6008EF718 /* RealityKitContent in Frameworks */,
 				B6C9A4112C75A59200DB6786 /* CytegeistLibrary.framework in Frameworks */,
+				B661331A2CBCC69F00AAA15B /* CObservation in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -542,6 +545,7 @@
 		B65D82A62C44BE7100E4F0A2 /* Packages */ = {
 			isa = PBXGroup;
 			children = (
+				B661331B2CBCC79200AAA15B /* CObservation */,
 				B65D82A72C44BE7100E4F0A2 /* RealityKitContent */,
 			);
 			path = Packages;
@@ -746,6 +750,7 @@
 			name = CytegeistCore;
 			packageProductDependencies = (
 				B69B90BE2CA2A5F6008EF718 /* RealityKitContent */,
+				B66133192CBCC69F00AAA15B /* CObservation */,
 			);
 			productName = CytegeistLibrary;
 			productReference = B63D162E2C55E50D00E81C2F /* CytegeistCore.framework */;
@@ -916,6 +921,9 @@
 				Base,
 			);
 			mainGroup = B65D829A2C44BE7100E4F0A2;
+			packageReferences = (
+				B66133182CBCC69F00AAA15B /* XCLocalSwiftPackageReference "Packages/CObservation" */,
+			);
 			productRefGroup = B65D82A42C44BE7100E4F0A2 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -1131,6 +1139,10 @@
 		};
 		B63D16402C55E50E00E81C2F /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
+			platformFilters = (
+				macos,
+				xros,
+			);
 			target = B63D162D2C55E50D00E81C2F /* CytegeistCore */;
 			targetProxy = B63D163F2C55E50E00E81C2F /* PBXContainerItemProxy */;
 		};
@@ -1161,6 +1173,10 @@
 		};
 		B6C9A3FD2C75A3F000DB6786 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
+			platformFilters = (
+				macos,
+				xros,
+			);
 			target = B6C9A3EA2C75A3EF00DB6786 /* CytegeistLibrary */;
 			targetProxy = B6C9A3FC2C75A3F000DB6786 /* PBXContainerItemProxy */;
 		};
@@ -1198,6 +1214,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 1.0;
 				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
 				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
@@ -1239,6 +1256,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 1.0;
 				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
 				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
@@ -1266,6 +1284,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = WFRFMHK56T;
 				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.cytegeist.visionos.2.CytegeistLibraryTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1288,6 +1307,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 9D5TC7JPM8;
 				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.cytegeist.visionos.2.CytegeistLibraryTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1464,6 +1484,7 @@
 		B65D82B92C44BE7200E4F0A2 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALLOW_TARGET_PLATFORM_SPECIALIZATION = YES;
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -1479,6 +1500,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 14.4;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.cytegeist.visionos.2.Cytegeist;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1508,6 +1530,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 14.4;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.cytegeist.visionos.2.Cytegeist;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1788,10 +1811,21 @@
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCLocalSwiftPackageReference section */
+		B66133182CBCC69F00AAA15B /* XCLocalSwiftPackageReference "Packages/CObservation" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/CObservation;
+		};
+/* End XCLocalSwiftPackageReference section */
+
 /* Begin XCSwiftPackageProductDependency section */
 		B65D82A82C44BE7100E4F0A2 /* RealityKitContent */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = RealityKitContent;
+		};
+		B66133192CBCC69F00AAA15B /* CObservation */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = CObservation;
 		};
 		B69B90BE2CA2A5F6008EF718 /* RealityKitContent */ = {
 			isa = XCSwiftPackageProductDependency;

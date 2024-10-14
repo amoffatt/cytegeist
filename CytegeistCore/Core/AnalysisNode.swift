@@ -7,16 +7,17 @@
 import Foundation
 import SwiftUI
 import UniformTypeIdentifiers.UTType
+import CObservation
 import CytegeistLibrary
 
 public extension UTType {  static var population = UTType(exportedAs: "cytegeist.population")   }
 enum AnalysisNodeError : Error {  case noSampleRef      }
 //---------------------------------------------------------
-@Observable
-public class AnalysisNode : Codable, Transferable, Identifiable, Hashable, CustomStringConvertible
+
+@CObservable
+public class AnalysisNode : CObject, Codable, Transferable, CustomStringConvertible
 {
     
-    public var id = UUID()
     public var name: String = ""
     public var description: String = ""
     public var sample: Sample? = nil                      // nil except at the root node
@@ -50,17 +51,14 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable, Custo
     
     
         //--------------------------------------------------------
-    public static func == (lhs: AnalysisNode, rhs: AnalysisNode) -> Bool {   lhs.id == rhs.id  }
-    public func hash(into hasher: inout Hasher) {        hasher.combine(id)    }
     public static var transferRepresentation: some TransferRepresentation {
         CodableRepresentation(contentType: UTType.population)
     }
         //--------------------------------------------------------
-    public init() {    }
+//    public init() {    }
     
     public required init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        self._id = try container.decode(UUID.self, forKey: ._id)
         self._name = try container.decode(String.self, forKey: ._name)
         self._sample = try container.decodeIfPresent(Sample.self, forKey: ._sample)
         self._graphDef = try container.decode(ChartDef.self, forKey: ._graphDef)
@@ -96,7 +94,7 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable, Custo
         self.graphDef = original.graphDef
         self.statistics = [:]
         self.children = []
-        self.parent = nil
+        self._parent = nil
         self.gate = original.gate
         self.invert = original.invert
         self.color = original.color ?? .green

@@ -7,6 +7,7 @@
 
 import SwiftUI
 import CytegeistCore
+import CytegeistLibrary
 import SwiftData
 
 @main
@@ -14,12 +15,11 @@ import SwiftData
 struct CytegeistApp: SwiftUI.App {
 
     @State private var appModel = App()
-    @Environment(\.undoManager) var undoManager
     @FocusedValue(\.analysisNode) var focusedAnalysisNode
 
     var body: some Scene {        
         #if os(macOS)
-            Window("Navigation", id: "nav")
+            Window("Experiment", id: "nav")
             {
                 ExperimentView().environment(appModel)
 //                     .modelContainer(for:  Experiment.self, isUndoEnabled: true)

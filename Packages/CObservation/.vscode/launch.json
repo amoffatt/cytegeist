@@ -1,0 +1,22 @@
+{
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:CObservation}",
+            "name": "Debug CObservationClient",
+            "program": "${workspaceFolder:CObservation}/.build/debug/CObservationClient",
+            "preLaunchTask": "swift: Build Debug CObservationClient"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:CObservation}",
+            "name": "Release CObservationClient",
+            "program": "${workspaceFolder:CObservation}/.build/release/CObservationClient",
+            "preLaunchTask": "swift: Build Release CObservationClient"
+        }
+    ]
+}

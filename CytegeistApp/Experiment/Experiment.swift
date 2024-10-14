@@ -11,20 +11,20 @@ import CytegeistLibrary
 import CytegeistCore
 import SwiftUI
 import SwiftData
+import CObservation
 
-@Observable
-class AnalysisNodeSelection: Codable {
+@CObservable
+class AnalysisNodeSelection: CObject, Codable {
     var nodes: Set<AnalysisNode> = []
     var first:AnalysisNode? { nodes.first }
 }
 
+
 //-----------------------------------------------
-@Observable
-public class Experiment : Usable
+@CObservable
+public class Experiment : CObject
 {
     public static func == (lhs: Experiment, rhs: Experiment) -> Bool { lhs.id == rhs.id   }
-    
-    public var id = UUID()
     
     var version: String? = "0.01"
     var creationDate: Date = Date.now
