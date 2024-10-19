@@ -9,6 +9,7 @@ import Foundation
 import CytegeistLibrary
 import SwiftUI
 import SwiftData
+import Observation
 
 //---------------------------------------------------------
 // CDimension is the analog of a samples parameter
@@ -21,9 +22,9 @@ public enum SampleError : Error {
 }
 
 //---------------------------------------------------------
-@Model
+//@Model
 //@MainActor
-//@Observable
+@Observable
 public class Sample : Identifiable, Codable, Hashable
 {
     public static func == (lhs: Sample, rhs: Sample) -> Bool {

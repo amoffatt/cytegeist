@@ -16,8 +16,8 @@ import UniformTypeIdentifiers
 struct ExperimentBrowser : View {
     
     @Environment(App.self) var app: App
-    
-    
+    @State var showImporter = false
+
     var body: some View {
 //        @Bindable var app = app
         
@@ -32,11 +32,18 @@ struct ExperimentBrowser : View {
         }
     detail: {
         VStack {
+            Button("Read DB", systemImage: "xmark.circle", action: { showImporter = true })
+                   .fileImporter(
+                       isPresented: $showImporter,
+                        allowedContentTypes: [.item]
+                   ) { result in processDB(result: result)   }
             PanelB()
          }
         .navigationSplitViewColumnWidth(min: 300, ideal: 600, max: .infinity)
         
-        }
+    }      .onAppear {
+        readCSV()
+    }
     }
     
         //
@@ -67,6 +74,138 @@ struct ExperimentBrowser : View {
         }
         
     }
+        //---------------------------------------------------------------------------
+//    func getDataFromSheet() {
+//        let urlString = "https://docs.google.com/spreadsheets/d/1qn1K2usdhI1wMEagrTcWWhsFMWEDwy2HG2WykMT0KPY?output=csv"
+//        
+//        
+//        guard let url = URL(string: urlString) else { print("error"); return }
+//        
+//        URLSession.shared.dataTask(with: url) { data, response, error in
+//            if let data = data {
+//                if let content = String(data: data, encoding: .utf8) {
+//                    let parsedCSV: [String] = content.components(separatedBy: "\n")
+//                     
+//                    for line in parsedCSV {
+//                        print (readTokens(line))
+//                    }
+//                }
+//            }
+//        }.resume()
+//    }
+ 
+    
+    func readTokens(_ s: String) -> [String]
+    {
+        var str = s
+        var tokens = [String]()
+        
+        while str.count > 0 {
+            var token = ""
+            let peek = str[str.startIndex]
+            switch peek {
+                case "\"":      let end: String.Index = str.firstIndex(of: "\"") ?? str.endIndex
+                                token = String(str[str.startIndex..<end])           // should be +1
+                                str = String(str[end..<str.endIndex])
+                                str.remove(at: str.startIndex)  // drop the quote
+                    
+                default:        let end = str.firstIndex(of: ",")  ?? str.endIndex
+                                token = String(str[str.startIndex..<end])
+                                str.removeSubrange(str.startIndex..<end)
+
+                    
+            }                                
+            if str.count > 0            { str.remove(at: str.startIndex) }
+            tokens.append(token)
+
+        }
+        return tokens
+    }
+                                                      
+    func readCSV()  {
+//        getDataFromSheet()
+        let file = "/Users/adamtreister/Documents/aaron-cytegeist-1/CytegeistCore/TestData/flowrepo.csv"
+        
+        if let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
+            
+            let fileURL = dir.appendingPathComponent(file)
+        
+            do {
+                let block = try String(contentsOf: fileURL, encoding: .utf8)
+                let lines = block.split(separator: "\n")
+//                let lines: [String] = readTokens(block, delim: "\r\n")
+                for line in lines {
+                    print (readTokens(String(line)))
+                }
+        }
+            catch {   print(error)
+            }
+        }
+        
+    }
+
+            
+            
+            //        if let filepath = Bundle.main.path(forResource: inputFile, ofType: nil) {
+//            do {
+//                let fileContent = try String(contentsOfFile: filepath)
+//                let lines = fileContent.components(separatedBy: "\n")
+//                var results: [String:String] = [:]
+//                lines.dropFirst().forEach { line in
+//                    let data = line.components(separatedBy: ",")
+//                    if data.count == 2 {
+//                        results[data[0]] = data[1]
+//                    }
+//                }
+//                return results
+//            } catch {
+//                print("error: \(error)") // to do deal with errors
+//            }
+//        } else {
+//            print("\(inputFile) could not be found")
+//        }
+//        return [:]
+     
+    
+    func  processDB(result: Result<URL, any Error> ) {
+                    switch result {
+                        case .success(let file):
+                            Task {
+                                let gotAccess = file.startAccessingSecurityScopedResource()
+                                if !gotAccess { return }
+                                retrieveDB(file)
+                                file.stopAccessingSecurityScopedResource()     // release access
+                            }
+                        case .failure(let error):
+                            print(error)         // handle error
+                    }
+                }
+    
+         
+            //        }
+    func retrieveDB(_ file: URL){
+    
+        var experimentDB = [FRExperiment]()
+//        var fileRoot = Bundle.main.path(forResource: "flowrepo", ofType: "csv")
+//
+//      if let bundleURL =  Bundle.main.url(forResource: "flowrepo", withExtension: "csv")
+//        {
+            guard let data = try? Data(contentsOf: file) else {
+                fatalError("Unable to load data")
+            }
+            if let decoder = String(data: data, encoding: .utf8)
+//            if  let dataArr = decoder?.components(separatedBy: "\n") //.map({ $0.components(separatedBy: ",") })
+            {
+                let lines = decoder.components(separatedBy: .newlines).compactMap( {$0.trim().isEmpty ? nil : $0})
+                for line in lines
+                {
+                    let tokens: [String] = readTokens(String(line))
+                    experimentDB.append( FRExperiment(tokens: tokens))
+            }
+        }
+     else  { print("cant find repo")   }
+    }
+
     
         //---------------------------------------------------------------------------
         // Model
@@ -84,62 +223,62 @@ struct ExperimentBrowser : View {
         
         public var id = UUID()
         public  var name = "Untitled Table"
-        public var items = [XColumn]()
-            //    var info = BatchInfo()
+        public var items = [FRExperiment]()
         
         init() {    }
     }
+    
 
 
-    public struct XColumn : Identifiable, Hashable, Codable
-    {
-        public var id = UUID()
-        var primary: String = " "
-        var keywords: String = " "
-        var experiement: String = " "
-        var species: String = " "
-        var date: String = " "
-
-        init(_ name: String, parm: String, stat: String, arg: String = " ")
-        {
-            self.date = name
-            self.primary = parm
-            self.keywords = stat
-            self.experiement = arg
-            self.species = arg
-        }
-        
-        public func hash(into hasher: inout Hasher) {
-            hasher.combineMany(date, primary, keywords, experiement, species)
-        }
-        
-        static var draggableType = UTType(exportedAs: "com.cytegeist.CyteGeistApp.tablecolumn")
-        var itemProvider: NSItemProvider {
-            let provider = NSItemProvider()
-            provider.registerDataRepresentation(forTypeIdentifier: Self.draggableType.identifier, visibility: .all) {
-                let encoder = JSONEncoder()
-                do {
-                    let data = try encoder.encode(self)
-                    $0(data, nil)
-                } catch {
-                    $0(nil, error)
-                }
-                return nil
-            }
-            return provider
-        }
-    }
+//    public struct XColumn : Identifiable, Hashable, Codable
+//    {
+//        public var id = UUID()
+//        var primary: String = " "
+//        var keywords: String = " "
+//        var experiement: String = " "
+//        var species: String = " "
+//        var date: String = " "
+//
+//        init(_ name: String, parm: String, stat: String, arg: String = " ")
+//        {
+//            self.date = name
+//            self.primary = parm
+//            self.keywords = stat
+//            self.experiement = arg
+//            self.species = arg
+//        }
+//        
+//        public func hash(into hasher: inout Hasher) {
+//            hasher.combineMany(date, primary, keywords, experiement, species)
+//        }
+//        
+//        static var draggableType = UTType(exportedAs: "com.cytegeist.CyteGeistApp.tablecolumn")
+//        var itemProvider: NSItemProvider {
+//            let provider = NSItemProvider()
+//            provider.registerDataRepresentation(forTypeIdentifier: Self.draggableType.identifier, visibility: .all) {
+//                let encoder = JSONEncoder()
+//                do {
+//                    let data = try encoder.encode(self)
+//                    $0(data, nil)
+//                } catch {
+//                    $0(nil, error)
+//                }
+//                return nil
+//            }
+//            return provider
+//        }
+//    }
 
     
     public struct XTableView : View {
   
-        @State var selection = Set<XColumn.ID>()
-        @State var sortOrder = [KeyPathComparator(\XColumn.primary, order: .forward),
-                                KeyPathComparator(\XColumn.experiement, order: .forward),
-                                KeyPathComparator(\XColumn.keywords, order: .forward),
-                                KeyPathComparator(\XColumn.species, order: .forward),
-                                KeyPathComparator(\XColumn.date, order: .forward)   ]
-        @State var columnCustomization = TableColumnCustomization<XColumn>()
+        @State var selection = Set<FRExperiment.ID>()
+        @State var sortOrder = [KeyPathComparator(\FRExperiment.ExpName, order: .forward),
+                                KeyPathComparator(\FRExperiment.Purpose, order: .forward),
+                                KeyPathComparator(\FRExperiment.Keywords, order: .forward),
+                                KeyPathComparator(\FRExperiment.Conclusion, order: .forward),
+                                KeyPathComparator(\FRExperiment.Comments, order: .forward)   ]
+        @State var columnCustomization = TableColumnCustomization<FRExperiment>()
         
         let table =  XTable()
         
@@ -147,21 +286,56 @@ struct ExperimentBrowser : View {
                 //            Table (of: TColumn.Type, selection: $selectedColumns)
             Table (selection: $selection, sortOrder: $sortOrder, columnCustomization: $columnCustomization)
             {
-                TableColumn("Date", value: \.date){ col in Text(col.date)}
+                TableColumn("RepID", value: \.RepID){ col in Text(col.RepID)}
                     .width(min: 130, ideal: 180)
-                    .customizationID("date")
-                TableColumn("Primary", value: \.date){ col in Text(col.primary)}
-                    .width(min: 130, ideal: 180)
-                    .customizationID("primary")
-                TableColumn("Experiment", value: \.experiement){ col in Text(col.experiement)}
+                    .customizationID("RepID")
+//                TableColumn("RepIDurl", value: \.RepIDurl){ col in Text(col.RepIDurl)}
+//                    .width(min: 130, ideal: 180)
+//                    .customizationID("RepIDurl")
+                TableColumn("ExpID", value: \.ExpID){ col in Text(col.ExpID)}
                     .width(min: 30, ideal: 80, max: 160)
-                    .customizationID("experiment")
-                TableColumn("Keywords", value: \.keywords){ col in Text(col.keywords)}
+                    .customizationID("ExpID")
+                TableColumn("ExpName", value: \.ExpName){ col in Text(col.ExpName)}
                     .width(min: 30, ideal: 50, max: 60)
-                    .customizationID("keywords")
-                TableColumn("Species", value: \.species){ col in Text(col.species)}
+                    .customizationID("ExpName")
+                TableColumn("Purpose", value: \.Purpose){ col in Text(col.Purpose)}
                     .width(min: 30, ideal: 50, max: 60)
-                    .customizationID("species")
+                    .customizationID("Purpose")
+                TableColumn("Conclusion", value: \.Conclusion){ col in Text(col.Conclusion)}
+                    .width(min: 30, ideal: 50, max: 60)
+                    .customizationID("Conclusion")
+                TableColumn("Comments", value: \.Comments){ col in Text(col.Comments)}
+                    .width(min: 30, ideal: 50, max: 60)
+                    .customizationID("Comments")
+                TableColumn("Keywords", value: \.Keywords){ col in Text(col.Keywords)}
+                    .width(min: 30, ideal: 50, max: 60)
+                    .customizationID("Keywords")
+//                TableColumn("ManuscriptUrl", value: \.ManuscriptUrl){ col in Text(col.ManuscriptUrl)}
+//                    .width(min: 30, ideal: 50, max: 60)
+//                    .customizationID("ManuscriptUrl")
+//                TableColumn("Manuscripts", value: \.Manuscripts){ col in Text(col.Manuscripts)}
+//                    .width(min: 30, ideal: 50, max: 60)
+//                    .customizationID("Manuscripts")
+//                TableColumn("Design", value: \.Design){ col in Text(col.Design)}
+//                    .width(min: 30, ideal: 50, max: 60)
+//                    .customizationID("Design")
+//                TableColumn("Design_FCS_Count", value: \.Design_FCS_Count){ col in Text(col.Design_FCS_Count)}
+//                    .width(min: 30, ideal: 50, max: 60)
+//                    .customizationID("Design_FCS_Count")
+//                TableColumn("MifScore", value: \.MifScore){ col in Text(col.MifScore)}
+//                    .width(min: 30, ideal: 50, max: 60)
+//                    .customizationID("MifScore")
+//                TableColumn("PResearche", value: \.PResearche){ col in Text(col.PResearche)}
+//                    .width(min: 30, ideal: 50, max: 60)
+//                    .customizationID("PResearche")
+//                TableColumn("PInvestigator", value: \.PInvestigator){ col in Text(col.PInvestigator)}
+//                    .width(min: 30, ideal: 50, max: 60)
+//                    .customizationID("PInvestigator")
+
+//                
+//                init( RepID: String, RepIDurl: String, ExpID: String, ExpName: String, Purpose: String, Conclusion: String, Comments: String, Keywords: String, ManuscriptUrl: String, Manuscripts: String, Design: String, Design_FCS_Count: String, MifScore: String, PResearche: String, PInvestigator: String, UploadAuth: String, ExpDates: String, ExpStart: String, ExpEnd: String, UploadDate: String, LastUpdate: String, Organizations: String, Funding: String, QualControl: String, QualControlUrl: String, hasWSP: String, Attachments: String, Event_total_K:String, Event_mean_K:String, FCS_count: String, FCS_total_MB: String, FCSVers: String, Cytometer: String )
+//                
+                
             }
         rows: {
             ForEach(table.items)  { col in TableRow(col) }
@@ -182,7 +356,7 @@ struct ExperimentBrowser : View {
 //                }
                 //            .opacity(mode == .table ? 1.0 : 0.3)
         }
-//        
+//
 //        func newTableItem(node:AnalysisNode, position:CGPoint)
 //        {
 //            table.items.append(TColumn("", parm: "Keyword", stat: "Date"))

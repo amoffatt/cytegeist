@@ -10,18 +10,18 @@ import Combine
 import CytegeistLibrary
 import CytegeistCore
 import SwiftUI
-import SwiftData
+//import SwiftData
 
 @Observable
-@Transient
+//@Transient
 class AnalysisNodeSelection: Codable {
     var nodes: Set<AnalysisNode> = []
     var first:AnalysisNode? { nodes.first }
 }
 
 //-----------------------------------------------
-//@Observable
-@Model
+@Observable
+//@Model
 public class Experiment : Usable
 {
 //    @Environment var appModel
@@ -30,7 +30,7 @@ public class Experiment : Usable
     
     public var id = UUID()
     
-    let version: String = "0.01"
+    let version: String
     var creationDate: Date = Date.now
     var modifiedDate: Date = Date.now
     var name = "All Samples"
@@ -39,14 +39,16 @@ public class Experiment : Usable
 
     var samples: [Sample] = [Sample]()
     var selectedSamples = Set<Sample.ID>()
-    @Transient   var selectedAnalysisNodes = AnalysisNodeSelection()
+//    @Transient   
+    var selectedAnalysisNodes = AnalysisNodeSelection()
     
     var panels = [CPanel]()
     var groups = [CGroup]()
     var tables = [CGTable]()
     var layouts = [CGLayout]()
     
-    @Transient var core: CytegeistCoreAPI = CytegeistCoreAPI()
+//    @Transient 
+    var core: CytegeistCoreAPI = CytegeistCoreAPI()
 
 //  @Transient
 //    var _core: CytegeistCoreAPI?
@@ -58,17 +60,25 @@ public class Experiment : Usable
 //    }
         //--------------------------------------------------------------------------------
     required public init(from decoder: any Decoder) throws {
-//        fatalError("Implement decoding")        // TODO AM Write class macro and property wrapper to handle properties with default values
+        self.version = "-02"
+       fatalError("Implement decoding")        // TODO AM Write class macro and property wrapper to handle properties with default values
     }
     
     init(name: String = "Untitled", version: String = "" )
     {
         print("Experiment \(name) ")
-        self.name = name
         self.version = version
+        self.name = name.isEmpty ? DateStr(Date.now) : name
     }
     public func encode(to encoder: Encoder) throws {
             // Do nothing
+    }
+    
+    func DateStr(_ date: Date) -> String
+    {
+        let myDateFormatter = DateFormatter()
+        myDateFormatter.dateFormat = "YYMMDD"
+        return myDateFormatter.string(from: date)
     }
         //--------------------------------------------------------------------------------
     
@@ -133,7 +143,8 @@ public class Experiment : Usable
     }
         //--------------------------------------------------------------------------------
         //--------------------------------------------------------------------------------
-    @Transient  struct Entry
+//    @Transient  
+    struct Entry
     {
         var key: String
         var vals: [String] = []
@@ -148,8 +159,10 @@ public class Experiment : Usable
         }
     }
     
-   @Transient var keywords = [String]()
-   @Transient var entries = [Entry]()
+//   @Transient 
+    var keywords = [String]()
+//   @Transient 
+    var entries = [Entry]()
     
     public func buildVaribleKeyDictionary() /// -> [Entry]
     {

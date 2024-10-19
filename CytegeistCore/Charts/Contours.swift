@@ -545,7 +545,7 @@ public struct ContourBuilder
                 path.move(to: seg.start)
                 path.addLine(to: seg.end )
             }
-            path.closeSubpath()
+//            path.closeSubpath()
             return path
         }
    }

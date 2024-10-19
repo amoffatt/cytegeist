@@ -10,7 +10,7 @@ import SwiftUI
 import CytegeistCore
 import CytegeistLibrary
 
-public struct ExperimentSamplePair: Codable, Hashable {
+public struct ExperimentSamplePair: Codable {
     public var sample:Sample
     public var experiment:Experiment
 }

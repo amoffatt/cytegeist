@@ -129,9 +129,9 @@ struct SampleList: View {
             for i in items {
                 print(i)
 //                SampleInspectorView(experiment, sample: i)
-                if let sample = experiment[i] {
-                    openWindow(id: "sample-inspector", value:ExperimentSamplePair(sample: sample, experiment: experiment))
-                }
+//                if let sample = experiment[i] {
+//                    openWindow(id: "sample-inspector", value:ExperimentSamplePair(sample: sample, experiment: experiment))
+//                }
              }
             
         }  }
@@ -248,7 +248,7 @@ struct SampleList: View {
     }
     
     public func addSample(_ sample: Sample)   {
-        modelContext.insert(sample)
+//        modelContext.insert(sample)
         experiment.samples.append(sample)
     }
 
