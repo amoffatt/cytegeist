@@ -42,7 +42,15 @@ struct ExperimentBrowser : View {
         .navigationSplitViewColumnWidth(min: 300, ideal: 600, max: .infinity)
         
     }      .onAppear {
-        readCSV()
+//            readCSV()
+//        let fileUrl = URL(fileURLWithPath: "/path/to/your/csv/file.csv")
+//        do {
+//            let parsedData = try parseCSV(fileUrl: fileUrl, experimentDB: experimentDB)
+//            print(parsedData)
+//        } catch {
+//            print("Error parsing CSV file: \(error)")
+//        }
+        
     }
     }
     
@@ -93,59 +101,133 @@ struct ExperimentBrowser : View {
 //            }
 //        }.resume()
 //    }
- 
-    
-    func readTokens(_ s: String) -> [String]
+// 
+//    
+//    func readTokens(_ s: String) -> [String]
+//    {
+//        var str = s
+//        var tokens = [String]()
+//        
+//        while str.count > 0 {
+//            var token = ""
+//            let peek = str[str.startIndex]
+//            switch peek {
+//                case "\"":      let end: String.Index = str.firstIndex(of: "\"") ?? str.endIndex
+//                                token = String(str[str.startIndex..<end])           // should be +1
+//                                str = String(str[end..<str.endIndex])
+//                                str.remove(at: str.startIndex)  // drop the quote
+//                    
+//                default:        let end = str.firstIndex(of: ",")  ?? str.endIndex
+//                                token = String(str[str.startIndex..<end])
+//                                str.removeSubrange(str.startIndex..<end)
+//
+//                    
+//            }                                
+//            if str.count > 0            { str.remove(at: str.startIndex) }
+//            tokens.append(token)
+//
+//        }
+//        return tokens
+//    }
+//                                                      
+//    func readCSV()  {
+////        getDataFromSheet()
+//        let file = "/Users/adamtreister/Documents/aaron-cytegeist-1/CytegeistCore/TestData/flowrepo.csv"
+//        
+//        if let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
+//            
+//            let fileURL = dir.appendingPathComponent(file)
+//        
+//            do {
+//                let block = try String(contentsOf: fileURL, encoding: .utf8)
+//                let lines = block.split(separator: "\n")
+////                let lines: [String] = readTokens(block, delim: "\r\n")
+//                for line in lines {
+//                    print (readTokens(String(line)))
+//                }
+//        }
+//            catch {   print(error)
+//            }
+//        }
+//        
+//    }
+    public var experimentDB = [FRExperiment]()
+
+    mutating func addFRExperiment(exp: FRExperiment)
     {
-        var str = s
-        var tokens = [String]()
-        
-        while str.count > 0 {
-            var token = ""
-            let peek = str[str.startIndex]
-            switch peek {
-                case "\"":      let end: String.Index = str.firstIndex(of: "\"") ?? str.endIndex
-                                token = String(str[str.startIndex..<end])           // should be +1
-                                str = String(str[end..<str.endIndex])
-                                str.remove(at: str.startIndex)  // drop the quote
-                    
-                default:        let end = str.firstIndex(of: ",")  ?? str.endIndex
-                                token = String(str[str.startIndex..<end])
-                                str.removeSubrange(str.startIndex..<end)
-
-                    
-            }                                
-            if str.count > 0            { str.remove(at: str.startIndex) }
-            tokens.append(token)
-
-        }
-        return tokens
+        experimentDB.append(exp)
     }
-                                                      
-    func readCSV()  {
-//        getDataFromSheet()
-        let file = "/Users/adamtreister/Documents/aaron-cytegeist-1/CytegeistCore/TestData/flowrepo.csv"
-        
-        if let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
-            
-            let fileURL = dir.appendingPathComponent(file)
-        
-            do {
-                let block = try String(contentsOf: fileURL, encoding: .utf8)
-                let lines = block.split(separator: "\n")
-//                let lines: [String] = readTokens(block, delim: "\r\n")
-                for line in lines {
-                    print (readTokens(String(line)))
+    
+    func  processDB(result: Result<URL, any Error> ) {
+        switch result {
+            case .success(let file):
+                Task {
+                    let gotAccess = file.startAccessingSecurityScopedResource()
+                    if !gotAccess { return }
+                    do {
+                        try parseCSV(fileUrl: file)
+                            //                                    print(parsedData)
+                    } catch {
+                        print("Error parsing CSV file: \(error)")
+                    }
+                    file.stopAccessingSecurityScopedResource()     // release access
                 }
+            case .failure(let error):
+                print(error)         // handle error
         }
-            catch {   print(error)
+    }
+    
+    
+   mutating func parseCSV(fileUrl: URL) throws  {
+        let csvData = try Data(contentsOf: fileUrl)
+        let csvString = String(data: csvData, encoding: .utf8)!
+        var currentRow = ""
+        var inQuotes = false
+        var parsedLines: [String] = []
+            //        var parsedData: [[String]] = []
+        for char in csvString {
+            if char == "\"" {
+                inQuotes.toggle()
+            } else if char == "\r\n" || char == "\n" && !inQuotes {
+                parsedLines.append(currentRow)
+//                parsedData.append()
+                let fields = parseLine(currentRow)
+                if (fields.count > 12 && fields[0].starts(with: "FR-FCM")) {
+                    addFRExperiment(exp: FRExperiment(tokens: fields))
+                }
+                currentRow = ""
+            } else {
+                currentRow.append(char)
             }
         }
         
+       if !currentRow.isEmpty {
+            parsedLines.append(currentRow)
+           let fields = parseLine(currentRow)
+           if (fields.count > 12 && fields[0].starts(with: "FR-FCM")) {
+               experimentDB.append( FRExperiment(tokens: fields))
+           }
+        }
     }
-
-            
-            
+   
+    func parseLine(_ csvString : String) -> [String]
+    {
+        var fields: [String] = []
+        var inQuotes = false
+        var currentBuffer = ""
+        
+        for char in csvString {
+            if char == "\""     { inQuotes.toggle() }
+            else if char == "," && !inQuotes {
+                fields.append(currentBuffer)
+                currentBuffer = ""
+            } else { currentBuffer.append(char)  }
+        }
+        return fields
+        
+    }
+        // Example usage:
+        
             //        if let filepath = Bundle.main.path(forResource: inputFile, ofType: nil) {
 //            do {
 //                let fileContent = try String(contentsOfFile: filepath)
@@ -166,45 +248,31 @@ struct ExperimentBrowser : View {
 //        }
 //        return [:]
      
-    
-    func  processDB(result: Result<URL, any Error> ) {
-                    switch result {
-                        case .success(let file):
-                            Task {
-                                let gotAccess = file.startAccessingSecurityScopedResource()
-                                if !gotAccess { return }
-                                retrieveDB(file)
-                                file.stopAccessingSecurityScopedResource()     // release access
-                            }
-                        case .failure(let error):
-                            print(error)         // handle error
-                    }
-                }
-    
+  
          
             //        }
-    func retrieveDB(_ file: URL){
-    
-        var experimentDB = [FRExperiment]()
-//        var fileRoot = Bundle.main.path(forResource: "flowrepo", ofType: "csv")
-//
-//      if let bundleURL =  Bundle.main.url(forResource: "flowrepo", withExtension: "csv")
-//        {
-            guard let data = try? Data(contentsOf: file) else {
-                fatalError("Unable to load data")
-            }
-            if let decoder = String(data: data, encoding: .utf8)
-//            if  let dataArr = decoder?.components(separatedBy: "\n") //.map({ $0.components(separatedBy: ",") })
-            {
-                let lines = decoder.components(separatedBy: .newlines).compactMap( {$0.trim().isEmpty ? nil : $0})
-                for line in lines
-                {
-                    let tokens: [String] = readTokens(String(line))
-                    experimentDB.append( FRExperiment(tokens: tokens))
-            }
-        }
-     else  { print("cant find repo")   }
-    }
+//    func retrieveDB(_ file: URL){
+//    
+//        var experimentDB = [FRExperiment]()
+////        var fileRoot = Bundle.main.path(forResource: "flowrepo", ofType: "csv")
+////
+////      if let bundleURL =  Bundle.main.url(forResource: "flowrepo", withExtension: "csv")
+////        {
+//            guard let data = try? Data(contentsOf: file) else {
+//                fatalError("Unable to load data")
+//            }
+//            if let decoder = String(data: data, encoding: .utf8)
+////            if  let dataArr = decoder?.components(separatedBy: "\n") //.map({ $0.components(separatedBy: ",") })
+//            {
+//                let lines = decoder.components(separatedBy: .newlines).compactMap( {$0.trim().isEmpty ? nil : $0})
+//                for line in lines
+//                {
+//                    let tokens: [String] = readTokens(String(line))
+//                    experimentDB.append( FRExperiment(tokens: tokens))
+//            }
+//        }
+//     else  { print("cant find repo")   }
+//    }
 
     
         //---------------------------------------------------------------------------
@@ -310,6 +378,9 @@ struct ExperimentBrowser : View {
                 TableColumn("Keywords", value: \.Keywords){ col in Text(col.Keywords)}
                     .width(min: 30, ideal: 50, max: 60)
                     .customizationID("Keywords")
+                TableColumn("PResearcher", value: \.PResearcher){ col in Text(col.PResearcher)}
+                    .width(min: 30, ideal: 50, max: 60)
+                    .customizationID("PResearcher")
 //                TableColumn("ManuscriptUrl", value: \.ManuscriptUrl){ col in Text(col.ManuscriptUrl)}
 //                    .width(min: 30, ideal: 50, max: 60)
 //                    .customizationID("ManuscriptUrl")
@@ -325,9 +396,6 @@ struct ExperimentBrowser : View {
 //                TableColumn("MifScore", value: \.MifScore){ col in Text(col.MifScore)}
 //                    .width(min: 30, ideal: 50, max: 60)
 //                    .customizationID("MifScore")
-//                TableColumn("PResearche", value: \.PResearche){ col in Text(col.PResearche)}
-//                    .width(min: 30, ideal: 50, max: 60)
-//                    .customizationID("PResearche")
 //                TableColumn("PInvestigator", value: \.PInvestigator){ col in Text(col.PInvestigator)}
 //                    .width(min: 30, ideal: 50, max: 60)
 //                    .customizationID("PInvestigator")

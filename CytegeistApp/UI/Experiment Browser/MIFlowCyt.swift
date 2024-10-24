@@ -148,7 +148,7 @@ public struct FRExperiment : Identifiable, Codable, Hashable{
     var Design: String = ""
     var Design_FCS_Count: String = ""
     var MifScore: String = ""
-    var PResearche: String = ""
+    var PResearcher: String = ""
     var PInvestigator: String = ""
     var UploadAuth: String = ""
     
@@ -193,7 +193,7 @@ public struct FRExperiment : Identifiable, Codable, Hashable{
 //        
 //        , RepIDurl: token[1], ExpID: token[2], ExpName: token[3], Purpose: token[4], Conclusion: token[5], Comments: token[6], Keywords: token[7], ManuscriptUrl: token[8], Manuscripts: token[9], Design: token[10], Design_FCS_Count: token[11], MifScore: token[12], PResearche: token[13], PInvestigator: token[14], UploadAuth: token[15], ExpDates: token[16], ExpStart: token[17], ExpEnd: token[18], UploadDate: token[19], LastUpdate: token[20], Organizations: token[21], Funding: token[22], QualControl: token[23], QualControlUrl: token[24], hasWSP: token[25], Attachments: token[26], Event_total_K: token[27], Event_mean_K: token[28], FCS_count: token[29], FCS_total_MB: token[30], FCSVers: token[31], Cytometer: token[32]
     }
-    init( RepID: String, RepIDurl: String, ExpID: String, ExpName: String, Purpose: String, Conclusion: String, Comments: String, Keywords: String, ManuscriptUrl: String, Manuscripts: String, Design: String, Design_FCS_Count: String, MifScore: String, PResearche: String, PInvestigator: String, UploadAuth: String, ExpDates: String, ExpStart: String, ExpEnd: String, UploadDate: String, LastUpdate: String, Organizations: String, Funding: String, QualControl: String, QualControlUrl: String, hasWSP: String, Attachments: String, Event_total_K:String, Event_mean_K:String, FCS_count: String, FCS_total_MB: String, FCSVers: String, Cytometer: String )
+    init( RepID: String, RepIDurl: String, ExpID: String, ExpName: String, Purpose: String, Conclusion: String, Comments: String, Keywords: String, ManuscriptUrl: String, Manuscripts: String, Design: String, Design_FCS_Count: String, MifScore: String, PResearcher: String, PInvestigator: String, UploadAuth: String, ExpDates: String, ExpStart: String, ExpEnd: String, UploadDate: String, LastUpdate: String, Organizations: String, Funding: String, QualControl: String, QualControlUrl: String, hasWSP: String, Attachments: String, Event_total_K:String, Event_mean_K:String, FCS_count: String, FCS_total_MB: String, FCSVers: String, Cytometer: String )
     {
         self.RepID = RepID
         self.RepIDurl = Manuscripts
@@ -210,7 +210,7 @@ public struct FRExperiment : Identifiable, Codable, Hashable{
         self.Design = Design
         self.Design_FCS_Count = Design_FCS_Count
         self.MifScore = MifScore
-        self.PResearche = PResearche
+        self.PResearcher = PResearcher
         self.PInvestigator = PInvestigator
         self.UploadAuth = UploadAuth
         self.ExpDates = ExpDates
@@ -235,7 +235,7 @@ public struct FRExperiment : Identifiable, Codable, Hashable{
     
     
     let colNames: [String] =  ["RepID","RepIDurl","ExpID","ExpName","Purpose","Conclusion","Comments","Keywords",
-                               "ManuscriptUrl","Manuscripts","Design","Design_FCS_Count","MifScore","PResearche","PInvestigator","UploadAuth",
+                               "ManuscriptUrl","Manuscripts","Design","Design_FCS_Count","MifScore","PResearcher","PInvestigator","UploadAuth",
                                "ExpDates","ExpStart","ExpEnd","UploadDate","LastUpdate","Organizations","Funding","QualControl","QualControlUrl",
                                "hasWSP","Attachments","Event_total_K","Event_mean_K","FCS_count","FCS_total_MB","FCS_mean_MB","FCSVers","Cytometer"]
     
