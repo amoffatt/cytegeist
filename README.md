@@ -1,6 +1,7 @@
 #  Cytegeist 
 
 SwiftUI Data analysis for flow cytometry files (FCS)
+![Screenshot](Screenshot.png)
 
 ----
 The primary model object is **Experiment**<br>
@@ -19,7 +20,7 @@ Currently gates, are geometric regions in one or two dimensions, but any functio
 Each AnalysisNode has one **ChartDef**, which describes how to display the population<br>
 
 
-
+----
 The main view object is the **ExperimentBrowser**<br>
 
 It contains a **Sidebar**, **SampleList**, **AnalysisList** & **ReportPanel**<br>  
