@@ -157,8 +157,8 @@ struct ExperimentBrowser : View {
     {
         experimentDB.append(exp)
     }
-    
-    func  processDB(result: Result<URL, any Error> ) {
+    @MainActor
+    mutating func  processDB(result: Result<URL, any Error> ) {
         switch result {
             case .success(let file):
                 Task {
@@ -182,10 +182,13 @@ struct ExperimentBrowser : View {
         let csvData = try Data(contentsOf: fileUrl)
         let csvString = String(data: csvData, encoding: .utf8)!
         var currentRow = ""
-        var inQuotes = false
+       var inQuotes = false
+       var backslashed = false
         var parsedLines: [String] = []
             //        var parsedData: [[String]] = []
         for char in csvString {
+            if backslashed  { backslashed.toggle(); continue}
+            if char == "\\" { backslashed.toggle(); continue }
             if char == "\"" {
                 inQuotes.toggle()
             } else if char == "\r\n" || char == "\n" && !inQuotes {
@@ -214,9 +217,12 @@ struct ExperimentBrowser : View {
     {
         var fields: [String] = []
         var inQuotes = false
+        var backslashed = false
         var currentBuffer = ""
         
         for char in csvString {
+            if backslashed  { backslashed.toggle(); continue}
+            if char == "\\" { backslashed.toggle(); continue }
             if char == "\""     { inQuotes.toggle() }
             else if char == "," && !inQuotes {
                 fields.append(currentBuffer)
@@ -290,7 +296,7 @@ struct ExperimentBrowser : View {
 //        }
         
         public var id = UUID()
-        public  var name = "Untitled Table"
+        public  var name = "FlowRepository Metadata"
         public var items = [FRExperiment]()
         
         init() {    }
