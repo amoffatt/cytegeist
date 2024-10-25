@@ -3,7 +3,7 @@
 SwiftUI Data analysis for flow cytometry files (FCS)
 
 ----
-The primary model object is **Experiment ** <br>
+The primary model object is **Experiment**<br>
 It contains a list of **Samples**<br>
 
 **Samples** have a URL to the data file<br>
@@ -22,6 +22,5 @@ Each AnalysisNode has one **ChartDef**, which describes how to display the popul
 
 The main view object is the **ExperimentBrowser**<br>
 
-It contains a **Sidebar**, **SampleList**, **AnalysisList** & **ReportPanel**<br>
- <br>    
+It contains a **Sidebar**, **SampleList**, **AnalysisList** & **ReportPanel**<br>  
 The **ReportPanel** is toggled between **GatingView**, **CGTableView** and **CGLayoutView**<br>
