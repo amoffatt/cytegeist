@@ -76,9 +76,11 @@ struct ExperimentBrowser : View {
     }
     struct PanelB :  View {
         
+   let  frExp: FRExperiment  = FRExperiment(RepID: "FR-FCM", RepIDurl: "http.", ExpID: "Exp1", ExpName: "My Experiment", Purpose: "The purpose of ....", Conclusion: "Therefore..." , Comments: "No Comment", Keywords: "", ManuscriptUrl: "", Manuscripts: "", Design: "", Design_FCS_Count: "", MifScore: "", PResearcher: "", PInvestigator: "", UploadAuth: "", ExpDates: "", ExpStart: "", ExpEnd: "", UploadDate: "", LastUpdate: "", Organizations: "", Funding: "", QualControl: "", QualControlUrl: "", hasWSP: "no", Attachments: "", Event_total_K: "", Event_mean_K: "", FCS_count: "", FCS_total_MB: "", FCSVers: "", Cytometer: "LSRII")
+        
         var body : some View
         {
-            MIFlowCytView().offset(x: 36, y: 36)
+            MIFlowCytView(exp: frExp).offset(x: 36, y: 36)
         }
         
     }
@@ -151,14 +153,16 @@ struct ExperimentBrowser : View {
 //        }
 //        
 //    }
-    public var experimentDB = [FRExperiment]()
+    @State private var experimentDB = [FRExperiment]()
 
-    mutating func addFRExperiment(exp: FRExperiment)
+    func addFRExperiment(exp: FRExperiment)
     {
         experimentDB.append(exp)
     }
+    
+    
     @MainActor
-    mutating func  processDB(result: Result<URL, any Error> ) {
+    func  processDB(result: Result<URL, any Error> ) {
         switch result {
             case .success(let file):
                 Task {
@@ -178,22 +182,19 @@ struct ExperimentBrowser : View {
     }
     
     
-   mutating func parseCSV(fileUrl: URL) throws  {
+   func parseCSV(fileUrl: URL) throws  {
         let csvData = try Data(contentsOf: fileUrl)
         let csvString = String(data: csvData, encoding: .utf8)!
         var currentRow = ""
        var inQuotes = false
        var backslashed = false
         var parsedLines: [String] = []
-            //        var parsedData: [[String]] = []
         for char in csvString {
-            if backslashed  { backslashed.toggle(); continue}
-            if char == "\\" { backslashed.toggle(); continue }
-            if char == "\"" {
-                inQuotes.toggle()
-            } else if char == "\r\n" || char == "\n" && !inQuotes {
+//            if backslashed  { backslashed = false; continue}
+//            if char == "\\" { backslashed = true; continue }
+            if char == "\"" { inQuotes.toggle()            }
+            if (char == "\r\n" || char == "\n") && !inQuotes {
                 parsedLines.append(currentRow)
-//                parsedData.append()
                 let fields = parseLine(currentRow)
                 if (fields.count > 12 && fields[0].starts(with: "FR-FCM")) {
                     addFRExperiment(exp: FRExperiment(tokens: fields))
@@ -221,39 +222,21 @@ struct ExperimentBrowser : View {
         var currentBuffer = ""
         
         for char in csvString {
-            if backslashed  { backslashed.toggle(); continue}
-            if char == "\\" { backslashed.toggle(); continue }
-            if char == "\""     { inQuotes.toggle() }
+//            if backslashed  { backslashed = false; continue}
+//            if char == "\\" { backslashed = true; continue }
+            if char == "\"" { inQuotes.toggle() }
             else if char == "," && !inQuotes {
                 fields.append(currentBuffer)
                 currentBuffer = ""
             } else { currentBuffer.append(char)  }
         }
+        if currentBuffer.count > 0 {
+            fields.append(currentBuffer)
+        }
         return fields
         
     }
-        // Example usage:
-        
-            //        if let filepath = Bundle.main.path(forResource: inputFile, ofType: nil) {
-//            do {
-//                let fileContent = try String(contentsOfFile: filepath)
-//                let lines = fileContent.components(separatedBy: "\n")
-//                var results: [String:String] = [:]
-//                lines.dropFirst().forEach { line in
-//                    let data = line.components(separatedBy: ",")
-//                    if data.count == 2 {
-//                        results[data[0]] = data[1]
-//                    }
-//                }
-//                return results
-//            } catch {
-//                print("error: \(error)") // to do deal with errors
-//            }
-//        } else {
-//            print("\(inputFile) could not be found")
-//        }
-//        return [:]
-     
+ 
   
          
             //        }
@@ -283,25 +266,25 @@ struct ExperimentBrowser : View {
     
         //---------------------------------------------------------------------------
         // Model
-    
-    @Observable
-    public class XTable : Usable  //, Hashable
-    {
-        public static func == (lhs: XTable, rhs: XTable) -> Bool {
-            lhs.id == rhs.id
-        }
-        
-//        public func hash(into hasher: inout Hasher) {
-//            hasher.combineMany(id, primary,keywords, experiement, species, date )
+//    
+//    @Observable
+//    public class XTable : Usable  //, Hashable
+//    {
+//        public static func == (lhs: XTable, rhs: XTable) -> Bool {
+//            lhs.id == rhs.id
 //        }
-        
-        public var id = UUID()
-        public  var name = "FlowRepository Metadata"
-        public var items = [FRExperiment]()
-        
-        init() {    }
-    }
-    
+//        
+////        public func hash(into hasher: inout Hasher) {
+////            hasher.combineMany(id, primary,keywords, experiement, species, date )
+////        }
+//        
+//        public var id = UUID()
+//        public  var name = "FlowRepository Metadata"
+////        public var items = [FRExperiment]()
+//        
+//        init() {    }
+//    }
+//    
 
 
 //    public struct XColumn : Identifiable, Hashable, Codable
@@ -354,11 +337,9 @@ struct ExperimentBrowser : View {
                                 KeyPathComparator(\FRExperiment.Comments, order: .forward)   ]
         @State var columnCustomization = TableColumnCustomization<FRExperiment>()
         
-        let table =  XTable()
-        
         public var body: some View {
                 //            Table (of: TColumn.Type, selection: $selectedColumns)
-            Table (selection: $selection, sortOrder: $sortOrder, columnCustomization: $columnCustomization)
+            Table (of: FRExperiment.self, selection: $selection, sortOrder: $sortOrder, columnCustomization: $columnCustomization)
             {
                 TableColumn("RepID", value: \.RepID){ col in Text(col.RepID)}
                     .width(min: 130, ideal: 180)
@@ -412,7 +393,7 @@ struct ExperimentBrowser : View {
                 
             }
         rows: {
-            ForEach(table.items)  { col in TableRow(col) }
+            ForEach(experimentDB)  { exp in TableRow(exp) }
                 //                ForEach(cols) { col in TableRow(TColumn).itemProvider { TColumn.itemProvider }  }
                 //                    .onInsert(of: [TColumn.draggableType]) { index, providers in
                 //                        TColumn.fromItemProviders(providers) { cols in
@@ -430,15 +411,9 @@ struct ExperimentBrowser : View {
 //                }
                 //            .opacity(mode == .table ? 1.0 : 0.3)
         }
-//
-//        func newTableItem(node:AnalysisNode, position:CGPoint)
-//        {
-//            table.items.append(TColumn("", parm: "Keyword", stat: "Date"))
-//            table.items.append(TColumn(node.name, parm: "CD3", stat: "Median"))
-//            table.items.append(TColumn(node.name, parm: "CD3", stat: "CV"))
-//            print("new table item: ", node.name)
-//        }
-//        
+
+    }
+    struct TableRow<FRExperiment> {
         
     }
 }

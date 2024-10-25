@@ -33,46 +33,46 @@ struct MIFlowCyt
 
 struct MIFlowCytView : View
 {
-    var rec = MIFlowCyt(ExperimentName: "20241001", Purpose: "Test Experiment", Conclusion: "Browser works",
-                        Keywords: ["Key", "Value"],  Variables: ["Key", "Value"], Score: 1.0,
-                        StartDate: Date(), EndDate: Date(), Uploaded: Date(), LastUpdated:Date(),
-                        RepositoryID: "ACB", Manuscripts: "Manuscripts",
-                        PrimaryResearcher: "Adam", Manager: "Adam", UploadedBy: "Adam", Organizations: "Cytegeist")
+//    var rec = MIFlowCyt(ExperimentName: "20241001", Purpose: "Test Experiment", Conclusion: "Browser works",
+//                        Keywords: ["Key", "Value"],  Variables: ["Key", "Value"], Score: 1.0,
+//                        StartDate: Date(), EndDate: Date(), Uploaded: Date(), LastUpdated:Date(),
+//                        RepositoryID: "ACB", Manuscripts: "Manuscripts",
+//                        PrimaryResearcher: "Adam", Manager: "Adam", UploadedBy: "Adam", Organizations: "Cytegeist")
+//    
     
-    
-    
+    var exp: FRExperiment
     var body: some View {
         VStack {
 //            Spacer(minLength: 36, maxLength: 36)
             HStack
             {
-                Text(rec.PrimaryResearcher)
+                Text(exp.PResearcher)
                 Text("Experiment:").frame(width: 120)
-                Text(rec.ExperimentName)
+                Text(exp.ExpName)
                 Spacer()
             }
             HStack
             {
                 Text("Purpose:") .font(.title3).frame(width: 120, alignment: .leading)
-                Text(rec.Purpose)
+                Text(exp.Purpose)
                 Spacer()
             }
             HStack
             {
                 Text("Conclusion:")  .font(.title3).frame(width: 120, alignment: .leading)
-                Text(rec.Conclusion)
+                Text(exp.Conclusion)
                 Spacer()
             }
             HStack
             {
                 Text("Variables:") .font(.title3).frame(width: 120, alignment: .leading)
-                Text(rec.Variables.joined())
+                Text(exp.Keywords )
                 Spacer()
             }
             HStack
             {
                 Text("Organizations:") .font(.title3).frame(width: 120, alignment: .leading)
-                Text(rec.Organizations)
+                Text(exp.Organizations)
                 Spacer()
             }
             HStack
@@ -80,26 +80,26 @@ struct MIFlowCytView : View
                 VStack {
                     HStack {
                         Text("Start:") .font(.title3)
-                        Text(dateFormatter.string(from: rec.StartDate))
+                        Text(exp.ExpStart)
                         Spacer()
                     }
                     HStack {
                         
                         Text("End:").font(.title3)
-                        Text(dateFormatter.string(from: rec.EndDate))
+                        Text(exp.ExpEnd)
                         Spacer()
                     }
                 }.frame(width: 120, alignment: .leading)
                 VStack {
                     HStack {
                         Text("Uploaded:") .font(.title3)
-                        Text(dateFormatter.string(from: rec.Uploaded))
+                        Text(exp.UploadDate)
                         Spacer()
                     }
                     HStack {
                         
                         Text("Last Update:").font(.title3)
-                        Text(dateFormatter.string(from: rec.LastUpdated))
+                        Text(exp.LastUpdate)
                         Spacer()
                     }
                     
@@ -109,8 +109,8 @@ struct MIFlowCytView : View
             HStack
             {
                 Text("FlowRepository ID:").font(.title3)
-                Text(rec.RepositoryID)
-                Text(rec.Manuscripts)
+                Text(exp.RepID)
+                Text(exp.Manuscripts)
                 Spacer()
             }//.border(0.4)
             Spacer()
@@ -132,7 +132,11 @@ struct MIFlowCytView : View
 
 
 
-public struct FRExperiment : Identifiable, Codable, Hashable{
+public class FRExperiment : Identifiable, Codable {
+    public static func == (lhs: FRExperiment, rhs: FRExperiment) -> Bool {
+        lhs.id == rhs.id
+    }
+    
     public var id = UUID()
     var RepID: String = ""
     var RepIDurl: String = ""
@@ -175,11 +179,11 @@ public struct FRExperiment : Identifiable, Codable, Hashable{
     init (tokens: [String])
     {
         print (tokens.count)
-        if (tokens.count > 12) {
+        if (tokens.count > 31) {
             self.RepID =  tokens[0]
             self.RepIDurl =  tokens[1]
             self.ExpID =  tokens[2]
-            self.ExpName =  tokens[03]
+            self.ExpName =  tokens[3]
             self.Purpose =  tokens[4]
             self.Conclusion =  tokens[5]
             self.Comments =  tokens[6]
@@ -187,8 +191,28 @@ public struct FRExperiment : Identifiable, Codable, Hashable{
             self.ManuscriptUrl =  tokens[8]
             self.Manuscripts =  tokens[9]
             self.Design =  tokens[10]
-            self.Design_FCS_Count =  tokens[11]
-            
+            self.MifScore =  tokens[11]
+            self.PResearcher =  tokens[12]
+            self.PInvestigator =  tokens[13]
+            self.UploadAuth =  tokens[14]
+            self.ExpDates =  tokens[15]
+            self.ExpStart =  tokens[16]
+            self.ExpEnd =  tokens[17]
+            self.UploadDate =  tokens[18]
+            self.LastUpdate =  tokens[19]
+            self.Organizations =  tokens[20]
+            self.Funding =  tokens[21]
+            self.QualControl =  tokens[22]
+            self.QualControlUrl =  tokens[23]
+            self.hasWSP =  tokens[24]
+            self.Attachments =  tokens[25]
+            self.Event_total_K =  tokens[26]
+            self.Event_mean_K =  tokens[27]
+            self.FCS_count =  tokens[28]
+            self.FCS_total_MB =  tokens[29]
+            self.FCSVers =  tokens[30]
+            self.Cytometer =  tokens[31]
+
         }
 //        
 //        , RepIDurl: token[1], ExpID: token[2], ExpName: token[3], Purpose: token[4], Conclusion: token[5], Comments: token[6], Keywords: token[7], ManuscriptUrl: token[8], Manuscripts: token[9], Design: token[10], Design_FCS_Count: token[11], MifScore: token[12], PResearche: token[13], PInvestigator: token[14], UploadAuth: token[15], ExpDates: token[16], ExpStart: token[17], ExpEnd: token[18], UploadDate: token[19], LastUpdate: token[20], Organizations: token[21], Funding: token[22], QualControl: token[23], QualControlUrl: token[24], hasWSP: token[25], Attachments: token[26], Event_total_K: token[27], Event_mean_K: token[28], FCS_count: token[29], FCS_total_MB: token[30], FCSVers: token[31], Cytometer: token[32]
