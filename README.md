@@ -6,8 +6,10 @@ Data analysis for flow cytometry files (FCS)
 The primary model object is **Experiment **
 
 It contains a list of **Samples**
+
 	**Samples** have a URL to the data file
 	They have a **meta** dictionary containing ~100 keyword-value pairs
+    
 	A Sample contains an AnalysisNode called **tree**, 
 
 	AnalysisNodes have a list of **children**, which are also AnalysisNodes
