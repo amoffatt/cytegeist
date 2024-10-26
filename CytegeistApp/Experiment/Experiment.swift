@@ -13,10 +13,18 @@ import SwiftUI
 import SwiftData
 import CObservation
 
-@CObservable
-class AnalysisNodeSelection: CObject, Codable {
-    var nodes: Set<AnalysisNode> = []
+//@MainActor
+//@CObservable
+@Observable
+class AnalysisNodeSelection: Codable {
+    
+    // AM DEBUGGING
+    var nodes: Set<AnalysisNode> = [] //{ [] }
     var first:AnalysisNode? { nodes.first }
+    
+//    public override init() {
+////        self.nodes = []
+//    }
 }
 
 
@@ -58,7 +66,9 @@ public class Experiment : CObject
         print("Experiment \(name) ")
         self.name = name
         self.version = version
+        super.init()
     }
+    
     public func encode(to encoder: Encoder) throws {
             // Do nothing
     }
@@ -154,7 +164,7 @@ public class Experiment : CObject
         }
         
         do  {
-            let sample = Sample(ref: SampleRef(url: url))
+            let sample = withContext { Sample(ref: SampleRef(url: url)) }
             sample.setUp(core:core)
             addSample(sample)
         }

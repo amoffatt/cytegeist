@@ -21,7 +21,7 @@ struct CytegeistApp: SwiftUI.App {
         #if os(macOS)
             Window("Experiment", id: "nav")
             {
-                ExperimentView().environment(appModel)
+                ExperimentWindow().environment(appModel)
 //                     .modelContainer(for:  Experiment.self, isUndoEnabled: true)
             }
             .commands {

@@ -32,9 +32,6 @@ enum ReportMode: String, CaseIterable, Identifiable, Codable {
 
 struct ExperimentView : View {
    
-    @Environment(App.self) var app: App
-    @Environment(\.undoManager) var undoManager
-
 //    var mode:ReportMode { app.reportMode }
     
 //    @State private var path = [Int]()
@@ -42,53 +39,38 @@ struct ExperimentView : View {
     @State  var sampleIdealWidth: CGFloat  = 800
     @State var analysisMinWidth: CGFloat  = 12
     @State  var analysisIdealWidth: CGFloat  = 800
+    
+    let experiment: Experiment
 
 
     var body: some View {
-        @Bindable var app = app
-        
-        Print("App UndoManager: \(undoManager)")
         
         // AM Note: If we need to support Pre-macOS13, see https://developer.apple.com/documentation/swiftui/migrating-to-new-navigation-types
         NavigationSplitView {
             Sidebar()
         }
-        content:
-        {
-                Group {
-                    if let selected = app.getSelectedExperiment(createIfNil: true) {
-                        HSplitView {
-                            SampleList(experiment: selected)
-                                .frame(minWidth: sampleMinWidth, idealWidth: sampleIdealWidth, maxWidth: .infinity, maxHeight: .infinity)
-                            
-                            AnalysisList()
-                                .frame(minWidth: analysisMinWidth, idealWidth: analysisIdealWidth, maxWidth: .infinity, maxHeight: .infinity)
-//                                .fillAvailableSpace()
-                        }
-                        .environment(selected)
-                        .environment(selected.core)
-                        .onChange(of: selected.selectedSamples) {
-                            selected.clearAnalysisNodeSelection()
-                        }
-
-                    } else {
-                        ZStack {
-                            VStack {
-                                Text("No experiment selected...")
-                                Button("Create New Experiment") {
-                                    app.createNewExperiment()
-                                }
-                            }
-                        }
-                    }
+        content: {
+            Group {
+                HSplitView {
+                    SampleList(experiment: experiment)
+                        .frame(minWidth: sampleMinWidth, idealWidth: sampleIdealWidth, maxWidth: .infinity, maxHeight: .infinity)
+                    
+                    AnalysisList()
+                        .frame(minWidth: analysisMinWidth, idealWidth: analysisIdealWidth, maxWidth: .infinity, maxHeight: .infinity)
+                    //                                .fillAvailableSpace()
                 }
-                .frame(minWidth: 150, idealWidth: 800, maxWidth: .infinity)
-                .fillAvailableSpace()
-                .navigationSplitViewColumnWidth(min: 72, ideal: 1600, max: .infinity)
-
+                .environment(experiment)
+                .environment(experiment.core)
+                .onChange(of: experiment.selectedSamples) {
+                    experiment.clearAnalysisNodeSelection()
+                }
+            }
+            .frame(minWidth: 150, idealWidth: 800, maxWidth: .infinity)
+            .fillAvailableSpace()
+            .navigationSplitViewColumnWidth(min: 72, ideal: 1600, max: .infinity)
+            
         }
         detail: {
-            if let experiment = app.getSelectedExperiment() {
                 VStack {        // AM: VStack leads to better compile error messages than Group when the below code breaks (!?)
                     switch experiment.reportMode {
               
@@ -112,15 +94,7 @@ struct ExperimentView : View {
                     )
                     ReportModePicker(mode: binding)
                 }
-            }
-            else {
-                Text("Select an Experiment")
-            }
-            
          }
-        .onAppear {
-            app.getSelectedExperiment(autoselect: true, createIfNil: true)
-        }
     }
 }
     

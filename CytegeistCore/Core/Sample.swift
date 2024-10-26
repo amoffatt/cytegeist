@@ -25,10 +25,6 @@ public enum SampleError : Error {
 @CObservable
 public class Sample : CObject, Codable
 {
-    public static func == (lhs: Sample, rhs: Sample) -> Bool {
-        lhs.id == rhs.id
-    }
-    
     var sampleId = ""
     
     var ref:SampleRef? = nil
@@ -137,7 +133,42 @@ public class Sample : CObject, Codable
 //            //            }
 //            //        }
 //    }
+    
+//    internal func testWithMutation<Member, MutationResult>(
+//        keyPath: ReferenceWritableKeyPath<Sample, Member>,
+//        _ mutation: () throws -> MutationResult
+//    ) rethrows -> MutationResult {
+//        let initialValue = self[keyPath: keyPath]
+//        let result = try _$observationRegistrar.withMutation(of: self, keyPath: keyPath, mutation)
+//        let finalValue = self[keyPath: keyPath]
+//
+//        self[keyPath: keyPath] = initialValue
+//      if let undoManager = _context?.undoManager {
+//          undoManager.registerUndo(withTarget:self) { target in
+//          target[keyPath: keyPath] = initialValue
+//        }
+//      }
+//        return result
+//    }
+//    
+    
 }
+
+// AM DEBUGGING
+//}: Observation.Observable, AnyObject {
+//class TestObject {
+//    internal nonisolated mutating func testWithMutation<Member>(
+//        keyPath: ReferenceWritableKeyPath<TestObject, Member>,
+//        _ mutation: () throws -> Void
+//    ) rethrows {
+//        let initialValue = self[keyPath: keyPath]
+//        try mutation()
+//        let finalValue = self[keyPath: keyPath]
+//
+//        self[keyPath: keyPath] = initialValue
+//    }
+//}
+
 
 import UniformTypeIdentifiers
 

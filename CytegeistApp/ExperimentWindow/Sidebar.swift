@@ -19,7 +19,7 @@ struct Sidebar : View {
         case history
     }
 
-    @Environment(App.self) var app: App
+    @Environment(Experiment.self) var experiment:Experiment?
     @SceneStorage("expansionState1") var expansionState1 = ExpansionState()
     @SceneStorage("expansionState2") var expansionState2 = ExpansionState()
     @SceneStorage("expansionState3") var expansionState3 = ExpansionState()
@@ -61,7 +61,7 @@ struct Sidebar : View {
 //                        VStack {
                             @State var panelselection: SidebarPanelSelection? = nil
                             List(selection: $panelselection) {
-                                if  let exp = app.getSelectedExperiment()  {
+                                if  let exp = experiment  {
                                     DisclosureGroup("Panels", isExpanded: $expansionState1[-1]) {
                                         ForEach(exp.panels) { panel in
                                             SidebarPanelLabel(sidebar: self, panel: panel, section: .current)
@@ -105,7 +105,7 @@ struct Sidebar : View {
  
                 @State var groupselection: SidebarGroupSelection? = nil
                 List(selection: $groupselection) {
-                    if  let exp = app.getSelectedExperiment() {
+                    if  let exp = experiment {
                         DisclosureGroup("Groups", isExpanded: $expansionState2[-1]) {
                             ForEach(exp.groups) { group in
                                 SidebarGroupLabel(sidebar: self, group: group, section: .current)  //
@@ -175,9 +175,11 @@ struct Sidebar : View {
     
     func addGroup()
     {
-        app.getSelectedExperiment()!.groups.append(
-            CGroup(name: groupName, color: groupColor, keyword: keyword, value: value))
-        print (app.getSelectedExperiment()!.groups.count)
+        if let experiment {
+            experiment.groups.append(
+                CGroup(name: groupName, color: groupColor, keyword: keyword, value: value))
+            print (experiment.groups.count)
+        }
             //        showAlert = true
     }
     func addNodesToGroup(_ nodes: [AnalysisNode], _ groupName: String)

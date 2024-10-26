@@ -22,8 +22,8 @@ final class App {
     }
     var immersiveSpaceState = ImmersiveSpaceState.closed
     
-    var experiments: [Experiment] = []
-    var selectedExperiment: Experiment.ID?
+//    var experiments: [Experiment] = []
+//    var selectedExperiment: Experiment.ID?
 //    var mode: SampleListMode = .table
 //    var reportMode: ReportMode = .gating
     
@@ -94,9 +94,9 @@ final class App {
 //    }
     
         //-------------------------------------------------------------------------
-  func append(_ experiment: Experiment) {
-        experiments.append(experiment)
-    }
+//  func append(_ experiment: Experiment) {
+//        experiments.append(experiment)
+//    }
     
         //-------------------------------------------------------------------------
     
@@ -104,41 +104,41 @@ final class App {
     /// If autoselect is true, will selected and eturn the most recently modified experiment
     /// if createIfNil is true, will create a new experiment if none already exist
     // AM DEBUGGING DELETE this, replace with ModelList
-    @discardableResult
-    func getSelectedExperiment(autoselect:Bool = false, createIfNil:Bool = false) -> Experiment?
-    {
-        if let selectedExperiment {
-            if let exp = experiments.first(where: { $0.id == selectedExperiment}) {
-                return exp
-            }
-        }
-//        if autoselect, let recent = recentExperiments.first {
-//            selectedExperiment = recent.id
-//            return recent
+//    @discardableResult
+//    func getSelectedExperiment(autoselect:Bool = false, createIfNil:Bool = false) -> Experiment?
+//    {
+//        if let selectedExperiment {
+//            if let exp = experiments.first(where: { $0.id == selectedExperiment}) {
+//                return exp
+//            }
 //        }
-        if createIfNil {
-            let exp = recentExperiments.first ?? createNewExperiment()
-            selectedExperiment = exp.id
-            return exp
-        }
-        return nil
-    }
+////        if autoselect, let recent = recentExperiments.first {
+////            selectedExperiment = recent.id
+////            return recent
+////        }
+//        if createIfNil {
+//            let exp = recentExperiments.first ?? createNewExperiment()
+//            selectedExperiment = exp.id
+//            return exp
+//        }
+//        return nil
+//    }
     
-    @discardableResult
-    func createNewExperiment() -> Experiment {
-        let exp = Experiment()
-        let names = experiments.map { $0.name }
-        exp.name = exp.name.generateUnique(existing: names)
-        experiments.append(exp)
-        selectedExperiment = exp.id
-        return exp
-    }
+//    @discardableResult
+//    func createNewExperiment() -> Experiment {
+//        let exp = Experiment()
+//        let names = experiments.map { $0.name }
+//        exp.name = exp.name.generateUnique(existing: names)
+//        experiments.append(exp)
+//        selectedExperiment = exp.id
+//        return exp
+//    }
     
     func removeExperiment(_ experiment:Experiment) {
-        experiments.removeAll { $0.id == experiment.id }
-        if selectedExperiment == experiment.id {
-            selectedExperiment = experiments.sorted(by: \.modifiedDate).first?.id
-        }
+//        experiments.removeAll { $0.id == experiment.id }
+//        if selectedExperiment == experiment.id {
+//            selectedExperiment = experiments.sorted(by: \.modifiedDate).first?.id
+//        }
         
     }
     
@@ -171,11 +171,13 @@ final class App {
 extension App {
     
     func experimentsModified(year: Int) -> [Experiment] {
-        experiments.filter({ $0.modifiedDate[.year] == year })
+//        experiments.filter({ $0.modifiedDate[.year] == year })
+        []
     }
     
     var recentExperiments:[Experiment] {
-        experiments.sorted(by: \.modifiedDate)
+//        experiments.sorted(by: \.modifiedDate)
+        []
     }
 //    
 //    var experimentsByYearCreated:[(year:Int, experiments:[Experiment])] {

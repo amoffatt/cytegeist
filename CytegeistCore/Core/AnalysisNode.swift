@@ -7,17 +7,16 @@
 import Foundation
 import SwiftUI
 import UniformTypeIdentifiers.UTType
-import CObservation
 import CytegeistLibrary
 
 public extension UTType {  static var population = UTType(exportedAs: "cytegeist.population")   }
 enum AnalysisNodeError : Error {  case noSampleRef      }
 //---------------------------------------------------------
-
-@CObservable
-public class AnalysisNode : CObject, Codable, Transferable, CustomStringConvertible
+@Observable
+public class AnalysisNode : Codable, Transferable, Identifiable, Hashable, CustomStringConvertible
 {
     
+    public var id = UUID()
     public var name: String = ""
     public var description: String = ""
     public var sample: Sample? = nil                      // nil except at the root node
@@ -51,14 +50,17 @@ public class AnalysisNode : CObject, Codable, Transferable, CustomStringConverti
     
     
         //--------------------------------------------------------
+    public static func == (lhs: AnalysisNode, rhs: AnalysisNode) -> Bool {   lhs.id == rhs.id  }
+    public func hash(into hasher: inout Hasher) {        hasher.combine(id)    }
     public static var transferRepresentation: some TransferRepresentation {
         CodableRepresentation(contentType: UTType.population)
     }
         //--------------------------------------------------------
-//    public init() {    }
+    public init() {    }
     
     public required init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
+        self._id = try container.decode(UUID.self, forKey: ._id)
         self._name = try container.decode(String.self, forKey: ._name)
         self._sample = try container.decodeIfPresent(Sample.self, forKey: ._sample)
         self._graphDef = try container.decode(ChartDef.self, forKey: ._graphDef)
@@ -94,7 +96,7 @@ public class AnalysisNode : CObject, Codable, Transferable, CustomStringConverti
         self.graphDef = original.graphDef
         self.statistics = [:]
         self.children = []
-        self._parent = nil
+        self.parent = nil
         self.gate = original.gate
         self.invert = original.invert
         self.color = original.color ?? .green
@@ -103,7 +105,8 @@ public class AnalysisNode : CObject, Codable, Transferable, CustomStringConverti
 
 
         //--------------------------------------------------------
-    public func getSample() -> Sample? 
+    @MainActor
+    public func getSample() -> Sample?
     { 
         let s: Sample? = sample ?? parent?.getSample()
         
@@ -114,6 +117,7 @@ public class AnalysisNode : CObject, Codable, Transferable, CustomStringConverti
         return s
         
     }       //AT?
+    @MainActor
     public func getSampleMeta() -> FCSMetadata? { getSample()?.meta }
     
     public func path() -> String { return "/" + (parent?.path() ?? name)  }
@@ -213,6 +217,7 @@ public class AnalysisNode : CObject, Codable, Transferable, CustomStringConverti
     }
 
 //--------------------------------------------------------
+    @MainActor
     public func createRequest() throws -> PopulationRequest {
         // AM could lead to undefined behavior if sample/gate are not set as expected
         if let gate, let parent {
@@ -240,6 +245,7 @@ public class AnalysisNode : CObject, Codable, Transferable, CustomStringConverti
         )
     }
  
+    @MainActor
     public func visibleChildren(_ chartDef:ChartDef) -> [ChartAnnotation] {
         let dims = getChartDimensions(chartDef)
         let result = children.compactMap { child in
@@ -248,6 +254,7 @@ public class AnalysisNode : CObject, Codable, Transferable, CustomStringConverti
         return result
     }
    
+    @MainActor
     public func getChartDimensions(_ chartDef:ChartDef?) -> Tuple2<CDimension?> {
         guard let chartDef, let sampleMeta = getSampleMeta() else {
             return .init(nil, nil)

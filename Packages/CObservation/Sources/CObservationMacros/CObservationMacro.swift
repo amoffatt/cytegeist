@@ -91,18 +91,25 @@ public struct CObservableMacro {
   static func withMutationFunction(_ observableType: TokenSyntax) -> DeclSyntax {
     return
       """
-      internal nonisolated func withMutation<Member, MutationResult>(
-      keyPath: WritableKeyPath<\(observableType), Member>,
+      internal func withMutation<Member, MutationResult>(
+      keyPath: ReferenceWritableKeyPath<\(observableType), Member>,
       _ mutation: () throws -> MutationResult
       ) rethrows -> MutationResult {
       let initialValue = self[keyPath: keyPath]
       let result = try \(raw: registrarVariableName).withMutation(of: self, keyPath: keyPath, mutation)
       let finalValue = self[keyPath: keyPath]
-      print(self, " Value changed from ", initialValue, " to ", finalValue)
+        
+        if let undoManager = _context?.undoManager {
+          undoManager.registerUndo(withTarget: self) { target in
+            target[keyPath: keyPath] = initialValue
+          }
+        }
       return result
       }
       """
+      // AM DEBUGGING work out the proper argument type to registerUndo handler().
   }
+    //      print(self, " Value changed from ", initialValue, " to ", finalValue)
 
   static var ignoredAttribute: AttributeSyntax {
     AttributeSyntax(
@@ -128,6 +135,7 @@ struct ObservationDiagnostic: DiagnosticMessage {
     self.message = message
     self.diagnosticID = diagnosticID
     self.severity = severity
+      
   }
   
   init(message: String, domain: String, id: ID, severity: SwiftDiagnostics.DiagnosticSeverity = .error) {
