@@ -36,6 +36,7 @@ struct FlowRepoDetailView : View
                     Spacer()
                     Text(exp.RepID)
                     Spacer()
+                    
                     Text("Score: " + exp.MifScore)
                     Spacer()
                 }
@@ -45,6 +46,29 @@ struct FlowRepoDetailView : View
                 Text(exp.ExpName).font(.title2)
                 Spacer()
             }
+        }.toolbar(content: {
+            Button("Repository", action: repo)
+            if !exp.ManuscriptUrl.isEmpty {
+                Button("Manuscript", action: opener)
+            }
+        })
+    }
+    func repo()
+    {
+        @Environment(\.openURL) var openURL
+        let flowrepo = "http://flowrepository.org/id/"
+        if let url = URL(string: flowrepo + exp.RepID) {
+            openURL(url)
+        }
+    }
+    func opener()
+    {
+        @Environment(\.openURL) var openURL
+       let pubmed = "http://www.ncbi.nlm.nih.gov/pubmed/"
+        let brackets: CharacterSet =   CharacterSet(["[" ,"]"])
+        let id = exp.ManuscriptUrl.trimmingCharacters(in: brackets)
+        if let url = URL(string: pubmed + id) {
+            openURL(url)
         }
     }
 

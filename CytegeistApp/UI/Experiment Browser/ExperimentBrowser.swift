@@ -18,35 +18,27 @@ struct ExperimentBrowser : View {
     @Environment(App.self) var app: App
 
     var body: some View {
-        
-    NavigationSplitView {    browserSidebar    }
-    content:        {
-        panelA
-           .navigationSplitViewColumnWidth(min: 200, ideal: 700, max: .infinity)
+        NavigationSplitView {    browserSidebar    }
+        content:        {
+            panelA.navigationSplitViewColumnWidth(min: 200, ideal: 700, max: .infinity)
+        }
+        detail: {
+            panelB.navigationSplitViewColumnWidth(min: 300, ideal: 600, max: .infinity)
+            
+        }
+        .task {   getDataFromSheet()     }
     }
-    detail: {
-        panelB
-            .navigationSplitViewColumnWidth(min: 300, ideal: 600, max: .infinity)
-        
-    }
-    .task {   getDataFromSheet()     }
-    }
+    //-------------------------------------------------------------------
     @State var showImporter = false
     @State var firstManuscript = false
     @State var hasWorkspace = false
     @State var useCytof = false
     @State var cytof = false
     @State var searchText: String = ""
-//-------------------------------------------------------------------
  
   //-------------------------------------------------------------------
-   @ViewBuilder
     var browserSidebar :  some View {
-        
-  //      var body :  View   {
-//            Text("Servers").font(.title2)
-//            Text("Local").font(.title3)
-//            Text("OMIPS").font(.title3)
+
         VStack {
             Text("FlowRepository").font(.title3)
             Text("\(filteredExperiments.count) of \(experimentDB.count)")
@@ -71,21 +63,10 @@ struct ExperimentBrowser : View {
                 Spacer()
             }
         }.padding(20)
-//      }
     }
     
     var panelA: some View {
         FRExperimentTable(selection:$selectedExperiment, sortOrder: $sortOrder, experiments:filteredExperiments)
-//   .toolbar {
-//        ToolbarItem(placement: .primaryAction) {
-//            HStack {
-//                Text("\(filteredExperiments.count) of \(experimentDB.count)")
-//                Buttons.toolbar("Manuscript", Icon("document")) {  }
-//                Buttons.toolbar("FlowRepo Page", Icon("cloud")) {
-//                
-//                }
-//            } }
-//    }
     }
     @ViewBuilder
     var panelB : some View {
@@ -93,7 +74,7 @@ struct ExperimentBrowser : View {
         
         if let experiment {
             FlowRepoDetailView(exp: experiment)
-                .offset(x: 16, y: 36)
+                .offset(x: 16, y: 16)
         } else {
             Text("Select an experiment")
         }
@@ -150,11 +131,12 @@ struct ExperimentBrowser : View {
         }
         
     }
-
+    let debug = false
     var filteredExperiments: [FRExperiment] {
         
         var   experiments = experimentDB.filter {
                
+            if (!debug && $0.RepID.prefix(6) != "FR-FCM") {  return false  }
             if (hasWorkspace && $0.hasWSP.isEmpty) {  return false  }
             if (useCytof && ($0.cytof != cytof)) {  return false  }
             if (firstManuscript && !$0.firstManuscript) {  return false  }
@@ -162,8 +144,7 @@ struct ExperimentBrowser : View {
             return true
         }
         
-        return experiments
-            .sorted(using: sortOrder)
+        return experiments.sorted(using: sortOrder)
     }
  
     public struct FRExperimentTable : View {
@@ -206,7 +187,6 @@ struct ExperimentBrowser : View {
         
         @Binding var selection:FRExperiment.ID?
         @Binding var sortOrder:[KeyPathComparator<FRExperiment>]
-
         @State var columnCustomization = TableColumnCustomization<FRExperiment>()
         
         let experiments:[FRExperiment]
@@ -223,11 +203,7 @@ struct ExperimentBrowser : View {
                 }
             }
             .frame(minWidth: 300, idealWidth: 600)
-//                        .onChange(of: sortOrder) { _ in
-//                            experiments.sort(using: sortOrder)
-//                        }
         }
-        
     }
     //--------------------------------------------------------------------------------------
     @MainActor
@@ -242,7 +218,6 @@ struct ExperimentBrowser : View {
                         let csvString = String(data: csvData, encoding: .utf8)!
                         allManuscripts.removeAll()
                         parseCSV(csvString)
-                            //                                    print(parsedData)
                     } catch {
                         print("Error fetching CSV file: \(error)")
                     }
