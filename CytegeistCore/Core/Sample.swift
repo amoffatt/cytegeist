@@ -125,7 +125,7 @@ public class Sample : Identifiable, Codable, Hashable
     
     @Transient private var _tree:AnalysisNode = AnalysisNode()
     public func getTree() -> AnalysisNode {
-        _tree.sample = self
+        _tree.sampleID = self.id
         return _tree
 
 //        if _tree == nil {

@@ -49,6 +49,8 @@ public class Experiment : Usable
     
 //    @Transient 
     var core: CytegeistCoreAPI = CytegeistCoreAPI()
+    
+    var defaultBatchContext: BatchContext { .init(allSamples: samples) }
 
 //  @Transient
 //    var _core: CytegeistCoreAPI?

@@ -113,6 +113,38 @@ public extension String {
     func nonEmpty(_ defaultValue:String) -> String {
         self.isEmpty ? defaultValue : self
     }
+    
+    
+    func contains(_ find: String) -> Bool{
+        return self.range(of: find) != nil
+    }
+    
+    func containsIgnoringCase(_ find: String) -> Bool{
+        return self.range(of: find, options: .caseInsensitive) != nil
+    }
+    func preprocessK() -> String{
+        if let idx = firstIndex(of: ".")
+        {
+            let str = prefix(upTo: idx)
+            if str.count > 4 {
+                return str.prefix(str.count-3)  + "M"
+            }
+            return str + "K"
+        }
+        return self
+    }
+    
+    func preprocessM() -> String{
+        if let idx = firstIndex(of: ".")
+        {
+            let str = prefix(upTo: idx)
+            if str.count > 4 {
+                return str.prefix(str.count-3)  + "G"
+            }
+            return str + "M"
+        }
+        return self
+    }
 
 }
 

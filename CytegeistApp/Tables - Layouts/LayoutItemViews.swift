@@ -105,11 +105,18 @@ struct CChartView : View {
     @Environment(CytegeistCoreAPI.self) var core:CytegeistCoreAPI
     
     var body: some View {
+        let chartDefBinding:Binding<ChartDef?> = .init {
+            item.node?.graphDef
+        } set: {
+            if let chartDef = $0 {
+                item.node?.graphDef = chartDef
+            }
+        }
             //        let bindableText:Binding<String> = .init(get: { item.value }, set: { item.value = $0 } )
 //        let sampleRef = SampleRef(url: DemoData.facsDivaSample0!)
         
         VStack {
-            ChartView(population: item.node, config: readOnlyBinding(item.node?.graphDef), editable: true)
+            ChartView(population: item.node, config: chartDefBinding, editable: true)
                 .padding(4)
                 .background(.black.opacity(0.1))
                 .cornerRadius(8)

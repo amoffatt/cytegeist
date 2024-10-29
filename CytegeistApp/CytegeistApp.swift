@@ -45,6 +45,7 @@ struct CytegeistApp: SwiftUI.App {
              
             Window("Pair Charts", id: "pair-charts") {
                 PairChartsPreview()
+                    .environment(BatchContext.empty)
             }
         
 //        WindowGroup(id: "sample-inspector", for: ExperimentSamplePair.self) { $sample in

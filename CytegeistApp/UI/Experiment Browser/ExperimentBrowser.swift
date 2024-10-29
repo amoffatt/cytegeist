@@ -16,151 +16,220 @@ import UniformTypeIdentifiers
 struct ExperimentBrowser : View {
     
     @Environment(App.self) var app: App
-    @State var showImporter = false
 
     var body: some View {
-//        @Bindable var app = app
         
-        NavigationSplitView {
-            BrowserSidebar()
-        }
-    content:
-        {
-            PanelA()
-//            TableBuilder()
-                .navigationSplitViewColumnWidth(min: 200, ideal: 700, max: .infinity)
-        }
+    NavigationSplitView {    browserSidebar    }
+    content:        {
+        panelA
+           .navigationSplitViewColumnWidth(min: 200, ideal: 700, max: .infinity)
+    }
     detail: {
+        panelB
+            .navigationSplitViewColumnWidth(min: 300, ideal: 600, max: .infinity)
+        
+    }
+    .task {   getDataFromSheet()     }
+    }
+    @State var showImporter = false
+    @State var firstManuscript = false
+    @State var hasWorkspace = false
+    @State var useCytof = false
+    @State var cytof = false
+    @State var searchText: String = ""
+//-------------------------------------------------------------------
+ 
+  //-------------------------------------------------------------------
+   @ViewBuilder
+    var browserSidebar :  some View {
+        
+  //      var body :  View   {
+//            Text("Servers").font(.title2)
+//            Text("Local").font(.title3)
+//            Text("OMIPS").font(.title3)
         VStack {
-            Button("Read DB", systemImage: "xmark.circle", action: { showImporter = true })
-                   .fileImporter(
-                       isPresented: $showImporter,
-                        allowedContentTypes: [.item]
-                   ) { result in processDB(result: result)   }
-            PanelB()
-         }
-        .navigationSplitViewColumnWidth(min: 300, ideal: 600, max: .infinity)
-        
-    }      .onAppear {
-//            readCSV()
-//        let fileUrl = URL(fileURLWithPath: "/path/to/your/csv/file.csv")
-//        do {
-//            let parsedData = try parseCSV(fileUrl: fileUrl, experimentDB: experimentDB)
-//            print(parsedData)
-//        } catch {
-//            print("Error parsing CSV file: \(error)")
-//        }
-        
-    }
-    }
-    
-        //
-    struct BrowserSidebar :  View {
-        
-        var body : some View   {
-            Text("Servers").font(.title2)
-            Text("Local").font(.title3)
-            Text("OMIPS").font(.title3)
             Text("FlowRepository").font(.title3)
-        }
-        
+            Text("\(filteredExperiments.count) of \(experimentDB.count)")
+            HStack {
+                Toggle("Unique manuscipts", isOn:  $firstManuscript)
+                Spacer()
+            }
+            HStack {
+                Toggle("Mass Cytometry", isOn: $useCytof)
+                Toggle("Include", isOn: $cytof)
+                Spacer()
+            }
+            HStack {
+                Toggle("Workspace Included", isOn:  $hasWorkspace)
+                Spacer()
+            }
+            HStack {
+                TextField("Search:", text: $searchText)
+                    .font(.body)
+                    .textFieldStyle(.roundedBorder)
+                    .padding(.trailing, 24)
+                Spacer()
+            }
+        }.padding(20)
+//      }
     }
     
-    struct PanelA :  View {
-        
-        var body : some View
-        {
-            XTableView()
-        }
-        
+    var panelA: some View {
+        FRExperimentTable(selection:$selectedExperiment, sortOrder: $sortOrder, experiments:filteredExperiments)
+//   .toolbar {
+//        ToolbarItem(placement: .primaryAction) {
+//            HStack {
+//                Text("\(filteredExperiments.count) of \(experimentDB.count)")
+//                Buttons.toolbar("Manuscript", Icon("document")) {  }
+//                Buttons.toolbar("FlowRepo Page", Icon("cloud")) {
+//                
+//                }
+//            } }
+//    }
     }
-    struct PanelB :  View {
+    @ViewBuilder
+    var panelB : some View {
+         let experiment = experimentDB.first { selectedExperiment == $0.id }
         
-   let  frExp: FRExperiment  = FRExperiment(RepID: "FR-FCM", RepIDurl: "http.", ExpID: "Exp1", ExpName: "My Experiment", Purpose: "The purpose of ....", Conclusion: "Therefore..." , Comments: "No Comment", Keywords: "", ManuscriptUrl: "", Manuscripts: "", Design: "", Design_FCS_Count: "", MifScore: "", PResearcher: "", PInvestigator: "", UploadAuth: "", ExpDates: "", ExpStart: "", ExpEnd: "", UploadDate: "", LastUpdate: "", Organizations: "", Funding: "", QualControl: "", QualControlUrl: "", hasWSP: "no", Attachments: "", Event_total_K: "", Event_mean_K: "", FCS_count: "", FCS_total_MB: "", FCSVers: "", Cytometer: "LSRII")
-        
-        var body : some View
-        {
-            MIFlowCytView(exp: frExp).offset(x: 36, y: 36)
+        if let experiment {
+            FlowRepoDetailView(exp: experiment)
+                .offset(x: 16, y: 36)
+        } else {
+            Text("Select an experiment")
         }
         
     }
         //---------------------------------------------------------------------------
-//    func getDataFromSheet() {
+    func getDataFromSheet() {
 //        let urlString = "https://docs.google.com/spreadsheets/d/1qn1K2usdhI1wMEagrTcWWhsFMWEDwy2HG2WykMT0KPY?output=csv"
-//        
 //        
 //        guard let url = URL(string: urlString) else { print("error"); return }
 //        
 //        URLSession.shared.dataTask(with: url) { data, response, error in
 //            if let data = data {
 //                if let content = String(data: data, encoding: .utf8) {
-//                    let parsedCSV: [String] = content.components(separatedBy: "\n")
-//                     
-//                    for line in parsedCSV {
-//                        print (readTokens(line))
-//                    }
+//                        parseCSV(content)
 //                }
 //            }
 //        }.resume()
-//    }
-// 
-//    
-//    func readTokens(_ s: String) -> [String]
-//    {
-//        var str = s
-//        var tokens = [String]()
-//        
-//        while str.count > 0 {
-//            var token = ""
-//            let peek = str[str.startIndex]
-//            switch peek {
-//                case "\"":      let end: String.Index = str.firstIndex(of: "\"") ?? str.endIndex
-//                                token = String(str[str.startIndex..<end])           // should be +1
-//                                str = String(str[end..<str.endIndex])
-//                                str.remove(at: str.startIndex)  // drop the quote
-//                    
-//                default:        let end = str.firstIndex(of: ",")  ?? str.endIndex
-//                                token = String(str[str.startIndex..<end])
-//                                str.removeSubrange(str.startIndex..<end)
-//
-//                    
-//            }                                
-//            if str.count > 0            { str.remove(at: str.startIndex) }
-//            tokens.append(token)
-//
-//        }
-//        return tokens
-//    }
-//                                                      
-//    func readCSV()  {
-////        getDataFromSheet()
-//        let file = "/Users/adamtreister/Documents/aaron-cytegeist-1/CytegeistCore/TestData/flowrepo.csv"
-//        
-//        if let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
-//            
-//            let fileURL = dir.appendingPathComponent(file)
-//        
-//            do {
-//                let block = try String(contentsOf: fileURL, encoding: .utf8)
-//                let lines = block.split(separator: "\n")
-////                let lines: [String] = readTokens(block, delim: "\r\n")
-//                for line in lines {
-//                    print (readTokens(String(line)))
-//                }
-//        }
-//            catch {   print(error)
-//            }
-//        }
-//        
-//    }
+        
+        let fileUrl = DemoData.testDataRoot?.appendingPathComponent("flowrepo.csv")
+        do {
+            let csvData = try String(contentsOf: fileUrl!)
+            parseCSV(csvData)
+        } catch {
+            print("Error reading FlowRepo CSV data: \(error)")
+        }
+    }
+ 
+    
     @State private var experimentDB = [FRExperiment]()
-
+    @State private var selectedExperiment:FRExperiment.ID?
+    @State  var sortOrder: [KeyPathComparator<FRExperiment>] =
+    [
+        .init(\.LastUpdate, order: .reverse),
+        .init(\.MifScore, order: .reverse),
+        .init(\.Design_FCS_Count, order: .reverse),
+        .init(\.Cytometer, order: .forward),
+        .init(\.hasWSP, order: .forward)
+    ]
     func addFRExperiment(exp: FRExperiment)
     {
         experimentDB.append(exp)
     }
-    
-    
+    func addRecord(_ currentRow: String)
+    {
+        let fields = parseLine(currentRow)
+        if fields.count > 30 {         // && fields[0].starts(with: "FR-FCM"))
+            
+            let record = FRExperiment(tokens: fields)
+            let cytof = searchCytof(currentRow)
+            let firstManuscript = searchUniqueManuscript(record)
+            record.setFlags(cytof: cytof, firstManuscript: firstManuscript, fulltext: currentRow)
+            experimentDB.append(record )
+        }
+        
+    }
+
+    var filteredExperiments: [FRExperiment] {
+        
+        var   experiments = experimentDB.filter {
+               
+            if (hasWorkspace && $0.hasWSP.isEmpty) {  return false  }
+            if (useCytof && ($0.cytof != cytof)) {  return false  }
+            if (firstManuscript && !$0.firstManuscript) {  return false  }
+            if (searchText.count > 2 && !$0.fulltext.containsIgnoringCase(searchText))  {  return false  }
+            return true
+        }
+        
+        return experiments
+            .sorted(using: sortOrder)
+    }
+ 
+    public struct FRExperimentTable : View {
+        
+        static let columnDefs:[TableColumnField<FRExperiment>] = [
+            TableColumnField("RepID", \.RepID),
+            TableColumnField("LastUpdate", \.LastUpdate),
+            TableColumnField("MifScore", \.MifScore),
+            TableColumnField("ExpName", \.ExpName),
+            TableColumnField("Researcher", \.PResearcher),
+            TableColumnField("PubmedID", \.ManuscriptUrl),
+            TableColumnField("Cytometer", \.Cytometer),
+            TableColumnField("#Files", \.FCS_count),
+            TableColumnField("FCS_total_MB", \.FCS_total_MB),
+            TableColumnField("Event_mean_K", \.Event_mean_K),
+            TableColumnField("Workspace", \.hasWSP),
+            TableColumnField("Keywords", \.Keywords),
+            TableColumnField("Investigator", \.PInvestigator),
+            TableColumnField("ExpEnd", \.ExpEnd),
+            TableColumnField("FCSVers", \.FCSVers)
+         ]
+            //        TableColumnField("Design_FCS_Count", \.Design_FCS_Count),
+            //        TableColumnField("Purpose", \.Purpose),
+            //        TableColumnField("Conclusion", \.Conclusion),
+            //        TableColumnField("Comments", \.Comments),
+            //        TableColumnField("Manuscripts", \.Manuscripts),
+            //        TableColumnField("Design", \.Design),
+            //        TableColumnField("UploadAuth", \.UploadAuth),
+            //        TableColumnField("ExpDates", \.ExpDates),
+            //        TableColumnField("ExpStart", \.ExpStart),
+            //        TableColumnField("UploadDate", \.UploadDate),
+            //        TableColumnField("Organizations", \.LastUpdate),
+            //        TableColumnField("Funding", \.Funding),
+            //        TableColumnField("QualControl", \.QualControl),
+            //        TableColumnField("QualControlUrl", \.QualControlUrl),
+            //        TableColumnField("Attachments", \.Attachments),
+            //        TableColumnField("Event_total_K", \.Event_total_K),
+            //        TableColumnField("ExpID", \.ExpID)
+
+        
+        @Binding var selection:FRExperiment.ID?
+        @Binding var sortOrder:[KeyPathComparator<FRExperiment>]
+
+        @State var columnCustomization = TableColumnCustomization<FRExperiment>()
+        
+        let experiments:[FRExperiment]
+  
+        
+        public var body: some View {
+            Table (experiments, 
+                   selection: $selection,
+                   sortOrder: $sortOrder,
+                   columnCustomization: $columnCustomization)
+            {
+                TableColumnForEach(Self.columnDefs) { def in
+                    def.defaultColumn().customizationID(def.name)
+                }
+            }
+            .frame(minWidth: 300, idealWidth: 600)
+//                        .onChange(of: sortOrder) { _ in
+//                            experiments.sort(using: sortOrder)
+//                        }
+        }
+        
+    }
+    //--------------------------------------------------------------------------------------
     @MainActor
     func  processDB(result: Result<URL, any Error> ) {
         switch result {
@@ -169,10 +238,13 @@ struct ExperimentBrowser : View {
                     let gotAccess = file.startAccessingSecurityScopedResource()
                     if !gotAccess { return }
                     do {
-                        try parseCSV(fileUrl: file)
+                        let csvData = try Data(contentsOf: file)
+                        let csvString = String(data: csvData, encoding: .utf8)!
+                        allManuscripts.removeAll()
+                        parseCSV(csvString)
                             //                                    print(parsedData)
                     } catch {
-                        print("Error parsing CSV file: \(error)")
+                        print("Error fetching CSV file: \(error)")
                     }
                     file.stopAccessingSecurityScopedResource()     // release access
                 }
@@ -182,23 +254,20 @@ struct ExperimentBrowser : View {
     }
     
     
-   func parseCSV(fileUrl: URL) throws  {
-        let csvData = try Data(contentsOf: fileUrl)
-        let csvString = String(data: csvData, encoding: .utf8)!
+   func parseCSV(_ csvString: String)   {
         var currentRow = ""
        var inQuotes = false
-       var backslashed = false
-        var parsedLines: [String] = []
+//       var backslashed = false
+//        var parsedLines: [String] = []
         for char in csvString {
 //            if backslashed  { backslashed = false; continue}
 //            if char == "\\" { backslashed = true; continue }
             if char == "\"" { inQuotes.toggle()            }
+            
+                // note that \r\n is one character which doesnt match \n
             if (char == "\r\n" || char == "\n") && !inQuotes {
-                parsedLines.append(currentRow)
-                let fields = parseLine(currentRow)
-                if (fields.count > 12 && fields[0].starts(with: "FR-FCM")) {
-                    addFRExperiment(exp: FRExperiment(tokens: fields))
-                }
+//                parsedLines.append(currentRow)
+                addRecord(currentRow)
                 currentRow = ""
             } else {
                 currentRow.append(char)
@@ -206,19 +275,15 @@ struct ExperimentBrowser : View {
         }
         
        if !currentRow.isEmpty {
-            parsedLines.append(currentRow)
-           let fields = parseLine(currentRow)
-           if (fields.count > 12 && fields[0].starts(with: "FR-FCM")) {
-               experimentDB.append( FRExperiment(tokens: fields))
-           }
-        }
+           addRecord(currentRow)
+       }
     }
    
     func parseLine(_ csvString : String) -> [String]
     {
         var fields: [String] = []
         var inQuotes = false
-        var backslashed = false
+//        var backslashed = false
         var currentBuffer = ""
         
         for char in csvString {
@@ -237,183 +302,24 @@ struct ExperimentBrowser : View {
         
     }
  
-  
-         
-            //        }
-//    func retrieveDB(_ file: URL){
-//    
-//        var experimentDB = [FRExperiment]()
-////        var fileRoot = Bundle.main.path(forResource: "flowrepo", ofType: "csv")
-////
-////      if let bundleURL =  Bundle.main.url(forResource: "flowrepo", withExtension: "csv")
-////        {
-//            guard let data = try? Data(contentsOf: file) else {
-//                fatalError("Unable to load data")
-//            }
-//            if let decoder = String(data: data, encoding: .utf8)
-////            if  let dataArr = decoder?.components(separatedBy: "\n") //.map({ $0.components(separatedBy: ",") })
-//            {
-//                let lines = decoder.components(separatedBy: .newlines).compactMap( {$0.trim().isEmpty ? nil : $0})
-//                for line in lines
-//                {
-//                    let tokens: [String] = readTokens(String(line))
-//                    experimentDB.append( FRExperiment(tokens: tokens))
-//            }
-//        }
-//     else  { print("cant find repo")   }
-//    }
 
-    
-        //---------------------------------------------------------------------------
-        // Model
-//    
-//    @Observable
-//    public class XTable : Usable  //, Hashable
-//    {
-//        public static func == (lhs: XTable, rhs: XTable) -> Bool {
-//            lhs.id == rhs.id
-//        }
-//        
-////        public func hash(into hasher: inout Hasher) {
-////            hasher.combineMany(id, primary,keywords, experiement, species, date )
-////        }
-//        
-//        public var id = UUID()
-//        public  var name = "FlowRepository Metadata"
-////        public var items = [FRExperiment]()
-//        
-//        init() {    }
-//    }
-//    
-
-
-//    public struct XColumn : Identifiable, Hashable, Codable
-//    {
-//        public var id = UUID()
-//        var primary: String = " "
-//        var keywords: String = " "
-//        var experiement: String = " "
-//        var species: String = " "
-//        var date: String = " "
-//
-//        init(_ name: String, parm: String, stat: String, arg: String = " ")
-//        {
-//            self.date = name
-//            self.primary = parm
-//            self.keywords = stat
-//            self.experiement = arg
-//            self.species = arg
-//        }
-//        
-//        public func hash(into hasher: inout Hasher) {
-//            hasher.combineMany(date, primary, keywords, experiement, species)
-//        }
-//        
-//        static var draggableType = UTType(exportedAs: "com.cytegeist.CyteGeistApp.tablecolumn")
-//        var itemProvider: NSItemProvider {
-//            let provider = NSItemProvider()
-//            provider.registerDataRepresentation(forTypeIdentifier: Self.draggableType.identifier, visibility: .all) {
-//                let encoder = JSONEncoder()
-//                do {
-//                    let data = try encoder.encode(self)
-//                    $0(data, nil)
-//                } catch {
-//                    $0(nil, error)
-//                }
-//                return nil
-//            }
-//            return provider
-//        }
-//    }
-
-    
-    public struct XTableView : View {
-  
-        @State var selection = Set<FRExperiment.ID>()
-        @State var sortOrder = [KeyPathComparator(\FRExperiment.ExpName, order: .forward),
-                                KeyPathComparator(\FRExperiment.Purpose, order: .forward),
-                                KeyPathComparator(\FRExperiment.Keywords, order: .forward),
-                                KeyPathComparator(\FRExperiment.Conclusion, order: .forward),
-                                KeyPathComparator(\FRExperiment.Comments, order: .forward)   ]
-        @State var columnCustomization = TableColumnCustomization<FRExperiment>()
-        
-        public var body: some View {
-                //            Table (of: TColumn.Type, selection: $selectedColumns)
-            Table (of: FRExperiment.self, selection: $selection, sortOrder: $sortOrder, columnCustomization: $columnCustomization)
-            {
-                TableColumn("RepID", value: \.RepID){ col in Text(col.RepID)}
-                    .width(min: 130, ideal: 180)
-                    .customizationID("RepID")
-//                TableColumn("RepIDurl", value: \.RepIDurl){ col in Text(col.RepIDurl)}
-//                    .width(min: 130, ideal: 180)
-//                    .customizationID("RepIDurl")
-                TableColumn("ExpID", value: \.ExpID){ col in Text(col.ExpID)}
-                    .width(min: 30, ideal: 80, max: 160)
-                    .customizationID("ExpID")
-                TableColumn("ExpName", value: \.ExpName){ col in Text(col.ExpName)}
-                    .width(min: 30, ideal: 50, max: 60)
-                    .customizationID("ExpName")
-                TableColumn("Purpose", value: \.Purpose){ col in Text(col.Purpose)}
-                    .width(min: 30, ideal: 50, max: 60)
-                    .customizationID("Purpose")
-                TableColumn("Conclusion", value: \.Conclusion){ col in Text(col.Conclusion)}
-                    .width(min: 30, ideal: 50, max: 60)
-                    .customizationID("Conclusion")
-                TableColumn("Comments", value: \.Comments){ col in Text(col.Comments)}
-                    .width(min: 30, ideal: 50, max: 60)
-                    .customizationID("Comments")
-                TableColumn("Keywords", value: \.Keywords){ col in Text(col.Keywords)}
-                    .width(min: 30, ideal: 50, max: 60)
-                    .customizationID("Keywords")
-                TableColumn("PResearcher", value: \.PResearcher){ col in Text(col.PResearcher)}
-                    .width(min: 30, ideal: 50, max: 60)
-                    .customizationID("PResearcher")
-//                TableColumn("ManuscriptUrl", value: \.ManuscriptUrl){ col in Text(col.ManuscriptUrl)}
-//                    .width(min: 30, ideal: 50, max: 60)
-//                    .customizationID("ManuscriptUrl")
-//                TableColumn("Manuscripts", value: \.Manuscripts){ col in Text(col.Manuscripts)}
-//                    .width(min: 30, ideal: 50, max: 60)
-//                    .customizationID("Manuscripts")
-//                TableColumn("Design", value: \.Design){ col in Text(col.Design)}
-//                    .width(min: 30, ideal: 50, max: 60)
-//                    .customizationID("Design")
-//                TableColumn("Design_FCS_Count", value: \.Design_FCS_Count){ col in Text(col.Design_FCS_Count)}
-//                    .width(min: 30, ideal: 50, max: 60)
-//                    .customizationID("Design_FCS_Count")
-//                TableColumn("MifScore", value: \.MifScore){ col in Text(col.MifScore)}
-//                    .width(min: 30, ideal: 50, max: 60)
-//                    .customizationID("MifScore")
-//                TableColumn("PInvestigator", value: \.PInvestigator){ col in Text(col.PInvestigator)}
-//                    .width(min: 30, ideal: 50, max: 60)
-//                    .customizationID("PInvestigator")
-
-//                
-//                init( RepID: String, RepIDurl: String, ExpID: String, ExpName: String, Purpose: String, Conclusion: String, Comments: String, Keywords: String, ManuscriptUrl: String, Manuscripts: String, Design: String, Design_FCS_Count: String, MifScore: String, PResearche: String, PInvestigator: String, UploadAuth: String, ExpDates: String, ExpStart: String, ExpEnd: String, UploadDate: String, LastUpdate: String, Organizations: String, Funding: String, QualControl: String, QualControlUrl: String, hasWSP: String, Attachments: String, Event_total_K:String, Event_mean_K:String, FCS_count: String, FCS_total_MB: String, FCSVers: String, Cytometer: String )
-//                
-                
-            }
-        rows: {
-            ForEach(experimentDB)  { exp in TableRow(exp) }
-                //                ForEach(cols) { col in TableRow(TColumn).itemProvider { TColumn.itemProvider }  }
-                //                    .onInsert(of: [TColumn.draggableType]) { index, providers in
-                //                        TColumn.fromItemProviders(providers) { cols in
-                ////                            let experiment = store.getSelectedExperiment()
-                ////                            experiment.samples.insert(contentsOf: samples, at: index)
-                //                        }
-                //                    }
-            
-        }.frame(minWidth: 300, idealWidth: 600)
-//                .dropDestination(for: AnalysisNode.self) { (items, position) in
-//                    for item in items {print(item.name)  }
-//                    
-//                    for item in items { newTableItem(node: item, position:position)  }
-//                    return true
-//                }
-                //            .opacity(mode == .table ? 1.0 : 0.3)
-        }
-
-    }
-    struct TableRow<FRExperiment> {
-        
-    }
 }
+    //--------------------------------------------------------------------------------------
+
+func searchCytof(_ s: String) -> Bool{
+    if s.containsIgnoringCase("mass cytometry"){  return true}
+    if s.containsIgnoringCase("DVSSciences"){  return true}
+    if s.containsIgnoringCase("cytof") &&  !s.containsIgnoringCase("cytoflex")
+    {  return true}
+    return false
+
+}
+
+var allManuscripts = [String]()
+func searchUniqueManuscript(_ exp: FRExperiment) -> Bool{
+    if exp.Manuscripts.isEmpty { return false   }
+    if (allManuscripts.contains(exp.Manuscripts)){ return false   }
+    allManuscripts.append(exp.Manuscripts)
+    return true
+}
+

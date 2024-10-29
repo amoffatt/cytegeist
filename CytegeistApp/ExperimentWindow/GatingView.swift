@@ -35,6 +35,7 @@ struct GateConfigView : View {
 
 struct GatingView: View {
     
+    
         //    @State private var mode = ReportMode.gating
     @State var curTool = GatingTool.range
     @State private var isDragging = false
@@ -56,7 +57,8 @@ struct GatingView: View {
     
     @Environment(Experiment.self) var experiment
     @Environment(CytegeistCoreAPI.self) var core
-    
+    @Environment(BatchContext.self) var batchContext
+
     func deleteSelectedAnnotation() {
         if let focusedItem, focusedItem.remove != nil {
             confirmDelete = focusedItem
@@ -113,7 +115,7 @@ struct GatingView: View {
     }
     
     func axisNormalizers() -> Tuple2<AxisNormalizer?> {
-        population?.getChartDimensions(chartDef).map { $0?.normalizer } ?? .init(nil, nil)
+        population?.getChartDimensions(batchContext, chartDef).map { $0?.normalizer } ?? .init(nil, nil)
     }
     
         //    @MainActor
@@ -182,7 +184,7 @@ struct GatingView: View {
     var body: some View {
         return VStack {
                 //            Text("Gating Prototype")
-            if let sample = population?.getSample() {
+            if let sample = population?.getSample(batchContext) {
                 HStack {
                     Text("Sample: \(sample.tubeName), population: \((population?.name).nonNil)")
                     Button("Contours", action: toggleContours)

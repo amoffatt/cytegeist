@@ -57,6 +57,7 @@ struct ExperimentView : View {
         {
                 Group {
                     if let selected = app.getSelectedExperiment(createIfNil: true) {
+                        
                         HSplitView {
                             SampleList(experiment: selected)
                                 .frame(minWidth: sampleMinWidth, idealWidth: sampleIdealWidth, maxWidth: .infinity, maxHeight: .infinity)
@@ -67,6 +68,7 @@ struct ExperimentView : View {
                         }
                         .environment(selected)
                         .environment(selected.core)
+                        .environment(selected.defaultBatchContext)
                         .onChange(of: selected.selectedSamples) {
                             selected.clearAnalysisNodeSelection()
                         }
@@ -104,6 +106,7 @@ struct ExperimentView : View {
                 }
                 .environment(experiment)
                 .environment(experiment.core)
+                .environment(experiment.defaultBatchContext)
                 .navigationSplitViewColumnWidth(min: 12,  ideal: 1200, max: .infinity)
                 .toolbar {
                     let binding = Binding(
