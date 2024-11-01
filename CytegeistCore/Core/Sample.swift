@@ -23,7 +23,7 @@ public enum SampleError : Error {
 //@Model
 //@MainActor
 @CObservable
-public class Sample : CObject, Codable
+public class Sample : CObject
 {
     var sampleId = ""
     
@@ -33,9 +33,6 @@ public class Sample : CObject, Codable
 //    @ObservationIgnored
     var error:Error? = nil
     
-    public func encode(to encoder: any Encoder) throws {
-        
-    }
 //    var attributes = AttributeStore()
 //    var dimensions = [CDimension]()
     //    var matrix = CMatrix()
@@ -67,9 +64,6 @@ public class Sample : CObject, Codable
         //-------------------------------------------------------------------------
     //read from JSON
     
-    public required init(from decoder: any Decoder) throws {
-//        fatalError("AM: Implement decoding")
-}
     
         //-------------------------------------------------------------------------
     public init(
@@ -79,7 +73,11 @@ public class Sample : CObject, Codable
         self.ref = ref
         print("Sample \(ref)")
     }
- 
+    
+//    @MainActor required init(from decoder: any Decoder) async throws {
+//        try await super.init(from:decoder)
+//    }
+    
 //    convenience init(_ xml: TreeNode)
 //    {
 //        assert(xml.value == "Sample")
@@ -181,46 +179,49 @@ extension Sample {
         /// Note: because this method uses `NSItemProvider.loadDataRepresentation(forTypeIdentifier:completionHandler:)`
         /// internally, it is currently not marked as `async`.
     static func fromItemProviders(_ itemProviders: [NSItemProvider], completion: @escaping ([Sample]) -> Void) {
-        let typeIdentifier = Self.draggableType.identifier
-        let filteredProviders = itemProviders.filter {
-            $0.hasItemConformingToTypeIdentifier(typeIdentifier)
-        }
-        
-        let group = DispatchGroup()
-        var result = [Int: Sample]()
-        
-        for (index, provider) in filteredProviders.enumerated() {
-            group.enter()
-            provider.loadDataRepresentation(forTypeIdentifier: typeIdentifier) { (data, error) in
-                defer { group.leave() }
-                guard let data = data else { return }
-                let decoder = JSONDecoder()
-                guard let plant = try? decoder.decode(Sample.self, from: data)
-                else { return }
-                result[index] = plant
-            }
-        }
-        
-        group.notify(queue: .global(qos: .userInitiated)) {
-            let plants = result.keys.sorted().compactMap { result[$0] }
-            DispatchQueue.main.async {
-                completion(plants)
-            }
-        }
+        // AM DEBUGGING
+        print("Sample transfer not implemented")
+//        let typeIdentifier = Self.draggableType.identifier
+//        let filteredProviders = itemProviders.filter {
+//            $0.hasItemConformingToTypeIdentifier(typeIdentifier)
+//        }
+//        
+//        let group = DispatchGroup()
+//        var result = [Int: Sample]()
+//        
+//        for (index, provider) in filteredProviders.enumerated() {
+//            group.enter()
+//            provider.loadDataRepresentation(forTypeIdentifier: typeIdentifier) { (data, error) in
+//                defer { group.leave() }
+//                guard let data = data else { return }
+//                let decoder = JSONDecoder()
+//                guard let plant = try? decoder.decode(Sample.self, from: data)
+//                else { return }
+//                result[index] = plant
+//            }
+//        }
+//        
+//        group.notify(queue: .global(qos: .userInitiated)) {
+//            let plants = result.keys.sorted().compactMap { result[$0] }
+//            DispatchQueue.main.async {
+//                completion(plants)
+//            }
+//        }
     }
     
     var itemProvider: NSItemProvider {
+        print("Sample transfer not implemented")
         let provider = NSItemProvider()
-        provider.registerDataRepresentation(forTypeIdentifier: Self.draggableType.identifier, visibility: .all) {
-            let encoder = JSONEncoder()
-            do {
-                let data = try encoder.encode(self)
-                $0(data, nil)
-            } catch {
-                $0(nil, error)
-            }
-            return nil
-        }
+//        provider.registerDataRepresentation(forTypeIdentifier: Self.draggableType.identifier, visibility: .all) {
+//            let encoder = JSONEncoder()
+//            do {
+//                let data = try encoder.encode(self)
+//                $0(data, nil)
+//            } catch {
+//                $0(nil, error)
+//            }
+//            return nil
+//        }
         return provider
     }
 }

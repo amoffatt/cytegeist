@@ -93,6 +93,7 @@
 		B6C9A4B62C77D57500DB6786 /* FJGatingExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4B52C77D57500DB6786 /* FJGatingExtensions.swift */; };
 		B6C9A4B82C77D9AA00DB6786 /* ChartAxisView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4B72C77D9AA00DB6786 /* ChartAxisView.swift */; };
 		B6C9A4BA2C77DB3700DB6786 /* AxisNormalizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4B92C77DB3700DB6786 /* AxisNormalizer.swift */; };
+		B6D05D422CBD885200EA5A39 /* ExperimentWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6D05D412CBD885200EA5A39 /* ExperimentWindow.swift */; };
 		DC05A3D12C798EC900C08BBF /* Smoothing.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC05A3D02C798EC900C08BBF /* Smoothing.swift */; };
 		DC23F02F2C7D3C0B002FCDC0 /* Gate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4692C75D04800DB6786 /* Gate.swift */; };
 		DC2473682C9A743A00D2DCA0 /* Statistic.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC2473662C9A72A700D2DCA0 /* Statistic.swift */; };
@@ -317,6 +318,7 @@
 		B6C9A4B52C77D57500DB6786 /* FJGatingExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FJGatingExtensions.swift; sourceTree = "<group>"; };
 		B6C9A4B72C77D9AA00DB6786 /* ChartAxisView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartAxisView.swift; sourceTree = "<group>"; };
 		B6C9A4B92C77DB3700DB6786 /* AxisNormalizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AxisNormalizer.swift; sourceTree = "<group>"; };
+		B6D05D412CBD885200EA5A39 /* ExperimentWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExperimentWindow.swift; sourceTree = "<group>"; };
 		DC05A3D02C798EC900C08BBF /* Smoothing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Smoothing.swift; sourceTree = "<group>"; };
 		DC2473662C9A72A700D2DCA0 /* Statistic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Statistic.swift; sourceTree = "<group>"; };
 		DC6F42FA2C83F7BD00288EB8 /* TabBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabBar.swift; sourceTree = "<group>"; };
@@ -655,6 +657,7 @@
 				B6C9A4532C75D01300DB6786 /* ExperimentHistoryOutline.swift */,
 				B6C9A4562C75D01300DB6786 /* ReportModePicker.swift */,
 				B6C9A4572C75D01300DB6786 /* SampleGallery.swift */,
+				B6D05D412CBD885200EA5A39 /* ExperimentWindow.swift */,
 			);
 			path = ExperimentWindow;
 			sourceTree = "<group>";
@@ -1059,6 +1062,7 @@
 				B6C9A49C2C7680EA00DB6786 /* FocusedValues+Experiment.swift in Sources */,
 				B6C9A49E2C7680EA00DB6786 /* Experiment.swift in Sources */,
 				B6C9A4A12C7680EA00DB6786 /* FJChartDefExtensions.swift in Sources */,
+				B6D05D422CBD885200EA5A39 /* ExperimentWindow.swift in Sources */,
 				B6C9A4B62C77D57500DB6786 /* FJGatingExtensions.swift in Sources */,
 				B6C9A4A32C7680EA00DB6786 /* Matrix.swift in Sources */,
 				B6C9A4A52C7680EA00DB6786 /* Cytometer.swift in Sources */,

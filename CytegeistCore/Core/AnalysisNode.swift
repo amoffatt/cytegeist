@@ -19,6 +19,8 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable, Custo
     public var id = UUID()
     public var name: String = ""
     public var description: String = ""
+    @CodableIgnored
+    @ObservationIgnored
     public var sample: Sample? = nil                      // nil except at the root node
     public var graphDef = ChartDef()              // how this population wants to be shown
     public var statistics =  [String : Double]()         // cache of stats with values
@@ -62,7 +64,7 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable, Custo
         let container = try decoder.container(keyedBy: CodingKeys.self)
         self._id = try container.decode(UUID.self, forKey: ._id)
         self._name = try container.decode(String.self, forKey: ._name)
-        self._sample = try container.decodeIfPresent(Sample.self, forKey: ._sample)
+//        self._sample = try container.decodeIfPresent(Sample.self, forKey: ._sample)
         self._graphDef = try container.decode(ChartDef.self, forKey: ._graphDef)
         self._statistics = try container.decode([String : Double].self, forKey: ._statistics)
         self._children = try container.decode([AnalysisNode].self, forKey: ._children)
