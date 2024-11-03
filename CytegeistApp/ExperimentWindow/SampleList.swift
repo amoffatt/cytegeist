@@ -128,10 +128,10 @@ struct SampleList: View {
 
             for i in items {
                 print(i)
-//                SampleInspectorView(experiment, sample: i)
-//                if let sample = experiment[i] {
-//                    openWindow(id: "sample-inspector", value:ExperimentSamplePair(sample: sample, experiment: experiment))
-//                }
+//                SampleInspectorView(experiment, sample: i.ref)
+                if let sample = experiment[i] {
+                    openWindow(id: "sample-inspector", value:ExperimentSamplePair(sample: sample, experiment: experiment))
+                }
              }
             
         }  }
@@ -199,6 +199,9 @@ struct SampleList: View {
                     Buttons.toolbar("Open FCS Files", .add) { showFCSImporter = true }
                     Buttons.toolbar("Dictionary", Icon("pencil")) {
                         experiment.buildVaribleKeyDictionary()
+                    }
+                    Buttons.toolbar("XML", Icon("cloud")) {
+                        print(experiment.xml())
                     }
                 } }
 

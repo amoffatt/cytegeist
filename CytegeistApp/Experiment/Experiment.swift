@@ -63,7 +63,7 @@ public class Experiment : Usable
         //--------------------------------------------------------------------------------
     required public init(from decoder: any Decoder) throws {
         self.version = "-02"
-       fatalError("Implement decoding")        // TODO AM Write class macro and property wrapper to handle properties with default values
+//       fatalError("Implement decoding")        // TODO AM Write class macro and property wrapper to handle properties with default values
     }
     
     init(name: String = "Untitled", version: String = "" )
@@ -144,8 +144,32 @@ public class Experiment : Usable
         return "\(s.substring(offset: 0, length: 12))...\(s.substring(offset: len-12, length: 12))"
     }
         //--------------------------------------------------------------------------------
+  // streaming
+    
+    public func xml() -> String {
+        
+        let panelStr = "<Panels>\n" +
+            panels.compactMap { $0.xml() }.joined(separator: "\n\t") +   "</Panels>\n"
+        let groupStr = "<Groups>\n" +
+            groups.compactMap { $0.xml() }.joined(separator: "\n\t") +   "</Groups>\n"
+        let tableStr = "<Tables>\n" +
+            tables.compactMap { $0.xml() }.joined(separator: "\n\t") +   "</Tables>\n"
+        let layoutStr = "<Layouts>\n" +
+            tables.compactMap { $0.xml() }.joined(separator: "\n\t") +   "</Layouts>\n"
+        
+        
+        let subs: String  = panelStr + groupStr + tableStr + layoutStr
+        //+ attributes + " >/n"
+        let attr =  attributes()
+        return "<Experiment " + attr + ">\n" + subs + "</Experiment>\n"
+    }
+
+    public func attributes() -> String {
+        return "name=\(self.name) version=\(self.version)"
+    }
+ 
         //--------------------------------------------------------------------------------
-//    @Transient  
+//    @Transient
     struct Entry
     {
         var key: String
@@ -222,39 +246,3 @@ public class Experiment : Usable
     }
 }
 
-    //--------------------------------------------------------------------------------
-public struct CGroup : Identifiable, Codable
-{
-    public var id = UUID()
-    var name = ""
-    var keyword: String?
-    var value: String?
-    @CodableIgnored
-    var color: Color?
-    
-    init(name: String = "name", color: Color?, keyword: String?, value:  String?) {
-        self.name = name
-        self.color = color
-        self.keyword = keyword
-        self.value = value
-    }
-}
-    //--------------------------------------------------------------------------------
-struct CPanel : Usable
-{
-    var id = UUID()
-    var name = ""
-    var keyword: String?
-    var values: [String]
-    @CodableIgnored
-    var color: Color?
-    
-     public static func == (lhs: CPanel, rhs: CPanel) -> Bool {   lhs.id == rhs.id   }
-
-    init(name: String = "name", color: Color?, keyword: String?, values:  String?) {
-        self.name = name
-        self.color = color
-        self.keyword = keyword
-        self.values = []
-    }
-}

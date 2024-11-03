@@ -71,6 +71,23 @@ public extension String {
         let end = offset + length
         return self[offset..<end]
     }
+   
+    func stripHead() -> String {
+        
+        if let a = self.range(of:"<head>") {
+            if let z = self.range(of: "</head>") {
+                let tail = self[z.upperBound...]
+                return String(tail)
+            }
+        } 
+        return self.replacingOccurrences(of: "<head>[^>]+</head>", with: "", options: .regularExpression, range: nil)
+    }
+    func withoutHtmlTags() -> String {
+        
+        let s = stripHead()
+        let str = s.replacingOccurrences(of: "<style>[^>]+</style>", with: "", options: .regularExpression, range: nil)
+        return str.replacingOccurrences(of: "<[^>]+>", with: "", options: .regularExpression, range: nil)
+    }
     
     func splitWithDoubleEscaping(separator:String) -> [String] {
         let escape = separator + separator

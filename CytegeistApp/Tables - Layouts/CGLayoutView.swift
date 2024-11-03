@@ -225,7 +225,7 @@ struct CGLayoutView: View {
 }
 
 
-  
+
 // Drag and drop references
     //  https://gist.github.com/tarasis/f9bac6d98de5433f1ddbadaef02f9a29
     // https://swiftui-lab.com/drag-drop-with-swiftui/

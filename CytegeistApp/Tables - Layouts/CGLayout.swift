@@ -145,51 +145,51 @@ public class LayoutItem: Codable, Identifiable, Equatable
     var position: CGPoint = .zero
     var tmpOffset: CGPoint = .zero
     var type: ELayoutType
-//    var value: String = ""              //Text
-//    var xAxis: AxisNormalizer?          //Chart
-//    var yAxis: AxisNormalizer?
-//    var data: Data?                     //Table
-
-// save scale, rotation, background, stroke, etc
+        //    var value: String = ""              //Text
+        //    var xAxis: AxisNormalizer?          //Chart
+        //    var yAxis: AxisNormalizer?
+        //    var data: Data?                     //Table
+    
+        // save scale, rotation, background, stroke, etc
     
     var selected:Bool = false
     private(set) var node:AnalysisNode?
-
+    
     var name:String {
         get { node != nil ? node!.name : "n/a"}
         set { if node != nil { node!.name = newValue }}
     }
-
-//    init(_ type: ELayoutType, position: CGPoint = .zero, node: AnalysisNode? = nil) {
-//        self.node = node
-//        self.position = position
-//        self.type = type
-//    }
     
-//    init(position: CGPoint, type: ELayoutType) {
-//        self.position = position
-//        self.type = type
-//        
-//    }
-//    init(value: String) {
-//        self.value = value
-//        self.type = .text
-//    }
+        //    init(_ type: ELayoutType, position: CGPoint = .zero, node: AnalysisNode? = nil) {
+        //        self.node = node
+        //        self.position = position
+        //        self.type = type
+        //    }
+    
+        //    init(position: CGPoint, type: ELayoutType) {
+        //        self.position = position
+        //        self.type = type
+        //
+        //    }
+        //    init(value: String) {
+        //        self.value = value
+        //        self.type = .text
+        //    }
     
     public init(_ type: ELayoutType, node: AnalysisNode? = nil, position: CGPoint = .zero, size: CGSize = .init(100)) {
         self.node = node
         self.position = position
         self.type = type
         self.size = size
-//        self.tmpOffset = tmpOffset
+            //        self.tmpOffset = tmpOffset
     }
-
-//    convenience init(data: Data?) {
-//        self.init(position: CGPoint.zero, node: nil, type: ELayoutType.table )
-//         self.data = data
-//      }
     
-     public required init(from decoder: any Decoder) throws {
+        //    convenience init(data: Data?) {
+        //        self.init(position: CGPoint.zero, node: nil, type: ELayoutType.table )
+        //         self.data = data
+        //      }
+    
+    public required init(from decoder: any Decoder) throws {
         fatalError("init(from:) has not been implemented")
     }
     
@@ -197,8 +197,21 @@ public class LayoutItem: Codable, Identifiable, Equatable
     {
         LayoutItem(self.type, node: self.node, position: self.position, size: self.size)
     }
+    
+    
+    public func xml() -> String {
+        return "<Layout " + attributes() + " >/n\t<Items>" +
+            //    items.compactMap { $0.xml() }.joined(separator: "\n\t") +
+        "</Items>\n" +
+        "</Layout>\n"
+        
+    }
+    
+    public func attributes() -> String {
+        
+        return "name=" + name
+    }
 }
-
 
 //---------------------------------------------------------------------
 //@Observable

@@ -9,9 +9,7 @@ import Foundation
 import SwiftUI
 import CytegeistLibrary
 import CytegeistCore
-
 import UniformTypeIdentifiers
-
 
 struct ExperimentBrowser : View {
     
@@ -80,20 +78,42 @@ struct ExperimentBrowser : View {
         }
         
     }
+ 
+//    }
         //---------------------------------------------------------------------------
     func getDataFromSheet() {
-//        let urlString = "https://docs.google.com/spreadsheets/d/1qn1K2usdhI1wMEagrTcWWhsFMWEDwy2HG2WykMT0KPY?output=csv"
-//        
-//        guard let url = URL(string: urlString) else { print("error"); return }
-//        
-//        URLSession.shared.dataTask(with: url) { data, response, error in
-//            if let data = data {
-//                if let content = String(data: data, encoding: .utf8) {
-//                        parseCSV(content)
-//                }
-//            }
-//        }.resume()
+        let urlString = "https://docs.google.com/spreadsheets/d/1qn1K2usdhI1wMEagrTcWWhsFMWEDwy2HG2WykMT0KPY?output=csv"
         
+        guard let url = URL(string: urlString) else { print("error"); return }
+        URLSession.shared.dataTask(with: url) { data, response, error in
+            if let data = data {
+                if let content = String(data: data, encoding: .utf8) {
+                 
+                    let str = content.withoutHtmlTags()
+                    print(str.prefix(3000))
+                        parseCSV(content)
+                }
+            }
+        }.resume()
+//        do {
+//            let html = "<html><head><title>First parse</title></head>"
+//            + "<body><p>Parsed HTML into a doc.</p></body></html>"
+//            let doc: Document = try SwiftSoup.parse(html)
+//            return try doc.text()
+//        } catch Exception.Error(let type, let message) {
+//            print(message)
+//        } catch {
+//            print("error")
+//        }
+//        do {
+//            let attributed = try NSAttributedString(data: str,
+//                                                    options: [NSDocumentTypeDocumentAttribute: NSHTMLTextDocumentType], documentAttributes: nil)
+//            print(attributed.string)
+//            
+//        } catch () {}
+//        
+        
+ 
         let fileUrl = DemoData.testDataRoot?.appendingPathComponent("flowrepo.csv")
         do {
             let csvData = try String(contentsOf: fileUrl!)

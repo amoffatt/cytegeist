@@ -80,7 +80,7 @@ struct FlowRepoDetailView : View
                 HStack
                 {
                     Text("Purpose:") .font(.title3).frame(width: 120, alignment: .leading)
-                    Text(exp.Purpose).padding(20)
+                    Text(exp.Purpose).textSelection(.enabled).padding(20)
                     Spacer()
                 }
                 Spacer()
@@ -89,7 +89,7 @@ struct FlowRepoDetailView : View
                 HStack
                 {
                     Text("Conclusion:")  .font(.title3).frame(width: 120, alignment: .leading)
-                    Text(exp.Conclusion).padding(20)
+                    Text(exp.Conclusion).textSelection(.enabled).padding(20)
                     Spacer()
                 }
                 Spacer()
@@ -98,7 +98,7 @@ struct FlowRepoDetailView : View
                 HStack
                 {
                     Text("Comments:") .font(.title3).frame(width: 120, alignment: .leading)
-                    Text(exp.Comments ).padding(20)
+                    Text(exp.Comments ).padding(20).textSelection(.enabled)
                     Spacer()
                 }
                 Spacer()
@@ -107,7 +107,7 @@ struct FlowRepoDetailView : View
                 HStack
                 {
                     Text("Keywords:") .font(.title3).frame(width: 120, alignment: .leading)
-                    Text(exp.Keywords ).padding(20)
+                    Text(exp.Keywords ).padding(20).textSelection(.enabled)
                     Spacer()
                 }
                 Spacer()
@@ -116,7 +116,7 @@ struct FlowRepoDetailView : View
             if !exp.Design.isEmpty  && exp.Design != "None" {
                 HStack  {
                     Text("Design:").font(.title3).frame(width: 120, alignment: .leading)
-                    Text(exp.Design).padding(20)
+                    Text(exp.Design).padding(20).textSelection(.enabled)
                     Spacer()
                 }
             }
@@ -125,14 +125,14 @@ struct FlowRepoDetailView : View
             if !exp.QualControl.isEmpty  && exp.QualControl != "None" {
                 HStack  {
                     Text("Quality Control:").font(.title3).frame(width: 120, alignment: .leading)
-                    Text(exp.QualControl).padding(20)
+                    Text(exp.QualControl).padding(20).textSelection(.enabled)
                     Spacer()
                 }
             }
             if !exp.QualControlUrl.isEmpty {
                 HStack {
                     Text("QC Url:").font(.title3).frame(width: 120, alignment: .leading)
-                    Text(exp.QualControlUrl).padding(20)
+                    Text(exp.QualControlUrl).padding(20).textSelection(.enabled)
                     Spacer()
                 }
             }

@@ -206,6 +206,19 @@ public class CGTable : Usable, Hashable
     {
         items.append(TColumn(node.name, stat: "Freq"))
     }
+    
+    public func xml() -> String {
+        return "<Table " + attributes() + " >/n\t<Columns>" +
+        items.compactMap { $0.xml() }.joined(separator: "\n\t") +   "</Columns>\n" +
+        "</Table>\n"
+        
+    }
+    
+    public func attributes() -> String {
+        
+            return "name=" + name
+    }
+ 
 }
 
 //---------------------------------------------------------------------------
@@ -232,6 +245,9 @@ public struct TColumn : Identifiable, Hashable, Codable
     public func hash(into hasher: inout Hasher) {
         hasher.combineMany(id, pop, parm, stat, arg)
     }
+ 
+    public func xml() -> String {   "<Column \(pop)\n \(stat) \(parm) \(arg) >\n"   }
+
     
     static var draggableType = UTType(exportedAs: "com.cytegeist.CyteGeistApp.tablecolumn")
     var itemProvider: NSItemProvider {
