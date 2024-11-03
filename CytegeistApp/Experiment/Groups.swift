@@ -34,8 +34,8 @@ public struct CGroup : Identifiable, Codable
     }
     
     public func attributes() -> String {
-        return "name=\(self.name) keyword= \(self.keyword ?? "") "
-//        + "value=" + self.value + " "
+        return "name=\(self.name)"
+//  keyword=\(self.keyword)      + "value=" + self.value + " "
 //        + "color=" + self.color?.description + " "
     }
     

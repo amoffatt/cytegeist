@@ -72,6 +72,7 @@ public class Sample : Identifiable, Codable, Hashable
     public var src:  String { self["$SRC"] }
     public var sys:  String { self["$SYS"] }
     public var cytometer:  String { self["$CYT"] }
+    public var comp:  String { self["$COMP"] }
     public var setup1:  String { self["CST SETUP STATUS"] }
 
     //-------------------------------------------------------------------------

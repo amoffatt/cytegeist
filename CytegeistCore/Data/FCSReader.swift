@@ -16,12 +16,8 @@ public struct CDimension : Identifiable, Hashable, Codable {
     
     
     public static func displayName(_ name:String, _ stain:String) -> String {
-        if name == stain {
-            return name
-        }
-        if stain.isEmpty {
-            return name
-        }
+        if name == stain {      return name     }
+        if stain.isEmpty {      return name     }
         return "\(name) : \(stain)"
     }
     
@@ -117,6 +113,7 @@ public struct FCSMetadata: Hashable, Codable {
     public var byteOrder: FCSByteOrder?
     public var system:String = ""
     public var cytometer: String = ""
+    public var comp: String = ""
 
     
     public var _parameters: [CDimension]?
@@ -390,6 +387,7 @@ public class FCSReader {
         fcs.eventCount = eventCount
         fcs.system = keywords["$SYS"]!
         fcs.cytometer = keywords["$CYT"].nonNil
+        fcs.comp = keywords["$COMP"].nonNil
         fcs.date = keywords["$DATE"].nonNil
         fcs.dataType = FCSDataType(rawValue: keywords["$DATATYPE"].nonNil)!
         fcs.byteOrder = FCSByteOrder(rawValue: keywords["$BYTEORD"].nonNil)

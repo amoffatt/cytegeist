@@ -41,14 +41,16 @@ public struct SampleInspectorView: View {
                 VStack {
                     TabView {
                         if let keywords = query?.data?.meta.keywords {
-                            KeywordsTable(keywords: keywords) 
-                                .tabItem {
+                            VStack {
+                                KeywordsTable(keywords: keywords)
+                                if let comp = query?.data?.meta.comp {
+                                    CompMatrixDisplay(keyword: comp)
+                                }
+                            }.tabItem {
                                 Label("Keywords", systemImage: "key")
                             }
-//                            if let comp = keywords["$Comp"]?.value   {
-//                                CompMatrixDisplay(keyword: comp)
-//                            }
                         }
+                        
                         if let parameters = query?.data?.meta.parameters {
                             ParameterKeywordTable(parms: parameters).tabItem {
                                 Label("Parameters", systemImage: "clock")
@@ -128,12 +130,48 @@ public struct KeywordsTable: View {
          
         }
     }
-//    
-//    CompMatrixDisplay(keyword: String) {
-//        
-//    }
-//    
-    public struct ParameterKeywordTable: View {
+    
+    public struct  CompMatrixDisplay: View {
+        let keyword:String          //comma delim string starting with size
+        public var body: some View {
+            Text("comp").frame(minWidth: 100, minHeight: 100)
+            let k = keyword
+            let nums = get_numbers(stringtext: k)
+            let strs = getStrList(nums: nums)
+            ForEach(strs){ str in
+                Text(str)
+            }
+        }
+  
+        func getStrList(nums:  [Float])  -> [String]
+        {
+            let sz = Int(nums[0])
+            var strs = [String]()
+            for row in 0..<sz {
+                var s: String = ""
+                for i in 0..<sz {
+                    var a = "0\t"
+                    let idx = i + (sz * row) + 1
+                    let val = nums[idx]
+                    if val == 1 { a = "1"}
+                    else if abs(val) > 0.0000 {
+                        a = String(format: "%0.4f\t", val)
+                    }
+                    s.append(a)
+                }
+                s.append("\n")
+                strs.append(s)
+            }
+            return strs
+        }
+        
+        func get_numbers(stringtext:String) -> [Float] {
+            let StringRecordedArr = stringtext.components(separatedBy: ",")
+            return StringRecordedArr.map { Float($0)!}
+        }
+    }
+    
+        public struct ParameterKeywordTable: View {
         let parms:[CDimension]
         public var body: some View {
             
