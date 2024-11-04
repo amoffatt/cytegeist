@@ -15,132 +15,17 @@ import SwiftData
 import CObservation
 import UniformTypeIdentifiers
 
-//@MainActor
-//@CObservable
 @CObservable
 class AnalysisNodeSelection: CObject {
     
-    // AM DEBUGGING
-    var nodes: Set<AnalysisNode> = [] //{ [] }
+    var nodes: Set<AnalysisNode> = []
     var first:AnalysisNode? { nodes.first }
-    
-//    public override init() {
-////        self.nodes = []
-//    }
 }
 
-//@CObservable
-//class AnalysisNodeSelectionTest: CObject {
-//    
-//    // AM DEBUGGING
-////    var nodes: Set<AnalysisNode> //{ [] }
-//    var node:SampleRef?
-//    
-//    required init(from decoder: any Decoder) async throws {
-//        try await super.init(from: decoder)
-//    }
-////    var first:AnalysisNode? { nodes.first }
-//    
-////    public override init() {
-//////        self.nodes = []
-////    }
-//}
 
 extension UTType {
     static var cge: UTType = .init(filenameExtension: "cge")!
 }
-
-@Observable
-@MainActor
-public class CDocument {
-
-    public static let readableContentTypes: [UTType] = [.cge]
-    public static let writableContentTypes: [UTType] = [.cge]
-
-    public private(set) var content: Experiment!
-    public let context = CObjectContext(nil)
-    public private(set) var isTemporaryURL: Bool = true
-    private var _url: URL
-    public var url: URL {
-        get { _url }
-        set { _url = newValue; isTemporaryURL = false }
-    }
-    public init() {
-        
-        // self.content = try! runOnMainThreadBlocking {   // AM try! because runOnMainThreadBlocking can't support swift 'rethrows' behavior
-        content = self.context.withContext {
-             Experiment()
-        }
-        _url = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(UUID().uuidString)
-    }
-    
-    private func snapshot() throws -> Any? {
-        print("Beginning document snapshot...")
-        
-//        let result = try runOnMainThreadBlocking {
-//            let result = try self.content.serialize()
-//        }
-        // We can serialize from outside the MainActor because the main actor is waiting on this function, so the model will not be changed or read at the same time
-        let result = try content.serialize()
-        print(" ==> document snapshot complete.")
-        return result
-    }
-    
-    public func fileWrapper(snapshot: Any?) throws -> FileWrapper {
-        guard let snapshot else {
-            throw DocumentError.documentNotSerialized
-        }
-//        let encoder = JSONEncoder()
-//        await snapshot.encode(to: encoder)
-//        let data = try encoder.e/*n*/code(AsyncMainActorCodableWrapper(snapshot))
-        let options = JSONSerialization.WritingOptions.prettyPrinted
-        let data = try JSONSerialization.data(withJSONObject: snapshot, options: options)
-        print("Serialized document:\n\(String(decoding: data, as: Unicode.UTF8.self))")
-        return FileWrapper(regularFileWithContents: data)
-    }
-
-    func save(_ callback: @escaping (CDocument, Error?) -> Void) {
-        do {
-            try fileWrapper(snapshot: try snapshot()).write(to: url, options: .atomic, originalContentsURL: nil)
-            callback(self, nil)
-        } catch {
-            print("Error saving document: \(error)")
-            callback(self, error)
-        }
-    }
-
-}
-
-//public struct AsyncMainActorCodableWrapper<T:MainActorSerializable> : Codable {
-//    public let content: T?
-//    
-//    public init(_ content: T?) {
-//        self.content = content
-//    }
-//    
-//    public init(from decoder: any Decoder) throws {
-//        var tempContent: T?
-//        let container = try decoder.singleValueContainer()
-//        let decodedContent = try container.decode(T.self)
-//        
-//        // Use async/await properly
-//        let group = DispatchGroup()
-//        group.enter()
-//        
-//        Task {
-//            tempContent = decodedContent
-//            group.leave()
-//        }
-//        
-//        group.wait()
-//        self.content = tempContent
-//    }
-//    
-//    public func encode(to encoder: any Encoder) throws {
-//        
-//    }
-//}
-
 
 //-----------------------------------------------
 @CObservable

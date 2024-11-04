@@ -30,10 +30,11 @@ public protocol CObservable: Observation.Observable, AnyObject {
 }
 
 
-//@MainActor
+@MainActor
 public class CObjectContext {
     // AM DEBUGGING. Remove the nonisolated(unsafe) and make models MainActor
-    nonisolated(unsafe) public private(set) static var currentContext:CObjectContext? = nil
+//    nonisolated(unsafe)
+    public private(set) static var currentContext:CObjectContext? = nil
     
     public var undoManager:UndoManager?
     

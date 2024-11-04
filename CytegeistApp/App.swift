@@ -21,8 +21,7 @@ final class App {
         case open
     }
     var immersiveSpaceState = ImmersiveSpaceState.closed
-
-    public var openDocuments: [CDocument] = []
+    
     public var recentDocuments: [URL] = []
     
 //    var experiments: [Experiment] = []

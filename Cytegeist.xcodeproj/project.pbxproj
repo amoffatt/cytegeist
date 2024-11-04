@@ -94,6 +94,8 @@
 		B6C9A4B82C77D9AA00DB6786 /* ChartAxisView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4B72C77D9AA00DB6786 /* ChartAxisView.swift */; };
 		B6C9A4BA2C77DB3700DB6786 /* AxisNormalizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4B92C77DB3700DB6786 /* AxisNormalizer.swift */; };
 		B6D05D422CBD885200EA5A39 /* ExperimentWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6D05D412CBD885200EA5A39 /* ExperimentWindow.swift */; };
+		B6EF58A62CD7E4B500AD38E4 /* FileUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6EF58A52CD7E4B300AD38E4 /* FileUtil.swift */; };
+		B6EF58A82CD9464B00AD38E4 /* CDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6EF58A72CD9464500AD38E4 /* CDocument.swift */; };
 		DC05A3D12C798EC900C08BBF /* Smoothing.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC05A3D02C798EC900C08BBF /* Smoothing.swift */; };
 		DC23F02F2C7D3C0B002FCDC0 /* Gate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4692C75D04800DB6786 /* Gate.swift */; };
 		DC2473682C9A743A00D2DCA0 /* Statistic.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC2473662C9A72A700D2DCA0 /* Statistic.swift */; };
@@ -319,6 +321,8 @@
 		B6C9A4B72C77D9AA00DB6786 /* ChartAxisView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartAxisView.swift; sourceTree = "<group>"; };
 		B6C9A4B92C77DB3700DB6786 /* AxisNormalizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AxisNormalizer.swift; sourceTree = "<group>"; };
 		B6D05D412CBD885200EA5A39 /* ExperimentWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExperimentWindow.swift; sourceTree = "<group>"; };
+		B6EF58A52CD7E4B300AD38E4 /* FileUtil.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileUtil.swift; sourceTree = "<group>"; };
+		B6EF58A72CD9464500AD38E4 /* CDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CDocument.swift; sourceTree = "<group>"; };
 		DC05A3D02C798EC900C08BBF /* Smoothing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Smoothing.swift; sourceTree = "<group>"; };
 		DC2473662C9A72A700D2DCA0 /* Statistic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Statistic.swift; sourceTree = "<group>"; };
 		DC6F42FA2C83F7BD00288EB8 /* TabBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabBar.swift; sourceTree = "<group>"; };
@@ -411,6 +415,7 @@
 		B610A5732C54269A0081C517 /* Util */ = {
 			isa = PBXGroup;
 			children = (
+				B6EF58A52CD7E4B300AD38E4 /* FileUtil.swift */,
 				B691FCE72CA29F4E00B0CFC9 /* RealityKitUtil.swift */,
 				B6C9A4AA2C7689A000DB6786 /* FileInfo.swift */,
 				B685296A2C74DBD700EF9EF4 /* Colormaps.swift */,
@@ -627,6 +632,7 @@
 		B6C9A4302C75B66500DB6786 /* Experiment */ = {
 			isa = PBXGroup;
 			children = (
+				B6EF58A72CD9464500AD38E4 /* CDocument.swift */,
 				B6C9A46B2C75D04800DB6786 /* Experiment.swift */,
 				B6C9A46A2C75D04800DB6786 /* FocusedValues+Experiment.swift */,
 			);
@@ -1079,6 +1085,7 @@
 				B6C9A45D2C75D01300DB6786 /* AnalysisList.swift in Sources */,
 				B6C9A45F2C75D01300DB6786 /* ExpansionState.swift in Sources */,
 				DCF6FBAF2CA389E30001C9AF /* MIFlowCyt.swift in Sources */,
+				B6EF58A82CD9464B00AD38E4 /* CDocument.swift in Sources */,
 				B6C9A44C2C75CFCB00DB6786 /* App.swift in Sources */,
 				B65D82AF2C44BE7100E4F0A2 /* ImmersiveView.swift in Sources */,
 				DCF6FBAE2CA389E30001C9AF /* ExperimentBrowser.swift in Sources */,
@@ -1110,6 +1117,7 @@
 				B6C9A4AE2C76A77800DB6786 /* DateUtil.swift in Sources */,
 				B6C9A4082C75A46800DB6786 /* StringUtil.swift in Sources */,
 				B6C9A4092C75A46800DB6786 /* ThreadUtil.swift in Sources */,
+				B6EF58A62CD7E4B500AD38E4 /* FileUtil.swift in Sources */,
 				B6C9A4932C76729000DB6786 /* InputUtil.swift in Sources */,
 				B6C9A40A2C75A46800DB6786 /* MathUtil.swift in Sources */,
 				B6C9A40B2C75A46800DB6786 /* GraphicsUtil.swift in Sources */,
