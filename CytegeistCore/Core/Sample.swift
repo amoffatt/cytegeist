@@ -90,11 +90,12 @@ public class Sample : Identifiable, Codable, Hashable
         print("Sample \(ref)")
     }
  
-//    convenience init(_ xml: TreeNode)
-//    {
-//        assert(xml.value == "Sample")
-//        self.init()
-//    }
+    public func xml() -> String {
+        if let ref {
+            return "<Sample name=\(ref.filename) url=\(ref.url) />\n"
+        }
+        return ""
+    }
     
     private func handleError(_ error:SampleError) {
         print("Error: cannot load sample: \(error.localizedDescription)")

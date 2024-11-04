@@ -23,6 +23,7 @@ public struct CDimension : Identifiable, Hashable, Codable {
     
     public let name: String
     public let stain: String
+    public let shortName: String
     public let displayName: String
     public let bits: Int
     public var bytes: Int { (bits + 7) / 8 }
@@ -46,6 +47,7 @@ public struct CDimension : Identifiable, Hashable, Codable {
                 displayInfo: String, normalizer: AxisNormalizer,
                 valueReader: @escaping FCSParameterValueReader) {
         self.name = name
+        self.shortName = name
         self.stain = stain
         self.displayName = displayName
         self.bits = bits

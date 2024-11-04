@@ -50,6 +50,19 @@ class CGLayout : Codable, Hashable, Identifiable
         item.selected = true
         addItem(item)
     }
+    
+    public func addImage() -> ()
+    {
+        if !optionKey() { deselectAll()  }
+        newImage(name: "some image", position: CGPoint.zero)
+    }
+    
+    public func newImage(name: String, position:CGPoint)
+    {
+        let item = LayoutItem(.image, position: position)
+        item.selected = true
+        addItem(item)
+    }
         //---------------------------------------------------------------------------
         // manage the selection
     
@@ -81,7 +94,7 @@ class CGLayout : Codable, Hashable, Identifiable
             item.selected = sectRect(pt: item.position, size: item.size, rect: marquee)
         }
     }
-    
+    // TODO dont think this is correct
     public func sectRect(pt: CGPoint, size: CGSize, rect: CGRect) -> Bool
     {
         let halfHght = (size.height / 2), halfWidth = (size.width / 2)
@@ -134,6 +147,7 @@ public enum ELayoutType : Codable {
     case text(String)
     case chart(ChartDef?)
     case table
+    case image
 }
 
 @Observable
@@ -200,7 +214,7 @@ public class LayoutItem: Codable, Identifiable, Equatable
     
     
     public func xml() -> String {
-        return "<Layout " + attributes() + " >/n\t<Items>" +
+        return "<Layout " + attributes() + " >\n\t<Items>" +
             //    items.compactMap { $0.xml() }.joined(separator: "\n\t") +
         "</Items>\n" +
         "</Layout>\n"
@@ -208,6 +222,20 @@ public class LayoutItem: Codable, Identifiable, Equatable
     }
     
     public func attributes() -> String {
+        
+        return "name=" + name
+    }
+    
+    
+    public func json() -> String {
+        return "Layout( " + jsonattributes() + " >\n\tItems>( " +
+            //    items.compactMap { $0.xml() }.joined(separator: "\n\t") +
+        ")\n" +
+        ")\n"
+        
+    }
+    
+    public func jsonattributes() -> String {
         
         return "name=" + name
     }

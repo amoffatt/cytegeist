@@ -40,7 +40,7 @@ struct CytegeistApp: SwiftUI.App {
                             focusedAnalysisNode.graphDef.contours = contours ? false : true
                         }
                     }
-                }
+                 }
             }
              
             Window("Pair Charts", id: "pair-charts") {

@@ -26,7 +26,8 @@ struct LayoutItemWrappper: View, Identifiable {
             switch item.type {
                 case .text:   CTextView(parent: parent, item: item, editing: editing).background(.purple.opacity(0.3))
                 case .chart:  CChartView(parent: parent, item: item, editing: editing).background(.green.opacity(0.2))
-                case .table:  CTableView(parent: parent, item: item, editing: editing).background(.orange.opacity(0.2))
+                case .table:  CTableView(parent: parent, item: item, editing: editing).background(.blue.opacity(0.2))
+                case .image:  CImageView(parent: parent, item: item, editing: editing).background(.brown.opacity(0.2))
             }
         }
         .allowsHitTesting(true)
@@ -129,8 +130,25 @@ struct CChartView : View {
     }
 }
 
-//--------------------------------------------------------------------
-// TABLE
+    //--------------------------------------------------------------------
+    // IMAGE
+
+struct CImageView : View {
+    var parent: CGLayoutView
+    let item: LayoutItem
+    let editing: Bool
+    
+    var body: some View {
+        VStack {
+            Text("Image goes here")
+        }
+        .onAppear(perform:  {   item.position = CGPoint(x: 300, y: 200) })
+        
+    }
+    
+}
+    //--------------------------------------------------------------------
+    // TABLE
 
 struct CTableView : View {
     var parent: CGLayoutView
@@ -159,10 +177,7 @@ struct CTableView : View {
                 .border(.red, width: item.selected ? 3.0 : 0.0 )
         }
         .onAppear(perform:  {   item.position = CGPoint(x: 100, y: 200) })
-        
-        
     }
-    ///-------------------------------------------------------------------------
     public  struct User: Identifiable {
         public var id: Int
         var name: String
@@ -177,5 +192,8 @@ struct CTableView : View {
         User(id: 3, name: "Adkins", score: 84, number: 9.32e4, marker: "CD4"),
         User(id: 4, name: "Bob", score: 94, number: 0.32, marker: "CD44-39"),
         User(id: 5, name: "Ted", score: 82, number: 92, marker: "CD44-8")]
-
 }
+
+ 
+    ///-------------------------------------------------------------------------
+

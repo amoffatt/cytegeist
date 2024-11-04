@@ -33,33 +33,29 @@ public struct SampleInspectorView: View {
     public var body: some View {
 
         VStack {
-            Text(sample.filename)
+//            Text(sample.filename)
 //            NavigationSplitView {
 //                
 //            }
             HSplitView {
                 VStack {
                     TabView {
-                        if let keywords = query?.data?.meta.keywords {
+                        if let keywords = query?.data?.meta.keywords,
+                           let parameters = query?.data?.meta.parameters  {
                             VStack {
                                 KeywordsTable(keywords: keywords)
                                 if let comp = query?.data?.meta.comp {
-                                    CompMatrixDisplay(keyword: comp)
+                                    CompMatrixDisplay(keyword: comp, parameters: parameters)
                                 }
-                            }.tabItem {
-                                Label("Keywords", systemImage: "key")
-                            }
-                        }
-                        
-                        if let parameters = query?.data?.meta.parameters {
+                            }.tabItem {  Label("Keywords", systemImage: "key")  }
+                            
                             ParameterKeywordTable(parms: parameters).tabItem {
                                 Label("Parameters", systemImage: "clock")
                             }
                         }
-                       
                     }
-                    
                 }
+                    
                 TabView {
                     VStack {
                         if let metadata = query?.data?.meta {
@@ -70,7 +66,7 @@ public struct SampleInspectorView: View {
                     }.tabItem {
                         Label("Histograms", systemImage: "gauge")
                     }
-                    if let data = query?.data {
+                    if let _ = query?.data {
                         
                         dataView()
                             .tabItem {
@@ -83,6 +79,7 @@ public struct SampleInspectorView: View {
         .onChange(of: sample.url, initial: true) {
             query = experiment.core.loadSample(SampleRequest.init(sample, includeData:true))
         }
+        .navigationTitle(sample.filename)
     }
  
     
@@ -108,6 +105,7 @@ public struct SampleInspectorView: View {
             
         }
     }
+    
 
 
 public struct KeywordsTable: View {
@@ -133,16 +131,38 @@ public struct KeywordsTable: View {
     
     public struct  CompMatrixDisplay: View {
         let keyword:String          //comma delim string starting with size
+        let parameters:[CDimension]
         public var body: some View {
-            Text("comp").frame(minWidth: 100, minHeight: 100)
+//            Text("comp").frame(minWidth: 100, minHeight: 100)
             let k = keyword
             let nums = get_numbers(stringtext: k)
-            let strs = getStrList(nums: nums)
-            ForEach(strs){ str in
-                Text(str)
+            let mtx = getArray(nums: nums)
+            let size = mtx.count
+            
+//            let strs = getStrList(nums: nums)
+            VStack {
+               Table(mtx) {
+//                        TableColumn("") { e in Text("FL")}
+                        if #available(macOS 14.4, *) {
+                            TableColumnForEach(0..<mtx.count, id: \.self) { index in
+                                TableColumn("\(parameters[index].shortName)") { e in
+                                    Text(String(matrixFormat(val: e.guts[index])))
+                                }
+                            }
+                    }
+                }
+                
             }
+//            ForEach(strs){ str in
+//                Text(str).frame(width: .infinity)
+//            }
         }
-  
+        func matrixFormat(val: Float) -> String{
+            if val == 0     {   return "0"  }
+            if val == 1     { return "1"}
+            return String(format: "%0.3f", val)
+        }
+        
         func getStrList(nums:  [Float])  -> [String]
         {
             let sz = Int(nums[0])
@@ -153,9 +173,9 @@ public struct KeywordsTable: View {
                     var a = "0\t"
                     let idx = i + (sz * row) + 1
                     let val = nums[idx]
-                    if val == 1 { a = "1"}
+                    if val == 1 { a = "1\t"}
                     else if abs(val) > 0.0000 {
-                        a = String(format: "%0.4f\t", val)
+                        a = String(format: "%0.2f\t", val)
                     }
                     s.append(a)
                 }
@@ -163,7 +183,31 @@ public struct KeywordsTable: View {
                 strs.append(s)
             }
             return strs
+        }      
+        struct Floats: Identifiable
+        {
+            var id = UUID()
+            var guts = [Float]()
         }
+        
+        
+        func getArray(nums:  [Float])  -> [Floats]
+        {
+            let sz = Int(nums[0])
+            var mtx = [Floats]()
+            for row in 0..<sz {
+                var line = Floats()
+                for i in 0..<sz {
+                    let idx = i + (sz * row) + 1
+                    let val = nums[idx]
+                    line.guts.append(val)
+                }
+                mtx.append(line)
+            }
+            return mtx
+        }
+        
+        
         
         func get_numbers(stringtext:String) -> [Float] {
             let StringRecordedArr = stringtext.components(separatedBy: ",")

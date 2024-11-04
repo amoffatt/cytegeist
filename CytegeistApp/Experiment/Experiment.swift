@@ -148,6 +148,8 @@ public class Experiment : Usable
     
     public func xml() -> String {
         
+        let sampleStr = "<Samples>\n" +
+            samples.compactMap { $0.xml() }.joined(separator: "\n\t") +   "</Samples>\n"
         let panelStr = "<Panels>\n" +
             panels.compactMap { $0.xml() }.joined(separator: "\n\t") +   "</Panels>\n"
         let groupStr = "<Groups>\n" +
@@ -158,8 +160,8 @@ public class Experiment : Usable
             tables.compactMap { $0.xml() }.joined(separator: "\n\t") +   "</Layouts>\n"
         
         
-        let subs: String  = panelStr + groupStr + tableStr + layoutStr
-        //+ attributes + " >/n"
+        let subs: String  = sampleStr + panelStr + groupStr + tableStr + layoutStr
+        //+ attributes + " >\n"
         let attr =  attributes()
         return "<Experiment " + attr + ">\n" + subs + "</Experiment>\n"
     }

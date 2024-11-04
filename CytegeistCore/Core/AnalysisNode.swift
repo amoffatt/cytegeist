@@ -14,6 +14,7 @@ import CytegeistLibrary
 public extension UTType {  static var population = UTType(exportedAs: "cytegeist.population")   }
 enum AnalysisNodeError : Error {  case noSampleRef      }
 //---------------------------------------------------------
+//Model
 @Observable
 public class AnalysisNode : Codable, Transferable, Identifiable, Hashable, CustomStringConvertible
 {
@@ -108,7 +109,18 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable, Custo
         self.color = original.color ?? .green
         self.opacity = original.opacity
    }
-
+    public func xml() -> String {
+        let attributes = attributes()
+        let head = "<Node " + attributes + ">\n<Children>\n"
+        var kids = ""
+        for child in children {   kids.append(child.xml())    }
+        let tail = "</Children>\n</Node>\n"
+        return head + kids + tail
+    }
+    public func attributes() -> String {
+        let inv = invert ? "true" : "false"
+        return "inverted=\(inv)"
+    }
 
         //--------------------------------------------------------
     public func getSampleID() -> Sample.ID?

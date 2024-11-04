@@ -208,7 +208,7 @@ public class CGTable : Usable, Hashable
     }
     
     public func xml() -> String {
-        return "<Table " + attributes() + " >/n\t<Columns>" +
+        return "<Table " + attributes() + " >\n\t<Columns>" +
         items.compactMap { $0.xml() }.joined(separator: "\n\t") +   "</Columns>\n" +
         "</Table>\n"
         

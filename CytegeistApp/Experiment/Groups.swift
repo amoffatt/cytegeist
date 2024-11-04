@@ -34,9 +34,17 @@ public struct CGroup : Identifiable, Codable
     }
     
     public func attributes() -> String {
-        return "name=\(self.name)"
+        return "name=\(self.name) keyword=\(self.keyword ?? "") "
 //  keyword=\(self.keyword)      + "value=" + self.value + " "
 //        + "color=" + self.color?.description + " "
+    }
+    public func json() -> String {
+        return "Group( " + jsonattributes() + ")"
+    }
+    public func jsonattributes() -> String {
+        return "name: \(self.name) keyword: \(self.keyword ?? "") "
+            //        + "values=" + self.values + " "
+            //        + "color=" + self.color?.description + " "
     }
     
 }
@@ -65,8 +73,17 @@ struct CPanel : Usable
     
     public func attributes() -> String {
         return "name=\(self.name) keyword=\(self.keyword ?? "") "
-//        + "values=" + self.values + " "
-//        + "color=" + self.color?.description + " "
+            //        + "values=" + self.values + " "
+            //        + "color=" + self.color?.description + " "
+    }
+    
+    public func json() -> String {
+        return "Panel( " + jsonattributes() + ")"
+    }
+    public func jsonattributes() -> String {
+        return "name: \(self.name) keyword: \(self.keyword ?? "") "
+            //        + "values=" + self.values + " "
+            //        + "color=" + self.color?.description + " "
     }
     
 }
