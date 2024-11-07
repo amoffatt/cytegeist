@@ -35,8 +35,17 @@ public func isEmpty(_ value:String?) -> Bool {
 public func nonNil(_ value:String?) -> String {
     value ?? ""
 }
+public extension Bool {
+     func xml() -> String {     return self ? "true" : "false"   }
+}
 
+public extension CGPoint {
+    func xml() -> String {     return "<Point x=\(self.x) y=(self.y) /> \n"   }
+}
 
+public extension CGSize {
+    func xml() -> String {     return "<Size width=\(self.width) y=\(self.height) /> \n"   }
+}
 public extension String {
     //    func substring(offset: Int, length: Int) -> String {
     //        guard offset >= 0, length > 0, offset < self.count else {
@@ -72,7 +81,7 @@ public extension String {
         let end = offset + length
         return self[offset..<end]
     }
-   
+
     func toColor( ) -> Color {
         return Color.blue
     }

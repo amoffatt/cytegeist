@@ -148,16 +148,11 @@ public class Experiment : Usable
     
     public func xml() -> String {
         
-        let sampleStr = "<Samples>\n" +
-            samples.compactMap { $0.xml() }.joined() +   "</Samples>\n"               //separator: "\n\t"
-        let panelStr = "<Panels>\n" +
-            panels.compactMap { $0.xml() }.joined(separator: "\n\t") +   "</Panels>\n"
-        let groupStr = "<Groups>\n" +
-            groups.compactMap { $0.xml() }.joined(separator: "\n\t") +   "</Groups>\n"
-        let tableStr = "<Tables>\n" +
-            tables.compactMap { $0.xml() }.joined(separator: "\n\t") +   "</Tables>\n"
-        let layoutStr = "<Layouts>\n" +
-            tables.compactMap { $0.xml() }.joined(separator: "\n\t") +   "</Layouts>\n"
+        let sampleStr = "<Samples>\n" + samples.compactMap { $0.xml() }.joined() +   "</Samples>\n"               //separator: "\n\t"
+        let panelStr = "<Panels>\n" + panels.compactMap { $0.xml() }.joined() +   "</Panels>\n"
+        let groupStr = "<Groups>\n" + groups.compactMap { $0.xml() }.joined() +   "</Groups>\n"
+        let tableStr = "<Tables>\n" + tables.compactMap { $0.xml() }.joined() +   "</Tables>\n"
+        let layoutStr = "<Layouts>\n" + layouts.compactMap { $0.xml() }.joined() +   "</Layouts>\n"
         
         
         let subs: String  = sampleStr + panelStr + groupStr + tableStr + layoutStr

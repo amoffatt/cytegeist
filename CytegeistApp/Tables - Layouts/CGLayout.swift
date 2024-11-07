@@ -19,6 +19,14 @@ class CGLayout : Codable, Hashable, Identifiable
     //-------------------------------------------------------------
     static func == (lhs: CGLayout, rhs: CGLayout) -> Bool {       lhs.id == rhs.id   }
     func hash(into hasher: inout Hasher) {     hasher.combine(id)   }
+    
+    public func xml() -> String {
+        return "<Layout " + attributes() + " >\n\t<Items>\n" +
+               items.compactMap { $0.xml() }.joined() +
+        "\t</Items>\n</Layout>\n"
+    }
+    
+    public func attributes() -> String {  return "name= \(self.name) id=\(self.id)"  }
 
     //-------------------------------------------------------------
     // adding items
@@ -148,6 +156,16 @@ public enum ELayoutType : Codable {
     case chart(ChartDef?)
     case table
     case image
+    
+    public func xml() -> String
+    {
+        switch self {
+            case .text: return "text"
+            case .chart: return "chart"
+            case .table: return "table"
+            case .image: return "image"
+        }
+    }
 }
 
 @Observable
@@ -212,18 +230,16 @@ public class LayoutItem: Codable, Identifiable, Equatable
         LayoutItem(self.type, node: self.node, position: self.position, size: self.size)
     }
     
-    
+
     public func xml() -> String {
-        return "<Layout " + attributes() + " >\n\t<Items>" +
-            //    items.compactMap { $0.xml() }.joined(separator: "\n\t") +
-        "</Items>\n" +
-        "</Layout>\n"
+        return "<LayoutItem " + attributes() + " >\n" +
+        position.xml() + size.xml() +
+        "</LayoutItem>\n"
         
     }
     
     public func attributes() -> String {
-        
-        return "name=" + name
+        return "type=\(type.xml())"
     }
 
 }
