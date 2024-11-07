@@ -14,8 +14,10 @@ import CytegeistLibrary
 public extension UTType {  static var population = UTType(exportedAs: "cytegeist.population")   }
 enum AnalysisNodeError : Error {  case noSampleRef      }
 //---------------------------------------------------------
+
+@MainActor
 @Observable
-public class AnalysisNode : Codable, Transferable, Identifiable, Hashable, CustomStringConvertible
+public class AnalysisNode : Transferable, Identifiable, Hashable, CustomStringConvertible
 {
     
     public var id = UUID()
@@ -23,7 +25,7 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable, Custo
     public var description: String = ""
     @CodableIgnored
     @ObservationIgnored
-    public var sample: Sample? = nil                      // nil except at the root node
+    public var sampleID: UUID? = nil                      // nil except at the root node
     public var graphDef = ChartDef()              // how this population wants to be shown
     public var statistics =  [String : Double]()         // cache of stats with values
     public private(set) var children: [AnalysisNode] = []        // subpopulations dependent on us
@@ -61,26 +63,26 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable, Custo
     public static func == (lhs: AnalysisNode, rhs: AnalysisNode) -> Bool {   lhs.id == rhs.id  }
     public func hash(into hasher: inout Hasher) {        hasher.combine(id)    }
     public static var transferRepresentation: some TransferRepresentation {
-        CodableRepresentation(contentType: UTType.population)
+//        CodableRepresentation(contentType: UTType.population)
     }
         //--------------------------------------------------------
     public init() {    }
     
-    public required init(from decoder: any Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        self._id = try container.decode(UUID.self, forKey: ._id)
-        self._name = try container.decode(String.self, forKey: ._name)
-        self._sampleID = try container.decodeIfPresent(Sample.ID.self, forKey: ._sampleID)
-        self._graphDef = try container.decode(ChartDef.self, forKey: ._graphDef)
-        self._statistics = try container.decode([String : Double].self, forKey: ._statistics)
-        self._children = try container.decode([AnalysisNode].self, forKey: ._children)
-//        self.__parent = try container.decodeIfPresent(AnalysisNode.self, forKey: .__parent)
-        self._gate = try container.decode(CodableIgnored<AnyGate>.self, forKey: .gate)
-        self._color = try container.decode(CodableIgnored<Color>.self, forKey: .color)
-        self._opacity = try container.decode(Double.self, forKey: ._opacity)
-        self._labelOffset = try container.decode(CGPoint.self, forKey: ._labelOffset)
-        self._invert = try container.decode(Bool.self, forKey: ._invert)
-    }
+//    public required init(from decoder: any Decoder) throws {
+//        let container = try decoder.container(keyedBy: CodingKeys.self)
+//        self._id = try container.decode(UUID.self, forKey: ._id)
+//        self._name = try container.decode(String.self, forKey: ._name)
+////        self._sampleID = try container.decodeIfPresent(Sample.ID.self, forKey: ._sampleID)
+//        self._graphDef = try container.decode(ChartDef.self, forKey: ._graphDef)
+//        self._statistics = try container.decode([String : Double].self, forKey: ._statistics)
+//        self._children = try container.decode([AnalysisNode].self, forKey: ._children)
+////        self.__parent = try container.decodeIfPresent(AnalysisNode.self, forKey: .__parent)
+//        self._gate = try container.decode(CodableIgnored<AnyGate>.self, forKey: .gate)
+//        self._color = try container.decode(CodableIgnored<Color>.self, forKey: .color)
+//        self._opacity = try container.decode(Double.self, forKey: ._opacity)
+//        self._labelOffset = try container.decode(CGPoint.self, forKey: ._labelOffset)
+//        self._invert = try container.decode(Bool.self, forKey: ._invert)
+//    }
     
     public init(children: [AnalysisNode]? = nil)  {
         if let children {   self.children = children  }

@@ -36,13 +36,13 @@ import Foundation
     let initPHighBound = 1e6
     let epsilon = 1e-12
     
-    struct Logicle {
+    public struct Logicle {
         var T: Double
         var w: Double
         var m: Double
         var p: Double = 0
      
-    init(T: Double, w: Double, m: Double)
+    public init(T: Double, w: Double, m: Double)
     {
 //      assert((T>0) && (w>0) && (m>0))
         self.T = T

@@ -7,6 +7,7 @@
 
 import Foundation
 import CytegeistLibrary
+import SwiftUI
 import CObservation
 
 //---------------------------------------------------------
@@ -31,7 +32,8 @@ public class Sample : CObject
     
 //    @CodableIgnored
 //    @ObservationIgnored
-    @Transient var error:Error? = nil
+    // AM DEBUGGING @Transient
+    var error:Error? = nil
     
 //    var attributes = AttributeStore()
 //    var dimensions = [CDimension]()
@@ -40,7 +42,7 @@ public class Sample : CObject
     //    var validity = SampleValidityCheck ()
     
     public var imageURL: URL?
-    @Transient public var meta:FCSMetadata?
+    public var meta:FCSMetadata?
     
 //    var keywords:AttributeStore { meta?.keywordLookup ?? [:] }
     public subscript(_ keyword:String) -> String { (meta?.keywordLookup[keyword]).nonNil }
@@ -111,7 +113,9 @@ public class Sample : CObject
         print("sample validity check")
     }
     
-    @Transient private var _tree:AnalysisNode = AnalysisNode()
+    // AM DEBUGGING
+//    @Transient
+    private var _tree:AnalysisNode = AnalysisNode()
     public func getTree() -> AnalysisNode {
         _tree.sampleID = self.id
         return _tree

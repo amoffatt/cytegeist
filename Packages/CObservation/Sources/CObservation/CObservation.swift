@@ -11,6 +11,8 @@
 //public macro stringify<T>(_ value: T) -> (T, String) = #externalMacro(module: "CObservationMacrosMacros", type: "StringifyMacro")
 
 import Foundation
+import UniformTypeIdentifiers
+import SwiftUI
 
 
 /// Similar to @Observable, but adds UndoManager support to the object.
@@ -22,12 +24,6 @@ public macro CObservable() =
   #externalMacro(module: "CObservationMacros", type: "CObservableMacro")
 
 
-
-public protocol CObservable: Observation.Observable, AnyObject {
-    // AM DEBUGGING
-    @MainActor
-    var _context:CObjectContext? { get }
-}
 
 
 @MainActor
@@ -55,6 +51,12 @@ public class CObjectContext {
         return try body()
     }
     
+}
+
+extension UTType {
+    static var cObject:UTType {
+        UTType(exportedAs: "com.cytegiest.cobject")
+    }
 }
 
 @MainActor
@@ -198,6 +200,20 @@ open class CObject : CObservable, Identifiable, Hashable, Equatable, MainActorSe
 //            return nil
 //        }
 //    }
+}
+
+
+public protocol CObservable: Observation.Observable, AnyObject {
+    // AM DEBUGGING
+    @MainActor
+    var _context:CObjectContext? { get }
+}
+
+extension CObject: Transferable {
+    nonisolated public static var transferRepresentation: some TransferRepresentation {
+        DataRepresentation(importedContentType: .cObject) { o in
+        }
+    }
 }
 
 

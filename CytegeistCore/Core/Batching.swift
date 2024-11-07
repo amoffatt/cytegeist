@@ -9,6 +9,7 @@ import Foundation
 import SwiftUI
 
 @Observable
+@MainActor
 public class BatchContext {
     public static let empty = BatchContext(allSamples: [])
     

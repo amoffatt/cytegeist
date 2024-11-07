@@ -11,7 +11,7 @@ import CytegeistLibrary
 public enum AxisScaleType: Hashable {
     case linear
     case log(base:ValueType)
-    case biex(_ transform: Logicle)
+//    case biex(_ transform: Logicle)
 }
 
 public struct AxisNormalizer: Hashable, Codable {
@@ -96,19 +96,19 @@ public struct AxisNormalizer: Hashable, Codable {
         )
     }
     
-    public static func logicle(min:Double, max:Double) -> AxisNormalizer {
-        let transform = Logicle(T:0, w:0, m:0)
-        
-        func calculateTickMarks(desiredTicks: Int) -> [MajorAxisTick] {
-            []
-        }
-        
-        return .init(
-            min, max, .biex(transform),
-            transform.logicle,
-            transform.unnormalize,
-            calculateTickMarks)
-    }
+//    public static func logicle(min:Double, max:Double) -> AxisNormalizer {
+//        let transform = Logicle(T:0, w:0, m:0)
+//        
+//        func calculateTickMarks(desiredTicks: Int) -> [MajorAxisTick] {
+//            []
+//        }
+//        
+//        return .init(
+//            min, max, .biex(transform),
+//            transform.logicle,
+//            transform.unnormalize,
+//            calculateTickMarks)
+//    }
     
     public static func == (lhs: AxisNormalizer, rhs: AxisNormalizer) -> Bool {
         lhs.min == rhs.min && lhs.max == rhs.max && lhs.type == rhs.type
