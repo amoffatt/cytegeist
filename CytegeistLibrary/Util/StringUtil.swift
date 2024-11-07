@@ -7,6 +7,7 @@
 
 import Foundation
 import CryptoKit
+import SwiftUI
 
 
 let DEBUG = true
@@ -72,6 +73,10 @@ public extension String {
         return self[offset..<end]
     }
    
+    func toColor( ) -> Color {
+        return Color.blue
+    }
+    
     func stripHead() -> String {
         
         if let a = self.range(of:"<head>") {

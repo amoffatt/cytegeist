@@ -218,7 +218,10 @@ public class CGTable : Usable, Hashable
         
             return "name=" + name
     }
- 
+    init(_ node: TreeNode) {    
+        
+    }
+
 }
 
 //---------------------------------------------------------------------------

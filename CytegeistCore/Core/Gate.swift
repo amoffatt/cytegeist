@@ -107,7 +107,7 @@ public protocol GateDef : Codable, Hashable, Equatable
     func probability(of:EventData) -> PValue
 //        fatalError("Implemented")
 //    }
-    
+    func xml() -> String
     /// self is a binding for the gate's view to be able to edit the gate itself through
 //    func chartView(_ self:Binding<AnyGate?>, chart:ChartDef) -> ChartAnnotation?
 //    func chartView(_ node:PopulationNode,
@@ -168,6 +168,9 @@ public struct RangeGateDef : GateDef
         event.values[0] >= min && event.values[0] <= max ? .one : .zero
     }
 
+    public func xml() -> String {
+        return " "
+    }
 }
 
 public struct RectGateDef : GateDef
@@ -222,7 +225,9 @@ public struct RectGateDef : GateDef
 //            return .zero
 //        }
     }
-
+    public func xml() -> String {
+        return " "
+    }
 //    public func chartView(_ node: PopulationNode, chartSize: CGSize, chartDims: Tuple2<CDimension?>) -> any View {
 //            Text("Rect gate not yet supported")
 //        guard let xAxis = chart.xAxis?.name, xAxis == dims.get(index:0),
@@ -273,7 +278,9 @@ public struct RadialGateDef : GateDef
     public init(from decoder: any Decoder) throws {
         fatalError("init(from:) has not been implemented")
     }
-    
+    public func xml() -> String {
+        return " "
+    }
 }
 
 public protocol PathGate : GateDef {
@@ -304,7 +311,9 @@ public struct EllipsoidGateDef: PathGate {
             .path(subdivisions:100)
 //            .map { $0.unnormalize(axes) }
     }
-}
+    public func xml() -> String {
+        return " "
+    }}
 
 public struct Ellipsoid: Codable, Hashable {
     public var center:CPoint
@@ -377,7 +386,9 @@ public struct Ellipsoid: Codable, Hashable {
             return rotatedP + center
         }
     }
-    
+    public func xml() -> String {
+        return " "
+    }
 //    public func scaled(_ scale:CGSize) -> Ellipsoid {
 //        
 //    }
@@ -392,10 +403,13 @@ public struct PolygonGateDef : GateDef {
         self.dims = dims
         self.points = points
     }
-    
     public func probability(of: EventData) -> PValue {
         fatalError()
     }
+    public func xml() -> String {
+        return " "
+    }
+
 }
 
 //public class SplineGateDef : GateDef

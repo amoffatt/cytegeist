@@ -11,6 +11,7 @@ import CytegeistCore
 import SwiftUI
 import Combine
 
+// Questionable if these should be different classes
     //--------------------------------------------------------------------------------
     //Model
 public struct CGroup : Identifiable, Codable
@@ -38,13 +39,13 @@ public struct CGroup : Identifiable, Codable
 //  keyword=\(self.keyword)      + "value=" + self.value + " "
 //        + "color=" + self.color?.description + " "
     }
-    public func json() -> String {
-        return "Group( " + jsonattributes() + ")"
-    }
-    public func jsonattributes() -> String {
-        return "name: \(self.name) keyword: \(self.keyword ?? "") "
-            //        + "values=" + self.values + " "
-            //        + "color=" + self.color?.description + " "
+    init(xml: TreeNode) {
+        let attr = xml.attrib.dictionary
+        self.name = attr["name"] ?? ""
+        self.color = (attr["color"]  ?? "blue").toColor()
+        self.keyword = attr["keyword"] ?? ""
+        self.value = attr["value"] ?? ""
+
     }
     
 }
@@ -55,7 +56,7 @@ struct CPanel : Usable
     var id = UUID()
     var name = ""
     var keyword: String?
-    var values: [String]
+    var values: String?         // should be [String]???
     @CodableIgnored
     var color: Color?
     
@@ -65,7 +66,7 @@ struct CPanel : Usable
         self.name = name
         self.color = color
         self.keyword = keyword
-        self.values = []
+        self.values = ""
     }
     public func xml() -> String {
         return "<Panel " + attributes() + "/>"
@@ -77,13 +78,11 @@ struct CPanel : Usable
             //        + "color=" + self.color?.description + " "
     }
     
-    public func json() -> String {
-        return "Panel( " + jsonattributes() + ")"
+    init(_ xml: TreeNode) {
+        let attr = xml.attrib.dictionary
+        self.name = attr["name"] ?? ""
+        self.name = attr["color"] ?? ""
+        self.keyword = attr["keyword"] ?? ""
+        self.values = attr["values"] ?? ""
     }
-    public func jsonattributes() -> String {
-        return "name: \(self.name) keyword: \(self.keyword ?? "") "
-            //        + "values=" + self.values + " "
-            //        + "color=" + self.color?.description + " "
-    }
-    
 }

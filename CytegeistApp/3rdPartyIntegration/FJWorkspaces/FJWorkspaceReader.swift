@@ -38,7 +38,7 @@ class WorkspaceReader {
             
             let node = TreeNode(elementName)
             for entry in attributeDict {
-                node.attrib[entry.key] = entry.value
+                node.attrib.dictionary[entry.key] = entry.value
             }
             //            print ("Pushing ", elementName, parentStack.count)
             parentStack[parentStack.endIndex-1].add(child: node)        //add the new node to parent's children
@@ -56,38 +56,12 @@ class WorkspaceReader {
             let s = string.trimmingCharacters(in: .whitespacesAndNewlines)
             if !s.isEmpty {
                 print ("CDATA " + s)
-                parentStack[parentStack.endIndex-1].attrib["CDATA"] = s
+                parentStack[parentStack.endIndex-1].attrib.dictionary["CDATA"] = s
             }
         }
     }
 }
 
-
-//extension AnalysisNode {
-//    convenience init(fjxml: TreeNode)
-//    {
-//        self.init()
-//        
-//        extraAttributes.merge(fjxml.attrib, uniquingKeysWith: +)
-//        if let gs = fjxml.findChild(value: "Graph")
-//        {
-//            graphDef = ChartDef(fjxml:gs)
-//        }
-//        if let g = fjxml.findChild(value: "Gate")
-//        {
-//            gate = Gate(fjxml: g)
-//        }
-//        for stat in fjxml.children where (stat.value == "Statistic")
-//        {
-//            statistics.append( Statistic(fjxml: stat))
-//        }
-//        if let kids = fjxml.findChild(value: "Subpopulations")
-//        {
-//            addChild(AnalysisNode(fjxml:kids))
-//        }
-//    }
-//    
-//}
 
 //
 //struct Criterion : Codable

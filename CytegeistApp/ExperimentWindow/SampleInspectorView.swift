@@ -144,8 +144,8 @@ public struct KeywordsTable: View {
                Table(mtx) {
 //                        TableColumn("") { e in Text("FL")}
                         if #available(macOS 14.4, *) {
-                            TableColumnForEach(0..<mtx.count, id: \.self) { index in
-                                TableColumn("\(parameters[index].shortName)") { e in
+                            TableColumnForEach(0..<size, id: \.self) { index in
+                                TableColumn("\(parameters[index+3].shortName)") { e in          // TODO -- parm size - size ?
                                     Text(String(matrixFormat(val: e.guts[index])))
                                 }
                             }

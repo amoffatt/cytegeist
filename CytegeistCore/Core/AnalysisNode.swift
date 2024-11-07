@@ -26,7 +26,8 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable, Custo
     public var graphDef = ChartDef()              // how this population wants to be shown
     public var statistics =  [String : Double]()         // cache of stats with values
     public private(set) var children: [AnalysisNode] = []        // subpopulations dependent on us
-    
+    public var extraAttributes = AttributeStore()              // how this population wants to be shown
+
     // TODO parent should not be encoded/decoded. Value is set when parent decodes its children
     @CodableIgnored
     @ObservationIgnored
@@ -109,17 +110,43 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable, Custo
         self.color = original.color ?? .green
         self.opacity = original.opacity
    }
+    
+    
     public func xml() -> String {
         let attributes = attributes()
-        let head = "<Node " + attributes + ">\n<Children>\n"
-        var kids = ""
+        let head = "<Population " + attributes + ">\n"
+        let graph = graphDef.xml()
+        let gate = gate?.xml() ?? ""
+
+        
+        var kids = "<Subpopulations>\n"
         for child in children {   kids.append(child.xml())    }
-        let tail = "</Children>\n</Node>\n"
-        return head + kids + tail
+        let tail = "</Subpopulations>\n</Population>\n"
+        return head + graph + gate + kids + tail
     }
     public func attributes() -> String {
         let inv = invert ? "true" : "false"
         return "inverted=\(inv)"
+    }
+    
+
+    convenience init(fjxml: TreeNode)
+    {
+        self.init()
+
+        extraAttributes.dictionary.merge(fjxml.attrib.dictionary, uniquingKeysWith: +)
+        if let gs = fjxml.findChild(value: "Graph")   {
+            graphDef = ChartDef(fjxml:gs)
+        }
+        if let g = fjxml.findChild(value: "Gate")  {
+//            gate = Gate(fjxml: g)
+        }
+        for stat in fjxml.children where (stat.value == "Statistic")  {
+//            statistics.append( Statistic(fjxml: stat))
+        }
+        if let kids = fjxml.findChild(value: "Subpopulations")  {
+            addChild(AnalysisNode(fjxml:kids))
+        }
     }
 
         //--------------------------------------------------------
@@ -129,17 +156,14 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable, Custo
     }       //AT?
     
     public func getSample(_ ctx:BatchContext) -> Sample? {
-        guard let sampleID = getSampleID() else {
-            return nil
-        }
+        guard let sampleID = getSampleID() else {  return nil   }
         
-        let s = ctx.getSample(sampleID)
-        
-        if s != nil {
-            print("getSample(): \(s!.tubeName), ref: \(s?.ref?.url)")
+        if let s = ctx.getSample(sampleID) {
+//            print("getSample(): \(s.tubeName), ref: \(s.ref?.url ?? URL.applicationDirectory )")
+            return s
         }
-        else { print("null sample")}
-        return s
+        print("null sample")
+        return nil
     }
     
     public func getSampleMeta(_ ctx:BatchContext) -> FCSMetadata? { getSample(ctx)?.meta }
@@ -234,9 +258,7 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable, Custo
     public func mergeTree(_ clone: AnalysisNode)
     {
         print ("mergeTree")
-        if name != clone.name {
-            addChild(clone)
-        }
+        if name != clone.name {  addChild(clone)  }
         else {  children.append(contentsOf: clone.children) }
     }
 

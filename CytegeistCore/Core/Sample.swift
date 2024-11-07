@@ -92,11 +92,17 @@ public class Sample : Identifiable, Codable, Hashable
  
     public func xml() -> String {
         if let ref {
-            return "<Sample name=\(ref.filename) url=\(ref.url) />\n"
+            return "\t<Sample name=\(ref.filename) url=\(ref.url) />\n"
         }
         return ""
     }
     
+    public init( xml: TreeNode )
+    {
+        if let url = xml.attrib.dictionary["url"] {
+            self.ref = SampleRef(url: URL(string: url)!)
+        }
+    }
     private func handleError(_ error:SampleError) {
         print("Error: cannot load sample: \(error.localizedDescription)")
         self.error = error

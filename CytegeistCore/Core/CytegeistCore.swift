@@ -447,6 +447,7 @@ public struct StatisticRequest : Hashable {
         self.dim = dimName
         self.statistic = statistic
     }
+ 
 }
 
 public typealias StatisticBatch = [Statistic:Double]

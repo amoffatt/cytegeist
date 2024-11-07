@@ -46,8 +46,8 @@ public class Experiment : Usable
     var groups = [CGroup]()
     var tables = [CGTable]()
     var layouts = [CGLayout]()
-    
-//    @Transient 
+    var keywords = AttributeStore()
+//    @Transient
     var core: CytegeistCoreAPI = CytegeistCoreAPI()
     
     var defaultBatchContext: BatchContext { .init(allSamples: samples) }
@@ -143,13 +143,13 @@ public class Experiment : Usable
         let len = s.count
         return "\(s.substring(offset: 0, length: 12))...\(s.substring(offset: len-12, length: 12))"
     }
-        //--------------------------------------------------------------------------------
+  //--------------------------------------------------------------------------------
   // streaming
     
     public func xml() -> String {
         
         let sampleStr = "<Samples>\n" +
-            samples.compactMap { $0.xml() }.joined(separator: "\n\t") +   "</Samples>\n"
+            samples.compactMap { $0.xml() }.joined() +   "</Samples>\n"               //separator: "\n\t"
         let panelStr = "<Panels>\n" +
             panels.compactMap { $0.xml() }.joined(separator: "\n\t") +   "</Panels>\n"
         let groupStr = "<Groups>\n" +
@@ -163,14 +163,68 @@ public class Experiment : Usable
         let subs: String  = sampleStr + panelStr + groupStr + tableStr + layoutStr
         //+ attributes + " >\n"
         let attr =  attributes()
+        let keywords = keywords.xml()
         return "<Experiment " + attr + ">\n" + subs + "</Experiment>\n"
     }
 
     public func attributes() -> String {
         return "name=\(self.name) version=\(self.version)"
     }
+    
  
         //--------------------------------------------------------------------------------
+    public convenience init(ws: TreeNode )
+    {
+        self.init()
+        print ("Experiment's Tree Count: ", ws.deepCount)
+        let ws = ws.children.first
+        let samps = ws?.findChild(value: "SampleList")
+        let gps = ws?.findChild(value: "Groups")
+        let tabls = ws?.findChild(value: "TableEditor")
+        let lays = ws?.findChild(value: "LayoutEditor")
+        
+        if let s = samps  { self.processSamples(s)   }
+        if let g = gps    { self.processGroups(g)    }
+        if let t = tabls  { self.processTables(t)    }
+        if let l = lays  { self.processLayouts(l)    }
+        print ("Samples: \(samples.count) Groups: \(groups.count) Tables: \(tables.count) Layouts: \(layouts.count) ")
+        
+    }
+        //--------------------------------------------------------------------------------
+
+    func processSamples(_ xml: TreeNode)
+    {
+        for node in xml.children where node.value == "Sample"  {
+            samples.append(Sample(xml: node))
+        }
+        print("SampleList: ", samples.count)
+    }
+    func processGroups(_ xml: TreeNode)
+    {
+        for node in xml.children where node.value == "GroupNode"  {
+            groups.append(CGroup(xml: node))
+        }
+        print("Groups: ", groups.count)
+    }
+    func processTables(_ xml: TreeNode)
+    {
+        for node in xml.children where  node.value == "Table" {
+            tables.append(CGTable(node))
+        }
+        print("Tables: ", tables.count)
+    }
+    func processLayouts(_ xml: TreeNode)
+    {
+        for node in xml.children where  node.value == "Layout" {
+            layouts.append(CGLayout(node))
+        }
+        print("Layouts: ", layouts.count)
+    }
+
+    func processMatrices(_ xml: TreeNode)    {   }  //IGNORE
+    func processCytometers(_ xml: TreeNode)   {    }//IGNORE
+        
+   //--------------------------------------------------------------------------------
 //    @Transient
     struct Entry
     {
@@ -187,9 +241,8 @@ public class Experiment : Usable
         }
     }
     
-//   @Transient 
-    var keywords = [String]()
-//   @Transient 
+
+//    var keywords = [String]()
     var entries = [Entry]()
     
     public func buildVaribleKeyDictionary() /// -> [Entry]
@@ -214,7 +267,7 @@ public class Experiment : Usable
 
 //        let ct = union.count            // number of keywords in all samples
 
-        keywords.append(contentsOf: allKeywords)
+//        keywords.append(contentsOf: allKeywords)
         entries.append(contentsOf: union)
 
         let sampleCt = samples.count

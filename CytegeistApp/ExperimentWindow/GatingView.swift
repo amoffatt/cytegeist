@@ -105,12 +105,12 @@ struct GatingView: View {
             Buttons.delete() {    confirmDelete?.remove?()   }
             Buttons.cancel()
         }
-                            .onChange(of: population, initial:true) {
-                                if chartDef?.xAxis == nil && chartDef?.yAxis == nil {
-                                    chartDefBinding.wrappedValue?.xAxis = AxisDef(dim:"FSC-A")
-                                    chartDefBinding.wrappedValue?.yAxis = AxisDef(dim:"SSC-A")
-                                }
-                            }
+        .onChange(of: population, initial:true) {
+            if chartDef?.xAxis == nil && chartDef?.yAxis == nil {
+                 chartDefBinding.wrappedValue?.xAxis = AxisDef(dim:"FSC-A")
+                 chartDefBinding.wrappedValue?.yAxis = AxisDef(dim:"SSC-A")
+               }
+        }
         
     }
     

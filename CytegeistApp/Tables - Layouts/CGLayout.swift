@@ -225,20 +225,7 @@ public class LayoutItem: Codable, Identifiable, Equatable
         
         return "name=" + name
     }
-    
-    
-    public func json() -> String {
-        return "Layout( " + jsonattributes() + " >\n\tItems>( " +
-            //    items.compactMap { $0.xml() }.joined(separator: "\n\t") +
-        ")\n" +
-        ")\n"
-        
-    }
-    
-    public func jsonattributes() -> String {
-        
-        return "name=" + name
-    }
+
 }
 
 //---------------------------------------------------------------------

@@ -72,6 +72,7 @@ struct CGLayoutView: View {
         HStack {
             Button("Add Text Block", systemImage: "plus", action:  layoutModel.addTextItem  )
             Button("Add Table", systemImage: "plus", action:  layoutModel.addTable  )
+            Button("Add Image", systemImage: "plus", action:  layoutModel.addImage  )
             ItemSizeSlider(size: $size)
         }
     }
@@ -96,6 +97,7 @@ struct CGLayoutView: View {
                     Spacer()
                     Button("Add Text Block", systemImage: "plus", action:  layoutModel.addTextItem  )
                     Button("Add Table", systemImage: "plus", action:  layoutModel.addTable  )
+                    Button("Add Image", systemImage: "plus", action:  layoutModel.addImage  )
                     ItemSizeSlider(size: $size)
                 }
             } .fillAvailableSpace()
