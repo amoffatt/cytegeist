@@ -11,13 +11,15 @@ struct SampleListModePicker: View {
     @Binding var mode: SampleListMode
 
     var body: some View {
-        Picker("Display Mode", selection: $mode) {
+        Picker("", selection: $mode) {
             ForEach(SampleListMode.allCases) { viewMode in
                 viewMode.label
                     .labelStyle(.iconOnly)
             }
         }
         .pickerStyle(.segmented)
+        .frame(minWidth: 72, maxWidth: 72)
+        .padding(4)
     }
 }
 
@@ -25,9 +27,9 @@ extension SampleListMode {
 
     var labelContent: (name: String, systemImage: String) {
         switch self {
-        case .table:        return ("Table", "tablecells")
+        case .table:        return ("Table", "cart.fill")
         case .gallery:      return ("Gallery", "photo")
-        case .compact:      return ("Table", "tablecells")
+        case .compact:      return ("Table", "gauge")
         }
     }
 

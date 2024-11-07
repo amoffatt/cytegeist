@@ -8,7 +8,6 @@
 import SwiftUI
 import CytegeistCore
 import CytegeistLibrary
-import SwiftData
 
 @main
 @MainActor
@@ -71,6 +70,14 @@ struct CytegeistApp: SwiftUI.App {
                     .disabled(appModel.recentDocuments.isEmpty)
                 }
             }
+        
+//        WindowGroup(id: "sample-inspector", for: ExperimentSamplePair.self) { $sample in
+//            if let sample = $sample.wrappedValue, 
+//                let ref = sample.sample.ref {
+//                SampleInspectorView(sample.experiment, sample:ref)
+//            }
+//        }
+//        
             
             CommandGroup(replacing: .saveItem) {
                 Button("Save") {
@@ -83,15 +90,33 @@ struct CytegeistApp: SwiftUI.App {
                 }
                 .keyboardShortcut("s", modifiers: [.command, .shift])
             }
+
+if let focusedAnalysisNode,
+                   let focusedAnalysisNode {
+                    
+                    CommandMenu("Chart") {
+                        Button("Toggle Smoothing") {
+                            let smoothing = focusedAnalysisNode.graphDef.smoothing
+                            focusedAnalysisNode.graphDef.smoothing = smoothing == .off ? .low : .off
+                        }
+                        Button("Toggle Contours") {
+                            let contours = focusedAnalysisNode.graphDef.contours
+                            focusedAnalysisNode.graphDef.contours = contours ? false : true
+                        }
+                    }
+                }
+
         }
         
         #if os(macOS)
         Window("Pair Charts", id: "pair-charts") {
-            PairChartsPreview()
+                PairChartsPreview()
+                    .environment(BatchContext.empty)
         }
         
         Window("Experiment Browser", id: "browse") {
             ExperimentBrowser().environment(appModel)
+//                .environmentObject(core)
         }
         #endif
 

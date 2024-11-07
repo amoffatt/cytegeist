@@ -14,6 +14,12 @@ public struct ParameterInspectorView: View {
     let sample:SampleRef
     let parameter:CDimension
     
+    public init(core: CytegeistCoreAPI, sample: SampleRef, parameter: CDimension) {
+        self.core = core
+        self.sample = sample
+        self.parameter = parameter
+    }
+    
     public var body: some View {
         VStack() {
             HStack {

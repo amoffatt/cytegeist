@@ -24,6 +24,7 @@ fileprivate enum ChartDataRequest {
 
 public struct ChartView<Overlay>: View where Overlay:View {
     @Environment(CytegeistCoreAPI.self) var core: CytegeistCoreAPI
+    @Environment(BatchContext.self) var batchContext
     
     let population: AnalysisNode?
     let config: Binding<ChartDef?>
@@ -120,12 +121,14 @@ public struct ChartView<Overlay>: View where Overlay:View {
                 ChartAxisView(def: def?.xAxis, normalizer: chartDims.x?.normalizer,
                                   sampleMeta: sampleMeta,
                                   width: chartSize.width,
-                                  update: editable ? { config.wrappedValue?.xAxis = $0 } : nil)
+                              update: editable ? {
+                    config.wrappedValue?.xAxis = $0
+                } : nil)
                         .frame(minWidth: 10)        // Avoid conflicts with the GeometryReader preventing resizing
             }
             .fillAvailableSpace()
         }
-        .updateSampleQuery(core, population, query: $sampleQuery)
+        .updateSampleQuery(core, batchContext, population, query: $sampleQuery)
         
         .onChange(of: population, initial: true, updateChartQuery)
         .onChange(of: config.wrappedValue, updateChartQuery)
@@ -139,7 +142,7 @@ public struct ChartView<Overlay>: View where Overlay:View {
                 let size = proxy.size
                 ZStack(alignment:.topLeading) {
                     if let population, let chartDef = config.wrappedValue {
-                        ForEach(population.visibleChildren(chartDef), id:\.self) { child in
+                        ForEach(population.visibleChildren(batchContext, chartDef), id:\.self) { child in
                             // AM DEBUGGING
                             let editing = false //child == focusedItem
                             AnyView(child.view(size, editing))
@@ -167,7 +170,7 @@ public struct ChartView<Overlay>: View where Overlay:View {
             return (nil, "No population")
         }
         do {
-            return (try population.createRequest(), nil)
+            return (try population.createRequest(batchContext), nil)
         } catch {
             return (nil, "Error creating chart: \(error)")
         }
@@ -225,8 +228,8 @@ extension View {
 //    var population: PopulationRequest { get }
 //    var chartDef: Binding<ChartDef> { get }
     @MainActor
-    func updateSampleQuery(_ core:CytegeistCoreAPI, _ population:AnalysisNode?, query:Binding<APIQuery<FCSFile>?>) -> some View {
-        let sampleRef = population?.getSample()?.ref
+    func updateSampleQuery(_ core:CytegeistCoreAPI, _ batchContext:BatchContext, _ population:AnalysisNode?, query:Binding<APIQuery<FCSFile>?>) -> some View {
+        let sampleRef = population?.getSample(batchContext)?.ref
         return self.onChange(of: sampleRef, initial: true) {
             query.wrappedValue?.dispose()
             query.wrappedValue = nil

@@ -61,6 +61,7 @@ struct ExperimentView : View {
                 }
                 .environment(experiment)
                 .environment(experiment.core)
+				.environment(selected.defaultBatchContext)
                 .onChange(of: experiment.selectedSamples) {
                     experiment.clearAnalysisNodeSelection()
                 }
@@ -86,6 +87,7 @@ struct ExperimentView : View {
                 }
                 .environment(experiment)
                 .environment(experiment.core)
+                .environment(experiment.defaultBatchContext)
                 .navigationSplitViewColumnWidth(min: 12,  ideal: 1200, max: .infinity)
                 .toolbar {
                     let binding = Binding(

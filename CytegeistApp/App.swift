@@ -8,6 +8,7 @@
 import Foundation
 import CytegeistLibrary
 import CytegeistCore
+import SwiftUI
 
 
 
@@ -59,7 +60,7 @@ final class App {
         }
     }
         //-------------------------------------------------------------------------
-    private func loadExperiments(from storeFileData: Data) -> [Experiment] {
+//    private func loadExperiments(from storeFileData: Data) -> [Experiment] {
 //        do {
 //            let decoder = JSONDecoder()
 //            decoder.dateDecodingStrategy = .iso8601
@@ -69,8 +70,7 @@ final class App {
 //            print(error)
 //            return []
 //        }
-        return []
-    }
+//    }
         //-------------------------------------------------------------------------
         //------------------------------------------------------
         // gain access to the directory and call readFCSFile

@@ -11,7 +11,6 @@ import Synchronization
 import CytegeistLibrary
 import CytegeistCore
 import SwiftUI
-import SwiftData
 import CObservation
 import UniformTypeIdentifiers
 
@@ -40,32 +39,46 @@ public class Experiment : CObject
 
     var samples: [Sample] = [Sample]()
     var selectedSamples = Set<Sample.ID>()
+//    @Transient   
     var selectedAnalysisNodes = AnalysisNodeSelection()
     
     var panels = [CPanel]()
     var groups = [CGroup]()
     var tables = [CGTable]()
     var layouts = [CGLayout]()
-    var _core: CytegeistCoreAPI? = nil
     
-    var core: CytegeistCoreAPI {       /// Lazilly created
-        if let _core {  return _core   }
-        _core = CytegeistCoreAPI()
-        return _core!
-    }
+//    @Transient 
+    var core: CytegeistCoreAPI = CytegeistCoreAPI()
+    
+    var defaultBatchContext: BatchContext { .init(allSamples: samples) }
+
+//  @Transient
+//    var _core: CytegeistCoreAPI?
+//
+//    var core: CytegeistCoreAPI {       /// Lazilly created
+//        if let _core {  return _core   }
+//        _core = CytegeistCoreAPI()
+//        return _core!
+//    }
+        //--------------------------------------------------------------------------------
+
     
     init(name: String = "Untitled", version: String = "" )
     {
         print("Experiment \(name) ")
-        self.name = name
         self.version = version
-        super.init()
+        self.name = name.isEmpty ? DateStr(Date.now) : name
+		super.init()
     }
+
     
-        //--------------------------------------------------------------------------------
-    public func addSample(_ sample: Sample)   {
-        samples.append(sample)
+    func DateStr(_ date: Date) -> String
+    {
+        let myDateFormatter = DateFormatter()
+        myDateFormatter.dateFormat = "YYMMDD"
+        return myDateFormatter.string(from: date)
     }
+        //--------------------------------------------------------------------------------
     
     func addTable() -> CGTable {
         let table = CGTable()
@@ -122,68 +135,14 @@ public class Experiment : CObject
         }
     }
     
-    
-        //--------------------------------------------------------------------------------
-    func onFCSPicked(_result: Result<[URL], any Error>)
-    {
-        Task {
-            do {
-                try print("FCSPicked urls: ", _result.get())
-                for url in try _result.get()
-                {
-                    let gotAccess = url.startAccessingSecurityScopedResource()
-                    if !gotAccess { break }
-                    await readFCSFile(url)
-                    url.stopAccessingSecurityScopedResource()     // release access
-                }
-            }
-            catch let error as NSError {
-                debug("Ooops! Something went wrong: \(error)")
-            }
-        }
-    }
-    
-    public func readFCSFile(_ url: URL) async
-    {
-        if  url.isDirectory
-        {
-            let options: FileManager.DirectoryEnumerationOptions = [.skipsHiddenFiles, .skipsPackageDescendants]
-            let fcsFiles = walkDirectory(at: url, options: options).filter {  $0.pathExtension == "fcs"  }
-            for await item in fcsFiles { await readFCSFile(item) }
-            return
-        }
-        
-        do  {
-            let sample = withContext { Sample(ref: SampleRef(url: url)) }
-            sample.setUp(core:core)
-            addSample(sample)
-        }
-            //        catch let err as NSError {
-            //            debug("Ooops! Something went wrong: \(err)")
-            //        }
-        debug("FCS Read")
-    }
-    
-    
-        // Recursive iteration
-    func walkDirectory(at url: URL, options: FileManager.DirectoryEnumerationOptions ) -> AsyncStream<URL> {
-        AsyncStream { continuation in
-            Task {
-                let enumerator = FileManager.default.enumerator(at: url, includingPropertiesForKeys: nil, options: options)
-                while let fileURL = enumerator?.nextObject() as? URL {
-                    print(fileURL)
-                    if fileURL.hasDirectoryPath {
-                        for await item in walkDirectory(at: fileURL, options: options) {
-                            continuation.yield(item)
-                        }
-                    } else {  continuation.yield( fileURL )    }
-                }
-                continuation.finish()
-            }
-        }
+    func editStr(s: String) -> String {
+        let len = s.count
+        return "\(s.substring(offset: 0, length: 12))...\(s.substring(offset: len-12, length: 12))"
     }
         //--------------------------------------------------------------------------------
-    public struct Entry
+        //--------------------------------------------------------------------------------
+//    @Transient  
+    struct Entry
     {
         var key: String
         var vals: [String] = []
@@ -198,26 +157,31 @@ public class Experiment : CObject
         }
     }
     
+//   @Transient 
     var keywords = [String]()
+//   @Transient 
     var entries = [Entry]()
+    
     public func buildVaribleKeyDictionary() /// -> [Entry]
     {
         var union: [Entry] = []
         var allKeywords: Set<String> = []
         for sample in samples {
-            let keywords = sample.meta?.keywords.filter( {!isParameterKey($0.name) && !isExcludedKey($0.name) } )           // exclude parameter keywords
-            for s in keywords! {
-                allKeywords.insert(s.name)
-            }
-           
-            for keyPair in keywords! {
-                if let entry = union.firstIndex(where: { $0.key == keyPair.name} ) {
-                    union[entry].vals.append(keyPair.value)
+            if let keywords = sample.meta?.keywords.filter( {!isParameterKey($0.name) && !isExcludedKey($0.name) } )           // exclude parameter keywords
+            {
+                for s in keywords {
+                    allKeywords.insert(s.name)
                 }
-                else {   union.append(Entry(keyPair))  }
+        
+                for keyPair in keywords {
+                    if let entry = union.firstIndex(where: { $0.key == keyPair.name} ) {
+                        union[entry].vals.append(keyPair.value)
+                    }
+                    else {   union.append(Entry(keyPair))  }
+                }
             }
         }
-        
+
 //        let ct = union.count            // number of keywords in all samples
 
         keywords.append(contentsOf: allKeywords)
@@ -248,7 +212,7 @@ public class Experiment : CObject
 
     subscript(sampleId: Sample.ID?) -> Sample? {
         get {
-            if let id = sampleId {  return samples.first(where: { $0.id == id })!  }
+            if let id = sampleId {  return samples.first(where: { $0.id == id })  }
             return nil
         }
     }

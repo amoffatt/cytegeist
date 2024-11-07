@@ -35,6 +35,19 @@ struct Sidebar : View {
     var body: some View {
         
         VStack {
+            HStack {
+                if let undoManager {
+                        Button("Undo") {
+                            undoManager.undo()
+                        }
+                        .disabled(!undoManager.canUndo)
+                        Button("Redo") {
+                            undoManager.redo()
+                        }
+                        .disabled(!undoManager.canRedo)
+                }
+                
+            }
             
 //            toprowButtons
   
@@ -99,9 +112,9 @@ struct Sidebar : View {
                         }.frame(width: 20, height: 30, alignment: .topLeading)
                         TextField("Value", text: $value).frame(width: 80)
                     }
-                }.opacity(0.8)
+                }.opacity(0.9)
                     .frame(maxWidth: .infinity, minHeight: 80, maxHeight: 80)
-                    .border(.black)
+                    .border(.black.opacity(0.66))
  
                 @State var groupselection: SidebarGroupSelection? = nil
                 List(selection: $groupselection) {
@@ -127,9 +140,9 @@ struct Sidebar : View {
 //                label: {    Label("History", systemImage: "arrow.swap")     }
 //                }
 //                .frame(maxWidth: .infinity, minHeight: 80, maxHeight: 800)
-          }
+          }.opacity(0.7)
 
-        }
+        }.opacity(0.8)
     }
 //--------------------------------------------------------------------------------------------------------------
 //    
