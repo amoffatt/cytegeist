@@ -21,13 +21,9 @@ public enum SampleError : Error {
 }
 
 //---------------------------------------------------------
-//@Model
-//@MainActor
 @CObservable
 public class Sample : CObject
 {
-    var sampleId = ""
-    
     public var ref:SampleRef? = nil
     
 //    @CodableIgnored
@@ -102,8 +98,11 @@ public class Sample : CObject
         
         Task {
             do {
-                meta = try await core.loadSample(SampleRequest(ref, includeData: false)).getResult().meta
-                btime = meta?.keywordLookup["$BTIM"] ?? ""
+                let meta = try await core.loadSample(SampleRequest(ref, includeData: false)).getResult().meta
+                notUndoable {
+                    self.meta = meta
+                    btime = meta.keywordLookup["$BTIM"] ?? ""
+                }
                 print("Loaded metadata")
             } catch {
                 print(error)
@@ -117,7 +116,10 @@ public class Sample : CObject
 //    @Transient
     private var _tree:AnalysisNode = AnalysisNode()
     public func getTree() -> AnalysisNode {
-        _tree.sampleID = self.id
+        // AM DEBUGGING to prevent repeat mutation upon read. An analysis tree should not be bound to a sample. Instead a SampleRef? (SampleBatchRef?)
+        if _tree.sampleID != self.id {
+            _tree.sampleID = self.id
+        }
         return _tree
 
 //        if _tree == nil {

@@ -67,18 +67,31 @@ public class Experiment : CObject
     {
         print("Experiment \(name) ")
         self.version = version
-        self.name = name.isEmpty ? DateStr(Date.now) : name
+        self.name = name.isEmpty ? Self.DateStr(Date.now) : name
 		super.init()
     }
 
     
-    func DateStr(_ date: Date) -> String
+    static func DateStr(_ date: Date) -> String
     {
         let myDateFormatter = DateFormatter()
         myDateFormatter.dateFormat = "YYMMDD"
         return myDateFormatter.string(from: date)
     }
-        //--------------------------------------------------------------------------------
+    
+    
+    //--------------------------------------------------------------------------------
+    
+    public func addSampleURLs(_ urls:[URL]) {
+        withContext { undoable("Add Samples") {
+            for url in urls {
+                let sample = Sample(ref: SampleRef(url: url))
+                sample.setUp(core: core)
+                samples.append(sample)
+            }
+        } }
+    }
+
     
     func addTable() -> CGTable {
         let table = CGTable()

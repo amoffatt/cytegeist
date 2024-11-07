@@ -1,14 +1,9 @@
-// The Swift Programming Language
-// https://docs.swift.org/swift-book
-
-/// A macro that produces both a value and a string containing the
-/// source code that generated the value. For example,
-///
-///     #stringify(x + y)
-///
-/// produces a tuple `(x + y, "x + y")`.
-//@freestanding(expression)
-//public macro stringify<T>(_ value: T) -> (T, String) = #externalMacro(module: "CObservationMacrosMacros", type: "StringifyMacro")
+//
+//  CObservation.swift
+//  CObservation
+//
+//  Created by Aaron Moffatt on 10/12/24.
+//
 
 import Foundation
 import UniformTypeIdentifiers
@@ -28,8 +23,6 @@ public macro CObservable() =
 
 @MainActor
 public class CObjectContext {
-    // AM DEBUGGING. Remove the nonisolated(unsafe) and make models MainActor
-//    nonisolated(unsafe)
     public private(set) static var currentContext:CObjectContext? = nil
     
     public var undoManager:UndoManager?
@@ -53,6 +46,31 @@ public class CObjectContext {
     
 }
 
+/// Registers all undoable actions registers within this closure to the same Undo group
+/// Must be called within a CObject context
+@MainActor
+public func undoable<T>(_ actionName:String? = nil, _ body: () throws -> T) rethrows -> T {
+    let context = CObjectContext.currentContext
+    guard let context else {
+        fatalError("undoable() must be invoked within a CObject Context. See CObject.withContext { }")
+    }
+    let undoManager = context.undoManager
+    undoManager?.beginUndoGrouping()
+    undoManager?.setActionName(actionName ?? "")
+    defer { undoManager?.endUndoGrouping() }
+    
+    return try body()
+    
+}
+
+@MainActor
+public func notUndoable<T>(_ body: () throws -> T) rethrows -> T {
+    print("TODO:Implement notUndoable()")
+    return try body()
+}
+
+
+
 extension UTType {
     static var cObject:UTType {
         UTType(exportedAs: "com.cytegiest.cobject")
@@ -73,13 +91,11 @@ open class CObject : CObservable, Identifiable, Hashable, Equatable, MainActorSe
     
     public let _context:CObjectContext?
     
-//    @MainActor
     public init() {
         self.id = UUID()
         
         self._context = CObjectContext.currentContext
         if self._context == nil {
-//            print("Error: CObject created without a context. Use CObjectContext.withContext { ... }")
             fatalError("CObject created without a context. Use CObjectContext.withContext { ... }")
         }
     }
@@ -92,30 +108,12 @@ open class CObject : CObservable, Identifiable, Hashable, Equatable, MainActorSe
         return try body()
     }
 
-    // New initializer for decoding
-//    public required init(from decoder: Decoder) async throws {
-//        
-//        let container = try decoder.container(keyedBy: CodingKeys.self)
-//        self.id = try container.decode(UUID.self, forKey: .id)
-//        self._context = CObjectContext.currentContext
-//
-//        if self._context == nil {
-//            fatalError("CObject created without a context. Use CObjectContext.withContext { ... }")
-//        }
-//
-////        try await decodeCodableProperties(from: decoder)
-//    }
-    
-    
     open func serialize() throws -> Any? {
         let container = NSMutableDictionary()
         
         let mirror = Mirror(reflecting: self)
         for child in mirror.children {
             guard let label = child.label else { continue }
-//            if let encodableProperty = child.value as? Codable {
-//                try container.encode(encodableProperty, forKey: key)
-//            }
             if let encodableProperty = child.value as? MainActorSerializable {
                 if let encoded = try encodableProperty.serialize() {
                     container.setValue(encoded, forKey: label)
@@ -127,91 +125,26 @@ open class CObject : CObservable, Identifiable, Hashable, Equatable, MainActorSe
         }
         return container
     }
-
-    // New encode method
-//    open func encode(to encoder: Encoder) async throws {
-//        var container = encoder.container(keyedBy: CodingKeys.self)
-//        try container.encode(id, forKey: .id)
-//
-//        try await encodeCodableProperties(to: encoder)
-//    }
-//    private func encodeCodableProperties(to encoder: Encoder) async throws {
-//        var container = encoder.container(keyedBy: DynamicCodingKeys.self)
-//        let mirror = Mirror(reflecting: self)
-//        for child in mirror.children {
-//            guard let label = child.label else { continue }
-//            let key = DynamicCodingKeys.init(stringValue: label)
-//            if let encodableProperty = child.value as? Codable {
-//                try container.encode(encodableProperty, forKey: key)
-//            }
-//            else if let encodableProperty = child.value as? MainActorSerializable {
-////                try container.encode(encodableProperty, forKey: .init(stringValue: label))
-//                let childEncoder = container.superEncoder(forKey: key)
-//                try await encodableProperty.encode(to: childEncoder)
-//            }
-//            else {
-//                print("Could not encode property \(label) in \(type(of: self)).")
-//            }
-//        }
-//    }
-
-//    // Helper method for decoding properties
-//    private func decodeCodableProperties(from decoder: Decoder) async throws {
-//        let container = try decoder.container(keyedBy: DynamicCodingKeys.self)
-//        let mirror = Mirror(reflecting: self)
-//        for child in mirror.children {
-//            guard let label = child.label else { continue }
-//            let key = DynamicCodingKeys.init(stringValue: label)
-//            let decoder = try container.superDecoder(forKey: key)
-//            do {
-//                let value = try await decodeCodableProperty(child, from: decoder)
-//                (self as AnyObject).setValue(value, forKey: label)
-//            } catch {
-//                print("Could not decode property \(label) in \(type(of: self)).")
-//            }
-//        }
-//                
-//    }
-//
-//    private func decodeCodableProperty(_ property: Mirror.Child, from decoder: Decoder) async throws -> Any {
-//        switch property.value {
-//            case let decodableProperty as Codable:
-//                return try type(of: decodableProperty).init(from: decoder)
-//            case let decodableProperty as MainActorSerializable:
-//                return try await type(of: decodableProperty).init(from: decoder)
-//            default:
-//                throw DecodingError.typeMismatch(type(of: property.value), DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Non-decodable property type"))
-//        }
-//    }
-//
-//    // CodingKeys enum for the id property
-//    private enum CodingKeys: String, CodingKey {
-//        case id
-//    }
-//
-//    // DynamicCodingKeys for dynamic property encoding/decoding
-//    private struct DynamicCodingKeys: CodingKey {
-//        var stringValue: String
-//        init(stringValue: String) {
-//            self.stringValue = stringValue
-//        }
-//        var intValue: Int?
-//        init?(intValue: Int) {
-//            return nil
-//        }
-//    }
 }
 
 
 public protocol CObservable: Observation.Observable, AnyObject {
-    // AM DEBUGGING
     @MainActor
     var _context:CObjectContext? { get }
 }
 
 extension CObject: Transferable {
+    // AM DEBUGGING
     nonisolated public static var transferRepresentation: some TransferRepresentation {
         DataRepresentation(importedContentType: .cObject) { o in
+//            Self(o)
+            fatalError()
+        }
+        DataRepresentation(exportedContentType: .cObject) { o in
+            fatalError()
+            try await Task.sleep(nanoseconds:1000)
+            return try Data(contentsOf: URL("https://google.com")!)
+//            await o.serialize()
         }
     }
 }

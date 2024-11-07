@@ -10,6 +10,7 @@ import UniformTypeIdentifiers
 import CytegeistCore
 import CytegeistLibrary
 import SwiftUI
+import CObservation
 
 
 
@@ -163,7 +164,6 @@ public struct CGTableView : View {
             for item in items { newTableItem(node: item, position:position)  }
             return true
         }
-        //            .opacity(mode == .table ? 1.0 : 0.3)
     }
     
     func newTableItem(node:AnalysisNode, position:CGPoint)
@@ -177,25 +177,17 @@ public struct CGTableView : View {
 //---------------------------------------------------------------------------
 // Model
 
-@Observable
-public class CGTable : Usable, Hashable
+@CObservable
+public class CGTable : CObject
 {
-    public static func == (lhs: CGTable, rhs: CGTable) -> Bool {
-        lhs.id == rhs.id
-    }
     
-    public func hash(into hasher: inout Hasher) {
-        hasher.combineMany(id, name)
-    }
-    
-    public var id = UUID()
     public  var name = "Untitled Table"
     public var items = [TColumn]()
     public var rows: [[String]]?
     public var isTemplate = true
         //    var info = BatchInfo()
     
-    init() {    }
+    override init() { super.init() }
     init(cols: [TColumn], rows: [[String]]? )
     {
         self.items = cols

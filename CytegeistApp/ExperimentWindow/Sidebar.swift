@@ -35,20 +35,6 @@ struct Sidebar : View {
     var body: some View {
         
         VStack {
-            HStack {
-                if let undoManager {
-                        Button("Undo") {
-                            undoManager.undo()
-                        }
-                        .disabled(!undoManager.canUndo)
-                        Button("Redo") {
-                            undoManager.redo()
-                        }
-                        .disabled(!undoManager.canRedo)
-                }
-                
-            }
-            
 //            toprowButtons
   
             HStack

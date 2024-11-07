@@ -61,7 +61,7 @@ struct ExperimentView : View {
                 }
                 .environment(experiment)
                 .environment(experiment.core)
-				.environment(selected.defaultBatchContext)
+				.environment(experiment.defaultBatchContext)
                 .onChange(of: experiment.selectedSamples) {
                     experiment.clearAnalysisNodeSelection()
                 }

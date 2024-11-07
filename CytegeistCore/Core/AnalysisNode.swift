@@ -9,22 +9,19 @@ import SwiftUI
 import SwiftData
 import UniformTypeIdentifiers.UTType
 import CytegeistLibrary
+import CObservation
 
 
 public extension UTType {  static var population = UTType(exportedAs: "cytegeist.population")   }
 enum AnalysisNodeError : Error {  case noSampleRef      }
 //---------------------------------------------------------
 
-@MainActor
-@Observable
-public class AnalysisNode : Transferable, Identifiable, Hashable, CustomStringConvertible
+@CObservable
+public class AnalysisNode : CObject, CustomStringConvertible
 {
     
-    public var id = UUID()
     public var name: String = ""
     public var description: String = ""
-    @CodableIgnored
-    @ObservationIgnored
     public var sampleID: UUID? = nil                      // nil except at the root node
     public var graphDef = ChartDef()              // how this population wants to be shown
     public var statistics =  [String : Double]()         // cache of stats with values
@@ -60,13 +57,7 @@ public class AnalysisNode : Transferable, Identifiable, Hashable, CustomStringCo
     
     
         //--------------------------------------------------------
-    public static func == (lhs: AnalysisNode, rhs: AnalysisNode) -> Bool {   lhs.id == rhs.id  }
-    public func hash(into hasher: inout Hasher) {        hasher.combine(id)    }
-    public static var transferRepresentation: some TransferRepresentation {
-//        CodableRepresentation(contentType: UTType.population)
-    }
-        //--------------------------------------------------------
-    public init() {    }
+    public override init() { super.init() }
     
 //    public required init(from decoder: any Decoder) throws {
 //        let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -106,7 +97,7 @@ public class AnalysisNode : Transferable, Identifiable, Hashable, CustomStringCo
         self.graphDef = original.graphDef
         self.statistics = [:]
         self.children = []
-        self.parent = nil
+//        self.parent = nil
         self.gate = original.gate
         self.invert = original.invert
         self.color = original.color ?? .green

@@ -6,19 +6,16 @@ import SwiftUI
 import Charts
 import CytegeistLibrary
 import CytegeistCore
+import CObservation
 
-@Observable
-class CGLayout : Codable, Hashable, Identifiable
+@CObservable
+class CGLayout : CObject
 {
-    var id = UUID()
     var name = "Untitled Layout"
     var items = [LayoutItem]()
     //-------------------------------------------------------------
-    init() {    }
+    override init() { super.init() }
     init(_ xml: TreeNode)    {    }
-    //-------------------------------------------------------------
-    static func == (lhs: CGLayout, rhs: CGLayout) -> Bool {       lhs.id == rhs.id   }
-    func hash(into hasher: inout Hasher) {     hasher.combine(id)   }
 
     //-------------------------------------------------------------
     // adding items
@@ -136,11 +133,9 @@ public enum ELayoutType : Codable {
     case table
 }
 
-@Observable
-public class LayoutItem: Codable, Identifiable, Equatable
+@CObservable
+public class LayoutItem: CObject
 {
-    public static func == (lhs: LayoutItem, rhs: LayoutItem) -> Bool {   lhs.id == rhs.id  }
-    public private(set) var id = UUID()
     var size: CGSize = .zero
     var position: CGPoint = .zero
     var tmpOffset: CGPoint = .zero
@@ -188,10 +183,6 @@ public class LayoutItem: Codable, Identifiable, Equatable
 //        self.init(position: CGPoint.zero, node: nil, type: ELayoutType.table )
 //         self.data = data
 //      }
-    
-     public required init(from decoder: any Decoder) throws {
-        fatalError("init(from:) has not been implemented")
-    }
     
     public func clone() -> LayoutItem
     {

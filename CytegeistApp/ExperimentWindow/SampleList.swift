@@ -39,6 +39,7 @@ extension SampleList
 }
 
 extension TableColumnField<Sample> {
+    @MainActor
     init(keyword: String) {
         self.init(keyword, \.self[keyword] )
     }
@@ -207,69 +208,35 @@ struct SampleList: View {
     }
     
     
-    func onFCSPicked(_result: Result<[URL], any Error>)
-    {
+    func onFCSPicked(_result: Result<[URL], any Error>) {
         Task {
             do {
-                    //                try print("FCSPicked urls: ", _result.get().map(editStr($0.description)))
-                for url in try _result.get()
-                {
-                    let gotAccess = url.startAccessingSecurityScopedResource()
-                    if !gotAccess { break }
-                    await readFCSFile(url)
-                    url.stopAccessingSecurityScopedResource()     // release access
-                }
-            }
-            catch let error as NSError {
-                debug("Ooops! Something went wrong: \(error)")
-            }
-        }
-    }
-    
-    public func readFCSFile(_ url: URL) async
-    {
-        if  url.isDirectory
-        {
-            let options: FileManager.DirectoryEnumerationOptions = [.skipsHiddenFiles, .skipsPackageDescendants]
-            let fcsFiles = walkDirectory(at: url, options: options).filter {  $0.pathExtension == "fcs"  }
-            for await item in fcsFiles { await readFCSFile(item) }
-            return
-        }
-        
-        do  {
-            let sample = Sample(ref: SampleRef(url: url))
-            sample.setUp(core: experiment.core)
-            addSample(sample)
-        }
-            //        catch let err as NSError {
-            //            debug("Ooops! Something went wrong: \(err)")
-            //        }
-        debug("FCS Read")
-    }
-    
-    public func addSample(_ sample: Sample)   {
-//        modelContext.insert(sample)
-        experiment.samples.append(sample)
-    }
-
-    
-        // Recursive iteration
-    func walkDirectory(at url: URL, options: FileManager.DirectoryEnumerationOptions ) -> AsyncStream<URL> {
-        AsyncStream { continuation in
-            Task {
-                let enumerator = FileManager.default.enumerator(at: url, includingPropertiesForKeys: nil, options: options)
-                while let fileURL = enumerator?.nextObject() as? URL {
-                    print(fileURL)
-                    if fileURL.hasDirectoryPath {
-                        for await item in walkDirectory(at: fileURL, options: options) {
-                            continuation.yield(item)
+                // Collect all FCS files first
+                var fcsUrls: [URL] = []
+                for url in try _result.get() {
+                    if url.isDirectory {
+                        await url.withSecurityScopedAccess {
+                            let options: FileManager.DirectoryEnumerationOptions = [.skipsHiddenFiles, .skipsPackageDescendants]
+                            let found = walkDirectory(at: url, options: options).filter { $0.pathExtension == "fcs" }
+                            for await item in found {
+                                fcsUrls.append(item)
+                            }
                         }
-                    } else {  continuation.yield( fileURL )    }
+                    } else if url.pathExtension == "fcs" {
+                        fcsUrls.append(url)
+                    }
                 }
-                continuation.finish()
+                
+                // Process all FCS files at once, so they can all be included in the same undo operation
+                experiment.addSampleURLs(fcsUrls)
+                
+                debug("Added \(fcsUrls.count) FCS files")
+            } catch let error as NSError {
+                debug("Error adding FCS files: \(error)")
             }
         }
     }
+    
 
 //--------------------------------------------------------
 // table sorting
