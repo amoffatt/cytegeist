@@ -22,12 +22,9 @@ struct ExperimentWindow: View {
         }
         .onChange(of: undoManager, initial: true) {
             document.context.undoManager = undoManager
-//            if experiment == nil && undoManager != nil {
-//                let context = CObjectContext(undoManager: undoManager)
-//                context.withContext {
-//                    experiment = Experiment()
-//                }
-//            }
+        }
+        .onChange(of: document.id, initial: false) {
+            document.context.undoManager = undoManager
         }
     }
 }

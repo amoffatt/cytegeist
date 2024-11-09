@@ -99,7 +99,7 @@ public struct CObservableMacro {
       let initialValue = self[keyPath: keyPath]
       let result = try \(raw: registrarVariableName).withMutation(of: self, keyPath: keyPath, mutation)
       let finalValue = self[keyPath: keyPath]
-      _context?.registerUndo(withTarget:self) { target in
+      _context?.registerUndo(withTarget:self, initialValue, finalValue) { target in
         target[keyPath: keyPath] = initialValue
       }
       return result
@@ -408,7 +408,7 @@ public struct CObservationTrackedMacro: AccessorMacro {
       defer {
         \(raw: CObservableMacro.registrarVariableName).didSet(self, keyPath: \\.\(identifier))
           let finalValue = self[keyPath: \\._\(identifier)]
-          _context?.registerUndo(withTarget:self) { target in
+          _context?.registerUndo(withTarget:self, initialValue, finalValue) { target in
             target[keyPath: \\.\(identifier)] = initialValue
           }
       }

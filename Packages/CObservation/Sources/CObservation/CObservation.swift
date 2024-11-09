@@ -49,8 +49,17 @@ public class CObjectContext {
         return try body()
     }
     
-    public func registerUndo<TargetType:AnyObject>(withTarget target:TargetType, _ action:@escaping @Sendable (TargetType) -> Void) {
-//        undoManager?.registerUndo(withTarget: self, selector: #selector(undoAction), object: nil)
+    public func registerUndo<Target:AnyObject, Value>(withTarget target:Target, _ initialValue:Value, _ finalValue:Value, _ action:@escaping @Sendable (Target) -> Void) {
+        registerUndo(target, action)
+    }
+
+    public func registerUndo<Target: AnyObject, Value: Equatable>(withTarget target: Target, _ initialValue: Value, _ finalValue: Value, _ action: @escaping @Sendable (Target) -> Void) {
+        // Skip registration if values are equal
+        guard initialValue != finalValue else { return }
+        registerUndo(target, action)
+    }
+    
+    public func registerUndo<Target: AnyObject>(_ target: Target, _ action: @escaping @Sendable (Target) -> Void) {
         if Self.ignoreUndoableActions {
             return
         }
