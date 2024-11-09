@@ -17,35 +17,65 @@ public struct TableBuilder : View
 {
     @Environment(Experiment.self) var experiment
     @State var selectedTable:CGTable? = nil
-    
+    @State private var selectedPop: String = ""
+    @State private var selectedParm: String = ""
+    @State private var selectedKeyword: String = ""
+
     var TableTools : some View {
         
-        HStack {
-            Spacer()
-            Text("        ")
-            Menu("Populations"){
-                Button("All Cells", action: {})
-                Button("Lymphocytes", action: {})
-                Button("TCells", action: {})
+        VStack {
+            HStack {
+                VStack {
+                    HStack {
+                        
+                        Text("Keywords: ").font(.title2)
+                        Picker("", selection: $selectedKeyword,  content: {
+                            ForEach(experiment.keywordNames()) {  Text($0)  }
+                        })
+                        Button("Add", systemImage: "plus", action: {  selectedTable?.addKeyword(selectedKeyword)}).buttonBorderShape(.capsule)
+                        Spacer()
+                        
+                    }
+                    Text("-- or --")
+                }.frame(maxWidth: 350)
+                Spacer()
             }
-            Menu("Parameters"){
-                Button("FSC", action: {})
-                Button("SSC", action: {})
-                Button("PE", action: {})
-                Button("FITC", action: {})
-                Button("Cy7-PE", action: {})
+            HStack {
+                
+                Text("Populations: ").font(.title2)
+                Picker("", selection: $selectedPop,  content: {
+                    ForEach(experiment.populationNames()) {  Text($0)  }
+                })
+                Spacer()
+                Text("Parameters: ").font(.title2)
+                Picker("", selection: $selectedParm,  content: {
+                    ForEach(experiment.parameterNames()) {  Text($0)  }
+                })
+//                Spacer()
+//             Spacer()
+                
+            } //.frame(maxWidth: 350)
+//
+//            HStack {
+// 
+//               }.frame(maxWidth: 350)
+//            
+            HStack {
+                Button("Frequency", action: {  selectedTable?.addStat(selectedPop, "freq", "", experiment: experiment)}).buttonBorderShape(.capsule)
+                Button("... of Parent", action: {  selectedTable?.addStat(selectedPop, "freqOf", "", experiment: experiment)}).buttonBorderShape(.capsule)
+                Spacer()
+                Button("Median", action: {  selectedTable?.addStat(selectedPop, "median", selectedParm, experiment: experiment)}).buttonBorderShape(.capsule)
+                Button("CV",    action: {   selectedTable?.addStat(selectedPop, "cv",  selectedParm, experiment: experiment)}).buttonBorderShape(.capsule)
+//                Button("Mean", action: {    selectedTable?.addStat(selectedPop, "mean", selectedParm)}).buttonBorderShape(.capsule)
+//                Button("StDev", action: {   selectedTable?.addStat(selectedPop, "stdev", selectedParm)}).buttonBorderShape(.capsule)
+//                Button("5%, 95%", action: {   selectedTable?.addStat("percentile595")}).buttonBorderShape(.capsule)
+//                Button("...",    action: {  }).buttonBorderShape(.capsule)
+                
             }
-            Button("Median", action: {  addStat(stat: "median")}).buttonBorderShape(.capsule)
-            Button("CV",    action: {   addStat(stat: "cv")}).buttonBorderShape(.capsule)
-            Button("...",    action: {  }).buttonBorderShape(.capsule)
-//            Button("Mean", action: {    addStat(name: "mean")}).buttonBorderShape(.capsule)
-//            Button("StDev", action: {   addStat(name: "stdev")}).buttonBorderShape(.capsule)
-//            Button("5%, 95%", action: {   addStat(name: "percentile595")}).buttonBorderShape(.capsule)
-            Spacer()
-           Button("Batch", action: {   doBatch()   }).buttonBorderShape(.capsule)
-        }
+        }.padding(8)
     }
-        public var body: some View {
+        
+    public var body: some View {
         return VStack {
             TabBar(experiment.tables, selection:$selectedTable) { table in
                 Text(table.name)
@@ -55,6 +85,7 @@ public struct TableBuilder : View
             
             VStack {
                 if let selectedTable {
+                    TableTools
                     CGTableView(table:selectedTable)
                 } else {  Text("Select a Table") }
             }
@@ -64,14 +95,14 @@ public struct TableBuilder : View
             if experiment.tables.isEmpty {
                 selectedTable = experiment.addTable()
             }
-        }.toolbar { TableTools }
+        } .toolbar {  ToolbarItem(placement: .primaryAction) {
+            Button("Batch", action: {   doBatch()   }).buttonBorderShape(.capsule)
+            }
+        }
     }
     
         //---------------------------------------------------------------------------
-    func addStat(stat: String)
-    {
-            //        table.addNode(node)
-    }
+
     func addTable()
     {
         let table = CGTable()
@@ -100,7 +131,7 @@ public struct TableBuilder : View
         if let selectedTable {
             var cells = [[String]]()
 //            let cols = selectedTable.items.map( { $0.toString() })
-           let activeSamples = experiment.getSamplesInCurrentGroup()
+            let activeSamples = experiment.getSamplesInCurrentGroup()
             if !activeSamples.isEmpty {
                 
                 for sample in activeSamples {
@@ -136,13 +167,13 @@ public struct CGTableView : View {
             TableColumn("Population", value: \.pop){ col in Text(col.pop)}
                 .width(min: 130, ideal: 180)
                 .customizationID("name")
+             TableColumn("Statistic", value: \.stat){ col in Text(col.stat)}
+                .width(min: 30, ideal: 80, max: 160)
+                .customizationID("stat")
             TableColumn("Parameter", value: \.parm){ col in Text(col.parm)}
                 .width(min: 130, ideal: 180)
                 .customizationID("parm")
-            TableColumn("Statistic", value: \.stat){ col in Text(col.stat)}
-                .width(min: 30, ideal: 80, max: 160)
-                .customizationID("stat")
-            TableColumn("Arg", value: \.arg){ col in Text(col.arg)}
+           TableColumn("Arg", value: \.arg){ col in Text(col.arg)}
                 .width(min: 30, ideal: 50, max: 60)
                 .customizationID("arg")
         }
@@ -194,7 +225,7 @@ public class CGTable : Usable, Hashable
     public var rows: [[String]]?
     public var isTemplate = true
         //    var info = BatchInfo()
-    
+
     init() {    }
     init(cols: [TColumn], rows: [[String]]? )
     {
@@ -206,7 +237,30 @@ public class CGTable : Usable, Hashable
     {
         items.append(TColumn(node.name, stat: "Freq"))
     }
-    
+ 
+    public func addStat(_ name: String, _ stat: String, _ parm: String, experiment: Experiment)
+    {
+        if parm == "<All>"  {
+            for param in experiment.parameterNames() {
+                if param != "<All>" {
+                    items.append(TColumn(name, stat: stat, parm: param))
+                }
+            }
+        }
+        else { items.append(TColumn(name, stat: stat, parm: parm)) }
+    }
+
+    public func addStat(_ str: String)
+    {
+        items.append(TColumn("current", stat: str))
+    }
+
+    public func addKeyword(_ str: String)
+    {
+        items.append(TColumn("", stat: str, parm: "Keyword"))
+    }
+
+
     public func xml() -> String {
         return "<Table " + attributes() + " >\n\t<Columns>" +
         items.compactMap { $0.xml() }.joined(separator: "\n\t") +   "</Columns>\n" +
@@ -249,7 +303,8 @@ public struct TColumn : Identifiable, Hashable, Codable
         hasher.combineMany(id, pop, parm, stat, arg)
     }
  
-    public func xml() -> String {   "<Column \(pop)\n \(stat) \(parm) \(arg) >\n"   }
+
+    public func xml() -> String {   "<Column pop=\"\(pop)\" stat=\"\(stat)\" parm=\"\(parm)\" arg=\"\(arg)\" >\n"   }
 
     
     static var draggableType = UTType(exportedAs: "com.cytegeist.CyteGeistApp.tablecolumn")

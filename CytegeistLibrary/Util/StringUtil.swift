@@ -25,6 +25,13 @@ if (DEBUG)  {
 }
 
 
+public func dateStr(_ date: Date) -> String
+{
+    let myDateFormatter = DateFormatter()
+    myDateFormatter.dateFormat = "YYMMDD"
+    return myDateFormatter.string(from: date)
+}
+
 private let newline = "\n".data(using: .utf8)!
 private let comma = ",".data(using: .utf8)!
 
@@ -40,12 +47,13 @@ public extension Bool {
 }
 
 public extension CGPoint {
-    func xml() -> String {     return "<Point x=\(self.x) y=(self.y) /> \n"   }
+    func xml() -> String {     return "<Point x=\(self.x) y=\(self.y) /> \n"   }
 }
 
 public extension CGSize {
     func xml() -> String {     return "<Size width=\(self.width) y=\(self.height) /> \n"   }
 }
+
 public extension String {
     //    func substring(offset: Int, length: Int) -> String {
     //        guard offset >= 0, length > 0, offset < self.count else {

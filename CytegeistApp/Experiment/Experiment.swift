@@ -39,7 +39,6 @@ public class Experiment : Usable
 
     var samples: [Sample] = [Sample]()
     var selectedSamples = Set<Sample.ID>()
-//    @Transient   
     var selectedAnalysisNodes = AnalysisNodeSelection()
     
     var panels = [CPanel]()
@@ -47,6 +46,7 @@ public class Experiment : Usable
     var tables = [CGTable]()
     var layouts = [CGLayout]()
     var keywords = AttributeStore()
+    var parameters = [String]()         // keep a set of union of all parameter names
 //    @Transient
     var core: CytegeistCoreAPI = CytegeistCoreAPI()
     
@@ -70,19 +70,12 @@ public class Experiment : Usable
     {
         print("Experiment \(name) ")
         self.version = version
-        self.name = name.isEmpty ? DateStr(Date.now) : name
+        self.name = name.isEmpty ? dateStr(Date.now) : name
     }
     public func encode(to encoder: Encoder) throws {
             // Do nothing
     }
-    
-    func DateStr(_ date: Date) -> String
-    {
-        let myDateFormatter = DateFormatter()
-        myDateFormatter.dateFormat = "YYMMDD"
-        return myDateFormatter.string(from: date)
-    }
-        //--------------------------------------------------------------------------------
+  //--------------------------------------------------------------------------------
     
     func addTable() -> CGTable {
         let table = CGTable()
@@ -159,14 +152,25 @@ public class Experiment : Usable
         //+ attributes + " >\n"
         let attr =  attributes()
         let keywords = keywords.xml()
-        return "<Experiment " + attr + ">\n" + subs + "</Experiment>\n"
+        return "<Experiment " + attr + ">\n" + keywords + subs + "</Experiment>\n"
     }
 
     public func attributes() -> String {
         return "name=\(self.name) version=\(self.version)"
     }
     
- 
+    public func parameterNames() -> [String] {
+        return ["<All>", "FS", "SS", "FITC", "PE", "APC", "Cy7-APC"]
+    }
+    public func populationNames() -> [String] {
+        return ["<All>", "All Cells", "Single", "Lymphocytes", "Monocytes", "T Cells", "CD3+", "CD4+", "CD8+"]
+    }
+    
+    public func keywordNames() -> [String] {
+        return ["Date", "Tube Name", "Url", "Total", "Investigator", "Stains"]
+    }
+    
+
         //--------------------------------------------------------------------------------
     public convenience init(ws: TreeNode )
     {

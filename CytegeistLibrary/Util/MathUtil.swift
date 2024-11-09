@@ -201,7 +201,4 @@ public struct Logicle : Equatable, Hashable {
     }
         //-----------------------------------------------------------------------
 }
-public func quickDistance(_ a: CGPoint,_  b: CGPoint) -> Double {
-        //             (abs(a.x - b.x) + abs(a.y - b.y))
-    return sqrt ((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y))
-    }
+

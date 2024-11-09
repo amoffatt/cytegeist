@@ -9,7 +9,6 @@ import Foundation
 import SwiftUI
 import Charts
 
-
 public struct Colormap: Equatable, Hashable {
     public let lookup:[Color]
     public let uint8Lookup:[SIMD4<UInt8>]
@@ -148,6 +147,19 @@ extension Color {
         return .zero
     }
     
+}
+
+extension Color {
+    
+//    init?(hex: String) {
+//        guard let uiColor = UIColor(hex: hex) else { return nil }
+//        self.init(uiColor: uiColor)
+//    }
+//    
+//    func toHexString(includeAlpha: Bool = false) -> String? {
+//        return UIColor(self).toHexString(includeAlpha: includeAlpha)
+//    }
+//    
 }
 
 extension SIMD4<Float> {

@@ -437,7 +437,7 @@ public struct ContourBuilder
         init(segments: [Segment])
         {
 //            print("\(segments.count)  segments")
-            var local = segments.filter({ quickDistance($0.start, $0.end) > epsilon})
+            var local = segments.filter({ distance($0.start, $0.end) > epsilon})
 //            print("\(local.count)  segments in local")
             
                 //            pointList =  segments.map { CGPoint($0.start.x, 256 - $0.start.y)}
@@ -490,7 +490,7 @@ public struct ContourBuilder
             var minIdx = -1
             for i in (0 ..< segments.count) {
                 let seg = segments[i]
-                let di = quickDistance( seg.start, pt)
+                let di = distance( seg.start, pt)
                 if di < minDist {
                     minDist = di
                     minIdx = i
