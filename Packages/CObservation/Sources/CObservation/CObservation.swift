@@ -18,13 +18,18 @@ import SwiftUI
 public macro CObservable() =
   #externalMacro(module: "CObservationMacros", type: "CObservableMacro")
 
+@attached(accessor, names: named(init), named(get), named(set), named(_modify))
+@attached(peer, names: prefixed(_))
+public macro CObservationTracked() =
+  #externalMacro(module: "CObservationMacros", type: "CObservationTrackedMacro")
 
 
 
 @MainActor
 public class CObjectContext {
     public private(set) static var currentContext:CObjectContext? = nil
-    
+    public internal(set) static var ignoreUndoableActions = false
+
     public var undoManager:UndoManager?
     
     public init(_ undoManager:UndoManager?) {
@@ -42,6 +47,14 @@ public class CObjectContext {
             Self.currentContext = nil
         }
         return try body()
+    }
+    
+    public func registerUndo<TargetType:AnyObject>(withTarget target:TargetType, _ action:@escaping @Sendable (TargetType) -> Void) {
+//        undoManager?.registerUndo(withTarget: self, selector: #selector(undoAction), object: nil)
+        if Self.ignoreUndoableActions {
+            return
+        }
+        undoManager?.registerUndo(withTarget: target, handler: action)
     }
     
 }
@@ -65,7 +78,9 @@ public func undoable<T>(_ actionName:String? = nil, _ body: () throws -> T) reth
 
 @MainActor
 public func notUndoable<T>(_ body: () throws -> T) rethrows -> T {
-    print("TODO:Implement notUndoable()")
+    let context = CObjectContext.currentContext
+    CObjectContext.ignoreUndoableActions = true
+    defer { CObjectContext.ignoreUndoableActions = false }
     return try body()
 }
 

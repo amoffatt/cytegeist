@@ -41,7 +41,8 @@ import SwiftCompilerPlugin
 @main
 struct CObservationPlugin: CompilerPlugin {
     let providingMacros: [Macro.Type] = [
-        CObservableMacro.self
+        CObservableMacro.self,
+        CObservationTrackedMacro.self
     ]
 }
 
@@ -65,7 +66,7 @@ public struct CObservableMacro {
     return "\(observationModuleName).\(registrarTypeName)"
   }
   
-  static let trackedMacroName = "ObservationTracked"
+  static let trackedMacroName = "CObservationTracked"
   static let ignoredMacroName = "ObservationIgnored"
 
   static let registrarVariableName = "_$observationRegistrar"
@@ -98,18 +99,13 @@ public struct CObservableMacro {
       let initialValue = self[keyPath: keyPath]
       let result = try \(raw: registrarVariableName).withMutation(of: self, keyPath: keyPath, mutation)
       let finalValue = self[keyPath: keyPath]
-        
-        if let undoManager = _context?.undoManager {
-          undoManager.registerUndo(withTarget: self) { target in
-            target[keyPath: keyPath] = initialValue
-          }
-        }
+      _context?.registerUndo(withTarget:self) { target in
+        target[keyPath: keyPath] = initialValue
+      }
       return result
       }
       """
-      // AM DEBUGGING work out the proper argument type to registerUndo handler().
   }
-    //      print(self, " Value changed from ", initialValue, " to ", finalValue)
 
   static var ignoredAttribute: AttributeSyntax {
     AttributeSyntax(
@@ -359,97 +355,104 @@ extension CObservableMacro: ExtensionMacro {
  }
 }
 
-//public struct ObservationTrackedMacro: AccessorMacro {
-//  public static func expansion<
-//    Context: MacroExpansionContext,
-//    Declaration: DeclSyntaxProtocol
-//  >(
-//    of node: AttributeSyntax,
-//    providingAccessorsOf declaration: Declaration,
-//    in context: Context
-//  ) throws -> [AccessorDeclSyntax] {
-//    guard let property = declaration.as(VariableDeclSyntax.self),
-//          property.isValidForObservation,
-//          let identifier = property.identifier?.trimmed else {
-//      return []
-//    }
-//
-//    if property.hasMacroApplication(ObservableMacro.ignoredMacroName) {
-//      return []
-//    }
-//
-//    let initAccessor: AccessorDeclSyntax =
-//      """
-//      @storageRestrictions(initializes: _\(identifier))
-//      init(initialValue) {
-//      _\(identifier) = initialValue
-//      }
-//      """
-//
-//    let getAccessor: AccessorDeclSyntax =
-//      """
-//      get {
-//      access(keyPath: \\.\(identifier))
-//      return _\(identifier)
-//      }
-//      """
-//
-//    let setAccessor: AccessorDeclSyntax =
-//      """
-//      set {
-//      withMutation(keyPath: \\.\(identifier)) {
-//      _\(identifier) = newValue
-//      }
-//      }
-//      """
-//
-//    let modifyAccessor: AccessorDeclSyntax =
-//      """
-//      _modify {
-//      access(keyPath: \\.\(identifier))
-//      \(raw: ObservableMacro.registrarVariableName).willSet(self, keyPath: \\.\(identifier))
-//      defer { \(raw: ObservableMacro.registrarVariableName).didSet(self, keyPath: \\.\(identifier)) }
-//      yield &_\(identifier)
-//      }
-//      """
-//
-//    return [initAccessor, getAccessor, setAccessor, modifyAccessor]
-//  }
-//}
+public struct CObservationTrackedMacro: AccessorMacro {
+  public static func expansion<
+    Context: MacroExpansionContext,
+    Declaration: DeclSyntaxProtocol
+  >(
+    of node: AttributeSyntax,
+    providingAccessorsOf declaration: Declaration,
+    in context: Context
+  ) throws -> [AccessorDeclSyntax] {
+    guard let property = declaration.as(VariableDeclSyntax.self),
+          property.isValidForObservation,
+          let identifier = property.identifier?.trimmed else {
+      return []
+    }
 
-//extension ObservationTrackedMacro: PeerMacro {
-//  public static func expansion<
-//    Context: MacroExpansionContext,
-//    Declaration: DeclSyntaxProtocol
-//  >(
-//    of node: SwiftSyntax.AttributeSyntax,
-//    providingPeersOf declaration: Declaration,
-//    in context: Context
-//  ) throws -> [DeclSyntax] {
-//    guard let property = declaration.as(VariableDeclSyntax.self),
-//          property.isValidForObservation else {
-//      return []
-//    }
-//
-//    if property.hasMacroApplication(ObservableMacro.ignoredMacroName) ||
-//       property.hasMacroApplication(ObservableMacro.trackedMacroName) {
-//      return []
-//    }
-//
-//    let storage = DeclSyntax(property.privatePrefixed("_", addingAttribute: ObservableMacro.ignoredAttribute))
-//    return [storage]
-//  }
-//}
+    if property.hasMacroApplication(CObservableMacro.ignoredMacroName) {
+      return []
+    }
 
-//public struct ObservationIgnoredMacro: AccessorMacro {
-//  public static func expansion<
-//    Context: MacroExpansionContext,
-//    Declaration: DeclSyntaxProtocol
-//  >(
-//    of node: AttributeSyntax,
-//    providingAccessorsOf declaration: Declaration,
-//    in context: Context
-//  ) throws -> [AccessorDeclSyntax] {
-//    return []
-//  }
-//}
+    let initAccessor: AccessorDeclSyntax =
+      """
+      @storageRestrictions(initializes: _\(identifier))
+      init(initialValue) {
+      _\(identifier) = initialValue
+      }
+      """
+
+    let getAccessor: AccessorDeclSyntax =
+      """
+      get {
+      access(keyPath: \\.\(identifier))
+      return _\(identifier)
+      }
+      """
+
+    let setAccessor: AccessorDeclSyntax =
+      """
+      set {
+      withMutation(keyPath: \\.\(identifier)) {
+      _\(identifier) = newValue
+      }
+      }
+      """
+
+    let modifyAccessor: AccessorDeclSyntax =
+      """
+      _modify {
+      access(keyPath: \\.\(identifier))
+      \(raw: CObservableMacro.registrarVariableName).willSet(self, keyPath: \\.\(identifier))
+      let initialValue = self[keyPath: \\._\(identifier)]
+      defer {
+        \(raw: CObservableMacro.registrarVariableName).didSet(self, keyPath: \\.\(identifier))
+          let finalValue = self[keyPath: \\._\(identifier)]
+          _context?.registerUndo(withTarget:self) { target in
+            target[keyPath: \\.\(identifier)] = initialValue
+          }
+      }
+      yield &_\(identifier)
+      }
+      """
+
+    return [initAccessor, getAccessor, setAccessor, modifyAccessor]
+  }
+}
+
+extension CObservationTrackedMacro: PeerMacro {
+  public static func expansion<
+    Context: MacroExpansionContext,
+    Declaration: DeclSyntaxProtocol
+  >(
+    of node: SwiftSyntax.AttributeSyntax,
+    providingPeersOf declaration: Declaration,
+    in context: Context
+  ) throws -> [DeclSyntax] {
+    guard let property = declaration.as(VariableDeclSyntax.self),
+          property.isValidForObservation else {
+      return []
+    }
+
+    if property.hasMacroApplication(CObservableMacro.ignoredMacroName) ||
+       property.hasMacroApplication(CObservableMacro.trackedMacroName) {
+      return []
+    }
+
+    let storage = DeclSyntax(property.privatePrefixed("_", addingAttribute: CObservableMacro.ignoredAttribute))
+    return [storage]
+  }
+}
+
+public struct ObservationIgnoredMacro: AccessorMacro {
+  public static func expansion<
+    Context: MacroExpansionContext,
+    Declaration: DeclSyntaxProtocol
+  >(
+    of node: AttributeSyntax,
+    providingAccessorsOf declaration: Declaration,
+    in context: Context
+  ) throws -> [AccessorDeclSyntax] {
+    return []
+  }
+}
