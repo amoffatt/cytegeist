@@ -43,7 +43,7 @@ public class Experiment : Usable
     
     var panels = [CPanel]()
     var groups = [CGroup]()
-    var tables = [CGTable]()
+    var tables = [CGTableDef]()
     var layouts = [CGLayout]()
     var keywords = AttributeStore()
     var parameters = [String]()         // keep a set of union of all parameter names
@@ -77,8 +77,8 @@ public class Experiment : Usable
     }
   //--------------------------------------------------------------------------------
     
-    func addTable() -> CGTable {
-        let table = CGTable()
+    func addTable() -> CGTableDef {
+        let table = CGTableDef()
         table.name = table.name.generateUnique(existing: tables.map { $0.name })
         tables.append(table)
         return table
@@ -141,11 +141,11 @@ public class Experiment : Usable
     
     public func xml() -> String {
         
-        let sampleStr = "<Samples>\n" + samples.compactMap { $0.xml() }.joined() +   "</Samples>\n"               //separator: "\n\t"
-        let panelStr = "<Panels>\n" + panels.compactMap { $0.xml() }.joined() +   "</Panels>\n"
-        let groupStr = "<Groups>\n" + groups.compactMap { $0.xml() }.joined() +   "</Groups>\n"
-        let tableStr = "<Tables>\n" + tables.compactMap { $0.xml() }.joined() +   "</Tables>\n"
-        let layoutStr = "<Layouts>\n" + layouts.compactMap { $0.xml() }.joined() +   "</Layouts>\n"
+        let sampleStr = "<Samples>\n" + samples.compactMap { $0.xml() }.joined() + "</Samples>\n"
+        let panelStr = "<Panels>\n" + panels.compactMap { $0.xml() }.joined() + "</Panels>\n"
+        let groupStr = "<Groups>\n" + groups.compactMap { $0.xml() }.joined() + "</Groups>\n"
+        let tableStr = "<Tables>\n" + tables.compactMap { $0.xml() }.joined() + "</Tables>\n"
+        let layoutStr = "<Layouts>\n" + layouts.compactMap { $0.xml() }.joined() + "</Layouts>\n"
         
         
         let subs: String  = sampleStr + panelStr + groupStr + tableStr + layoutStr
@@ -208,7 +208,7 @@ public class Experiment : Usable
     func processTables(_ xml: TreeNode)
     {
         for node in xml.children where  node.value == "Table" {
-            tables.append(CGTable(node))
+            tables.append(CGTableDef(node))
         }
         print("Tables: ", tables.count)
     }
