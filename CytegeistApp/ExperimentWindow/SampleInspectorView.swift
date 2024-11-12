@@ -135,23 +135,24 @@ public struct KeywordsTable: View {
         public var body: some View {
 //            Text("comp").frame(minWidth: 100, minHeight: 100)
             let k = keyword
+            if !k.isEmpty {
             let nums = get_numbers(stringtext: k)
             let mtx = getArray(nums: nums)
             let size = mtx.count
             
 //            let strs = getStrList(nums: nums)
-            VStack {
-               Table(mtx) {
-//                        TableColumn("") { e in Text("FL")}
+                VStack {
+                    Table(mtx) {
+                            //                        TableColumn("") { e in Text("FL")}
                         if #available(macOS 14.4, *) {
                             TableColumnForEach(0..<size, id: \.self) { index in
                                 TableColumn("\(parameters[index+3].shortName)") { e in          // TODO -- parm size - size ?
                                     Text(String(matrixFormat(val: e.guts[index])))
                                 }
                             }
+                        }
                     }
                 }
-                
             }
 //            ForEach(strs){ str in
 //                Text(str).frame(width: .infinity)
@@ -211,7 +212,7 @@ public struct KeywordsTable: View {
         
         func get_numbers(stringtext:String) -> [Float] {
             let StringRecordedArr = stringtext.components(separatedBy: ",")
-            return StringRecordedArr.map { Float($0)!}
+            return StringRecordedArr.compactMap { Float($0)}
         }
     }
     
