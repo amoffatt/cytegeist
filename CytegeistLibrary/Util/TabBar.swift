@@ -27,27 +27,25 @@ public struct TabBar<TabItems, TabItemView>: View where TabItems:RandomAccessCol
     public var body: some View {
         HStack {
             ScrollView(.horizontal, showsIndicators: false) {
-                LazyHStack(spacing: 10) {
+                LazyHStack(spacing: 10) {      //
                     ForEach(items, id: \.self) { item in
                         let selected = selection.wrappedValue == item
+                        let template = false  //  item.isTemplate
                         
                         Button {
                             selection.wrappedValue = item
-                        } label: {
-                            HStack {
-                                    //                            Buttons.delete()
-                                tabView(item)
-                            }
-                        }
-                        .buttonStyle(selected ? .plain : .plain)
-                        .background(selected ? .blue : .clear)
-                        
+                        } label: {  HStack {  tabView(item)   }   }
+                            .buttonStyle(selected ? .plain : .plain)
+//                        .buttonBorderShape(.capsule)
+                        .padding(8)
+                        .background(selected ? .blue.opacity(0.2) : .clear)
+                        .font(.title2)
+//                        .offset(y:(selected ? 6 : 0))
+
                     }
                 }
             }
-            Buttons.icon("Add Tab", .add) {
-                add()
-            }
+            Buttons.icon("Add Tab", .add) {  add()  }
             .buttonStyle(.plain)
             .padding(.horizontal)
             

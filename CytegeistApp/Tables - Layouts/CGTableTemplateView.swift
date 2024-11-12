@@ -15,7 +15,7 @@ import SwiftUI
 public struct TableBuilder : View
 {
     @Environment(Experiment.self) var experiment
-    @State var selectedTable:CGTableDef? = nil
+    @State var selectedTable:CGTable? = nil
     @State private var selectedPop: String = ""
     @State private var selectedParm: String = ""
     @State private var selectedKeyword: String = ""
@@ -25,7 +25,6 @@ public struct TableBuilder : View
     var TableTools : some View {
         
         TabView {
-            
             VStack {
                 HStack {
                     
@@ -53,11 +52,9 @@ public struct TableBuilder : View
                         //                Button("...",    action: {  }).buttonBorderShape(.capsule)
                     
                 }
-            }.tabItem( { Text("Statistics") } )
+            }.tabItem( { Text("Statistics") } )         //--------------------------------------
             
-            
-            
-            HStack {
+             HStack {
                 VStack {
                     HStack {
                         
@@ -69,44 +66,48 @@ public struct TableBuilder : View
                         Spacer()
                         
                     }
-//                    Text("-- or --")
+                        //                    Text("-- or --")
                 }.frame(maxWidth: 350)
                 Spacer()
-            }.tabItem( { Text("Keywords") } )
-            
-         
-            
-            
+            }.tabItem( { Text("Keywords") } )        //--------------------------------------
+
+
             VStack {
-
-//            HStack { Text("-- or --").frame(maxWidth: 350) }
-            HStack {
-                
-                Text("Column A: ").font(.title2)
-                Picker("", selection: $selectedColumnA,  content: {
-                    ForEach(colNames()) {  Text($0)  }
-                }).frame(maxWidth: 350)
-            }
-            HStack {
-                Text("Column B: ").font(.title2)
-                Picker("", selection: $selectedColumnB,  content: {
-                    ForEach(colNames()) {  Text($0)  }
-                }).frame(maxWidth: 350)
-            }
+                 HStack {
+                    
+                    Text("Column A: ").font(.title2)
+                    Picker("", selection: $selectedColumnA,  content: {
+                        ForEach(colNames()) {  Text($0)  }
+                    }).frame(maxWidth: 350)
+                }
+                HStack {
+                    Text("Column B: ").font(.title2)
+                    Picker("", selection: $selectedColumnB,  content: {
+                        ForEach(colNames()) {  Text($0)  }
+                    }).frame(maxWidth: 350)
+                }
+                                
+                HStack {
+                    Button("1 / A", action: {  addStat("reciprocal")}).buttonBorderShape(.capsule)
+                    Button("A + B", action: {  addStat("sum")}).buttonBorderShape(.capsule)
+                    Button("A - B", action: {  addStat("difference")}).buttonBorderShape(.capsule)
+                    Button("A * B", action: {  addStat("product")}).buttonBorderShape(.capsule)
+                    Button("A / B", action: {  addStat("ratio")}).buttonBorderShape(.capsule)
+                    Spacer()
+                }
+            }.tabItem( { Text("Calculated Columns") } )        //--------------------------------------
             
-
-            HStack {
-                 Button("1 / A", action: {  selectedTable?.addStat("reciprocal", colA: selectedColumnA, colB: selectedColumnB)}).buttonBorderShape(.capsule)
-                Button("A + B", action: {  selectedTable?.addStat("sum",colA: selectedColumnA, colB: selectedColumnB )}).buttonBorderShape(.capsule)
-                Button("A - B", action: {  selectedTable?.addStat("difference" , colA: selectedColumnA, colB: selectedColumnB )}).buttonBorderShape(.capsule)
-                Button("A * B", action: {  selectedTable?.addStat("product", colA: selectedColumnA, colB: selectedColumnB)}).buttonBorderShape(.capsule)
-                Button("A / B", action: {  selectedTable?.addStat("ratio", colA: selectedColumnA, colB: selectedColumnB)}).buttonBorderShape(.capsule)
-                Spacer()
-           }
-            }.tabItem( { Text("Calculated Columns") } )
- 
-        }.padding(8).frame(maxHeight: 120)
+        }.padding(8)
+        .frame(maxHeight: 120)
     }
+    //--------------------------------------
+     func addStat(_ action: String)
+    {
+        if let selectedTable {
+            selectedTable.addStat(action, colA: selectedColumnA, colB: selectedColumnB)
+        }
+    }
+    
     func colNames() -> [String]
     {
         if let selectedTable {
@@ -114,6 +115,8 @@ public struct TableBuilder : View
         }
         return ["age", "height", "weight"]
     }
+    //--------------------------------------
+
     
     public var body: some View {
         return VStack {
@@ -132,7 +135,7 @@ public struct TableBuilder : View
                     }
                     else
                     {
-//                        CGTableResultView(table:result)
+                        CGTableResultView(table:selectedTable)
                     }
                 } else {  Text("Select a Table") }
             }
@@ -143,33 +146,37 @@ public struct TableBuilder : View
                 selectedTable = experiment.addTable()
             }
         } .toolbar {  ToolbarItem(placement: .primaryAction) {
-            Button("Batch", action: {   doBatch()   }).buttonBorderShape(.capsule)
+            HStack {
+                Spacer(minLength: 200 )
+                Button("Batch", action: {   doBatch()   }).buttonBorderShape(.capsule)
             }
+        }
         }
     }
     
-        //---------------------------------------------------------------------------
+//---------------------------------------------------------------------------
 
     func addTable()
     {
-        let table = CGTableDef()
+        let table = CGTable(isTemplate: true)
         table.name = table.name.generateUnique(existing: experiment.tables.map { $0.name })
         experiment.tables.append(table)
         selectedTable = table
 
     }
-    
+    // called by doBatch, isTemplate: false
     func addTable(cols: [TColumn], rows: [Row])
     {
+        print ("called by doBatch")
         var namedCols = cols
         namedCols.insert(TColumn("Sample", stat: "Name"), at: 0)
-        let table = CGTableResult(cols: namedCols, rows: rows)
+        let table = CGTable(cols: namedCols, rows: rows)
         table.name = table.name.generateUnique(existing: experiment.tables.map { $0.name })
-//        experiment.tables.append(table)
-//        selectedTable = table
+        experiment.tables.append(table)
+        selectedTable = table
     }
 
-    //---------------------------------------------------------------------------
+//---------------------------------------------------------------------------
     func stat(_  sample: Sample, _  col: TColumn) -> String
     {
         return ("(\(col.parm), \(col.pop), \(col.stat))")
@@ -209,7 +216,7 @@ public struct CGTableTemplateView : View {
     @State var columnCustomization = TableColumnCustomization<TColumn>()
     @State var selectedFormat = "None"
 
-    let table: CGTableDef
+    let table: CGTable
     
     public var body: some View {
             //            Table (of: TColumn.Type, selection: $selectedColumns)
@@ -239,14 +246,6 @@ public struct CGTableTemplateView : View {
         
     rows: {
         ForEach(table.items)  { col in TableRow(col) }
-            //                ForEach(cols) { col in TableRow(TColumn).itemProvider { TColumn.itemProvider }  }
-            //                    .onInsert(of: [TColumn.draggableType]) { index, providers in
-            //                        TColumn.fromItemProviders(providers) { cols in
-            ////                            let experiment = store.getSelectedExperiment()
-            ////                            experiment.samples.insert(contentsOf: samples, at: index)
-            //                        }
-            //                    }
-        
     }.frame(minWidth: 300, idealWidth: 600)
         .dropDestination(for: AnalysisNode.self) { (items, position) in
             for item in items {print(item.name)  }
@@ -263,4 +262,28 @@ public struct CGTableTemplateView : View {
     }
  
 
+}
+//-------------------------------------------------------------------------
+public struct CGTableResultView : View {
+    @State var selection = Set<TColumn.ID>()
+    @State var sortOrder = [KeyPathComparator(\TColumn.pop, order: .forward), KeyPathComparator(\TColumn.parm, order: .forward)]
+    @State var columnCustomization = TableColumnCustomization<TColumn>()
+    
+    let table: CGTable
+    
+    
+    
+    public var body: some View {
+            //            Table (of: TColumn.Type, selection: $selectedColumns)
+        
+        if let t = table.cells {
+            Table (t)
+            {
+                let colnames = table.items.map( { $0.colname() })
+                TableColumnForEach(0..<colnames.count, id: \.self) { i in
+                    TableColumn("\(colnames[i])") { _ in  Text(colnames[i])  }
+                }
+            }
+        }
+    }
 }

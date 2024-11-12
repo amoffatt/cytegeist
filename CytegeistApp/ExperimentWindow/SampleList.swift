@@ -97,7 +97,7 @@ struct SampleList: View {
 //                    print("Action")
 //                }
             
-            SampleListModePicker(mode: $mode)
+//            SampleListModePicker(mode: $mode)
         }
     }
     

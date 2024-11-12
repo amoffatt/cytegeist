@@ -21,6 +21,15 @@ public class BatchContext {
     public func getSample(_ id:Sample.ID) -> Sample? {
         allSamples.first { $0.id == id }
     }
+    
+    public func getSample(keyword: String, value: String) -> Sample? {
+        allSamples.first { $0.meta?.keywordLookup[keyword] == value }
+    }
+ 
+    public func getSample(keyword: String, value: String, keyword2: String, value2: String) -> Sample? {
+        allSamples.first { $0.meta?.keywordLookup[keyword] == value  &&  $0.meta?.keywordLookup[keyword2] == value2 }
+    }
+
 }
 
 

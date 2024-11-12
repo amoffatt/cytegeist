@@ -7,15 +7,43 @@ import Charts
 import CytegeistLibrary
 import CytegeistCore
 
+
+public struct LayoutCell : Codable, Hashable, Identifiable
+{
+    public var id = UUID()
+    public func hash(into hasher: inout Hasher) {     hasher.combine(id)   }
+    let sample: Sample
+    var iteratorValue: String = ""
+    var items: [LayoutItem]
+    public init (sample: Sample, items: [LayoutItem], val: String = "")
+    {
+        self.sample =  sample
+        self.items = items
+        self.iteratorValue = val
+    }
+}
+
 @Observable
 class CGLayout : Codable, Hashable, Identifiable
 {
+ 
+
+    
     var id = UUID()
     var name = "Untitled Layout"
     var items = [LayoutItem]()
+    var isTemplate = true
+    var cells: [LayoutCell]?        // result of a batch
     //-------------------------------------------------------------
     init() {    }
     init(_ xml: TreeNode)    {    }
+
+    init(orig: CGLayout, cells: [LayoutCell])
+    {
+        items = orig.items
+        self.cells = cells
+        isTemplate = false
+  }
     //-------------------------------------------------------------
     static func == (lhs: CGLayout, rhs: CGLayout) -> Bool {       lhs.id == rhs.id   }
     func hash(into hasher: inout Hasher) {     hasher.combine(id)   }

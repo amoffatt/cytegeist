@@ -25,7 +25,7 @@ public struct LayoutBuilder: View {
     public var body: some View
     {
         VStack {
-            Text("Layout Editor")
+//            Text("Layout Editor")
             TabBar(experiment.layouts, selection:$selectedLayout) { layout in
                 Text(layout.name)
             } add: {
@@ -37,7 +37,7 @@ public struct LayoutBuilder: View {
             
             VStack {
                 if let selectedLayout {
-                    CGLayoutView(layoutModel: selectedLayout)
+                    CGLayoutView(experiment: experiment, layoutModel: selectedLayout)
                 } else {
                     Text("Select a Layout")
                 }
@@ -50,12 +50,15 @@ public struct LayoutBuilder: View {
             }
         }
     }
+    
+  
 }
 //---------------------------------------------------------------------------
-// each tab has a pasteboard with editor of layout items
+// each tab has a pasteboard an array of layout items
 
 @MainActor
 struct CGLayoutView: View {
+    let experiment:Experiment
     let layoutModel:CGLayout
 
     @State var editingItem:LayoutItem?
@@ -70,13 +73,15 @@ struct CGLayoutView: View {
     var LayoutTools : some View {
         
         HStack {
-            Button("Add Text Block", systemImage: "plus", action:  layoutModel.addTextItem  )
-            Button("Add Table", systemImage: "plus", action:  layoutModel.addTable  )
-            Button("Add Image", systemImage: "plus", action:  layoutModel.addImage  )
+            Spacer(minLength: 150)
+            Button("Add Text Block", systemImage: "t.square", action:  layoutModel.addTextItem  )
+            Button("Add Table", systemImage: "tablecells", action:  layoutModel.addTable  )
+            Button("Add Image", systemImage: "photo", action:  layoutModel.addImage  )
             ItemSizeSlider(size: $size)
+            Button("Batch", systemImage: "hands.sparkles.fill", action: {   doBatch()   }).buttonBorderShape(.capsule)
         }
     }
-
+   
     var body: some View {
         
         let step =  shiftKey() ? 20 : optionKey() ? 1.0 : 5.0           //  PREFS
@@ -160,7 +165,10 @@ struct CGLayoutView: View {
         let layoutItem = LayoutItem(.chart(nil), node:node, position:position)
         layoutModel.addItem(layoutItem)
     }
-    
+    func doBatch()
+    {
+        experiment.doBatch(layout: layoutModel)
+    }
    //------------------------------------------------------
     struct ItemSizeSlider: View {
         @Binding var size: CGFloat

@@ -13,34 +13,41 @@ import CytegeistLibrary
 
     //---------------------------------------------------------------------------
     // Model
-
+@Observable
 public class CGTable : Usable, Hashable  {
     public static func == (lhs: CGTable, rhs: CGTable) -> Bool {
         lhs.id == rhs.id
     }
     public var id: UUID = UUID()
-    public var name: String = ""
-    public func xml() -> String { "" }
+    public var name: String = "Table"
+//    public func xml() -> String { "" }
     
     public func hash(into hasher: inout Hasher) {
         hasher.combineMany(id, name)
     }
-}
-
-@Observable
-public class CGTableDef : CGTable
-{
-
-    public var items = [TColumn]()
-    public var isTemplate = true
-
+    public var isTemplate = false
     
-    override init() {    super.init()    }
-    public init(_ node: TreeNode ) {   super.init()      }
-    required init(from decoder: any Decoder) throws {
+    public var items = [TColumn]()
+    public var cells: [Row]?         // nil except when its the result of a batch
+    
+    public init(isTemplate: Bool ) {
+        self.isTemplate = isTemplate
+    }
+
+    init(cols: [TColumn], rows: [Row])
+    {
+        self.items = cols
+        self.cells = rows
+        self.isTemplate = false
+    }
+    
+    public init(_ node: TreeNode ) {
+    }
+    
+    required public init(from decoder: any Decoder) throws {
         fatalError("init(from:) has not been implemented")
     }
-        //------------------------------------------------------
+//------------------------------------------------------
     public func addNode(_ node: AnalysisNode)
     {
         items.append(TColumn(node.name, stat: "Freq"))
@@ -74,7 +81,7 @@ public class CGTableDef : CGTable
     }
     
    //------------------------------------------------------
-    override public func xml() -> String {
+    public func xml() -> String {
         return "<Table " + attributes() + " >\n\t<Columns>" +
         items.compactMap { $0.xml() }.joined(separator: "\n\t") +   "</Columns>\n" +
         "</Table>\n"
@@ -139,43 +146,37 @@ public struct TColumn : Identifiable, Hashable, Codable
         return provider
     }
 }
+    //---------------------------------------------------------------------------
+// The arrary of strings output into a  CGTableResult
 public struct Row: Usable {
     public var id = UUID()
     var cells: [String]
-    public init ()
-    {
+    
+    public init ()    {
         self.cells = [String]()
     }
 }
 
-
-
-@Observable
-public class CGTableResult : CGTable  ///Usable, Hashable  //, CGTable
-{
-    public static func == (lhs: CGTableResult, rhs: CGTableResult) -> Bool {
-        lhs.id == rhs.id
-    }
-    
-    public var cols: [TColumn]
-    public var rows: [Row]
-    public var isTemplate = true
-    
-    
-    init(cols: [TColumn], rows: [Row])
-    {
-        self.cols = cols
-        self.rows = rows
-        super.init()
-   }
-    
-    required init(from decoder: any Decoder) throws {
-        fatalError("init(from:) has not been implemented")
-    }
-    
-    func colNames() -> [String]    {
-        return cols.compactMap( { $0.colname() } )
-    }
-    
-    override public func xml() -> String   { return "<Table />" }  // TODO
-}
+    //---------------------------------------------------------------------------
+//
+//@Observable
+//public class CGTableResult : CGTable  ///Usable, Hashable  //, CGTable
+//{
+//    public static func == (lhs: CGTableResult, rhs: CGTableResult) -> Bool {
+//        lhs.id == rhs.id
+//    }
+//    
+//    public var cols: [TColumn]
+//    public var rows: [Row]
+//    
+//
+//    required init(from decoder: any Decoder) throws {
+//        fatalError("init(from:) has not been implemented")
+//    }
+//    
+//    func colNames() -> [String]    {
+//        return cols.compactMap( { $0.colname() } )
+//    }
+//    
+//    override public func xml() -> String   { return "<Table />" }  // TODO
+//}

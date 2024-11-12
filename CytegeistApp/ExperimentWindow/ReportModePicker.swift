@@ -26,7 +26,7 @@ extension ReportMode {
         switch self {
             case .gating:      return ("Gating", "square.and.pencil")
             case .table:       return ("Table", "tablecells")
-            case .layout:      return ("Layout", "person.3.sequence.fill")
+            case .layout:      return ("Layout", "door.french.closed")  //"square.grid.3x3.topleft.filled"
         }
     }
     

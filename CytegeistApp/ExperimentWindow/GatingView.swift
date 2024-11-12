@@ -125,20 +125,20 @@ struct GatingView: View {
         //        renderer.scale = 0.25
         //        return renderer.nsImage
         //    }
-    
+   let split = "arrow.left.and.right.righttriangle.left.righttriangle.right.fill"
         //--------------------------------------------------------------------
     var icons = ["None","triangle.righthalf.fill","pencil","square.and.pencil","ellipsis.circle", "skew", "scribble" ]
     
     var  GatingTools: some View {
         HStack{
-            Spacer()
+            Spacer(minLength: 200)
             HStack{
                 Spacer()
-                Button("Range", systemImage: "pencil",  action: { curTool = GatingTool.range }).background(curTool == .range ? .yellow : .gray)
-                Button("Split", systemImage: "triangle.righthalf.fill",   action: {curTool = GatingTool.split })
-                Button("Radius", systemImage: "triangle.righthalf.fill",   action: {curTool = GatingTool.radius }).background(curTool == .radius ? .yellow : .gray)
-                Button("Rectangle", systemImage: "square.and.pencil",   action: { curTool = GatingTool.rectangle}).background(curTool == .rectangle ? .yellow : .gray)
-                Button("Ellipse", systemImage: "ellipsis.circle",   action: {curTool = GatingTool.ellipse }).background(curTool == .ellipse ? .yellow : .gray)
+                Button("Range", systemImage: "pencil",  action: { curTool = GatingTool.range }).background(curTool == .range ? .gray : .clear)
+                Button("Split", systemImage: split,   action: {curTool = GatingTool.split }).background(curTool == .split ? .gray : .clear)
+                Button("Radius", systemImage: "triangle.righthalf.fill",   action: {curTool = GatingTool.radius }).background(curTool == .radius ? .gray : .clear)
+                Button("Rectangle", systemImage: "square.and.pencil",   action: { curTool = GatingTool.rectangle}).background(curTool == .rectangle ? .gray : .clear)
+                Button("Ellipse", systemImage: "ellipsis.circle",   action: {curTool = GatingTool.ellipse }).background(curTool == .ellipse ? .gray : .clear)
                 Spacer(minLength: 50)
                     //                Button("Quads", systemImage: "person.crop.square",   action: { curTool = GatingTool.quads})
                     //                Button("Polygon", systemImage: "skew",   action: { curTool = GatingTool.polygon})

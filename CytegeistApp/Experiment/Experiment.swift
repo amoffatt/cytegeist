@@ -43,7 +43,7 @@ public class Experiment : Usable
     
     var panels = [CPanel]()
     var groups = [CGroup]()
-    var tables = [CGTableDef]()
+    var tables = [CGTable]()
     var layouts = [CGLayout]()
     var keywords = AttributeStore()
     var parameters = [String]()         // keep a set of union of all parameter names
@@ -77,8 +77,8 @@ public class Experiment : Usable
     }
   //--------------------------------------------------------------------------------
     
-    func addTable() -> CGTableDef {
-        let table = CGTableDef()
+    func addTable() -> CGTable {
+        let table = CGTable(isTemplate: true)
         table.name = table.name.generateUnique(existing: tables.map { $0.name })
         tables.append(table)
         return table
@@ -91,6 +91,11 @@ public class Experiment : Usable
         return layout
     }
     
+    func addLayout(layout: CGLayout, cells: [LayoutCell]) {
+        let layout = CGLayout(orig: layout, cells: cells)
+        layout.name = layout.name.generateUnique(existing: layouts.map { $0.name })
+        layouts.append(layout)
+    }
         //--------------------------------------------------------------------------------
     
     public var focusedSample: Sample? {
@@ -136,6 +141,19 @@ public class Experiment : Usable
         let len = s.count
         return "\(s.substring(offset: 0, length: 12))...\(s.substring(offset: len-12, length: 12))"
     }
+    
+    func doBatch(layout: CGLayout)
+    {
+        print("doBatch")
+        let activeSamples = getSamplesInCurrentGroup()
+        var cells = [LayoutCell]()
+        if !activeSamples.isEmpty {
+            for sample in activeSamples {
+                cells.append(LayoutCell(sample: sample,items: layout.items, val: ""))
+            }
+        }
+        addLayout(layout: layout, cells: cells)
+    }
   //--------------------------------------------------------------------------------
   // streaming
     
@@ -146,10 +164,7 @@ public class Experiment : Usable
         let groupStr = "<Groups>\n" + groups.compactMap { $0.xml() }.joined() + "</Groups>\n"
         let tableStr = "<Tables>\n" + tables.compactMap { $0.xml() }.joined() + "</Tables>\n"
         let layoutStr = "<Layouts>\n" + layouts.compactMap { $0.xml() }.joined() + "</Layouts>\n"
-        
-        
         let subs: String  = sampleStr + panelStr + groupStr + tableStr + layoutStr
-        //+ attributes + " >\n"
         let attr =  attributes()
         let keywords = keywords.xml()
         return "<Experiment " + attr + ">\n" + keywords + subs + "</Experiment>\n"
@@ -171,7 +186,7 @@ public class Experiment : Usable
     }
     
 
-        //--------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------------
     public convenience init(ws: TreeNode )
     {
         self.init()
@@ -208,7 +223,7 @@ public class Experiment : Usable
     func processTables(_ xml: TreeNode)
     {
         for node in xml.children where  node.value == "Table" {
-            tables.append(CGTableDef(node))
+            tables.append(CGTable(node))
         }
         print("Tables: ", tables.count)
     }
@@ -224,7 +239,6 @@ public class Experiment : Usable
     func processCytometers(_ xml: TreeNode)   {    }//IGNORE
         
    //--------------------------------------------------------------------------------
-//    @Transient
     struct Entry
     {
         var key: String
@@ -282,7 +296,7 @@ public class Experiment : Usable
     
     func isParameterKey(_ keyword: String) -> Bool
     {
-        keyword.starts(with: "$P")      // should check for a digit in 3rd position
+        keyword.starts(with: "$P")      //TODO  should check for a digit in 3rd position
     }
     func isExcludedKey(_ keyword: String) -> Bool
     {
