@@ -32,12 +32,12 @@ struct CytegeistApp: SwiftUI.App {
                     
                     CommandMenu("Chart") {
                         Button("Toggle Smoothing") {
-                            let smoothing = focusedAnalysisNode.graphDef.smoothing
-                            focusedAnalysisNode.graphDef.smoothing = smoothing == .off ? .low : .off
+                            let smoothing = focusedAnalysisNode.chartDef.smoothing
+                            focusedAnalysisNode.chartDef.smoothing = smoothing == .off ? .low : .off
                         }
                         Button("Toggle Contours") {
-                            let contours = focusedAnalysisNode.graphDef.contours
-                            focusedAnalysisNode.graphDef.contours = contours ? false : true
+                            let contours = focusedAnalysisNode.chartDef.contours
+                            focusedAnalysisNode.chartDef.contours = contours ? false : true
                         }
                     }
                  }
