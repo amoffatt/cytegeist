@@ -60,7 +60,7 @@ public struct LayoutBuilder: View {
 struct CGLayoutView: View {
     let experiment:Experiment
     let layoutModel:CGLayout
-
+    
     @State var editingItem:LayoutItem?
     @FocusState private var isFocused: Bool
     @State  var mouseLocation = CGPoint.zero
@@ -68,12 +68,11 @@ struct CGLayoutView: View {
     @State private var isMouseHoveringBackdrop = false
     @State var dragValue:DragGesture.Value? = nil
     @State var viewportSize:CGSize = .zero
-
-     //---------------------------------------------------------------------------
+    
+        //---------------------------------------------------------------------------
     var LayoutTools : some View {
-        
         HStack {
-            Spacer(minLength: 150)
+                //            Spacer(minLength: 150)
             Button("Add Text Block", systemImage: "t.square", action:  layoutModel.addTextItem  )
             Button("Add Table", systemImage: "tablecells", action:  layoutModel.addTable  )
             Button("Add Image", systemImage: "photo", action:  layoutModel.addImage  )
@@ -81,53 +80,112 @@ struct CGLayoutView: View {
             Button("Batch", systemImage: "hands.sparkles.fill", action: {   doBatch()   }).buttonBorderShape(.capsule)
         }
     }
-   
+    var BatchTools : some View {
+        HStack {
+            let nTiles = layoutModel.cells?.count ?? 0
+            let tiles = "tile" + ((nTiles != 1 ) ? "s" : "")
+            let str = "\(nTiles)" + tiles
+            Spacer(minLength: 20)
+            Text(str)
+            Button("Share", systemImage: "square.and.arrow.up", action: {} )
+            Button("Save", systemImage: "cylinder.split.1x2", action: {} )
+            Button("Animate", systemImage: "movieclapper", action:{} )
+            ItemSizeSlider(size: $size)
+        } 
+    }
+    var Footer : some View {
+        ZStack {
+            LayoutTools.opacity(layoutModel.isTemplate ? 1 : 0)
+            BatchTools.opacity(layoutModel.isTemplate ? 0 : 1)
+        }
+    }
+    
+    var Pasteboard : some View {
+        ZStack(alignment:.topLeading)   {
+            
+            layoutBackdrop()
+            ForEach(layoutModel.items) { item in
+                LayoutItemWrappper(parent: self, item:item, editableItem:$editingItem )
+            }
+            layoutOverlay()
+            
+        }
+    }
+    var BatchResult : some View {
+//        ScrollView {
+//            
+            LazyVGrid(columns: columns, spacing: 400) {
+                if let cells = layoutModel.cells {
+                    ForEach(cells) { cell in LayoutCellView(cell: cell) }
+                  }
+            }.padding(36)
+//        }
+    }
+    var columns: [GridItem] {
+        [GridItem(.adaptive(minimum: 400.0, maximum: 400.0), spacing: 0)]
+    }
+    struct LayoutCellView: View {
+        let cell: LayoutCell
+        
+        var body: some View {
+            ZStack {
+                let uRect = cell.unionRect()
+                Rectangle()
+                    .stroke(.gray.opacity(0.5), lineWidth: 1)
+                    .position(uRect.origin)
+                    .frame(width: uRect.width, height: uRect.height, alignment: .topLeading)
+//                    .background(Rectangle().fill(Color.clear)
+//                        .stroke(Color.gray, lineWidth: 1.6))
+//                ForEach(cell.items) { item in
+//                    Rectangle()
+//                        .stroke(.red, lineWidth: 2)
+//                        .position(item.position)
+//                        .frame(width:item.size.width, height: item.size.height, alignment: .topLeading)
+////                        .background(RoundedRectangle(cornerRadius: 4).fill(Color.blue.opacity(0.3))
+////                            .stroke(Color.primary, lineWidth: 1))
+//                }
+//
+            }
+        }
+    }
     var body: some View {
         
         let step =  shiftKey() ? 20 : optionKey() ? 1.0 : 5.0           //  PREFS
-            VStack {
-                 ZStack(alignment:.topLeading) {
-                     layoutBackdrop()
-                     ForEach(layoutModel.items) { item in
-                         LayoutItemWrappper(parent: self, item:item, editableItem:$editingItem )
-                     }
-                     layoutOverlay()
-
-                } .fillAvailableSpace()
-                    .scrollClipDisabled()
-                    .scaleEffect( $size.wrappedValue)
-                    .background(.blue.opacity(0.1))
-
-                HStack {
-                    Spacer()
-                    Button("Add Text Block", systemImage: "plus", action:  layoutModel.addTextItem  )
-                    Button("Add Table", systemImage: "plus", action:  layoutModel.addTable  )
-                    Button("Add Image", systemImage: "plus", action:  layoutModel.addImage  )
-                    ItemSizeSlider(size: $size)
-                }
-            } .fillAvailableSpace()
-                .focusable()
-                .focusEffectDisabled(true)
-                .onKeyPress(.return)        {  print("Return key pressed!");   return .handled    }
-                .onKeyPress(.deleteForward) {  layoutModel.deleteSelection();  return .handled}
-                .onKeyPress(.delete)        {  layoutModel.deleteSelection();   return .handled   }   // .delete DOESNT WORK
-                .onKeyPress(.init(Character(UnicodeScalar(127))))      {  layoutModel.deleteSelection();   return .handled   }   // .delete DOESNT WORK
-                .onArrowKeys { layoutModel.nudgeSelection(offset: $0 * step) }
+        VStack {
+            ZStack {
+                Pasteboard.opacity(layoutModel.isTemplate ? 1 : 0)
+                BatchResult.opacity(layoutModel.isTemplate ? 0 : 1)
+            }
+            .fillAvailableSpace()
+                .scrollClipDisabled()
+                .scaleEffect( $size.wrappedValue)
+                .background(.blue.opacity(0.1))
             
-                .background(.blue.opacity(0.1))       // Needed to received clicks
-                .dropDestination(for: AnalysisNode.self) { (items, position) in
-                    for item in items { newChartItem(node: item, position:position)  }
-                    return true
-                }
-                .onTapGesture {
-                    editingItem = nil
-                    layoutModel.deselectAll()
-                }
-                .onAppear {
-//                    layoutModel.addItem( LayoutItem(.text("new text item!")))
-                    isFocused = true
-                }
-                .toolbar { LayoutTools }
+            Footer
+            
+        } .fillAvailableSpace()
+            .focusable()
+            .focusEffectDisabled(true)
+            .onKeyPress(.return)        {  print("Return key pressed!");   return .handled  }
+            .onKeyPress(.deleteForward) {  layoutModel.deleteSelection();  return .handled  }
+            .onKeyPress(.delete)        {  layoutModel.deleteSelection();   return .handled }   // .delete DOESNT WORK
+            .onKeyPress(.init(Character(UnicodeScalar(127))))      {  layoutModel.deleteSelection();   return .handled   }   // .delete DOESNT WORK
+            .onArrowKeys { layoutModel.nudgeSelection(offset: $0 * step) }
+        
+            .background(.blue.opacity(0.1))       // Needed to received clicks
+            .dropDestination(for: AnalysisNode.self) { (items, position) in
+                for item in items { newChartItem(node: item, position:position)  }
+                return true
+            }
+            .onTapGesture {
+                editingItem = nil
+                layoutModel.deselectAll()
+            }
+            .onAppear {  isFocused = true      }
+            .toolbar {  HStack {
+                Spacer(minLength: 100)
+                LayoutTools.opacity(layoutModel.isTemplate ? 1 : 0) }
+            }
     }
     
     func layoutBackdrop() -> some View {
@@ -167,8 +225,19 @@ struct CGLayoutView: View {
     }
     func doBatch()
     {
-        experiment.doBatch(layout: layoutModel)
-    }
+        @State var selectedLayout:CGLayout? = nil
+             print("doBatch")
+        let activeSamples = experiment.getSamplesInCurrentGroup()
+            var cells = [LayoutCell]()
+            if !activeSamples.isEmpty {
+                for sample in activeSamples {
+                    cells.append(LayoutCell(sample: sample,items: layoutModel.items, val: ""))
+                }
+                selectedLayout = experiment.addLayout(layout: layoutModel, cells: cells)
+            }
+            
+      }
+    
    //------------------------------------------------------
     struct ItemSizeSlider: View {
         @Binding var size: CGFloat
@@ -223,7 +292,6 @@ struct CGLayoutView: View {
         .foregroundColor(.black)
         .allowsHitTesting(false)
     }
-
     
     var selectionDrag: some Gesture {
         DragGesture()

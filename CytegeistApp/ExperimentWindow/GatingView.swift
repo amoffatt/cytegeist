@@ -65,10 +65,10 @@ struct GatingView: View {
         }
     }
     
-    var chartDef: ChartDef? { population?.graphDef }
+    var chartDef: ChartDef? { population?.chartDef }
     var chartDefBinding: Binding<ChartDef?> {
         .init(get: { chartDef },
-              set: { if let chartDef = $0 { population?.graphDef = chartDef  }}
+              set: { if let chartDef = $0 { population?.chartDef = chartDef  }}
         )
     }
     
@@ -253,7 +253,7 @@ struct GatingView: View {
         let width = abs(start - end)
         return Rectangle()
             .stroke(style: StrokeStyle(lineWidth: 1.8, dash: [15, 5]))
-            .foregroundColor(.yellow)
+            .foregroundColor(.green)
             .opacity(DEBUG || (isDragging && (curTool == .range)) ? 1.0 : 0.0)
             .position(x: min(start, end), y: 0)
             .offset(x: width / 2, y: siz.height / 2 )
@@ -327,7 +327,7 @@ struct GatingView: View {
             .opacity((curTool == .range) ? 0.0 : 1.0)
         }
         .fillAvailableSpace()
-        .opacity((isDragging || outOfBounds) ? 0.0 : 0.3)
+        .opacity((isDragging || outOfBounds) ? 0.0 : 0.5)
         .onHover(perform: { hovering in isHovering = true  })
         .onContinuousHover { phase in
             switch phase {
@@ -392,12 +392,12 @@ struct GatingView: View {
     
   //--------------------------------------------------------------------
     func toggleContours() {
-        let contours = population!.graphDef.contours
-        population!.graphDef.contours = contours ? false : true
+        let contours = population!.chartDef.contours
+        population!.chartDef.contours = contours ? false : true
     }
     func toggleSmoothing() {
-        let smoothing = population!.graphDef.smoothing
-        population!.graphDef.smoothing = smoothing == .off ? .low : .off
+        let smoothing = population!.chartDef.smoothing
+        population!.chartDef.smoothing = smoothing == .off ? .low : .off
     }
     
    //--------------------------------------------------------------------
@@ -466,7 +466,7 @@ struct GatingView: View {
             print("No population selected")
             return
         }
-        confirmedGate.graphDef = population.graphDef     //TBD -  findUnusedParameters
+        confirmedGate.chartDef = population.chartDef     //TBD -  findUnusedParameters
         population.addChild(confirmedGate)
         experiment.selectedAnalysisNodes.nodes = [confirmedGate]
         self.confirmedGate = nil

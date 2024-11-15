@@ -24,7 +24,7 @@ struct Sidebar : View {
     @SceneStorage("expansionState1") var expansionState1 = ExpansionState()
     @SceneStorage("expansionState2") var expansionState2 = ExpansionState()
     @SceneStorage("expansionState3") var expansionState3 = ExpansionState()
-    @State var lastSelectedSection:ListSection = .current
+//    @State var lastSelectedSection:ListSection = .current
         //    @State var selection: SidebarSelection? = nil
     @State var showDeleteConfirmation: Bool = false
     @State var groupName = "My Group"

@@ -23,7 +23,7 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable, Custo
     public var name: String = ""
     public var description: String { name }
     public var sampleID: Sample.ID? = nil                      // nil except at the root node
-    public var graphDef = ChartDef()              // how this population wants to be shown
+    public var chartDef = ChartDef()              // how this population wants to be shown
     public var statistics =  [String : Double]()         // cache of stats with values
     public private(set) var children: [AnalysisNode] = []        // subpopulations dependent on us
     public var extraAttributes = AttributeStore()              // how this population wants to be shown
@@ -71,7 +71,7 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable, Custo
         self._id = try container.decode(UUID.self, forKey: ._id)
         self._name = try container.decode(String.self, forKey: ._name)
         self._sampleID = try container.decodeIfPresent(Sample.ID.self, forKey: ._sampleID)
-        self._graphDef = try container.decode(ChartDef.self, forKey: ._graphDef)
+        self._chartDef = try container.decode(ChartDef.self, forKey: ._chartDef)
         self._statistics = try container.decode([String : Double].self, forKey: ._statistics)
         self._children = try container.decode([AnalysisNode].self, forKey: ._children)
 //        self.__parent = try container.decodeIfPresent(AnalysisNode.self, forKey: .__parent)
@@ -101,7 +101,7 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable, Custo
         self.gate = original.gate
 //        self.description = original.description
         self.sampleID = original.sampleID
-        self.graphDef = original.graphDef
+        self.chartDef = original.chartDef
         self.statistics = [:]
         self.children = []
         self.parent = nil
@@ -115,15 +115,14 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable, Custo
     public func xml() -> String {
         let attributes = attributes()
         let head = "<Population " + attributes + ">\n"
-        let graph = graphDef.xml()
+        let graph = chartDef.xml()
         let gate = gate?.xml() ?? ""
-
-        
         var kids = "<Subpopulations>\n"
         for child in children {   kids.append(child.xml())    }
         let tail = "</Subpopulations>\n</Population>\n"
         return head + graph + gate + kids + tail
     }
+    
     public func attributes() -> String {
         let inv = invert ? "true" : "false"
         return "inverted=\(inv)"
@@ -136,7 +135,7 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable, Custo
 
         extraAttributes.dictionary.merge(fjxml.attrib.dictionary, uniquingKeysWith: +)
         if let gs = fjxml.findChild(value: "Graph")   {
-            graphDef = ChartDef(fjxml:gs)
+            chartDef = ChartDef(fjxml:gs)
         }
         if let g = fjxml.findChild(value: "Gate")  {
 //            gate = Gate(fjxml: g)

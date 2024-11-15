@@ -91,10 +91,11 @@ public class Experiment : Usable
         return layout
     }
     
-    func addLayout(layout: CGLayout, cells: [LayoutCell]) {
+    func addLayout(layout: CGLayout, cells: [LayoutCell])  -> CGLayout {
         let layout = CGLayout(orig: layout, cells: cells)
         layout.name = layout.name.generateUnique(existing: layouts.map { $0.name })
         layouts.append(layout)
+        return layout
     }
         //--------------------------------------------------------------------------------
     
@@ -141,19 +142,7 @@ public class Experiment : Usable
         let len = s.count
         return "\(s.substring(offset: 0, length: 12))...\(s.substring(offset: len-12, length: 12))"
     }
-    
-    func doBatch(layout: CGLayout)
-    {
-        print("doBatch")
-        let activeSamples = getSamplesInCurrentGroup()
-        var cells = [LayoutCell]()
-        if !activeSamples.isEmpty {
-            for sample in activeSamples {
-                cells.append(LayoutCell(sample: sample,items: layout.items, val: ""))
-            }
-        }
-        addLayout(layout: layout, cells: cells)
-    }
+ 
   //--------------------------------------------------------------------------------
   // streaming
     
@@ -173,15 +162,19 @@ public class Experiment : Usable
     public func attributes() -> String {
         return "name=\(self.name) version=\(self.version)"
     }
-    
+   //--------------------------------------------------------------------------------
+
+    // TODO
     public func parameterNames() -> [String] {
         return ["<All>", "FS", "SS", "FITC", "PE", "APC", "Cy7-APC"]
     }
-    public func populationNames() -> [String] {
+        // TODO
+   public func populationNames() -> [String] {
         return ["<All>", "All Cells", "Single", "Lymphocytes", "Monocytes", "T Cells", "CD3+", "CD4+", "CD8+"]
     }
     
-    public func keywordNames() -> [String] {
+        // TODO
+   public func keywordNames() -> [String] {
         return ["Date", "Tube Name", "Url", "Total", "Investigator", "Stains"]
     }
     
@@ -204,7 +197,6 @@ public class Experiment : Usable
         print ("Samples: \(samples.count) Groups: \(groups.count) Tables: \(tables.count) Layouts: \(layouts.count) ")
         
     }
-        //--------------------------------------------------------------------------------
 
     func processSamples(_ xml: TreeNode)
     {
@@ -239,6 +231,8 @@ public class Experiment : Usable
     func processCytometers(_ xml: TreeNode)   {    }//IGNORE
         
    //--------------------------------------------------------------------------------
+   //  Entry holds all of the values for a given keyword
+    
     struct Entry
     {
         var key: String

@@ -113,7 +113,7 @@ public struct TableBuilder : View
         if let selectedTable {
             return selectedTable.items.compactMap( { $0.colname() } )
         }
-        return ["age", "height", "weight"]
+        return ["age", "height", "weight"]          //TODO
     }
     //--------------------------------------
 

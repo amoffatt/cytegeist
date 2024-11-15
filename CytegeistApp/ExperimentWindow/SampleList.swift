@@ -6,12 +6,10 @@
 //
 
 import Foundation
+import SwiftUI
 import UniformTypeIdentifiers
 import CytegeistCore
 import CytegeistLibrary
-
-
-import SwiftUI
 
     // The sample table view for an experiment.
 extension SampleList
@@ -19,8 +17,6 @@ extension SampleList
         // access to the samples with filter and sort applied
     var filteredSamples: [Sample] {
         var samples  = experiment.samples
-//        print (samples.count)
-        
         if !searchText.isEmpty {
             samples = samples.filter {
                 for column in columns {
@@ -31,9 +27,7 @@ extension SampleList
                 return false
             }
         }
-        
-        return samples
-            .sorted(using: sortOrder)
+        return samples.sorted(using: sortOrder)
     }
     
 }
@@ -48,7 +42,12 @@ extension Sample {
     var eventCountString: String { String(eventCount) }
 }
 
-
+public class FCSKeys {
+    public static let
+    fil = "$FIL", btim = "$BTIM",
+    cyt = "$CYT", sys = "$SYS", src = "$SRC",
+    setup = "SETUP", creator = "$Creator"
+}
 
 struct SampleList: View {
     var experiment: Experiment
@@ -100,7 +99,8 @@ struct SampleList: View {
 //            SampleListModePicker(mode: $mode)
         }
     }
-    
+
+
     var table: some View
     {
         @Bindable var experiment = experiment
@@ -228,7 +228,7 @@ struct SampleList: View {
             }
         }
     }
-    
+
     public func readFCSFile(_ url: URL) async
     {
         if  url.isDirectory
@@ -292,21 +292,21 @@ struct SampleList: View {
             fileInfo = []
             var gotFile = false
             
-            for itemProvider in info.itemProviders(for: ["public.file-url"]) {
-                itemProvider.loadItem(forTypeIdentifier: "public.file-url", options: nil) { (item, error) in
-                    if let data = item as? Data {
-                        if let url = URL(dataRepresentation: data, relativeTo: nil) {
-                            let theInfo = "File: \(url.lastPathComponent) \nPath: \(url.path)\n"
-                            let theSizes = FileInfo.reportSizes(url: url)
-                            DispatchQueue.main.async {
-                                fileInfo.append(theInfo + theSizes)
-                                process(url)
-                                gotFile = true
-                            }
-                        }
-                    }
-                }
-            }
+//            for itemProvider in info.itemProviders(for: ["public.file-url"]) {
+//                itemProvider.loadItem(forTypeIdentifier: "public.file-url", options: nil) { (item, error) in
+//                    if let data = item as? Data {
+//                        if let url = URL(dataRepresentation: data, relativeTo: nil) {
+//                            let theInfo = "File: \(url.lastPathComponent) \nPath: \(url.path)\n"
+//                            let theSizes = FileInfo.reportSizes(url: url)
+//                            DispatchQueue.main.async {
+//                                fileInfo.append(theInfo  + theSizes)        //
+//                                process(url)
+//                                gotFile = true
+//                            }
+//                        }
+//                    }
+//                }
+//            }
             return gotFile
         }
  
@@ -314,7 +314,7 @@ struct SampleList: View {
        {
            let path = url.path
            print (path)
-           if url.isDirectory
+           if !url.isFileURL
            {
               let resourceKeys : [URLResourceKey] = [.creationDateKey, .isDirectoryKey]
               let enumerator = FileManager.default.enumerator(at: url,

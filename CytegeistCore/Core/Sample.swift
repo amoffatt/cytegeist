@@ -82,19 +82,10 @@ public class Sample : Identifiable, Codable, Hashable
 //        fatalError("AM: Implement decoding")
 }
     
-        //-------------------------------------------------------------------------
-    public init(
-        ref: SampleRef
-    ) {
+    //-------------------------------------------------------------------------
+    public init(ref: SampleRef) {
         self.ref = ref
         print("Sample \(ref)")
-    }
- 
-    public func xml() -> String {
-        if let ref {
-            return "\t<Sample name=\(ref.filename) url=\(ref.url) />\n"
-        }
-        return ""
     }
     
     public init( xml: TreeNode )
@@ -102,6 +93,14 @@ public class Sample : Identifiable, Codable, Hashable
         if let url = xml.attrib.dictionary["url"] {
             self.ref = SampleRef(url: URL(string: url)!)
         }
+    }
+   //-------------------------------------------------------------------------
+
+    public func xml() -> String {
+        if let ref {
+            return "\t<Sample name=\(ref.filename) url=\(ref.url) />\n"
+        }
+        return ""
     }
     private func handleError(_ error:SampleError) {
         print("Error: cannot load sample: \(error.localizedDescription)")

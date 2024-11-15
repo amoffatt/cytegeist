@@ -21,6 +21,23 @@ public struct LayoutCell : Codable, Hashable, Identifiable
         self.items = items
         self.iteratorValue = val
     }
+    
+    func unionRect() -> CGRect
+    {
+        var xMin  =  0.0, xMax = 0.0, yMin = 0.0, yMax = 0.0
+        for item in items {
+           let r = item.getRect()
+            xMin = min(xMin, r.minX)
+            xMax = max(xMax, r.maxX)
+            yMin = min(yMin, r.minY)
+            yMax = max(yMax, r.maxY)
+        }
+        return CGRect(x: xMin, y: yMin, width: xMax - xMin, height: yMax - yMin)
+    }
+    
+    
+    
+    
 }
 
 @Observable
@@ -184,6 +201,7 @@ public enum ELayoutType : Codable {
     case chart(ChartDef?)
     case table
     case image
+    case group
     
     public func xml() -> String
     {
@@ -192,6 +210,7 @@ public enum ELayoutType : Codable {
             case .chart: return "chart"
             case .table: return "table"
             case .image: return "image"
+            case .group: return "group"
         }
     }
 }
@@ -258,6 +277,9 @@ public class LayoutItem: Codable, Identifiable, Equatable
         LayoutItem(self.type, node: self.node, position: self.position, size: self.size)
     }
     
+    public func getRect() -> CGRect {
+        return CGRect(origin: position, size: size)
+    }
 
     public func xml() -> String {
         return "<LayoutItem " + attributes() + " >\n" +

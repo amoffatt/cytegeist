@@ -28,6 +28,7 @@ struct LayoutItemWrappper: View, Identifiable {
                 case .chart:  CChartView(parent: parent, item: item, editing: editing).background(.green.opacity(0.2))
                 case .table:  CTableView(parent: parent, item: item, editing: editing).background(.blue.opacity(0.2))
                 case .image:  CImageView(parent: parent, item: item, editing: editing).background(.brown.opacity(0.2))
+                case .group:  CGroupView(parent: parent, item: item, editing: editing).background(.pink.opacity(0.2))
             }
         }
         .allowsHitTesting(true)
@@ -97,6 +98,7 @@ struct CTextView : View {
 }
 //--------------------------------------------------------------------
 // CHART
+//        let bindableText:Binding<String> = .init(get: { item.value }, set: { item.value = $0 } )
 
 struct CChartView : View {
     var parent: CGLayoutView
@@ -107,14 +109,12 @@ struct CChartView : View {
     
     var body: some View {
         let chartDefBinding:Binding<ChartDef?> = .init {
-            item.node?.graphDef
+            item.node?.chartDef
         } set: {
             if let chartDef = $0 {
-                item.node?.graphDef = chartDef
+                item.node?.chartDef = chartDef
             }
         }
-            //        let bindableText:Binding<String> = .init(get: { item.value }, set: { item.value = $0 } )
-//        let sampleRef = SampleRef(url: DemoData.facsDivaSample0!)
         
         VStack {
             ChartView(population: item.node, config: chartDefBinding, editable: true)
@@ -141,7 +141,10 @@ struct CImageView : View {
     var body: some View {
         VStack {
             Text("Image goes here")
-        }
+        }.frame(width: 100, height: 100)
+        .padding(10)
+        .onTapGesture {   parent.layoutModel.selectItem( item)    }
+        .border(.red, width: item.selected ? 3.0 : 0.0 )
         .onAppear(perform:  {   item.position = CGPoint(x: 300, y: 200) })
         
     }
@@ -195,5 +198,24 @@ struct CTableView : View {
 }
 
  
-    ///-------------------------------------------------------------------------
+ 
+    //--------------------------------------------------------------------
+    // GROUP
+
+struct CGroupView : View {
+    var parent: CGLayoutView
+    let item: LayoutItem
+    let editing: Bool
+    
+    var body: some View {
+        VStack {
+            Text("Group goes here")
+        }.frame(width: 100, height: 100)
+            .padding(10)
+            .onTapGesture {   parent.layoutModel.selectItem( item)    }
+            .border(.red, width: item.selected ? 3.0 : 0.0 )
+            .onAppear(perform:  {   item.position = CGPoint(x: 300, y: 200) })
+    }
+}
+///-------------------------------------------------------------------------
 
