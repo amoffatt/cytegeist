@@ -53,6 +53,16 @@ public struct LayoutBuilder: View {
     
   
 }
+struct Placeholder : Shape {
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        path.move(to: CGPoint(x: rect.minX, y: rect.minY))
+        path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
+        path.move(to: CGPoint(x: rect.minX, y: rect.maxY))
+        path.addLine(to: CGPoint(x: rect.maxX, y: rect.minY))
+        return path
+    }
+}
 //---------------------------------------------------------------------------
 // each tab has a pasteboard an array of layout items
 
@@ -113,13 +123,16 @@ struct CGLayoutView: View {
     }
     var BatchResult : some View {
 //        ScrollView {
-//            
-            LazyVGrid(columns: columns, spacing: 400) {
-                if let cells = layoutModel.cells {
+//       
+        VStack  {
+            if let cells = layoutModel.cells {
+//                LazyVGrid(columns: columns, spacing: cells.first?.width() ?? 0) {
+                    
                     ForEach(cells) { cell in LayoutCellView(cell: cell) }
-                  }
-            }.padding(36)
-//        }
+//                }
+            }
+            else {  Text("no cell") }
+        }
     }
     var columns: [GridItem] {
         [GridItem(.adaptive(minimum: 400.0, maximum: 400.0), spacing: 0)]
@@ -128,26 +141,42 @@ struct CGLayoutView: View {
         let cell: LayoutCell
         
         var body: some View {
-            ZStack {
-                let uRect = cell.unionRect()
-                Rectangle()
-                    .stroke(.gray.opacity(0.5), lineWidth: 1)
-                    .position(uRect.origin)
-                    .frame(width: uRect.width, height: uRect.height, alignment: .topLeading)
-//                    .background(Rectangle().fill(Color.clear)
-//                        .stroke(Color.gray, lineWidth: 1.6))
-//                ForEach(cell.items) { item in
-//                    Rectangle()
-//                        .stroke(.red, lineWidth: 2)
-//                        .position(item.position)
-//                        .frame(width:item.size.width, height: item.size.height, alignment: .topLeading)
-////                        .background(RoundedRectangle(cornerRadius: 4).fill(Color.blue.opacity(0.3))
-////                            .stroke(Color.primary, lineWidth: 1))
-//                }
-//
+            ZStack(alignment: .topLeading) {
+                let uRect = cell.rect
+
+                ZStack {
+                Rectangle().stroke(.green.opacity(0.8), lineWidth: 2)
+                      Placeholder().stroke(.green.opacity(0.8), lineWidth: 2)
+                    VStack {
+                    Spacer()
+                    Text(uRect.toString()).fontWeight(.light)
+                }
+                
+                }.frame(width: uRect.width, height: uRect.height, alignment: .topLeading)
+                 .position(uRect.origin)
+  
+                ForEach(cell.items) { item in
+                    ZStack() {
+                        Rectangle()
+                            .stroke(.gray.opacity(0.8), lineWidth: 2)
+                         Placeholder().stroke(.gray.opacity(0.8), lineWidth: 2)
+                        VStack {
+                            Text(item.type.xml()).frame(alignment: .top)
+                            Spacer()
+                            Text(item.getRect().toString()).fontWeight(.light).font(.system(size: 8))
+                        }
+                     }
+                    .frame(width:item.size.width, height: item.size.height, alignment: .topLeading)
+                    .position(item.position)
+                    .border(.blue.opacity(0.8))
+
+                }
             }
         }
     }
+
+   
+    
     var body: some View {
         
         let step =  shiftKey() ? 20 : optionKey() ? 1.0 : 5.0           //  PREFS

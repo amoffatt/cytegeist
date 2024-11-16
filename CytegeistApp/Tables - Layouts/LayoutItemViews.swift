@@ -89,6 +89,7 @@ struct CTextView : View {
         }   .padding()
             //            .onTapGesture {  parent.selectItem( item)    }
             .font(.headline)
+            .frame(width: item.size.width, height: item.size.height)
             .fontWidth(Font.Width(36))
             .foregroundColor(.white)
             .shadow(color: .black, radius: 3)
@@ -121,7 +122,7 @@ struct CChartView : View {
                 .padding(4)
                 .background(.black.opacity(0.1))
                 .cornerRadius(8)
-        }  .frame(width: 300, height: 300)
+        }  .frame(width: item.size.width, height: item.size.height)
             .padding()
             .onTapGesture {   parent.layoutModel.selectItem( item)    }
             .border(.red, width: item.selected ? 3.0 : 0.0 )
@@ -141,7 +142,7 @@ struct CImageView : View {
     var body: some View {
         VStack {
             Text("Image goes here")
-        }.frame(width: 100, height: 100)
+        }.frame(width: item.size.width, height: item.size.height)
         .padding(10)
         .onTapGesture {   parent.layoutModel.selectItem( item)    }
         .border(.red, width: item.selected ? 3.0 : 0.0 )
@@ -172,7 +173,7 @@ struct CTableView : View {
         rows:
             {
                 ForEach(users) { user in TableRow(user)  }
-            }.frame(width: 180, height: 120)
+            }.frame(width: item.size.width, height: item.size.height)
                 .border(.blue)
                 .fontWidth(Font.Width(8))
                 .allowsHitTesting(false)
@@ -210,7 +211,7 @@ struct CGroupView : View {
     var body: some View {
         VStack {
             Text("Group goes here")
-        }.frame(width: 100, height: 100)
+        }.frame(width: item.size.width, height: item.size.height)
             .padding(10)
             .onTapGesture {   parent.layoutModel.selectItem( item)    }
             .border(.red, width: item.selected ? 3.0 : 0.0 )

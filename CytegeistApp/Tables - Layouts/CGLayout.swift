@@ -14,38 +14,31 @@ public struct LayoutCell : Codable, Hashable, Identifiable
     public func hash(into hasher: inout Hasher) {     hasher.combine(id)   }
     let sample: Sample
     var iteratorValue: String = ""
-    var items: [LayoutItem]
+    let items: [LayoutItem]
+    let rect: CGRect
     public init (sample: Sample, items: [LayoutItem], val: String = "")
     {
         self.sample =  sample
         self.items = items
         self.iteratorValue = val
-    }
-    
-    func unionRect() -> CGRect
-    {
-        var xMin  =  0.0, xMax = 0.0, yMin = 0.0, yMax = 0.0
+
+        var xMin  =  10000.0, xMax = 0.0, yMin = 10000.0, yMax = 0.0
         for item in items {
-           let r = item.getRect()
+            let r = item.getRect()
             xMin = min(xMin, r.minX)
             xMax = max(xMax, r.maxX)
             yMin = min(yMin, r.minY)
             yMax = max(yMax, r.maxY)
         }
-        return CGRect(x: xMin, y: yMin, width: xMax - xMin, height: yMax - yMin)
+        rect =  CGRect(x: xMin, y: yMin, width: xMax - xMin, height: yMax - yMin)
     }
-    
-    
-    
+    func width() -> CGFloat    {   rect.width    }   
     
 }
 
 @Observable
 class CGLayout : Codable, Hashable, Identifiable
 {
- 
-
-    
     var id = UUID()
     var name = "Untitled Layout"
     var items = [LayoutItem]()
@@ -99,7 +92,7 @@ class CGLayout : Codable, Hashable, Identifiable
     
     public func newTable(name: String, position:CGPoint)
     {
-        let item = LayoutItem(.table, position: position)
+        let item = LayoutItem(.table, position: position, size: CGSize(width: 220, height: 120))
         item.selected = true
         addItem(item)
     }
@@ -107,12 +100,19 @@ class CGLayout : Codable, Hashable, Identifiable
     public func addImage() -> ()
     {
         if !optionKey() { deselectAll()  }
-        newImage(name: "some image", position: CGPoint.zero)
+        newImage(name: "some image", position: CGPoint.zero, size: CGSize(width: 150, height: 180))
     }
     
-    public func newImage(name: String, position:CGPoint)
+    public func group() -> ()
     {
-        let item = LayoutItem(.image, position: position)
+        print("TODO group")
+//        if !optionKey() { deselectAll()  }
+//        newImage(name: "some image", position: CGPoint.zero)
+    }
+    
+    public func newImage(name: String, position:CGPoint, size: CGSize)
+    {
+        let item = LayoutItem(.image, position: position, size: size)
         item.selected = true
         addItem(item)
     }
@@ -214,7 +214,7 @@ public enum ELayoutType : Codable {
         }
     }
 }
-
+//Model
 @Observable
 public class LayoutItem: Codable, Identifiable, Equatable
 {
@@ -280,10 +280,10 @@ public class LayoutItem: Codable, Identifiable, Equatable
     public func getRect() -> CGRect {
         return CGRect(origin: position, size: size)
     }
-
+    public func string() -> String {  return type.xml()    }
     public func xml() -> String {
         return "<LayoutItem " + attributes() + " >\n" +
-        position.xml() + size.xml() +
+        position.xml() + size.xml() +  // + type specific content
         "</LayoutItem>\n"
         
     }

@@ -200,7 +200,8 @@ struct SampleList: View {
                     Buttons.toolbar("Dictionary", Icon("pencil")) {
                         experiment.buildVaribleKeyDictionary()
                     }
-                    Buttons.toolbar("XML", Icon("cloud")) {
+//                    Buttons.toolbar("Clear", Icon("delete.left")) { doClear() }
+                  Buttons.toolbar("XML", Icon("cloud")) {
                         print(experiment.xml())
                     }
                 } }
@@ -208,8 +209,7 @@ struct SampleList: View {
         }
 
     }
-    
-    
+
     func onFCSPicked(_result: Result<[URL], any Error>)
     {
         Task {
