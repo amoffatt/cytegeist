@@ -27,8 +27,8 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable, Custo
     public var statistics =  [String : Double]()         // cache of stats with values
     public private(set) var children: [AnalysisNode] = []        // subpopulations dependent on us
     public var extraAttributes = AttributeStore()              // how this population wants to be shown
-
-    // TODO parent should not be encoded/decoded. Value is set when parent decodes its children
+    
+        // TODO parent should not be encoded/decoded. Value is set when parent decodes its children
     @CodableIgnored
     @ObservationIgnored
     private var _parent: AnalysisNode?
@@ -42,19 +42,17 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable, Custo
         }
     }
         //  these fields are only applicable to populations
-    @ObservationIgnored
-    @CodableIgnored
     public var gate: AnyGate? = nil                      // the predicate to filter ones parent
-//    @ObservationIgnored
-//    @CodableIgnored
-//    public var parentImage: NSImage? = nil            // a picture of parent pop showing our gate
+                                                         //    @ObservationIgnored
+                                                         //    @CodableIgnored
+                                                         //    public var parentImage: NSImage? = nil            // a picture of parent pop showing our gate
     @ObservationIgnored
     @CodableIgnored
     public var color: Color? = nil
     public var opacity: Double = 1.0
     public var labelOffset: CGPoint = .zero
     public var invert: Bool = false
-//    public var isExpanded: Bool = true
+        //    public var isExpanded: Bool = true
     
     
         //--------------------------------------------------------
@@ -66,20 +64,34 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable, Custo
         //--------------------------------------------------------
     public init() {    }
     
+    public func encode(to encoder: any Encoder) throws {
+        var container = encoder.container(keyedBy: Self.CodingKeys.self)
+        try container.encode(_id, forKey: .id)
+        try container.encode(_name, forKey: .name)
+        try container.encode(_sampleID, forKey: .sampleID)
+        try container.encode(_chartDef, forKey: .chartDef)
+//        try container.encode(_statistics, forKey: .id)
+//        try container.encode(_children, forKey: .id)
+    }
+    
     public required init(from decoder: any Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        self._id = try container.decode(UUID.self, forKey: ._id)
-        self._name = try container.decode(String.self, forKey: ._name)
-        self._sampleID = try container.decodeIfPresent(Sample.ID.self, forKey: ._sampleID)
-        self._chartDef = try container.decode(ChartDef.self, forKey: ._chartDef)
-        self._statistics = try container.decode([String : Double].self, forKey: ._statistics)
-        self._children = try container.decode([AnalysisNode].self, forKey: ._children)
-//        self.__parent = try container.decodeIfPresent(AnalysisNode.self, forKey: .__parent)
-        self._gate = try container.decode(CodableIgnored<AnyGate>.self, forKey: .gate)
-        self._color = try container.decode(CodableIgnored<Color>.self, forKey: .color)
-        self._opacity = try container.decode(Double.self, forKey: ._opacity)
-        self._labelOffset = try container.decode(CGPoint.self, forKey: ._labelOffset)
-        self._invert = try container.decode(Bool.self, forKey: ._invert)
+        let container = try decoder.container(keyedBy: Self.CodingKeys.self)
+        self._id = try container.decode(UUID.self, forKey: .id)
+        self._name = try container.decode(String.self, forKey: .name)
+        self._sampleID = try container.decodeIfPresent(Sample.ID.self, forKey: .sampleID)
+        self._chartDef = try container.decode(ChartDef.self, forKey: .chartDef)
+//        self._statistics = try container.decode([String : Double].self, forKey: ._statistics)
+//        self._children = try container.decode([AnalysisNode].self, forKey: ._children)
+//            //        self.__parent = try container.decodeIfPresent(AnalysisNode.self, forKey: .__parent)
+//            //        self._gate = try container.decode(CodableIgnored<AnyGate>.self, forKey: .gate)
+//        self._color = try container.decode(CodableIgnored<Color>.self, forKey: .color)
+//        self._opacity = try container.decode(Double.self, forKey: ._opacity)
+//        self._labelOffset = try container.decode(CGPoint.self, forKey: ._labelOffset)
+//        self._invert = try container.decode(Bool.self, forKey: ._invert)
+    }
+    
+    enum CodingKeys : CodingKey {
+        case id, name, sampleID, chartDef
     }
     
     public init(children: [AnalysisNode]? = nil)  {

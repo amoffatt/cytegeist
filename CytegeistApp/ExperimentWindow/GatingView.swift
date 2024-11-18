@@ -73,17 +73,18 @@ struct GatingView: View {
     }
     
     func chart(_ meta: FCSMetadata) -> some View {
-        
-        return ChartView(population: population, config: chartDefBinding) { size in
+        return ChartView(population: population, config: chartDefBinding, focusedItem: $focusedItem) { size in
             ZStack(alignment: .topLeading) {
                 gateRadius(siz: size)
                 gateRange(siz: size)
                 gateRect(siz: size)
                 gateEllipse(siz: size)
-                crosshair(location: mouseLocation, size: size )
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .gesture(makeDragGesture(areaSize: size))
-                    .gesture(makeTapGesture())
+//                if population?.visibleChildren(batchContext, chartDef!).count == 0 {
+                    crosshair(location: mouseLocation, size: size )
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .simultaneousGesture(makeDragGesture(areaSize: size))
+                        .simultaneousGesture(makeTapGesture())
+//                }
             }
         }
         .padding(40)
@@ -225,7 +226,8 @@ struct GatingView: View {
     
     func makeTapGesture() -> some Gesture {
         TapGesture()
-            .onEnded {  focusedItem = nil  }
+            .onEnded {
+                focusedItem = nil  }
     }
  
     

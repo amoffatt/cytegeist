@@ -31,8 +31,9 @@ public struct LayoutCell : Codable, Hashable, Identifiable
             yMax = max(yMax, r.maxY)
         }
         rect =  CGRect(x: xMin, y: yMin, width: xMax - xMin, height: yMax - yMin)
+        self.items.forEach { $0.position = $0.position - rect.origin }
     }
-    func width() -> CGFloat    {   rect.width    }   
+    func width() -> CGFloat    {   rect.width    }
     
 }
 
@@ -223,6 +224,7 @@ public class LayoutItem: Codable, Identifiable, Equatable
     var size: CGSize = .zero
     var position: CGPoint = .zero
     var tmpOffset: CGPoint = .zero
+    var currentCenterPosition:CGPoint { position + tmpOffset + size / 2 }
     var type: ELayoutType
         //    var value: String = ""              //Text
         //    var xAxis: AxisNormalizer?          //Chart

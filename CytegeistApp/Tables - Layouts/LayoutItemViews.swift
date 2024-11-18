@@ -20,20 +20,32 @@ struct LayoutItemWrappper: View, Identifiable {
     
     var body: some View
     {
-        let displayOffset = item.position + item.tmpOffset
         let editing = editableItem.wrappedValue == item
-        VStack {
-            switch item.type {
-                case .text:   CTextView(parent: parent, item: item, editing: editing).background(.purple.opacity(0.3))
-                case .chart:  CChartView(parent: parent, item: item, editing: editing).background(.green.opacity(0.2))
-                case .table:  CTableView(parent: parent, item: item, editing: editing).background(.blue.opacity(0.2))
-                case .image:  CImageView(parent: parent, item: item, editing: editing).background(.brown.opacity(0.2))
-                case .group:  CGroupView(parent: parent, item: item, editing: editing).background(.pink.opacity(0.2))
+        ZStack(alignment:.topLeading) {
+            VStack {
+                switch item.type {
+                    case .text:   CTextView(parent: parent, item: item, editing: editing).background(.purple.opacity(0.3))
+                    case .chart:  CChartView(parent: parent, item: item, editing: editing).background(.green.opacity(0.2))
+                    case .table:  CTableView(parent: parent, item: item, editing: editing).background(.blue.opacity(0.2))
+                    case .image:  CImageView(parent: parent, item: item, editing: editing).background(.brown.opacity(0.2))
+                    case .group:  CGroupView(parent: parent, item: item, editing: editing).background(.pink.opacity(0.2))
+                }
+            }
+            .shadow(color: .black, radius: 3)
+            .border(.red, width: item.selected ? 3.0 : 0.0 )
+
+            GateControlZone("lower-right", position: item.size.asPoint) { position, ended in
+                print("Move to position: \(position)")
+                item.size = position.asSize
+            } handle: { state in
+                CircleHandle(solid:false)
             }
         }
+        .environment(\.isEditing, item.selected)
         .allowsHitTesting(true)
-        .position(displayOffset)
-        .padding(15)
+        .frame(width: item.size.width, height: item.size.height)
+        .position(item.currentCenterPosition)
+//        .padding(15)
         .gesture(dragSelectedItems)
         .onTapGesture(count:2) {    self.editableItem.wrappedValue = item        }
         .onTapGesture(count:1) {     parent.layoutModel.selectItem(item)      }
@@ -86,14 +98,12 @@ struct CTextView : View {
             } else {
                 Text(bindableText.wrappedValue)
             }
-        }   .padding()
+        }
             //            .onTapGesture {  parent.selectItem( item)    }
+            .fillAvailableSpace()
             .font(.headline)
-            .frame(width: item.size.width, height: item.size.height)
             .fontWidth(Font.Width(36))
             .foregroundColor(.white)
-            .shadow(color: .black, radius: 3)
-            .border(.red, width: item.selected ? 3.0 : 0.0 )
         
     }
 }
@@ -118,14 +128,12 @@ struct CChartView : View {
         }
         
         VStack {
-            ChartView(population: item.node, config: chartDefBinding, editable: true)
+            ChartView(population: item.node, config: chartDefBinding, editable: true, focusedItem: nil)
                 .padding(4)
                 .background(.black.opacity(0.1))
                 .cornerRadius(8)
-        }  .frame(width: item.size.width, height: item.size.height)
-            .padding()
+        }
             .onTapGesture {   parent.layoutModel.selectItem( item)    }
-            .border(.red, width: item.selected ? 3.0 : 0.0 )
             .onAppear(perform:  {   item.size = CGSize(width: 120, height: 100) })
         
     }
@@ -142,10 +150,8 @@ struct CImageView : View {
     var body: some View {
         VStack {
             Text("Image goes here")
-        }.frame(width: item.size.width, height: item.size.height)
-        .padding(10)
+        }
         .onTapGesture {   parent.layoutModel.selectItem( item)    }
-        .border(.red, width: item.selected ? 3.0 : 0.0 )
         .onAppear(perform:  {   item.position = CGPoint(x: 300, y: 200) })
         
     }
@@ -173,12 +179,10 @@ struct CTableView : View {
         rows:
             {
                 ForEach(users) { user in TableRow(user)  }
-            }.frame(width: item.size.width, height: item.size.height)
-                .border(.blue)
+            }
                 .fontWidth(Font.Width(8))
                 .allowsHitTesting(false)
                 .clipShape(Rectangle())
-                .border(.red, width: item.selected ? 3.0 : 0.0 )
         }
         .onAppear(perform:  {   item.position = CGPoint(x: 100, y: 200) })
     }
@@ -211,10 +215,8 @@ struct CGroupView : View {
     var body: some View {
         VStack {
             Text("Group goes here")
-        }.frame(width: item.size.width, height: item.size.height)
-            .padding(10)
+        }
             .onTapGesture {   parent.layoutModel.selectItem( item)    }
-            .border(.red, width: item.selected ? 3.0 : 0.0 )
             .onAppear(perform:  {   item.position = CGPoint(x: 300, y: 200) })
     }
 }

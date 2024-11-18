@@ -37,7 +37,7 @@ public struct LayoutBuilder: View {
             
             VStack {
                 if let selectedLayout {
-                    CGLayoutView(experiment: experiment, layoutModel: selectedLayout)
+                    CGLayoutView(experiment: experiment, layoutModel: selectedLayout, selectedLayout:$selectedLayout)
                 } else {
                     Text("Select a Layout")
                 }
@@ -78,6 +78,8 @@ struct CGLayoutView: View {
     @State private var isMouseHoveringBackdrop = false
     @State var dragValue:DragGesture.Value? = nil
     @State var viewportSize:CGSize = .zero
+    
+    @Binding var selectedLayout:CGLayout?
     
         //---------------------------------------------------------------------------
     var LayoutTools : some View {
@@ -146,14 +148,15 @@ struct CGLayoutView: View {
 
                 ZStack {
                 Rectangle().stroke(.green.opacity(0.8), lineWidth: 2)
-                      Placeholder().stroke(.green.opacity(0.8), lineWidth: 2)
+//                      Placeholder().stroke(.green.opacity(0.8), lineWidth: 2)
                     VStack {
                     Spacer()
                     Text(uRect.toString()).fontWeight(.light)
                 }
                 
                 }.frame(width: uRect.width, height: uRect.height, alignment: .topLeading)
-                 .position(uRect.origin)
+//                 .position(uRect.origin)
+                 .border(.green.opacity(0.8))
   
                 ForEach(cell.items) { item in
                     ZStack() {
@@ -167,8 +170,8 @@ struct CGLayoutView: View {
                         }
                      }
                     .frame(width:item.size.width, height: item.size.height, alignment: .topLeading)
-                    .position(item.position)
-                    .border(.blue.opacity(0.8))
+                    .position(item.currentCenterPosition)
+                    .border(.pink.opacity(0.8))
 
                 }
             }
@@ -254,13 +257,13 @@ struct CGLayoutView: View {
     }
     func doBatch()
     {
-        @State var selectedLayout:CGLayout? = nil
              print("doBatch")
         let activeSamples = experiment.getSamplesInCurrentGroup()
             var cells = [LayoutCell]()
             if !activeSamples.isEmpty {
                 for sample in activeSamples {
-                    cells.append(LayoutCell(sample: sample,items: layoutModel.items, val: ""))
+                    let items = layoutModel.items.map { $0.clone() }
+                    cells.append(LayoutCell(sample: sample,items: items, val: ""))
                 }
                 selectedLayout = experiment.addLayout(layout: layoutModel, cells: cells)
             }

@@ -31,6 +31,9 @@ public struct ChartView<Overlay>: View where Overlay:View {
     let editable:Bool
     let _chartOverlay:(CGSize) -> Overlay
     
+    let focusedItem:Binding<ChartAnnotation?>?
+    
+    
     @State var sampleQuery: APIQuery<FCSFile>? = nil
     @State fileprivate var chartQuery: ChartDataRequest? = nil
     @State var chartDims: Tuple2<CDimension?> = .init(nil, nil)
@@ -38,10 +41,11 @@ public struct ChartView<Overlay>: View where Overlay:View {
     @State var chartSize:CGSize = CGSize(1)
     
     
-    public init(population: AnalysisNode?, config:Binding<ChartDef?>, editable:Bool = true, overlay:@escaping (CGSize) -> Overlay = { _ in EmptyView() }){
+    public init(population: AnalysisNode?, config:Binding<ChartDef?>, editable:Bool = true, focusedItem:Binding<ChartAnnotation?>?, overlay:@escaping (CGSize) -> Overlay = { _ in EmptyView() }){
         self.population = population
         self.config = config
         self.editable = editable
+        self.focusedItem = focusedItem
         self._chartOverlay = overlay
     }
     
@@ -141,16 +145,20 @@ public struct ChartView<Overlay>: View where Overlay:View {
             GeometryReader { proxy in
                 let size = proxy.size
                 ZStack(alignment:.topLeading) {
+                    _chartOverlay(size)
                     if let population, let chartDef = config.wrappedValue {
                         ForEach(population.visibleChildren(batchContext, chartDef), id:\.self) { child in
-                            // AM DEBUGGING
-                            let editing = false //child == focusedItem
+                            let editing = child == focusedItem?.wrappedValue
                             AnyView(child.view(size, editing))
                                 .environment(\.isEditing, editing)
-                                .onTapGesture {}       //    focusedItem = child
+                                .simultaneousGesture(
+                                    TapGesture()
+                                        .onEnded {
+                                            focusedItem?.wrappedValue = child
+                                        }
+                                    )
                         }
                     }
-                    _chartOverlay(size)
                 }
             }
         }
@@ -222,6 +230,8 @@ public struct ChartView<Overlay>: View where Overlay:View {
             
         }
     }
+    
+    
 }
 
 extension View {
