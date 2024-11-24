@@ -7,6 +7,8 @@ import Charts
 import CytegeistLibrary
 import CytegeistCore
 
+    //-------------------------------------------------------------
+// layout cell is the replicate made during batches
 
 public struct LayoutCell : Codable, Hashable, Identifiable
 {
@@ -31,11 +33,12 @@ public struct LayoutCell : Codable, Hashable, Identifiable
             yMax = max(yMax, r.maxY)
         }
         rect =  CGRect(x: xMin, y: yMin, width: xMax - xMin, height: yMax - yMin)
-        self.items.forEach { $0.position = $0.position - rect.origin }
+        items.forEach { $0.position = $0.position - rect.origin }
     }
     func width() -> CGFloat    {   rect.width    }
     
 }
+    //-------------------------------------------------------------
 
 @Observable
 class CGLayout : Codable, Hashable, Identifiable
