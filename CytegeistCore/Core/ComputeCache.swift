@@ -12,28 +12,9 @@ import CytegeistLibrary
 
 
 fileprivate class ComputeHandle<Request, Data> {
-    let request:Request
-
     var done = false
-    var data:Data? = nil
-    var error:Error? = nil
     var lastRequested:Date = Date()
-    var task:Task<Void, Never>
-    
-    let semaphore:CSemaphore = .init()
-
-    init(_ request: Request, _ task: Task<Void, Never>) {
-        self.request = request
-//        self.data = data
-//        self.error = error
-//        self.requested = requested
-        self.task = task
-    }
-    
-//    func cancel() {
-//        task.cancel()
-//    }
-    
+    var task:Task<Data, Error>!
 }
 
 
@@ -60,90 +41,46 @@ public actor ComputeCache<Request:Hashable, Data> : Identifiable {
 //        print ("Cache get() hit (hashValue: \(request.hashValue): \(handle != nil): \(request)")
 
         if handle == nil {
-            handle = ComputeHandle<Request, Data>(request,
-                Task {  // Note: don't use Task.detached, otherwise cancellation will not be passed through
+            handle = ComputeHandle<Request, Data>()
+            handle!.task = Task {  // Note: don't use Task.detached, otherwise cancellation will not be passed through
                     do {
                         try Task.checkCancellation()
-                        let result = try await self._compute(request)
-                        
-                        await self.handleSuccess(request, data:result)
+                        defer { handle!.done = true }
+                        return try await self._compute(request)
                     } catch {
-                        await self.handleError(request, error:error)
+                        print("Error computing request \(request): \(error)")
+                        throw error
                     }
                 }
-            )
             
             
             _cache[request] = handle
             pruneOldHandles()
         }
+        handle!.lastRequested = Date()
         
-        return try await awaiter(handle!)
+        return try await handle!.task.value
     }
     
     
     private func pruneOldHandles() {
-        
         // Only remove handles that have already finished
-        let finishedHandles = _cache.values.filter { $0.done }
+        let finishedHandles = _cache.filter { $0.value.done }
         if finishedHandles.count < maxCacheItems {
             return
         }
         
         for _ in maxCacheItems...finishedHandles.count {
             let oldest = finishedHandles.min {
-                $0.lastRequested > $1.lastRequested
+                $0.value.lastRequested > $1.value.lastRequested
             }
             
-            if let removed = _cache.removeValue(forKey: oldest!.request) {
+            if let removed = _cache.removeValue(forKey: oldest!.key) {
                 print("  => Removed data from cache: \(removed)")
             }
         }
     }
     
-    private func awaiter(_ handle:ComputeHandle<Request, Data>) async throws -> Data {
-        handle.lastRequested = Date()
-        
-        if !handle.done {
-            await handle.semaphore.wait()
-        }
-        
-        if let error = handle.error {
-            throw error
-        }
-        
-        guard let data = handle.data else {
-            throw APIError.noDataComputed
-        }
-        
-        return data
-    }
-    
-    private func handleSuccess(_ request:Request, data:Data) async {
-        guard let handle = _cache[request] else {
-            print("Error: ComputeHandle no longer exists")
-            return
-        }
-        handle.data = data
-        handle.done = true
-        await handle.semaphore.release()
-    }
-    
-    private func handleError(_ request:Request, error:Error) async {
-        guard let handle = _cache[request] else {
-            print("Error: ComputeHandle no longer exists")
-            return
-        }
-        handle.error = error
-        handle.done = true
-        
-        // Remove handle from cache if error
-        _cache.removeValue(forKey: request)
-        
-        await handle.semaphore.release()
-        
-    }
-
     
     // TODO How/and when to destroy these on view closed...?
 }

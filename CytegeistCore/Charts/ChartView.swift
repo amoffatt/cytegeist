@@ -29,23 +29,23 @@ fileprivate enum ChartViewDataQuery : ChartDataQuery {
 @Observable
 class ChartStateData<Query:ChartDataQuery> {
     
-    let population: AnalysisNode?
-    let def: Binding<ChartDef?>
+//    let population: AnalysisNode?
+//    let def: Binding<ChartDef?>
     
     var sampleQuery: APIQuery<PopulationData>? = nil
     var chartQuery: Query? = nil
     var errorMessage:String = ""
 
-    init(_ population:AnalysisNode?, _ def:Binding<ChartDef?>) {
-        self.population = population
-        self.def = def
-    }
+//    init(_ population:AnalysisNode?, _ def:Binding<ChartDef?>) {
+//        self.population = population
+//        self.def = def
+//    }
     
     @MainActor
-    func getPopulationRequest() -> (PopulationRequest?, error:String?) {
-        guard let population else {
-            return (nil, "No population")
-        }
+    func getPopulationRequest(_ population:AnalysisNode) -> (PopulationRequest?, error:String?) {
+//        guard let population else {
+//            return (nil, "No population")
+//        }
         do {
             return (try population.createRequest(), nil)
         } catch {
@@ -55,22 +55,21 @@ class ChartStateData<Query:ChartDataQuery> {
     
     
     @MainActor
-    func updateChartQuery(_ core:CytegeistCoreAPI)  {
+    func updateChartQuery(_ core:CytegeistCoreAPI, _ config:ChartConfig)  {
         chartQuery?.dispose()
         //        chartQuery = nil
         errorMessage = ""
-        let config = self.def.wrappedValue
         
-        guard let config, let population else {   return   }
+        guard let def = config.def.wrappedValue, let population = config.population else {   return   }
         
         if let meta = sampleQuery?.data?.meta {
-            let (populationRequest, error) = getPopulationRequest()
+            let (populationRequest, error) = getPopulationRequest(population)
             guard let populationRequest else {
                 errorMessage = error.nonNil
                 return
             }
             
-            updateChartQuery(core, config, meta, population, populationRequest)
+            updateChartQuery(core, def, meta, population, populationRequest)
         }
     }
     
@@ -116,13 +115,22 @@ fileprivate class ChartViewStateData : ChartStateData<ChartViewDataQuery> {
 }
 
 
-
+public struct ChartConfig {
+    public var population:AnalysisNode?
+    public var def:Binding<ChartDef?>
+    
+    public init(_ population: AnalysisNode?, _ def: Binding<ChartDef?>) {
+        self.population = population
+        self.def = def
+    }
+}
 
 
 public struct ChartView<Overlay>: View where Overlay:View {
     @Environment(CytegeistCoreAPI.self) var core: CytegeistCoreAPI
     
     @State private var state: ChartViewStateData
+    let config: ChartConfig
     let editable:Bool
     let _chartOverlay:(CGSize) -> Overlay
     
@@ -130,7 +138,8 @@ public struct ChartView<Overlay>: View where Overlay:View {
     
     
     public init(population: AnalysisNode?, def:Binding<ChartDef?>, editable:Bool = true, overlay:@escaping (CGSize) -> Overlay = { _ in EmptyView() }){
-        self.state = ChartViewStateData(population, def)
+        self.config = ChartConfig(population, def)
+        self.state = ChartViewStateData()
         self.editable = editable
         self._chartOverlay = overlay
     }
@@ -158,7 +167,7 @@ public struct ChartView<Overlay>: View where Overlay:View {
 //    }
     public var body: some View {
         let sampleMeta = state.sampleQuery?.data?.meta
-        let def = state.def.wrappedValue
+        let def = config.def.wrappedValue
         
         VStack {
             if !state.errorMessage.isEmpty {
@@ -201,7 +210,7 @@ public struct ChartView<Overlay>: View where Overlay:View {
                         ChartAxisView(def: yAxis, normalizer: state.chartDims.y?.normalizer,
                                       sampleMeta: sampleMeta,
                                       width: axisWidth,
-                                      update: editable ? { state.def.wrappedValue?.yAxis = $0 } : nil)
+                                      update: editable ? { config.def.wrappedValue?.yAxis = $0 } : nil)
                             .rotationEffect(.degrees(-90), anchor: .center)
                     }
                     .frame(width: axisHeight, height: axisWidth)
@@ -211,7 +220,7 @@ public struct ChartView<Overlay>: View where Overlay:View {
                 ChartAxisView(def: def?.xAxis, normalizer: state.chartDims.x?.normalizer,
                               sampleMeta: sampleMeta,
                               width: chartSize.width,
-                              update: editable ? { state.def.wrappedValue?.xAxis = $0 } : nil)
+                              update: editable ? { config.def.wrappedValue?.xAxis = $0 } : nil)
                         .frame(minWidth: 10)        // Avoid conflicts with the GeometryReader preventing resizing
             }
             .fillAvailableSpace()
@@ -224,7 +233,7 @@ public struct ChartView<Overlay>: View where Overlay:View {
             GeometryReader { proxy in
                 let size = proxy.size
                 ZStack(alignment:.topLeading) {
-                    if let population = state.population, let chartDef = state.def.wrappedValue {
+                    if let population = config.population, let chartDef = config.def.wrappedValue {
                         ForEach(population.visibleChildren(chartDef), id:\.self) { child in
                             // AM DEBUGGING
                             let editing = false //child == focusedItem
@@ -259,13 +268,13 @@ extension View {
     
     
     @MainActor
-    func updateChartQuery<T>(_ core:CytegeistCoreAPI, state:ChartStateData<T>) -> some View {
-        let sampleRef = state.population?.getSample()?.ref
+    func updateChartQuery<T>(_ core:CytegeistCoreAPI, _ config: ChartConfig, state:ChartStateData<T>) -> some View {
+        let sampleRef = config.population?.getSample()?.ref
         
         return self
-            .onChange(of: state.population, initial: true, { state.updateChartQuery(core) })
-            .onChange(of: state.def.wrappedValue, { state.updateChartQuery(core) })
-            .onChange(of: state.sampleQuery?.data?.meta, { state.updateChartQuery(core) })
+            .onChange(of: config.population, initial: true, { state.updateChartQuery(core, config) })
+            .onChange(of: config.def.wrappedValue, { state.updateChartQuery(core, config) })
+            .onChange(of: state.sampleQuery?.data?.meta, { state.updateChartQuery(core, config) })
             
             .onChange(of: sampleRef, initial: true) {
                 state.sampleQuery?.dispose()

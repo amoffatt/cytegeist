@@ -40,6 +40,9 @@ public struct ChartDef : Hashable, Codable, Equatable//, Transferable
     public var contours:Bool = false
     public var showOutliers:Bool = false
     
+    /// Used by 3D chart
+    public var maxPointCount:Int?
+    
     public var colormap:ChartColormap = .jet
 
     public init()

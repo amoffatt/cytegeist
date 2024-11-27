@@ -30,8 +30,9 @@ class Chart3DStateData : ChartStateData<APIQuery<SampledPopulationData>> {
 //        chartDims = .init(dims[0], dims[1], dims[2])
         
 //        print("Creating chart for \(population.name)")
+        let pointCount = config.maxPointCount ?? 500
         chartQuery = core.sampledPopulationData(
-            SampledPopulationRequest(populationRequest, dims.map { $0?.name ?? "" }, 500, PValue(0.8)))
+            SampledPopulationRequest(populationRequest, dims.map { $0?.name ?? "" }, pointCount, PValue(0.8)))
 
     }
 }
@@ -63,11 +64,13 @@ public struct Chart3DView: View {
     
     
     @State var state:Chart3DStateData
+    let config:ChartConfig
     
     @State var chartEntity: ScatterChart3DEntity! = nil
     
     public init(_ population:AnalysisNode?, _ def:Binding<ChartDef?>) {//, dataPoints:[SIMD3<Float>]) {
-        self.state = .init(population, def)
+        self.state = .init()
+        self.config = ChartConfig(population, def)
 //        self.dataPoints = dataPoints
     }
 
@@ -136,14 +139,14 @@ public struct Chart3DView: View {
                         }
                     }
                 }
-                .updateChartQuery(core, state: state)
+                .updateChartQuery(core, config, state: state)
                 .onChange(of: data, initial: true) {
                     let chartData = getChartData()
                     chartEntity?.setDataPoints((chartData, .jet))
                 }
                 
                 VStack {
-                    Text(state.population?.fullDisplayName() ?? "<No Population Selected>")
+                    Text(config.population?.fullDisplayName() ?? "<No Population Selected>")
                         .padding()
                         .font(.title3)
                         .glassBackgroundEffect()
@@ -153,11 +156,11 @@ public struct Chart3DView: View {
     }
     
     func axisDef(_ axis:AxisAttachmentInfo) -> AxisDef? {
-        state.def.wrappedValue?[keyPath: axis.keyPath]
+        config.def.wrappedValue?[keyPath: axis.keyPath]
     }
     
     func getChartData() -> SampledPopulationData? {
-        if let chartDef = state.def.wrappedValue,
+        if let chartDef = config.def.wrappedValue,
            let data = state.chartQuery?.data {
             
             // Data with dimensions mapped based on the ChartDef
@@ -175,61 +178,83 @@ public struct Chart3DView: View {
     }
     
     func updateAxisDef(_ axis:AxisAttachmentInfo, _ axisDef:AxisDef) {
-        state.def.wrappedValue?[keyPath: axis.keyPath] = axisDef
+        config.def.wrappedValue?[keyPath: axis.keyPath] = axisDef
     }
 }
 
 public struct Chart3DViewTest: View {
+    @Environment(CytegeistCoreAPI.self) var core
+    @State var maxPoints:Double = 500
+    @State var sample:Sample = Sample(ref: SampleRef(url:DemoData.facsDivaSample0!))
+    
     public init() {}
     
     public var body: some View {
-        let sample = Sample(ref: SampleRef(url:DemoData.facsDivaSample0!))
         let population = AnalysisNode(sample: sample)
 //        let population:PopulationRequest = .sample(.init(url:sample))
         var chart:ChartDef? = .init()
         chart?.xAxis = .init(dim:"FSC-A")
         chart?.yAxis = .init(dim:"SSC-A")
+        chart?.zAxis = .init(dim:"FSC-W")
+        chart?.maxPointCount = Int(maxPoints)
         let chartBinding = readOnlyBinding(chart)
         
-        return ZStack {
-            Chart3DView(population, chartBinding)
-//                                  , dataPoints: [
-//                SIMD3(0.1, 0.2, 0.3),
-//                SIMD3(0.4, 0.5, 0.6),
-//                SIMD3(0.7, 0.8, 0.9),
-//                SIMD3(0.2, 0.4, 0.6),
-//                SIMD3(0.5, 0.7, 0.9),
-//                SIMD3(0.3, 0.6, 0.9),
-//                SIMD3(0.1, 0.5, 0.9),
-//                SIMD3(0.8, 0.6, 0.4),
-//                SIMD3(0.2, 0.7, 0.3),
-//                SIMD3(0.9, 0.1, 0.5),
-//                SIMD3(0.4, 0.8, 0.2),
-//                SIMD3(0.6, 0.3, 0.7),
-//                SIMD3(0.1, 0.9, 0.5),
-//                SIMD3(0.7, 0.2, 0.8),
-//                SIMD3(0.3, 0.8, 0.1),
-//                SIMD3(0.5, 0.2, 0.9),
-//                SIMD3(0.8, 0.4, 0.1),
-//                SIMD3(0.2, 0.9, 0.6),
-//                SIMD3(0.6, 0.1, 0.7),
-//                SIMD3(0.9, 0.5, 0.3),
-//                SIMD3(0.4, 0.7, 0.1),
-//                SIMD3(0.7, 0.3, 0.5),
-//                SIMD3(0.1, 0.6, 0.2),
-//                SIMD3(0.8, 0.2, 0.7),
-//                SIMD3(0.3, 0.9, 0.4),
-//                SIMD3(0.5, 0.1, 0.8),
-//                SIMD3(0.9, 0.7, 0.2),
-//                SIMD3(0.2, 0.5, 0.1),
-//                SIMD3(0.6, 0.8, 0.3),
-//                SIMD3(0.4, 0.3, 0.9)
-//            ])
-//            VStack {
-//                Text("3D Chart Test")
+        return ZStack(alignment: .top) {
+                Chart3DView(population, chartBinding)
+                //                                  , dataPoints: [
+                //                SIMD3(0.1, 0.2, 0.3),
+                //                SIMD3(0.4, 0.5, 0.6),
+                //                SIMD3(0.7, 0.8, 0.9),
+                //                SIMD3(0.2, 0.4, 0.6),
+                //                SIMD3(0.5, 0.7, 0.9),
+                //                SIMD3(0.3, 0.6, 0.9),
+                //                SIMD3(0.1, 0.5, 0.9),
+                //                SIMD3(0.8, 0.6, 0.4),
+                //                SIMD3(0.2, 0.7, 0.3),
+                //                SIMD3(0.9, 0.1, 0.5),
+                //                SIMD3(0.4, 0.8, 0.2),
+                //                SIMD3(0.6, 0.3, 0.7),
+                //                SIMD3(0.1, 0.9, 0.5),
+                //                SIMD3(0.7, 0.2, 0.8),
+                //                SIMD3(0.3, 0.8, 0.1),
+                //                SIMD3(0.5, 0.2, 0.9),
+                //                SIMD3(0.8, 0.4, 0.1),
+                //                SIMD3(0.2, 0.9, 0.6),
+                //                SIMD3(0.6, 0.1, 0.7),
+                //                SIMD3(0.9, 0.5, 0.3),
+                //                SIMD3(0.4, 0.7, 0.1),
+                //                SIMD3(0.7, 0.3, 0.5),
+                //                SIMD3(0.1, 0.6, 0.2),
+                //                SIMD3(0.8, 0.2, 0.7),
+                //                SIMD3(0.3, 0.9, 0.4),
+                //                SIMD3(0.5, 0.1, 0.8),
+                //                SIMD3(0.9, 0.7, 0.2),
+                //                SIMD3(0.2, 0.5, 0.1),
+                //                SIMD3(0.6, 0.8, 0.3),
+                //                SIMD3(0.4, 0.3, 0.9)
+                //            ])
+                //            VStack {
+                //                Text("3D Chart Test")
+                //            }
+            
+            if let meta = sample.meta {
+                VStack {
+                    Text("# Events to show: \(Int(maxPoints)) / \(meta.eventCount)")
+                    LogarithmicSlider(value: $maxPoints, in: 10...Double(meta.eventCount))
+//                    Slider(value: $maxPoints, in: 0...Double(maxPoints))
+                }
+                .padding()
+                .glassBackgroundEffect()
+            }
 //            }
-//            .padding()
-//            .glassBackgroundEffect()
+//            else {
+//                VStack {
+//                    Text("Loading sample...")
+//                }
+//            }
+        }
+        .task {
+            sample.setUp(core: core)
         }
     }
 }

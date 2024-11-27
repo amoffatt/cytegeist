@@ -110,7 +110,7 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable, Custo
         let s: Sample? = sample ?? parent?.getSample()
         
         if s != nil {
-            print(s!.tubeName)
+            print("AnalysisNode.getSample() => \(s!.tubeName)")
         }
         else { print("null sample")}
         return s

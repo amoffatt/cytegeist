@@ -28,6 +28,7 @@
 		B65D82AF2C44BE7100E4F0A2 /* ImmersiveView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B65D82AE2C44BE7100E4F0A2 /* ImmersiveView.swift */; };
 		B65D82B12C44BE7200E4F0A2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B65D82B02C44BE7200E4F0A2 /* Assets.xcassets */; };
 		B65D82B42C44BE7200E4F0A2 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B65D82B32C44BE7200E4F0A2 /* Preview Assets.xcassets */; };
+		B67736092CEA59030071064A /* LogarithmicSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = B67736082CEA58FC0071064A /* LogarithmicSlider.swift */; };
 		B68529692C74DBB500EF9EF4 /* ComputeCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = B68529682C74DBB500EF9EF4 /* ComputeCache.swift */; };
 		B6902A1B2CA4BDC4004DBE33 /* AncestryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6902A1A2CA4BDC4004DBE33 /* AncestryView.swift */; };
 		B691FCE42CA2913000B0CFC9 /* Chart3DView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B691FCDC2CA28B1B00B0CFC9 /* Chart3DView.swift */; };
@@ -97,7 +98,6 @@
 		DC2473682C9A743A00D2DCA0 /* Statistic.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC2473662C9A72A700D2DCA0 /* Statistic.swift */; };
 		DC2473722C9A7CDD00D2DCA0 /* TreeNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A48D2C75D24B00DB6786 /* TreeNode.swift */; };
 		DC2473752C9B81E000D2DCA0 /* PairCharts.swift in Sources */ = {isa = PBXBuildFile; fileRef = B68529702C74DC1100EF9EF4 /* PairCharts.swift */; };
-		DC2473762C9B820200D2DCA0 /* SampleInspectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B68529712C74DC1100EF9EF4 /* SampleInspectorView.swift */; };
 		DC2473772C9CB6CE00D2DCA0 /* Statistics.swift in Sources */ = {isa = PBXBuildFile; fileRef = B69001CE2C88CED50083C743 /* Statistics.swift */; };
 		DC6F42FB2C83F7BD00288EB8 /* TabBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC6F42FA2C83F7BD00288EB8 /* TabBar.swift */; };
 		DC861C7C2C8632F000D7C3FB /* CGTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC861C7B2C8632F000D7C3FB /* CGTableView.swift */; };
@@ -252,12 +252,12 @@
 		B65D82B02C44BE7200E4F0A2 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B65D82B32C44BE7200E4F0A2 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		B65D82B52C44BE7200E4F0A2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		B67736082CEA58FC0071064A /* LogarithmicSlider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogarithmicSlider.swift; sourceTree = "<group>"; };
 		B68529682C74DBB500EF9EF4 /* ComputeCache.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ComputeCache.swift; sourceTree = "<group>"; };
 		B685296A2C74DBD700EF9EF4 /* Colormaps.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Colormaps.swift; sourceTree = "<group>"; };
 		B685296B2C74DBD700EF9EF4 /* GraphicsUtil.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GraphicsUtil.swift; sourceTree = "<group>"; };
 		B685296C2C74DBD700EF9EF4 /* VectorUtil.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VectorUtil.swift; sourceTree = "<group>"; };
 		B68529702C74DC1100EF9EF4 /* PairCharts.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PairCharts.swift; sourceTree = "<group>"; };
-		B68529712C74DC1100EF9EF4 /* SampleInspectorView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SampleInspectorView.swift; sourceTree = "<group>"; };
 		B69001CE2C88CED50083C743 /* Statistics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Statistics.swift; sourceTree = "<group>"; };
 		B6902A1A2CA4BDC4004DBE33 /* AncestryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AncestryView.swift; sourceTree = "<group>"; };
 		B691FCDC2CA28B1B00B0CFC9 /* Chart3DView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Chart3DView.swift; sourceTree = "<group>"; };
@@ -487,7 +487,6 @@
 				B64173912C58A89A001AA2F4 /* CoreTestUtil.swift */,
 				B64173932C58AB2B001AA2F4 /* DemoData.swift */,
 				B68529702C74DC1100EF9EF4 /* PairCharts.swift */,
-				B68529712C74DC1100EF9EF4 /* SampleInspectorView.swift */,
 			);
 			path = Test;
 			sourceTree = "<group>";
@@ -555,6 +554,14 @@
 			path = "Preview Content";
 			sourceTree = "<group>";
 		};
+		B67736072CEA58F20071064A /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				B67736082CEA58FC0071064A /* LogarithmicSlider.swift */,
+			);
+			path = UI;
+			sourceTree = "<group>";
+		};
 		B68529722C74DC1100EF9EF4 /* UI */ = {
 			isa = PBXGroup;
 			children = (
@@ -597,6 +604,7 @@
 		B6C9A3EC2C75A3EF00DB6786 /* CytegeistLibrary */ = {
 			isa = PBXGroup;
 			children = (
+				B67736072CEA58F20071064A /* UI */,
 				B610A5732C54269A0081C517 /* Util */,
 				B6C9A3ED2C75A3EF00DB6786 /* CytegeistLibrary.h */,
 			);
@@ -995,7 +1003,6 @@
 			files = (
 				DC05A3D12C798EC900C08BBF /* Smoothing.swift in Sources */,
 				B691FCE42CA2913000B0CFC9 /* Chart3DView.swift in Sources */,
-				DC2473762C9B820200D2DCA0 /* SampleInspectorView.swift in Sources */,
 				B6C9A4B82C77D9AA00DB6786 /* ChartAxisView.swift in Sources */,
 				B6C9A4B42C77CA5400DB6786 /* ChartDefs.swift in Sources */,
 				DC2473752C9B81E000D2DCA0 /* PairCharts.swift in Sources */,
@@ -1096,6 +1103,7 @@
 				B6C9A4072C75A46800DB6786 /* Colormaps.swift in Sources */,
 				DC6F42FB2C83F7BD00288EB8 /* TabBar.swift in Sources */,
 				B6C9A4AE2C76A77800DB6786 /* DateUtil.swift in Sources */,
+				B67736092CEA59030071064A /* LogarithmicSlider.swift in Sources */,
 				B6C9A4082C75A46800DB6786 /* StringUtil.swift in Sources */,
 				B6C9A4092C75A46800DB6786 /* ThreadUtil.swift in Sources */,
 				B6C9A4932C76729000DB6786 /* InputUtil.swift in Sources */,
