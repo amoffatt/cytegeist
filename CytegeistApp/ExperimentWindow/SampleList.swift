@@ -66,6 +66,7 @@ struct SampleList: View {
     @State var sortOrder: [KeyPathComparator<Sample>] = [    .init(\.id, order: SortOrder.forward) ]
     @State private var draggedItem: String?
     @State private var showFCSImporter = false
+    @State private var showWSPImporter = false
     @State private var isDragging = false
     @State private var isDropTargeted = false
     @State private var fileInfo: [String] = []
@@ -159,7 +160,7 @@ struct SampleList: View {
                 table
 //                switch mode {
 //                case .table:       alttable
-//                    
+//
 //                case .gallery:     SampleGallery(experiment: experiment, selection: $selectedSamples)
 //                }
             }
@@ -182,24 +183,32 @@ struct SampleList: View {
 //                    experiment[sampleID]?.imageURL = url
 //                }
 //            }
-//            
+//
 //        }
         .fileImporter( isPresented: $showFCSImporter,
                        allowedContentTypes: [.item,  .directory],
                        allowsMultipleSelection: true)
         { result in
             switch result {
-            case .success:  onFCSPicked(_result: result)       // gain access to the directory
-            case .failure(let error):  print(error)         // handle error
+                case .success:  onFCSPicked(_result: result)       // gain access to the directory
+                case .failure(let error):  print(error)         // handle error
+            }
+        }
+        .fileImporter( isPresented: $showWSPImporter,
+                               allowedContentTypes: [.item,  .directory],
+                               allowsMultipleSelection: true)
+        { result in
+            switch result {
+                case .success:  onWSPPicked(_result: result)       // gain access to the directory
+                case .failure(let error):  print(error)         // handle error
             }
         }
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 HStack {
                     Buttons.toolbar("Open FCS Files", .add) { showFCSImporter = true }
-                    Buttons.toolbar("Dictionary", Icon("pencil")) {
-                        experiment.buildVaribleKeyDictionary()
-                    }
+//                    Buttons.toolbar("Dictionary", Icon("pencil")) {      experiment.buildVaribleKeyDictionary()    }
+                    Buttons.toolbar("Dictionary", Icon("pencil")) {      showWSPImporter = true    }
 //                    Buttons.toolbar("Clear", Icon("delete.left")) { doClear() }
                   Buttons.toolbar("XML", Icon("cloud")) {
                         print(experiment.xml())
@@ -209,7 +218,25 @@ struct SampleList: View {
         }
 
     }
-
+    func onWSPPicked(_result: Result<[URL], any Error>)
+    {
+        Task {
+            do {
+                    //                try print("FCSPicked urls: ", _result.get().map(editStr($0.description)))
+                for url in try _result.get()
+                {
+                    let gotAccess = url.startAccessingSecurityScopedResource()
+                    if !gotAccess { break }
+                    await readWorkspaceFile(url)
+                    url.stopAccessingSecurityScopedResource()     // release access
+                }
+            }
+            catch let error as NSError {
+                debug("Ooops! Something went wrong: \(error)")
+            }
+        }
+    }
+    
     func onFCSPicked(_result: Result<[URL], any Error>)
     {
         Task {
@@ -249,7 +276,20 @@ struct SampleList: View {
             //        }
         debug("FCS Read")
     }
-    
+ 
+    func readWorkspaceFile(_ url:URL) async
+    {
+        let reader = WorkspaceReader()
+        do {
+            let ws = try await  reader.readWorkspaceFile(at: url)
+            let _ = Experiment(ws: ws )
+            print("WS of length: ", ws.text.count)
+        }
+        catch let error as NSError {
+            debug("Ooops! Something went wrong: \(error)")
+        }
+    }
+        
     public func addSample(_ sample: Sample)   {
 //        modelContext.insert(sample)
         experiment.samples.append(sample)
