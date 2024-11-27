@@ -31,8 +31,8 @@ public struct AncestryView: View {
                                 
                                 VStack {
                                     Text(parent.name.nonEmpty(" ")) // AM Should the name be for the plotted ancestor, or for the gate
-                                    ChartView(population: parent, def: chartBinding, editable: false)
-                                        .padding(4)
+                                    ChartView(population: parent, config: readOnlyBinding(chartDef), editable: false, focusedItem: nil)
+                                        .padding(3)
                                         .frame(width: height, height: height)
                                         .background(.black.opacity(0.1))
                                         .cornerRadius(12)

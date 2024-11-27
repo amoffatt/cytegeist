@@ -39,8 +39,7 @@ public class BaseAPIQuery {
     // TODO use to determine when related data should be uncached
     public private(set) var disposeTime: Date? = nil
     
-    nonisolated init() {
-    }
+    nonisolated init() {  }
 
     public func dispose() {
         viewPriority = 0
@@ -163,9 +162,7 @@ public class APIQuery<T> : BaseAPIQuery {
     
     
     public func getResult() async throws -> T {
-        if let error {
-            throw error
-        }
+        if let error { throw error  }
         
         if !isLoading {
             assert(data != nil)
@@ -175,12 +172,9 @@ public class APIQuery<T> : BaseAPIQuery {
         if _semaphore == nil {
             _semaphore = .init()
         }
-        
         await _semaphore!.wait()
         
-        if let error {
-            throw error
-        }
+        if let error {  throw error }
         
         assert(data != nil)
         return data!
@@ -202,9 +196,7 @@ public extension View {
             .onChange(of: value, initial: true) {
                 query.update(compute)
             }
-            .onDisappear {
-                query.dispose()
-            }
+            .onDisappear {  query.dispose()  }
     }
 }
 
@@ -214,7 +206,7 @@ public let defaultHistogramResolution:Int = 256
 
 @MainActor
 @Observable
-public class CytegeistCoreAPI {
+public class CytegeistCoreAPI : ObservableObject {
     private let fcsReader:FCSReader = FCSReader()
     
     
@@ -486,6 +478,7 @@ public struct StatisticRequest : Hashable {
         self.dim = dimName
         self.statistic = statistic
     }
+ 
 }
 
 public typealias StatisticBatch = [Statistic:Double]

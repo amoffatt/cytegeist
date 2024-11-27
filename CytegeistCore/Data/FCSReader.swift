@@ -16,17 +16,14 @@ public struct CDimension : Identifiable, Hashable, Codable, Sendable {
     
     
     public static func displayName(_ name:String, _ stain:String) -> String {
-        if name == stain {
-            return name
-        }
-        if stain.isEmpty {
-            return name
-        }
+        if name == stain {      return name     }
+        if stain.isEmpty {      return name     }
         return "\(name) : \(stain)"
     }
     
     public let name: String
     public let stain: String
+    public let shortName: String
     public let displayName: String
     public let bits: Int
     public var bytes: Int { (bits + 7) / 8 }
@@ -50,6 +47,7 @@ public struct CDimension : Identifiable, Hashable, Codable, Sendable {
                 displayInfo: String, normalizer: AxisNormalizer,
                 valueReader: @escaping FCSParameterValueReader) {
         self.name = name
+        self.shortName = name
         self.stain = stain
         self.displayName = displayName
         self.bits = bits
@@ -117,6 +115,7 @@ public struct FCSMetadata: Hashable, Codable, Sendable {
     public var byteOrder: FCSByteOrder?
     public var system:String = ""
     public var cytometer: String = ""
+    public var comp: String = ""
 
     
     public var _parameters: [CDimension]?
@@ -414,6 +413,7 @@ public class FCSReader {
         fcs.eventCount = eventCount
         fcs.system = keywords["$SYS"]!
         fcs.cytometer = keywords["$CYT"].nonNil
+        fcs.comp = keywords["$COMP"].nonNil
         fcs.date = keywords["$DATE"].nonNil
         fcs.dataType = FCSDataType(rawValue: keywords["$DATATYPE"].nonNil)!
         fcs.byteOrder = FCSByteOrder(rawValue: keywords["$BYTEORD"].nonNil)
@@ -495,10 +495,10 @@ public class FCSReader {
     
     private func createParameterNormalizer(max:Double, displayInfo:String) -> AxisNormalizer {
         if displayInfo == "LOG" && max > 1 {
-            return .log(min: 1, max: max)
+            return .log(minVal: 1, maxVal: max)
         }
         
-        return .linear(min: 0, max: max)
+        return .linear(minVal: 0, maxVal: max)
     }
     
     private func createParameterValueReader(dataType:FCSDataType, bits:Int) throws -> FCSParameterValueReader {

@@ -47,7 +47,7 @@ public class DataBufferReader {
     
     public func readUInt(bits:Int) throws -> UInt32 {
         readBytes(bitCount: bits)
-        var result = buffer.load(fromByteOffset: 0, as: UInt32.self)
+        let result = buffer.load(fromByteOffset: 0, as: UInt32.self)
         return result
     }
     
@@ -55,7 +55,7 @@ public class DataBufferReader {
         
 //        var result:Float = buffer.load(from)
         readBytes(bitCount: bits)
-        var result = buffer.load(fromByteOffset: 0, as: Float32.self)
+        let result = buffer.load(fromByteOffset: 0, as: Float32.self)
         return result
 //        buffer.withUnsafeMutableBytes {
 //            self.copyBytes(from: data, offsetBytes: offset, bitCount: valueBits, to: $0)

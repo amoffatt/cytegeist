@@ -21,10 +21,10 @@ public struct ChartAnnotation : Identifiable, Hashable {
     public let remove:Action?
 }
 
-protocol GateHandle : View {
+public protocol GateHandle : View {
 }
 
-struct CircleHandle: GateHandle {
+public struct CircleHandle: GateHandle {
     @Environment(\.gateColor) var color
     @Environment(\.controlState) var state
     
@@ -34,7 +34,7 @@ struct CircleHandle: GateHandle {
         self.solid = solid
     }
     
-    var body: some View {
+    public var body: some View {
         let solidColor = color.opacity(state.hovered ? 1.0 : 0.7)
         ZStack {
             if solid {
@@ -60,15 +60,15 @@ struct EmptyHandle: GateHandle {
 }
 
 
-typealias ControlState = (hovered:Bool, pressed:Bool)
-typealias MoveAction = ((point:CGPoint, ended:Bool)) -> Void
+public typealias ControlState = (hovered:Bool, pressed:Bool)
+public typealias MoveAction = ((point:CGPoint, ended:Bool)) -> Void
 
-struct GateControlZone<Content, Handle> : View, Identifiable where Content:View, Handle:View {
+public struct GateControlZone<Content, Handle> : View, Identifiable where Content:View, Handle:View {
     @Environment(\.handleSize) var size
     @Environment(\.controlSize) var controlSize
     @Environment(\.isEditing) var editing
 
-    let id: String
+    public let id: String
     let position: CGPoint
     let applyPosition:Bool
     let content: ((ControlState) -> Content)
@@ -80,7 +80,7 @@ struct GateControlZone<Content, Handle> : View, Identifiable where Content:View,
     @State var isHovered:Bool = false
     @State var isPressed:Bool = false
     
-    init(_ id: String,
+    public init(_ id: String,
          position: CGPoint, applyPosition:Bool = true,
          move: @escaping MoveAction,
          content: @escaping ((ControlState) -> Content) = { _ in EmptyView() },
@@ -94,7 +94,7 @@ struct GateControlZone<Content, Handle> : View, Identifiable where Content:View,
         self.move = move
     }
     
-    var body: some View {
+    public var body: some View {
         let state = (isHovered, isPressed)
         
         ZStack() {
@@ -348,6 +348,7 @@ extension RangeGateDef : ViewableGate {
             ) { (p, _) in
                 v.gate.wrappedValue?.min = v.view2DataX(p.x - viewWidth / 2)
                 v.gate.wrappedValue?.max = v.view2DataX(p.x + viewWidth / 2)
+                print("Moving gate: \(p). Binding value after: \(v.gate.wrappedValue?.max)")
             }
             
             v.rectControlZone("min-edge", center:.init(viewMin, v.chartCenter.height), width:v.lineWidth, height:chartSize.height, color:v.strokeColor) { (p, ended) in

@@ -7,6 +7,7 @@
 
 import Foundation
 import CryptoKit
+import SwiftUI
 
 
 let DEBUG = true
@@ -24,6 +25,13 @@ if (DEBUG)  {
 }
 
 
+public func dateStr(_ date: Date) -> String
+{
+    let myDateFormatter = DateFormatter()
+    myDateFormatter.dateFormat = "YYMMDD"
+    return myDateFormatter.string(from: date)
+}
+
 private let newline = "\n".data(using: .utf8)!
 private let comma = ",".data(using: .utf8)!
 
@@ -34,6 +42,18 @@ public func isEmpty(_ value:String?) -> Bool {
 public func nonNil(_ value:String?) -> String {
     value ?? ""
 }
+public extension Bool {
+     func xml() -> String {     return self ? "true" : "false"   }
+}
+
+public extension CGPoint {
+    func xml() -> String {     return "<Point x=\(self.x) y=\(self.y) /> \n"   }
+}
+
+public extension CGSize {
+    func xml() -> String {     return "<Size width=\(self.width) y=\(self.height) /> \n"   }
+}
+
 
 /// Return first non-empty string in the sequence
 public func nonEmpty(_ values:String?...) -> String {
@@ -81,6 +101,27 @@ public extension String {
         let end = offset + length
         return self[offset..<end]
     }
+
+    func toColor( ) -> Color {
+        return Color.blue
+    }
+    
+    func stripHead() -> String {
+        
+        if let a = self.range(of:"<head>") {
+            if let z = self.range(of: "</head>") {
+                let tail = self[z.upperBound...]
+                return String(tail)
+            }
+        } 
+        return self.replacingOccurrences(of: "<head>[^>]+</head>", with: "", options: .regularExpression, range: nil)
+    }
+    func withoutHtmlTags() -> String {
+        
+        let s = stripHead()
+        let str = s.replacingOccurrences(of: "<style>[^>]+</style>", with: "", options: .regularExpression, range: nil)
+        return str.replacingOccurrences(of: "<[^>]+>", with: "", options: .regularExpression, range: nil)
+    }
     
     func splitWithDoubleEscaping(separator:String) -> [String] {
         let escape = separator + separator
@@ -122,6 +163,38 @@ public extension String {
     
     func nonEmpty(_ defaultValue:String) -> String {
         self.isEmpty ? defaultValue : self
+    }
+    
+    
+    func contains(_ find: String) -> Bool{
+        return self.range(of: find) != nil
+    }
+    
+    func containsIgnoringCase(_ find: String) -> Bool{
+        return self.range(of: find, options: .caseInsensitive) != nil
+    }
+    func preprocessK() -> String{
+        if let idx = firstIndex(of: ".")
+        {
+            let str = prefix(upTo: idx)
+            if str.count > 4 {
+                return str.prefix(str.count-3)  + "M"
+            }
+            return str + "K"
+        }
+        return self
+    }
+    
+    func preprocessM() -> String{
+        if let idx = firstIndex(of: ".")
+        {
+            let str = prefix(upTo: idx)
+            if str.count > 4 {
+                return str.prefix(str.count-3)  + "G"
+            }
+            return str + "M"
+        }
+        return self
     }
 
 }

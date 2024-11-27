@@ -104,6 +104,7 @@ struct AnalysisList: View {
 
     public struct AnalysisNodeView: View {
         @Environment(CytegeistCoreAPI.self) var core
+        @Environment(BatchContext.self) var batchContext
         @State var query = APIQuery<StatisticBatch>()
         
         let node:AnalysisNode
@@ -113,7 +114,7 @@ struct AnalysisList: View {
             let data = query.data
             let freqOfParent = data?[.freqOfParent]
             let freqOfTotal = data?[.freqOfTotal]
-            let populationRequest = try? node.createRequest()
+            let populationRequest = try? node.createRequest(batchContext)
             
             HStack {
                 ZStack {

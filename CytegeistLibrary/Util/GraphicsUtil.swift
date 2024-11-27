@@ -153,6 +153,10 @@ public extension CGRect {
         self.init(origin: .init(x:x.0, y:y.0), size: .init(width:x.1 - x.0, height:y.1 - y.0))
     }
     
+    func toString() -> String
+    {
+        "(\(String(format: "%0.0f", minX)), \(String(format: "%0.0f", minY))) \(String(format: "%0.0f", width)) x \(String(format: "%0.0f", height)) "
+    }
     /// Based on lower-left origin
     subscript(_ point:Alignment) -> CGPoint {
         get {

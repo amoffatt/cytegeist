@@ -20,18 +20,32 @@ struct LayoutItemWrappper: View, Identifiable {
     
     var body: some View
     {
-        let displayOffset = item.position + item.tmpOffset
         let editing = editableItem.wrappedValue == item
-        VStack {
-            switch item.type {
-                case .text:   CTextView(parent: parent, item: item, editing: editing).background(.purple.opacity(0.3))
-                case .chart:  CChartView(parent: parent, item: item, editing: editing).background(.green.opacity(0.2))
-                case .table:  CTableView(parent: parent, item: item, editing: editing).background(.orange.opacity(0.2))
+        ZStack(alignment:.topLeading) {
+            VStack {
+                switch item.type {
+                    case .text:   CTextView(parent: parent, item: item, editing: editing).background(.purple.opacity(0.3))
+                    case .chart:  CChartView(parent: parent, item: item, editing: editing).background(.green.opacity(0.2))
+                    case .table:  CTableView(parent: parent, item: item, editing: editing).background(.blue.opacity(0.2))
+                    case .image:  CImageView(parent: parent, item: item, editing: editing).background(.brown.opacity(0.2))
+                    case .group:  CGroupView(parent: parent, item: item, editing: editing).background(.pink.opacity(0.2))
+                }
+            }
+            .shadow(color: .black, radius: 3)
+            .border(.red, width: item.selected ? 3.0 : 0.0 )
+
+            GateControlZone("lower-right", position: item.size.asPoint) { position, ended in
+                print("Move to position: \(position)")
+                item.size = position.asSize
+            } handle: { state in
+                CircleHandle(solid:false)
             }
         }
+        .environment(\.isEditing, item.selected)
         .allowsHitTesting(true)
-        .position(displayOffset)
-        .padding(15)
+        .frame(width: item.size.width, height: item.size.height)
+        .position(item.currentCenterPosition)
+//        .padding(15)
         .gesture(dragSelectedItems)
         .onTapGesture(count:2) {    self.editableItem.wrappedValue = item        }
         .onTapGesture(count:1) {     parent.layoutModel.selectItem(item)      }
@@ -79,23 +93,25 @@ struct CTextView : View {
         
         VStack {
             if editing {
-                TextField("Test Field", text: bindableText) .foregroundColor(.black)       //, selection: $selection
-                    .font(.headline).background(.black.opacity(0.8  )).frame(width: 120)
+                TextEditor(text: bindableText)
+                   .foregroundColor(.black)       //, selection: $selection
+                   .font(.body)
+                   .multilineTextAlignment(.leading)
             } else {
                 Text(bindableText.wrappedValue)
             }
-        }   .padding()
+        }
             //            .onTapGesture {  parent.selectItem( item)    }
+            .fillAvailableSpace()
             .font(.headline)
             .fontWidth(Font.Width(36))
             .foregroundColor(.white)
-            .shadow(color: .black, radius: 3)
-            .border(.red, width: item.selected ? 3.0 : 0.0 )
         
     }
 }
 //--------------------------------------------------------------------
 // CHART
+//        let bindableText:Binding<String> = .init(get: { item.value }, set: { item.value = $0 } )
 
 struct CChartView : View {
     var parent: CGLayoutView
@@ -105,25 +121,46 @@ struct CChartView : View {
     @Environment(CytegeistCoreAPI.self) var core:CytegeistCoreAPI
     
     var body: some View {
-            //        let bindableText:Binding<String> = .init(get: { item.value }, set: { item.value = $0 } )
-//        let sampleRef = SampleRef(url: DemoData.facsDivaSample0!)
+        let chartDefBinding:Binding<ChartDef?> = .init {
+            item.node?.chartDef
+        } set: {
+            if let chartDef = $0 {
+                item.node?.chartDef = chartDef
+            }
+        }
         
         VStack {
-            ChartView(population: item.node, def: readOnlyBinding(item.node?.graphDef), editable: false)
+            ChartView(population: item.node, config: chartDefBinding, editable: true, focusedItem: nil)
                 .padding(4)
                 .background(.black.opacity(0.1))
                 .cornerRadius(8)
-        }  .frame(width: 100, height: 100)
-            .padding()
+        }
             .onTapGesture {   parent.layoutModel.selectItem( item)    }
-            .border(.red, width: item.selected ? 3.0 : 0.0 )
             .onAppear(perform:  {   item.size = CGSize(width: 120, height: 100) })
         
     }
 }
 
-//--------------------------------------------------------------------
-// TABLE
+    //--------------------------------------------------------------------
+    // IMAGE
+
+struct CImageView : View {
+    var parent: CGLayoutView
+    let item: LayoutItem
+    let editing: Bool
+    
+    var body: some View {
+        VStack {
+            Text("Image goes here")
+        }
+        .onTapGesture {   parent.layoutModel.selectItem( item)    }
+        .onAppear(perform:  {   item.position = CGPoint(x: 300, y: 200) })
+        
+    }
+    
+}
+    //--------------------------------------------------------------------
+    // TABLE
 
 struct CTableView : View {
     var parent: CGLayoutView
@@ -144,18 +181,13 @@ struct CTableView : View {
         rows:
             {
                 ForEach(users) { user in TableRow(user)  }
-            }.frame(width: 180, height: 120)
-                .border(.blue)
+            }
                 .fontWidth(Font.Width(8))
                 .allowsHitTesting(false)
                 .clipShape(Rectangle())
-                .border(.red, width: item.selected ? 3.0 : 0.0 )
         }
         .onAppear(perform:  {   item.position = CGPoint(x: 100, y: 200) })
-        
-        
     }
-    ///-------------------------------------------------------------------------
     public  struct User: Identifiable {
         public var id: Int
         var name: String
@@ -170,5 +202,25 @@ struct CTableView : View {
         User(id: 3, name: "Adkins", score: 84, number: 9.32e4, marker: "CD4"),
         User(id: 4, name: "Bob", score: 94, number: 0.32, marker: "CD44-39"),
         User(id: 5, name: "Ted", score: 82, number: 92, marker: "CD44-8")]
-
 }
+
+ 
+ 
+    //--------------------------------------------------------------------
+    // GROUP
+
+struct CGroupView : View {
+    var parent: CGLayoutView
+    let item: LayoutItem
+    let editing: Bool
+    
+    var body: some View {
+        VStack {
+            Text("Group goes here")
+        }
+            .onTapGesture {   parent.layoutModel.selectItem( item)    }
+            .onAppear(perform:  {   item.position = CGPoint(x: 300, y: 200) })
+    }
+}
+///-------------------------------------------------------------------------
+

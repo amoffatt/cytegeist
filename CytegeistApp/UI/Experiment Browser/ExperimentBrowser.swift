@@ -9,188 +9,312 @@ import Foundation
 import SwiftUI
 import CytegeistLibrary
 import CytegeistCore
-
 import UniformTypeIdentifiers
-
 
 struct ExperimentBrowser : View {
     
     @Environment(App.self) var app: App
-    
-    
+
     var body: some View {
-//        @Bindable var app = app
-        
-        NavigationSplitView {
-            BrowserSidebar()
+        NavigationSplitView {    browserSidebar    }
+        content:        {
+            panelA.navigationSplitViewColumnWidth(min: 200, ideal: 700, max: .infinity)
         }
-    content:
-        {
-            PanelA()
-//            TableBuilder()
-                .navigationSplitViewColumnWidth(min: 200, ideal: 700, max: .infinity)
+        detail: {
+            panelB.navigationSplitViewColumnWidth(min: 300, ideal: 600, max: .infinity)
+            
         }
-    detail: {
+        .task {   getDataFromSheet()     }
+    }
+    //-------------------------------------------------------------------
+    @State var showImporter = false
+    @State var firstManuscript = false
+    @State var hasWorkspace = false
+    @State var useCytof = false
+    @State var cytof = false
+    @State var searchText: String = ""
+ 
+  //-------------------------------------------------------------------
+    var browserSidebar :  some View {
+
         VStack {
-            PanelB()
-         }
-        .navigationSplitViewColumnWidth(min: 300, ideal: 600, max: .infinity)
-        
-        }
-    }
-    
-        //
-    struct BrowserSidebar :  View {
-        
-        var body : some View   {
-            Text("Servers").font(.title2)
-            Text("Local").font(.title3)
-            Text("OMIPS").font(.title3)
             Text("FlowRepository").font(.title3)
-        }
-        
-    }
-    
-    struct PanelA :  View {
-        
-        var body : some View
-        {
-            XTableView()
-        }
-        
-    }
-    struct PanelB :  View {
-        
-        var body : some View
-        {
-            MIFlowCytView().offset(x: 36, y: 36)
-        }
-        
-    }
-    
-        //---------------------------------------------------------------------------
-        // Model
-    
-    @Observable
-    public class XTable : Usable  //, Hashable
-    {
-        public static func == (lhs: XTable, rhs: XTable) -> Bool {
-            lhs.id == rhs.id
-        }
-        
-//        public func hash(into hasher: inout Hasher) {
-//            hasher.combineMany(id, primary,keywords, experiement, species, date )
-//        }
-        
-        public var id = UUID()
-        public  var name = "Untitled Table"
-        public var items = [XColumn]()
-            //    var info = BatchInfo()
-        
-        init() {    }
-    }
-
-
-    public struct XColumn : Identifiable, Hashable, Codable
-    {
-        public var id = UUID()
-        var primary: String = " "
-        var keywords: String = " "
-        var experiement: String = " "
-        var species: String = " "
-        var date: String = " "
-
-        init(_ name: String, parm: String, stat: String, arg: String = " ")
-        {
-            self.date = name
-            self.primary = parm
-            self.keywords = stat
-            self.experiement = arg
-            self.species = arg
-        }
-        
-        public func hash(into hasher: inout Hasher) {
-            hasher.combineMany(date, primary, keywords, experiement, species)
-        }
-        
-        static var draggableType = UTType(exportedAs: "com.cytegeist.CyteGeistApp.tablecolumn")
-        var itemProvider: NSItemProvider {
-            let provider = NSItemProvider()
-            provider.registerDataRepresentation(forTypeIdentifier: Self.draggableType.identifier, visibility: .all) {
-                let encoder = JSONEncoder()
-                do {
-                    let data = try encoder.encode(self)
-                    $0(data, nil)
-                } catch {
-                    $0(nil, error)
-                }
-                return nil
+            Text("\(filteredExperiments.count) of \(experimentDB.count)")
+            HStack {
+                Toggle("Unique manuscipts", isOn:  $firstManuscript)
+                Spacer()
             }
-            return provider
+            HStack {
+                Toggle("Mass Cytometry", isOn: $useCytof)
+                Toggle("Include", isOn: $cytof)
+                Spacer()
+            }
+            HStack {
+                Toggle("Workspace Included", isOn:  $hasWorkspace)
+                Spacer()
+            }
+            HStack {
+                TextField("Search:", text: $searchText)
+                    .font(.body)
+                    .textFieldStyle(.roundedBorder)
+                    .padding(.trailing, 24)
+                Spacer()
+            }
+        }.padding(20)
+    }
+    
+    var panelA: some View {
+        FRExperimentTable(selection:$selectedExperiment, sortOrder: $sortOrder, experiments:filteredExperiments)
+    }
+    @ViewBuilder
+    var panelB : some View {
+         let experiment = experimentDB.first { selectedExperiment == $0.id }
+        
+        if let experiment {
+            FlowRepoDetailView(exp: experiment)
+                .offset(x: 16, y: 16)
+        } else {
+            Text("Select an experiment")
+        }
+        
+    }
+ 
+//    }
+        //---------------------------------------------------------------------------
+    func getDataFromSheet() {
+        let urlString = "https://docs.google.com/spreadsheets/d/1qn1K2usdhI1wMEagrTcWWhsFMWEDwy2HG2WykMT0KPY?output=csv"
+        
+        guard let url = URL(string: urlString) else { print("error"); return }
+        URLSession.shared.dataTask(with: url) { data, response, error in
+            if let data = data {
+                if let content = String(data: data, encoding: .utf8) {
+                 
+                    let str = content.withoutHtmlTags()
+                    print(str.prefix(3000))
+                        parseCSV(content)
+                }
+            }
+        }.resume()
+//        do {
+//            let html = "<html><head><title>First parse</title></head>"
+//            + "<body><p>Parsed HTML into a doc.</p></body></html>"
+//            let doc: Document = try SwiftSoup.parse(html)
+//            return try doc.text()
+//        } catch Exception.Error(let type, let message) {
+//            print(message)
+//        } catch {
+//            print("error")
+//        }
+//        do {
+//            let attributed = try NSAttributedString(data: str,
+//                                                    options: [NSDocumentTypeDocumentAttribute: NSHTMLTextDocumentType], documentAttributes: nil)
+//            print(attributed.string)
+//            
+//        } catch () {}
+//        
+        
+ 
+        let fileUrl = DemoData.testDataRoot?.appendingPathComponent("flowrepo.csv")
+        do {
+            let csvData = try String(contentsOf: fileUrl!)
+            parseCSV(csvData)
+        } catch {
+            print("Error reading FlowRepo CSV data: \(error)")
         }
     }
-
+ 
     
-    public struct XTableView : View {
-  
-        @State var selection = Set<XColumn.ID>()
-        @State var sortOrder = [KeyPathComparator(\XColumn.primary, order: .forward),
-                                KeyPathComparator(\XColumn.experiement, order: .forward),
-                                KeyPathComparator(\XColumn.keywords, order: .forward),
-                                KeyPathComparator(\XColumn.species, order: .forward),
-                                KeyPathComparator(\XColumn.date, order: .forward)   ]
-        @State var columnCustomization = TableColumnCustomization<XColumn>()
+    @State private var experimentDB = [FRExperiment]()
+    @State private var selectedExperiment:FRExperiment.ID?
+    @State  var sortOrder: [KeyPathComparator<FRExperiment>] =
+    [
+        .init(\.LastUpdate, order: .reverse),
+        .init(\.MifScore, order: .reverse),
+        .init(\.Design_FCS_Count, order: .reverse),
+        .init(\.Cytometer, order: .forward),
+        .init(\.hasWSP, order: .forward)
+    ]
+    func addFRExperiment(exp: FRExperiment)
+    {
+        experimentDB.append(exp)
+    }
+    func addRecord(_ currentRow: String)
+    {
+        let fields = parseLine(currentRow)
+        if fields.count > 30 {         // && fields[0].starts(with: "FR-FCM"))
+            
+            let record = FRExperiment(tokens: fields)
+            let cytof = searchCytof(currentRow)
+            let firstManuscript = searchUniqueManuscript(record)
+            record.setFlags(cytof: cytof, firstManuscript: firstManuscript, fulltext: currentRow)
+            experimentDB.append(record )
+        }
         
-        let table =  XTable()
+    }
+    let debug = false
+    var filteredExperiments: [FRExperiment] {
+        
+        var   experiments = experimentDB.filter {
+               
+            if (!debug && $0.RepID.prefix(6) != "FR-FCM") {  return false  }
+            if (hasWorkspace && $0.hasWSP.isEmpty) {  return false  }
+            if (useCytof && ($0.cytof != cytof)) {  return false  }
+            if (firstManuscript && !$0.firstManuscript) {  return false  }
+            if (searchText.count > 2 && !$0.fulltext.containsIgnoringCase(searchText))  {  return false  }
+            return true
+        }
+        
+        return experiments.sorted(using: sortOrder)
+    }
+ 
+    public struct FRExperimentTable : View {
+        
+        static let columnDefs:[TableColumnField<FRExperiment>] = [
+            TableColumnField("RepID", \.RepID),
+            TableColumnField("LastUpdate", \.LastUpdate),
+            TableColumnField("MifScore", \.MifScore),
+            TableColumnField("ExpName", \.ExpName),
+            TableColumnField("Researcher", \.PResearcher),
+            TableColumnField("PubmedID", \.ManuscriptUrl),
+            TableColumnField("Cytometer", \.Cytometer),
+            TableColumnField("#Files", \.FCS_count),
+            TableColumnField("FCS_total_MB", \.FCS_total_MB),
+            TableColumnField("Event_mean_K", \.Event_mean_K),
+            TableColumnField("Workspace", \.hasWSP),
+            TableColumnField("Keywords", \.Keywords),
+            TableColumnField("Investigator", \.PInvestigator),
+            TableColumnField("ExpEnd", \.ExpEnd),
+            TableColumnField("FCSVers", \.FCSVers)
+         ]
+            //        TableColumnField("Design_FCS_Count", \.Design_FCS_Count),
+            //        TableColumnField("Purpose", \.Purpose),
+            //        TableColumnField("Conclusion", \.Conclusion),
+            //        TableColumnField("Comments", \.Comments),
+            //        TableColumnField("Manuscripts", \.Manuscripts),
+            //        TableColumnField("Design", \.Design),
+            //        TableColumnField("UploadAuth", \.UploadAuth),
+            //        TableColumnField("ExpDates", \.ExpDates),
+            //        TableColumnField("ExpStart", \.ExpStart),
+            //        TableColumnField("UploadDate", \.UploadDate),
+            //        TableColumnField("Organizations", \.LastUpdate),
+            //        TableColumnField("Funding", \.Funding),
+            //        TableColumnField("QualControl", \.QualControl),
+            //        TableColumnField("QualControlUrl", \.QualControlUrl),
+            //        TableColumnField("Attachments", \.Attachments),
+            //        TableColumnField("Event_total_K", \.Event_total_K),
+            //        TableColumnField("ExpID", \.ExpID)
+
+        
+        @Binding var selection:FRExperiment.ID?
+        @Binding var sortOrder:[KeyPathComparator<FRExperiment>]
+        @State var columnCustomization = TableColumnCustomization<FRExperiment>()
+        
+        let experiments:[FRExperiment]
+  
         
         public var body: some View {
-                //            Table (of: TColumn.Type, selection: $selectedColumns)
-            Table (selection: $selection, sortOrder: $sortOrder, columnCustomization: $columnCustomization)
+            Table (experiments, 
+                   selection: $selection,
+                   sortOrder: $sortOrder,
+                   columnCustomization: $columnCustomization)
             {
-                TableColumn("Date", value: \.date){ col in Text(col.date)}
-                    .width(min: 130, ideal: 180)
-                    .customizationID("date")
-                TableColumn("Primary", value: \.date){ col in Text(col.primary)}
-                    .width(min: 130, ideal: 180)
-                    .customizationID("primary")
-                TableColumn("Experiment", value: \.experiement){ col in Text(col.experiement)}
-                    .width(min: 30, ideal: 80, max: 160)
-                    .customizationID("experiment")
-                TableColumn("Keywords", value: \.keywords){ col in Text(col.keywords)}
-                    .width(min: 30, ideal: 50, max: 60)
-                    .customizationID("keywords")
-                TableColumn("Species", value: \.species){ col in Text(col.species)}
-                    .width(min: 30, ideal: 50, max: 60)
-                    .customizationID("species")
+                TableColumnForEach(Self.columnDefs) { def in
+                    def.defaultColumn().customizationID(def.name)
+                }
             }
-        rows: {
-            ForEach(table.items)  { col in TableRow(col) }
-                //                ForEach(cols) { col in TableRow(TColumn).itemProvider { TColumn.itemProvider }  }
-                //                    .onInsert(of: [TColumn.draggableType]) { index, providers in
-                //                        TColumn.fromItemProviders(providers) { cols in
-                ////                            let experiment = store.getSelectedExperiment()
-                ////                            experiment.samples.insert(contentsOf: samples, at: index)
-                //                        }
-                //                    }
-            
-        }.frame(minWidth: 300, idealWidth: 600)
-//                .dropDestination(for: AnalysisNode.self) { (items, position) in
-//                    for item in items {print(item.name)  }
-//                    
-//                    for item in items { newTableItem(node: item, position:position)  }
-//                    return true
-//                }
-                //            .opacity(mode == .table ? 1.0 : 0.3)
+            .frame(minWidth: 300, idealWidth: 600)
         }
-//        
-//        func newTableItem(node:AnalysisNode, position:CGPoint)
-//        {
-//            table.items.append(TColumn("", parm: "Keyword", stat: "Date"))
-//            table.items.append(TColumn(node.name, parm: "CD3", stat: "Median"))
-//            table.items.append(TColumn(node.name, parm: "CD3", stat: "CV"))
-//            print("new table item: ", node.name)
-//        }
-//        
+    }
+    //--------------------------------------------------------------------------------------
+    @MainActor
+    func  processDB(result: Result<URL, any Error> ) {
+        switch result {
+            case .success(let file):
+                Task {
+                    let gotAccess = file.startAccessingSecurityScopedResource()
+                    if !gotAccess { return }
+                    do {
+                        let csvData = try Data(contentsOf: file)
+                        let csvString = String(data: csvData, encoding: .utf8)!
+                        allManuscripts.removeAll()
+                        parseCSV(csvString)
+                    } catch {
+                        print("Error fetching CSV file: \(error)")
+                    }
+                    file.stopAccessingSecurityScopedResource()     // release access
+                }
+            case .failure(let error):
+                print(error)         // handle error
+        }
+    }
+    
+    
+   func parseCSV(_ csvString: String)   {
+        var currentRow = ""
+       var inQuotes = false
+//       var backslashed = false
+//        var parsedLines: [String] = []
+        for char in csvString {
+//            if backslashed  { backslashed = false; continue}
+//            if char == "\\" { backslashed = true; continue }
+            if char == "\"" { inQuotes.toggle()            }
+            
+                // note that \r\n is one character which doesnt match \n
+            if (char == "\r\n" || char == "\n") && !inQuotes {
+//                parsedLines.append(currentRow)
+                addRecord(currentRow)
+                currentRow = ""
+            } else {
+                currentRow.append(char)
+            }
+        }
+        
+       if !currentRow.isEmpty {
+           addRecord(currentRow)
+       }
+    }
+   
+    func parseLine(_ csvString : String) -> [String]
+    {
+        var fields: [String] = []
+        var inQuotes = false
+//        var backslashed = false
+        var currentBuffer = ""
+        
+        for char in csvString {
+//            if backslashed  { backslashed = false; continue}
+//            if char == "\\" { backslashed = true; continue }
+            if char == "\"" { inQuotes.toggle() }
+            else if char == "," && !inQuotes {
+                fields.append(currentBuffer)
+                currentBuffer = ""
+            } else { currentBuffer.append(char)  }
+        }
+        if currentBuffer.count > 0 {
+            fields.append(currentBuffer)
+        }
+        return fields
         
     }
+ 
+
 }
+    //--------------------------------------------------------------------------------------
+
+func searchCytof(_ s: String) -> Bool{
+    if s.containsIgnoringCase("mass cytometry"){  return true}
+    if s.containsIgnoringCase("DVSSciences"){  return true}
+    if s.containsIgnoringCase("cytof") &&  !s.containsIgnoringCase("cytoflex")
+    {  return true}
+    return false
+
+}
+
+var allManuscripts = [String]()
+func searchUniqueManuscript(_ exp: FRExperiment) -> Bool{
+    if exp.Manuscripts.isEmpty { return false   }
+    if (allManuscripts.contains(exp.Manuscripts)){ return false   }
+    allManuscripts.append(exp.Manuscripts)
+    return true
+}
+

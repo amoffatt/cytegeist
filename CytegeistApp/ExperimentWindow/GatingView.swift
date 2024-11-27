@@ -35,6 +35,7 @@ struct GateConfigView : View {
 
 struct GatingView: View {
     
+    
         //    @State private var mode = ReportMode.gating
     @State var curTool = GatingTool.range
     @State private var isDragging = false
@@ -56,32 +57,34 @@ struct GatingView: View {
     
     @Environment(Experiment.self) var experiment
     @Environment(CytegeistCoreAPI.self) var core
-    
+    @Environment(BatchContext.self) var batchContext
+
     func deleteSelectedAnnotation() {
         if let focusedItem, focusedItem.remove != nil {
             confirmDelete = focusedItem
         }
     }
     
-    var chartDef: ChartDef? { population?.graphDef }
+    var chartDef: ChartDef? { population?.chartDef }
     var chartDefBinding: Binding<ChartDef?> {
         .init(get: { chartDef },
-              set: { if let chartDef = $0 { population?.graphDef = chartDef  }}
+              set: { if let chartDef = $0 { population?.chartDef = chartDef  }}
         )
     }
     
     func chart(_ meta: FCSMetadata) -> some View {
-        
-        return ChartView(population: population, def: chartDefBinding) { size in
+        return ChartView(population: population, config: chartDefBinding, focusedItem: $focusedItem) { size in
             ZStack(alignment: .topLeading) {
                 gateRadius(siz: size)
                 gateRange(siz: size)
                 gateRect(siz: size)
                 gateEllipse(siz: size)
-                crosshair(location: mouseLocation, size: size )
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .gesture(makeDragGesture(areaSize: size))
-                    .gesture(makeTapGesture())
+//                if population?.visibleChildren(batchContext, chartDef!).count == 0 {
+                    crosshair(location: mouseLocation, size: size )
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .simultaneousGesture(makeDragGesture(areaSize: size))
+                        .simultaneousGesture(makeTapGesture())
+//                }
             }
         }
         .padding(40)
@@ -103,17 +106,17 @@ struct GatingView: View {
             Buttons.delete() {    confirmDelete?.remove?()   }
             Buttons.cancel()
         }
-                            .onChange(of: population, initial:true) {
-                                if chartDef?.xAxis == nil && chartDef?.yAxis == nil {
-                                    chartDefBinding.wrappedValue?.xAxis = AxisDef(dim:"FSC-A")
-                                    chartDefBinding.wrappedValue?.yAxis = AxisDef(dim:"SSC-A")
-                                }
-                            }
+        .onChange(of: population, initial:true) {
+            if chartDef?.xAxis == nil && chartDef?.yAxis == nil {
+                 chartDefBinding.wrappedValue?.xAxis = AxisDef(dim:"FSC-A")
+                 chartDefBinding.wrappedValue?.yAxis = AxisDef(dim:"SSC-A")
+               }
+        }
         
     }
     
     func axisNormalizers() -> Tuple2<AxisNormalizer?> {
-        population?.getChartDimensions(chartDef).map { $0?.normalizer } ?? .init(nil, nil)
+        population?.getChartDimensions(batchContext, chartDef).map { $0?.normalizer } ?? .init(nil, nil)
     }
     
         //    @MainActor
@@ -123,20 +126,20 @@ struct GatingView: View {
         //        renderer.scale = 0.25
         //        return renderer.nsImage
         //    }
-    
+   let split = "arrow.left.and.right.righttriangle.left.righttriangle.right.fill"
         //--------------------------------------------------------------------
     var icons = ["None","triangle.righthalf.fill","pencil","square.and.pencil","ellipsis.circle", "skew", "scribble" ]
     
     var  GatingTools: some View {
         HStack{
-            Spacer()
+            Spacer(minLength: 200)
             HStack{
                 Spacer()
-                Button("Range", systemImage: "pencil",  action: { curTool = GatingTool.range }).background(curTool == .range ? .yellow : .gray)
-                Button("Split", systemImage: "triangle.righthalf.fill",   action: {curTool = GatingTool.split })
-                Button("Radius", systemImage: "triangle.righthalf.fill",   action: {curTool = GatingTool.radius }).background(curTool == .radius ? .yellow : .gray)
-                Button("Rectangle", systemImage: "square.and.pencil",   action: { curTool = GatingTool.rectangle}).background(curTool == .rectangle ? .yellow : .gray)
-                Button("Ellipse", systemImage: "ellipsis.circle",   action: {curTool = GatingTool.ellipse }).background(curTool == .ellipse ? .yellow : .gray)
+                Button("Range", systemImage: "pencil",  action: { curTool = GatingTool.range }).background(curTool == .range ? .gray : .clear)
+                Button("Split", systemImage: split,   action: {curTool = GatingTool.split }).background(curTool == .split ? .gray : .clear)
+                Button("Radius", systemImage: "triangle.righthalf.fill",   action: {curTool = GatingTool.radius }).background(curTool == .radius ? .gray : .clear)
+                Button("Rectangle", systemImage: "square.and.pencil",   action: { curTool = GatingTool.rectangle}).background(curTool == .rectangle ? .gray : .clear)
+                Button("Ellipse", systemImage: "ellipsis.circle",   action: {curTool = GatingTool.ellipse }).background(curTool == .ellipse ? .gray : .clear)
                 Spacer(minLength: 50)
                     //                Button("Quads", systemImage: "person.crop.square",   action: { curTool = GatingTool.quads})
                     //                Button("Polygon", systemImage: "skew",   action: { curTool = GatingTool.polygon})
@@ -182,7 +185,7 @@ struct GatingView: View {
     var body: some View {
         return VStack {
                 //            Text("Gating Prototype")
-            if let sample = population?.getSample() {
+            if let sample = population?.getSample(batchContext) {
                 HStack {
                     Text("Sample: \(sample.tubeName), population: \((population?.name).nonNil)")
                     Button("Contours", action: toggleContours)
@@ -223,7 +226,8 @@ struct GatingView: View {
     
     func makeTapGesture() -> some Gesture {
         TapGesture()
-            .onEnded {  focusedItem = nil  }
+            .onEnded {
+                focusedItem = nil  }
     }
  
     
@@ -251,7 +255,7 @@ struct GatingView: View {
         let width = abs(start - end)
         return Rectangle()
             .stroke(style: StrokeStyle(lineWidth: 1.8, dash: [15, 5]))
-            .foregroundColor(.yellow)
+            .foregroundColor(.green)
             .opacity(DEBUG || (isDragging && (curTool == .range)) ? 1.0 : 0.0)
             .position(x: min(start, end), y: 0)
             .offset(x: width / 2, y: siz.height / 2 )
@@ -325,7 +329,7 @@ struct GatingView: View {
             .opacity((curTool == .range) ? 0.0 : 1.0)
         }
         .fillAvailableSpace()
-        .opacity((isDragging || outOfBounds) ? 0.0 : 0.3)
+        .opacity((isDragging || outOfBounds) ? 0.0 : 0.5)
         .onHover(perform: { hovering in isHovering = true  })
         .onContinuousHover { phase in
             switch phase {
@@ -390,12 +394,12 @@ struct GatingView: View {
     
   //--------------------------------------------------------------------
     func toggleContours() {
-        let contours = population!.graphDef.contours
-        population!.graphDef.contours = contours ? false : true
+        let contours = population!.chartDef.contours
+        population!.chartDef.contours = contours ? false : true
     }
     func toggleSmoothing() {
-        let smoothing = population!.graphDef.smoothing
-        population!.graphDef.smoothing = smoothing == .off ? .low : .off
+        let smoothing = population!.chartDef.smoothing
+        population!.chartDef.smoothing = smoothing == .off ? .low : .off
     }
     
    //--------------------------------------------------------------------
@@ -464,7 +468,7 @@ struct GatingView: View {
             print("No population selected")
             return
         }
-        confirmedGate.graphDef = population.graphDef     //TBD -  findUnusedParameters
+        confirmedGate.chartDef = population.chartDef     //TBD -  findUnusedParameters
         population.addChild(confirmedGate)
         experiment.selectedAnalysisNodes.nodes = [confirmedGate]
         self.confirmedGate = nil

@@ -7,47 +7,59 @@
 
 import SwiftUI
 import CytegeistCore
-import SwiftData
+//import SwiftData
 
 @main
 @MainActor
 struct CytegeistApp: SwiftUI.App {
 
     @State private var appModel = App()
-    @Environment(\.undoManager) var undoManager
-    @FocusedValue(\.analysisNode) var focusedAnalysisNode
 
-    var body: some Scene {        
+    @FocusedValue(\.analysisNode) var focusedAnalysisNode
+       
+   
+    var body: some Scene {
         #if os(macOS)
             Window("Navigation", id: "nav")
             {
                 ExperimentView().environment(appModel)
-//                     .modelContainer(for:  Experiment.self, isUndoEnabled: true)
+//                    .modelContainer(for:  [Experiment.self, Sample.self], isUndoEnabled: true)
             }
+
             .commands {
                 if let focusedAnalysisNode,
                    let focusedAnalysisNode {
                     
                     CommandMenu("Chart") {
                         Button("Toggle Smoothing") {
-                            let smoothing = focusedAnalysisNode.graphDef.smoothing
-                            focusedAnalysisNode.graphDef.smoothing = smoothing == .off ? .low : .off
+                            let smoothing = focusedAnalysisNode.chartDef.smoothing
+                            focusedAnalysisNode.chartDef.smoothing = smoothing == .off ? .low : .off
                         }
                         Button("Toggle Contours") {
-                            let contours = focusedAnalysisNode.graphDef.contours
-                            focusedAnalysisNode.graphDef.contours = contours ? false : true
+                            let contours = focusedAnalysisNode.chartDef.contours
+                            focusedAnalysisNode.chartDef.contours = contours ? false : true
                         }
                     }
-                }
+                 }
             }
              
             Window("Pair Charts", id: "pair-charts") {
                 PairChartsPreview()
+                    .environment(BatchContext.empty)
             }
+        
+        WindowGroup(id: "sample-inspector", for: ExperimentSamplePair.self) { $sample in
+            if let sample = $sample.wrappedValue, 
+                let ref = sample.sample.ref {
+                SampleInspectorView(sample.experiment, sample:ref)
+            }
+        }
+        
             
         Window("Experiment Browser", id: "browse")
         {
             ExperimentBrowser().environment(appModel)
+//                .environmentObject(core)
         }
         #endif
 
@@ -65,5 +77,5 @@ struct CytegeistApp: SwiftUI.App {
 //                }
 //        }
 //        .immersionStyle(selection: .constant(.mixed), in: .mixed)
-     }
+    }
 }

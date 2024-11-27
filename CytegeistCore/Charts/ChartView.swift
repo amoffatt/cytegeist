@@ -128,6 +128,7 @@ public struct ChartConfig {
 
 public struct ChartView<Overlay>: View where Overlay:View {
     @Environment(CytegeistCoreAPI.self) var core: CytegeistCoreAPI
+    @Environment(BatchContext.self) var batchContext
     
     @State private var state: ChartViewStateData
     let config: ChartConfig
@@ -137,10 +138,11 @@ public struct ChartView<Overlay>: View where Overlay:View {
     @State var chartSize:CGSize = CGSize(1)
     
     
-    public init(population: AnalysisNode?, def:Binding<ChartDef?>, editable:Bool = true, overlay:@escaping (CGSize) -> Overlay = { _ in EmptyView() }){
+    public init(population: AnalysisNode?, def:Binding<ChartDef?>, editable:Bool = true, focusedItem:Binding<ChartAnnotation?>?, overlay:@escaping (CGSize) -> Overlay = { _ in EmptyView() }){
         self.config = ChartConfig(population, def)
         self.state = ChartViewStateData()
         self.editable = editable
+        self.focusedItem = focusedItem
         self._chartOverlay = overlay
     }
     
@@ -234,15 +236,19 @@ public struct ChartView<Overlay>: View where Overlay:View {
                 let size = proxy.size
                 ZStack(alignment:.topLeading) {
                     if let population = config.population, let chartDef = config.def.wrappedValue {
-                        ForEach(population.visibleChildren(chartDef), id:\.self) { child in
-                            // AM DEBUGGING
-                            let editing = false //child == focusedItem
+                    if let population, let chartDef = config.wrappedValue {
+                        ForEach(population.visibleChildren(batchContext, chartDef), id:\.self) { child in
+                            let editing = child == focusedItem?.wrappedValue
                             AnyView(child.view(size, editing))
                                 .environment(\.isEditing, editing)
-                                .onTapGesture {}       //    focusedItem = child
+                                .simultaneousGesture(
+                                    TapGesture()
+                                        .onEnded {
+                                            focusedItem?.wrappedValue = child
+                                        }
+                                    )
                         }
                     }
-                    _chartOverlay(size)
                 }
             }
         }
@@ -257,14 +263,82 @@ public struct ChartView<Overlay>: View where Overlay:View {
 //        return stateHash.finalize()
 //    }
     
+    @MainActor func getPopulationRequest() -> (PopulationRequest?, error:String?) {
+        guard let population else {
+            return (nil, "No population")
+        }
+        do {
+            return (try population.createRequest(batchContext), nil)
+        } catch {
+            return (nil, "Error creating chart: \(error)")
+        }
+    }
+    
+            
+    @MainActor func updateChartQuery()  {
+        chartQuery?.dispose()
+//        chartQuery = nil
+        errorMessage = ""
+        let config = self.config.wrappedValue
+        
+        guard let config, let population else {   return   }
+        
+          if let meta = sampleQuery?.data?.meta {
+            let (populationRequest, error) = getPopulationRequest()
+            guard let populationRequest else {
+                errorMessage = error.nonNil
+                return
+            }
+            
+            if isEmpty(config.yAxis?.dim),
+               let axis = config.xAxis, !axis.dim.isEmpty {
+                
+                if let dim = meta.parameter(named: axis.dim) {
+                    chartQuery = .histogram1D(core.histogram(.init(populationRequest, .init(axis.dim), chartDef: config)))
+                    chartDims = .init(dim, nil)
+                } else {
+                    errorMessage = "X axis dimension not in dataset"
+                }
+            }
+            else if let xAxis = config.xAxis, !xAxis.dim.isEmpty,
+                    let yAxis = config.yAxis, !yAxis.dim.isEmpty {
+                let xDim = meta.parameter(named: xAxis.dim)
+                let yDim = meta.parameter(named: yAxis.dim)
+                
+                if xDim == nil {        errorMessage = "X axis dimension not in dataset"  }
+               else if yDim == nil {    errorMessage = "Y axis dimension not in dataset"  }
+               else {
+                    print("Creating chart for \(population.name)")
+                    chartQuery = .histogram2D(core.histogram2D(
+                        HistogramRequest(populationRequest, .init(xAxis.dim, yAxis.dim), chartDef: config)))
+                    chartDims = .init(xDim, yDim)
+                }
+            }
+            else {
+                errorMessage = "Unsupported chart configuration"
+            }
+            
+        }
+    }
+    
+    
 }
 
 extension View {
 //    var population: PopulationRequest { get }
 //    var chartDef: Binding<ChartDef> { get }
-//    @MainActor
-//    func updateSampleQuery(_ core:CytegeistCoreAPI, _ population:AnalysisNode?, query:Binding<APIQuery<FCSFile>?>) -> some View {
-//    }
+    @MainActor
+    func updateSampleQuery(_ core:CytegeistCoreAPI, _ batchContext:BatchContext, _ population:AnalysisNode?, query:Binding<APIQuery<FCSFile>?>) -> some View {
+        let sampleRef = population?.getSample(batchContext)?.ref
+        return self.onChange(of: sampleRef, initial: true) {
+            query.wrappedValue?.dispose()
+            query.wrappedValue = nil
+            if let sampleRef {
+                let r = SampleRequest(sampleRef, includeData: false)
+                query.wrappedValue = core.loadSample(r)
+            }
+        }
+    }
     
     
     @MainActor

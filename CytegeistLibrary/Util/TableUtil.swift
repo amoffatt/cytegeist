@@ -37,7 +37,8 @@ public struct TableColumnField<RowValue> : Identifiable, Hashable where RowValue
     
     public func defaultColumn() -> TableColumn<RowValue, KeyPathComparator<RowValue>, Text, Text> {
         return TableColumn(name, value: keyPath) { item in
-            Text(value(from: item))
+            let s = value(from: item)
+            Text(s)
         }
     }
 

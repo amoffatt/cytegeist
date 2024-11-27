@@ -10,9 +10,10 @@ import Combine
 import CytegeistLibrary
 import CytegeistCore
 import SwiftUI
-import SwiftData
+//import SwiftData
 
 @Observable
+//@Transient
 class AnalysisNodeSelection: Codable {
     var nodes: Set<AnalysisNode> = []
     var first:AnalysisNode? { nodes.first }
@@ -20,13 +21,16 @@ class AnalysisNodeSelection: Codable {
 
 //-----------------------------------------------
 @Observable
+//@Model
 public class Experiment : Usable
 {
+//    @Environment var appModel
+    
     public static func == (lhs: Experiment, rhs: Experiment) -> Bool { lhs.id == rhs.id   }
     
     public var id = UUID()
     
-    var version: String? = "0.01"
+    let version: String
     var creationDate: Date = Date.now
     var modifiedDate: Date = Date.now
     var name = "All Samples"
@@ -41,34 +45,40 @@ public class Experiment : Usable
     var groups = [CGroup]()
     var tables = [CGTable]()
     var layouts = [CGLayout]()
-    var _core: CytegeistCoreAPI? = nil
+    var keywords = AttributeStore()
+    var parameters = [String]()         // keep a set of union of all parameter names
+//    @Transient
+    var core: CytegeistCoreAPI = CytegeistCoreAPI()
     
-    var core: CytegeistCoreAPI {       /// Lazilly created
-        if let _core {  return _core   }
-        _core = CytegeistCoreAPI()
-        return _core!
-    }
+    var defaultBatchContext: BatchContext { .init(allSamples: samples) }
+
+//  @Transient
+//    var _core: CytegeistCoreAPI?
+//
+//    var core: CytegeistCoreAPI {       /// Lazilly created
+//        if let _core {  return _core   }
+//        _core = CytegeistCoreAPI()
+//        return _core!
+//    }
         //--------------------------------------------------------------------------------
     required public init(from decoder: any Decoder) throws {
-        fatalError("Implement decoding")        // TODO AM Write class macro and property wrapper to handle properties with default values
+        self.version = "-02"
+//       fatalError("Implement decoding")        // TODO AM Write class macro and property wrapper to handle properties with default values
     }
     
     init(name: String = "Untitled", version: String = "" )
     {
         print("Experiment \(name) ")
-        self.name = name
         self.version = version
+        self.name = name.isEmpty ? dateStr(Date.now) : name
     }
     public func encode(to encoder: Encoder) throws {
             // Do nothing
     }
-        //--------------------------------------------------------------------------------
-    public func addSample(_ sample: Sample)   {
-        samples.append(sample)
-    }
+  //--------------------------------------------------------------------------------
     
     func addTable() -> CGTable {
-        let table = CGTable()
+        let table = CGTable(isTemplate: true)
         table.name = table.name.generateUnique(existing: tables.map { $0.name })
         tables.append(table)
         return table
@@ -81,6 +91,12 @@ public class Experiment : Usable
         return layout
     }
     
+    func addLayout(layout: CGLayout, cells: [LayoutCell])  -> CGLayout {
+        let layout = CGLayout(orig: layout, cells: cells)
+        layout.name = layout.name.generateUnique(existing: layouts.map { $0.name })
+        layouts.append(layout)
+        return layout
+    }
         //--------------------------------------------------------------------------------
     
     public var focusedSample: Sample? {
@@ -122,68 +138,102 @@ public class Experiment : Usable
         }
     }
     
-    
-        //--------------------------------------------------------------------------------
-    func onFCSPicked(_result: Result<[URL], any Error>)
-    {
-        Task {
-            do {
-                try print("FCSPicked urls: ", _result.get())
-                for url in try _result.get()
-                {
-                    let gotAccess = url.startAccessingSecurityScopedResource()
-                    if !gotAccess { break }
-                    await readFCSFile(url)
-                    url.stopAccessingSecurityScopedResource()     // release access
-                }
-            }
-            catch let error as NSError {
-                debug("Ooops! Something went wrong: \(error)")
-            }
-        }
+    func editStr(s: String) -> String {
+        let len = s.count
+        return "\(s.substring(offset: 0, length: 12))...\(s.substring(offset: len-12, length: 12))"
     }
+ 
+  //--------------------------------------------------------------------------------
+  // streaming
     
-    public func readFCSFile(_ url: URL) async
-    {
-        if  url.isDirectory
-        {
-            let options: FileManager.DirectoryEnumerationOptions = [.skipsHiddenFiles, .skipsPackageDescendants]
-            let fcsFiles = walkDirectory(at: url, options: options).filter {  $0.pathExtension == "fcs"  }
-            for await item in fcsFiles { await readFCSFile(item) }
-            return
-        }
+    public func xml() -> String {
         
-        do  {
-            let sample = Sample(ref: SampleRef(url: url))
-            sample.setUp(core:core)
-            addSample(sample)
-        }
-            //        catch let err as NSError {
-            //            debug("Ooops! Something went wrong: \(err)")
-            //        }
-        debug("FCS Read")
+        let sampleStr = "<Samples>\n" + samples.compactMap { $0.xml() }.joined() + "</Samples>\n"
+        let panelStr = "<Panels>\n" + panels.compactMap { $0.xml() }.joined() + "</Panels>\n"
+        let groupStr = "<Groups>\n" + groups.compactMap { $0.xml() }.joined() + "</Groups>\n"
+        let tableStr = "<Tables>\n" + tables.compactMap { $0.xml() }.joined() + "</Tables>\n"
+        let layoutStr = "<Layouts>\n" + layouts.compactMap { $0.xml() }.joined() + "</Layouts>\n"
+        let subs: String  = sampleStr + panelStr + groupStr + tableStr + layoutStr
+        let attr =  attributes()
+        let keywords = keywords.xml()
+        return "<Experiment " + attr + ">\n" + keywords + subs + "</Experiment>\n"
+    }
+
+    public func attributes() -> String {
+        return "name=\(self.name) version=\(self.version)"
+    }
+   //--------------------------------------------------------------------------------
+
+    // TODO
+    public func parameterNames() -> [String] {
+        return ["<All>", "FS", "SS", "FITC", "PE", "APC", "Cy7-APC"]
+    }
+        // TODO
+   public func populationNames() -> [String] {
+        return ["<All>", "All Cells", "Single", "Lymphocytes", "Monocytes", "T Cells", "CD3+", "CD4+", "CD8+"]
     }
     
-    
-        // Recursive iteration
-    func walkDirectory(at url: URL, options: FileManager.DirectoryEnumerationOptions ) -> AsyncStream<URL> {
-        AsyncStream { continuation in
-            Task {
-                let enumerator = FileManager.default.enumerator(at: url, includingPropertiesForKeys: nil, options: options)
-                while let fileURL = enumerator?.nextObject() as? URL {
-                    print(fileURL)
-                    if fileURL.hasDirectoryPath {
-                        for await item in walkDirectory(at: fileURL, options: options) {
-                            continuation.yield(item)
-                        }
-                    } else {  continuation.yield( fileURL )    }
-                }
-                continuation.finish()
-            }
-        }
+        // TODO
+   public func keywordNames() -> [String] {
+        return ["Date", "Tube Name", "Url", "Total", "Investigator", "Stains"]
     }
-        //--------------------------------------------------------------------------------
-    public struct Entry
+    
+
+    //--------------------------------------------------------------------------------
+    public convenience init(ws: TreeNode )
+    {
+        self.init()
+        print ("Experiment's Tree Count: ", ws.deepCount)
+        let ws = ws.children.first
+        let samps = ws?.findChild(value: "SampleList")
+        let gps = ws?.findChild(value: "Groups")
+        let tabls = ws?.findChild(value: "TableEditor")
+        let lays = ws?.findChild(value: "LayoutEditor")
+        
+        if let s = samps  { self.processSamples(s)   }
+        if let g = gps    { self.processGroups(g)    }
+        if let t = tabls  { self.processTables(t)    }
+        if let l = lays  { self.processLayouts(l)    }
+        print ("Samples: \(samples.count) Groups: \(groups.count) Tables: \(tables.count) Layouts: \(layouts.count) ")
+        
+    }
+
+    func processSamples(_ xml: TreeNode)
+    {
+        for node in xml.children where node.value == "Sample"  {
+            samples.append(Sample(xml: node))
+        }
+        print("SampleList: ", samples.count)
+    }
+    func processGroups(_ xml: TreeNode)
+    {
+        for node in xml.children where node.value == "GroupNode"  {
+            groups.append(CGroup(xml: node))
+        }
+        print("Groups: ", groups.count)
+    }
+    func processTables(_ xml: TreeNode)
+    {
+        for node in xml.children where  node.value == "Table" {
+            tables.append(CGTable(node))
+        }
+        print("Tables: ", tables.count)
+    }
+    func processLayouts(_ xml: TreeNode)
+    {
+        for node in xml.children where  node.value == "Layout" {
+            layouts.append(CGLayout(node))
+        }
+        print("Layouts: ", layouts.count)
+    }
+
+    func processMatrices(_ xml: TreeNode)    {   }  //IGNORE
+    func processCytometers(_ xml: TreeNode)   {    }//IGNORE
+        
+   //--------------------------------------------------------------------------------
+   //  Entry holds all of the values for a given keyword
+    
+    struct Entry
     {
         var key: String
         var vals: [String] = []
@@ -198,29 +248,33 @@ public class Experiment : Usable
         }
     }
     
-    var keywords = [String]()
+
+//    var keywords = [String]()
     var entries = [Entry]()
+    
     public func buildVaribleKeyDictionary() /// -> [Entry]
     {
         var union: [Entry] = []
         var allKeywords: Set<String> = []
         for sample in samples {
-            let keywords = sample.meta?.keywords.filter( {!isParameterKey($0.name) && !isExcludedKey($0.name) } )           // exclude parameter keywords
-            for s in keywords! {
-                allKeywords.insert(s.name)
-            }
-           
-            for keyPair in keywords! {
-                if let entry = union.firstIndex(where: { $0.key == keyPair.name} ) {
-                    union[entry].vals.append(keyPair.value)
+            if let keywords = sample.meta?.keywords.filter( {!isParameterKey($0.name) && !isExcludedKey($0.name) } )           // exclude parameter keywords
+            {
+                for s in keywords {
+                    allKeywords.insert(s.name)
                 }
-                else {   union.append(Entry(keyPair))  }
+        
+                for keyPair in keywords {
+                    if let entry = union.firstIndex(where: { $0.key == keyPair.name} ) {
+                        union[entry].vals.append(keyPair.value)
+                    }
+                    else {   union.append(Entry(keyPair))  }
+                }
             }
         }
-        
+
 //        let ct = union.count            // number of keywords in all samples
 
-        keywords.append(contentsOf: allKeywords)
+//        keywords.append(contentsOf: allKeywords)
         entries.append(contentsOf: union)
 
         let sampleCt = samples.count
@@ -236,7 +290,7 @@ public class Experiment : Usable
     
     func isParameterKey(_ keyword: String) -> Bool
     {
-        keyword.starts(with: "$P")      // should check for a digit in 3rd position
+        keyword.starts(with: "$P")      //TODO  should check for a digit in 3rd position
     }
     func isExcludedKey(_ keyword: String) -> Bool
     {
@@ -248,45 +302,9 @@ public class Experiment : Usable
 
     subscript(sampleId: Sample.ID?) -> Sample? {
         get {
-            if let id = sampleId {  return samples.first(where: { $0.id == id })!  }
+            if let id = sampleId {  return samples.first(where: { $0.id == id })  }
             return nil
         }
     }
 }
 
-    //--------------------------------------------------------------------------------
-public struct CGroup : Identifiable, Codable
-{
-    public var id = UUID()
-    var name = ""
-    var keyword: String?
-    var value: String?
-    @CodableIgnored
-    var color: Color?
-    
-    init(name: String = "name", color: Color?, keyword: String?, value:  String?) {
-        self.name = name
-        self.color = color
-        self.keyword = keyword
-        self.value = value
-    }
-}
-    //--------------------------------------------------------------------------------
-struct CPanel : Usable
-{
-    var id = UUID()
-    var name = ""
-    var keyword: String?
-    var values: [String]
-    @CodableIgnored
-    var color: Color?
-    
-     public static func == (lhs: CPanel, rhs: CPanel) -> Bool {   lhs.id == rhs.id   }
-
-    init(name: String = "name", color: Color?, keyword: String?, values:  String?) {
-        self.name = name
-        self.color = color
-        self.keyword = keyword
-        self.values = []
-    }
-}

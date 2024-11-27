@@ -7,18 +7,69 @@ import Charts
 import CytegeistLibrary
 import CytegeistCore
 
+    //-------------------------------------------------------------
+// layout cell is the replicate made during batches
+
+public struct LayoutCell : Codable, Hashable, Identifiable
+{
+    public var id = UUID()
+    public func hash(into hasher: inout Hasher) {     hasher.combine(id)   }
+    let sample: Sample
+    var iteratorValue: String = ""
+    let items: [LayoutItem]
+    let rect: CGRect
+    public init (sample: Sample, items: [LayoutItem], val: String = "")
+    {
+        self.sample =  sample
+        self.items = items
+        iteratorValue = val
+
+        var xMin  =  10000.0, xMax = 0.0, yMin = 10000.0, yMax = 0.0
+        for item in items {
+            let r = item.getRect()
+            xMin = min(xMin, r.minX)
+            xMax = max(xMax, r.maxX)
+            yMin = min(yMin, r.minY)
+            yMax = max(yMax, r.maxY)
+        }
+        rect =  CGRect(x: xMin, y: yMin, width: xMax - xMin, height: yMax - yMin)
+        items.forEach { $0.position = $0.position - rect.origin }
+        items.forEach { $0.inject(sample: sample, iterator: iteratorValue) }
+    }
+    func width() -> CGFloat    {   rect.width    }
+    
+}
+    //-------------------------------------------------------------
+
 @Observable
 class CGLayout : Codable, Hashable, Identifiable
 {
     var id = UUID()
     var name = "Untitled Layout"
     var items = [LayoutItem]()
+    var isTemplate = true
+    var cells: [LayoutCell]?        // result of a batch
     //-------------------------------------------------------------
     init() {    }
     init(_ xml: TreeNode)    {    }
+
+    init(orig: CGLayout, cells: [LayoutCell])
+    {
+        items = orig.items
+        self.cells = cells
+        isTemplate = false
+  }
     //-------------------------------------------------------------
     static func == (lhs: CGLayout, rhs: CGLayout) -> Bool {       lhs.id == rhs.id   }
     func hash(into hasher: inout Hasher) {     hasher.combine(id)   }
+    
+    public func xml() -> String {
+        return "<Layout " + attributes() + " >\n\t<Items>\n" +
+               items.compactMap { $0.xml() }.joined() +
+        "\t</Items>\n</Layout>\n"
+    }
+    
+    public func attributes() -> String {  return "name= \(self.name) id=\(self.id)"  }
 
     //-------------------------------------------------------------
     // adding items
@@ -46,7 +97,27 @@ class CGLayout : Codable, Hashable, Identifiable
     
     public func newTable(name: String, position:CGPoint)
     {
-        let item = LayoutItem(.table, position: position)
+        let item = LayoutItem(.table, position: position, size: CGSize(width: 220, height: 120))
+        item.selected = true
+        addItem(item)
+    }
+    
+    public func addImage() -> ()
+    {
+        if !optionKey() { deselectAll()  }
+        newImage(name: "some image", position: CGPoint.zero, size: CGSize(width: 150, height: 180))
+    }
+    
+    public func group() -> ()
+    {
+        print("TODO group")
+//        if !optionKey() { deselectAll()  }
+//        newImage(name: "some image", position: CGPoint.zero)
+    }
+    
+    public func newImage(name: String, position:CGPoint, size: CGSize)
+    {
+        let item = LayoutItem(.image, position: position, size: size)
         item.selected = true
         addItem(item)
     }
@@ -81,7 +152,7 @@ class CGLayout : Codable, Hashable, Identifiable
             item.selected = sectRect(pt: item.position, size: item.size, rect: marquee)
         }
     }
-    
+    // TODO dont think this is correct
     public func sectRect(pt: CGPoint, size: CGSize, rect: CGRect) -> Bool
     {
         let halfHght = (size.height / 2), halfWidth = (size.width / 2)
@@ -134,8 +205,21 @@ public enum ELayoutType : Codable {
     case text(String)
     case chart(ChartDef?)
     case table
+    case image
+    case group
+    
+    public func xml() -> String
+    {
+        switch self {
+            case .text: return "text"
+            case .chart: return "chart"
+            case .table: return "table"
+            case .image: return "image"
+            case .group: return "group"
+        }
+    }
 }
-
+//Model
 @Observable
 public class LayoutItem: Codable, Identifiable, Equatable
 {
@@ -144,52 +228,53 @@ public class LayoutItem: Codable, Identifiable, Equatable
     var size: CGSize = .zero
     var position: CGPoint = .zero
     var tmpOffset: CGPoint = .zero
+    var currentCenterPosition:CGPoint { position + tmpOffset + size / 2 }
     var type: ELayoutType
-//    var value: String = ""              //Text
-//    var xAxis: AxisNormalizer?          //Chart
-//    var yAxis: AxisNormalizer?
-//    var data: Data?                     //Table
-
-// save scale, rotation, background, stroke, etc
+        //    var value: String = ""              //Text
+        //    var xAxis: AxisNormalizer?          //Chart
+        //    var yAxis: AxisNormalizer?
+        //    var data: Data?                     //Table
+        //      var items: [LayoutItem]             // Group
+        // save scale, rotation, background, stroke, etc
     
     var selected:Bool = false
     private(set) var node:AnalysisNode?
-
+    
     var name:String {
         get { node != nil ? node!.name : "n/a"}
         set { if node != nil { node!.name = newValue }}
     }
-
-//    init(_ type: ELayoutType, position: CGPoint = .zero, node: AnalysisNode? = nil) {
-//        self.node = node
-//        self.position = position
-//        self.type = type
-//    }
     
-//    init(position: CGPoint, type: ELayoutType) {
-//        self.position = position
-//        self.type = type
-//        
-//    }
-//    init(value: String) {
-//        self.value = value
-//        self.type = .text
-//    }
+        //    init(_ type: ELayoutType, position: CGPoint = .zero, node: AnalysisNode? = nil) {
+        //        self.node = node
+        //        self.position = position
+        //        self.type = type
+        //    }
+    
+        //    init(position: CGPoint, type: ELayoutType) {
+        //        self.position = position
+        //        self.type = type
+        //
+        //    }
+        //    init(value: String) {
+        //        self.value = value
+        //        self.type = .text
+        //    }
     
     public init(_ type: ELayoutType, node: AnalysisNode? = nil, position: CGPoint = .zero, size: CGSize = .init(100)) {
         self.node = node
         self.position = position
         self.type = type
         self.size = size
-//        self.tmpOffset = tmpOffset
+            //        self.tmpOffset = tmpOffset
     }
-
-//    convenience init(data: Data?) {
-//        self.init(position: CGPoint.zero, node: nil, type: ELayoutType.table )
-//         self.data = data
-//      }
     
-     public required init(from decoder: any Decoder) throws {
+        //    convenience init(data: Data?) {
+        //        self.init(position: CGPoint.zero, node: nil, type: ELayoutType.table )
+        //         self.data = data
+        //      }
+    
+    public required init(from decoder: any Decoder) throws {
         fatalError("init(from:) has not been implemented")
     }
     
@@ -197,98 +282,25 @@ public class LayoutItem: Codable, Identifiable, Equatable
     {
         LayoutItem(self.type, node: self.node, position: self.position, size: self.size)
     }
+    
+    public func inject(sample: Sample, iterator: String)
+    {
+        self.node = node
+    }
+    
+    public func getRect() -> CGRect {
+        return CGRect(origin: position, size: size)
+    }
+    public func string() -> String {  return type.xml()    }
+    public func xml() -> String {
+        return "<LayoutItem " + attributes() + " >\n" +
+        position.xml() + size.xml() +  // + type specific content
+        "</LayoutItem>\n"
+        
+    }
+    
+    public func attributes() -> String {
+        return "type=\(type.xml())"
+    }
+
 }
-
-
-//---------------------------------------------------------------------
-//@Observable
-//public class CText: LayoutItem {
-//    var value: String = ""
-//    
-//    init(value: String) {
-//        self.value = value
-//        super.init(position: CGPoint(x: 200, y: 200), node: nil )
-//    }
-//    
-//    
-//    init(value: String, position: CGPoint) {
-//        super.init(position: position, node: nil )
-//        self.value = value
-//   }
-//
-//    public  required init(from decoder: any Decoder) throws {
-//        fatalError("init(from:) has not been implemented")
-//    }
-//    
-//    override public func clone() -> CText    {
-//        return .init(value: value, position: position)
-//   }
-//
-//}
-    //---------------------------------------------------------------------
-
-//@Observable
-//class CChart : LayoutItem
-//{
-//    var xAxis: AxisNormalizer?
-//    var yAxis: AxisNormalizer?
-//
-//    init() {
-//        super.init(position: CGPoint.zero, node: nil )
-//    }
-//   
-//    init(xAxis: AxisNormalizer?, yAxis: AxisNormalizer?
-//         , position:CGPoint = .zero, node: AnalysisNode?) {
-// 
-//        self.xAxis = xAxis;
-//        self.yAxis = yAxis;
-//        super.init(position: position, node: node )
-// 
-//    }
-//    
-//    init(node: AnalysisNode, position:CGPoint = .zero) {
-//        super.init(position: position, node: node )
-//    }
-//    
-//    
-//    required init(from decoder: any Decoder) throws {
-//        fatalError("init(from:) has not been implemented")
-//    }
-//    
-//    override public func clone() -> CChart
-//    {
-//        return .init(xAxis: xAxis, yAxis: yAxis, position: position, node: node)
-//    }
-//
-//}
-//---------------------------------------------------------------------
-//
-//@Observable
-//class CTable : LayoutItem
-//{
-//    var data: Data?      
-//    init(position: CGPoint) {
-//        self.data = nil
-//        super.init(position: CGPoint.zero, node: nil )
-//    }
-//    init(data: Data?) {
-//        super.init(position: CGPoint.zero, node: nil )
-//        self.data = data
-//    }
-//    
-//    init(data: Data?, position: CGPoint, node: AnalysisNode?)
-//    {
-//        super.init(position: position, node: node )
-//       self.data = data
-//    }
-//
-//    required init(from decoder: any Decoder) throws {
-//        fatalError("init(from:) has not been implemented")
-//    }
-//    
-//    override public func clone() -> CTable
-//    {
-//        return .init(data: data, position: position, node: node)
-//    }
-//
-//}

@@ -409,7 +409,7 @@ public struct HistogramData<D:Dimensions> {
 
 fileprivate func defaultCountAxis(mode:Double?) -> AxisNormalizer {
     let upper = max(1, mode ?? 0)
-    return .linear(min: 0, max: upper)
+    return .linear(minVal: 0, maxVal: upper)
 }
 
 
@@ -591,7 +591,8 @@ extension HistogramData<XY> {
         var size: D.IntCoord
         func getLineWidth(_ index: Int) -> CGFloat
         {
-            index % 4 == 0 ? 0.5 : 0.8
+            return 1.0
+            //index % 4 == 0 ? 0.5 : 0.8
             
         }
         func getColor(_ index: Int) -> Color

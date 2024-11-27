@@ -8,6 +8,7 @@
 import Foundation
 import CytegeistLibrary
 import CytegeistCore
+import SwiftUI
 
 
 
@@ -22,6 +23,8 @@ final class App {
     }
     var immersiveSpaceState = ImmersiveSpaceState.closed
     
+//    public var core = CytegeistCoreAPI()
+
     var experiments: [Experiment] = []
     var selectedExperiment: Experiment.ID?
 //    var mode: SampleListMode = .table
@@ -57,17 +60,17 @@ final class App {
         }
     }
         //-------------------------------------------------------------------------
-    private func loadExperiments(from storeFileData: Data) -> [Experiment] {
-        do {
-            let decoder = JSONDecoder()
-            decoder.dateDecodingStrategy = .iso8601
-                //            print(storeFileData([)in: [0, 300])
-            return try decoder.decode([Experiment].self, from: storeFileData)
-        } catch {
-            print(error)
-            return []
-        }
-    }
+//    private func loadExperiments(from storeFileData: Data) -> [Experiment] {
+//        do {
+//            let decoder = JSONDecoder()
+//            decoder.dateDecodingStrategy = .iso8601
+//                //            print(storeFileData([)in: [0, 300])
+//            return try decoder.decode([Experiment].self, from: storeFileData)
+//        } catch {
+//            print(error)
+//            return []
+//        }
+//    }
         //-------------------------------------------------------------------------
         //------------------------------------------------------
         // gain access to the directory and call readFCSFile

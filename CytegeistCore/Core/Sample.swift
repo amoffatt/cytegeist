@@ -7,7 +7,9 @@
 
 import Foundation
 import CytegeistLibrary
+import SwiftUI
 import SwiftData
+import Observation
 
 //---------------------------------------------------------
 // CDimension is the analog of a samples parameter
@@ -36,11 +38,11 @@ public class Sample : Identifiable, Codable, Hashable
     public var id = UUID()
     var sampleId = ""
     
-    var ref:SampleRef? = nil
+    public var ref:SampleRef? = nil
     
 //    @CodableIgnored
 //    @ObservationIgnored
-    var error:Error? = nil
+    @Transient var error:Error? = nil
     
     public func encode(to encoder: any Encoder) throws {
         
@@ -52,7 +54,7 @@ public class Sample : Identifiable, Codable, Hashable
     //    var validity = SampleValidityCheck ()
     
     public var imageURL: URL?
-    public var meta:FCSMetadata?
+    @Transient public var meta:FCSMetadata?
     
 //    var keywords:AttributeStore { meta?.keywordLookup ?? [:] }
     public subscript(_ keyword:String) -> String { (meta?.keywordLookup[keyword]).nonNil }
@@ -70,44 +72,50 @@ public class Sample : Identifiable, Codable, Hashable
     public var src:  String { self["$SRC"] }
     public var sys:  String { self["$SYS"] }
     public var cytometer:  String { self["$CYT"] }
+    public var comp:  String { self["$COMP"] }
     public var setup1:  String { self["CST SETUP STATUS"] }
     
     public var displayName:String {
         nonEmpty(tubeName, filename, ref?.filename, "<Unnamed Sample>")
     }
 
-
-        //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
     //read from JSON
     
     public required init(from decoder: any Decoder) throws {
 //        fatalError("AM: Implement decoding")
 }
     
-        //-------------------------------------------------------------------------
-    public init(
-        ref: SampleRef
-    ) {
+    //-------------------------------------------------------------------------
+    public init(ref: SampleRef) {
         self.ref = ref
         print("Sample \(ref)")
     }
- 
-//    convenience init(_ xml: TreeNode)
-//    {
-//        assert(xml.value == "Sample")
-//        self.init()
-//    }
     
+    public init( xml: TreeNode )
+    {
+        if let url = xml.attrib.dictionary["url"] {
+            self.ref = SampleRef(url: URL(string: url)!)
+        }
+    }
+   //-------------------------------------------------------------------------
+
+    public func xml() -> String {
+        if let ref {
+            return "\t<Sample name=\(ref.filename) url=\(ref.url) />\n"
+        }
+        return ""
+    }
     private func handleError(_ error:SampleError) {
         print("Error: cannot load sample: \(error.localizedDescription)")
         self.error = error
     }
         //-------------------------------------------------------------------------
         //  iniitialize based on a new FCS File added
-    public func setUp(core:CytegeistCoreAPI)
+    
+    public func setUp( core: CytegeistCoreAPI)
     {
         debug("in SetUp")
-        
         guard let ref else {
             handleError(.noRef)
             return
@@ -119,18 +127,22 @@ public class Sample : Identifiable, Codable, Hashable
                 btime = meta?.keywordLookup["$BTIM"] ?? ""
                 print("Loaded metadata")
             } catch {
+                print(error)
                 handleError(.queryError(error))
             }
         }
         print("sample validity check")
     }
     
-    private var _tree:AnalysisNode?
+    @Transient private var _tree:AnalysisNode = AnalysisNode()
     public func getTree() -> AnalysisNode {
-        if _tree == nil {
-            _tree = AnalysisNode(sample:self)
-        }
-        return _tree!
+        _tree.sampleID = self.id
+        return _tree
+
+//        if _tree == nil {
+//            _tree = AnalysisNode(sample:self)
+//        }
+//        return _tree!
     }
 
 //    public func addTree(_ node: AnalysisNode)           //, _ deep: Bool = true

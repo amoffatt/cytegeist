@@ -6,23 +6,31 @@
 
 import Foundation
 import SwiftUI
+import SwiftData
 import UniformTypeIdentifiers.UTType
 import CytegeistLibrary
+
 
 public extension UTType {  static var population = UTType(exportedAs: "cytegeist.population")   }
 enum AnalysisNodeError : Error {  case noSampleRef      }
 //---------------------------------------------------------
+//Model
 @Observable
 public class AnalysisNode : Codable, Transferable, Identifiable, Hashable, CustomStringConvertible
 {
     
     public var id = UUID()
     public var name: String = ""
-    public var description: String = ""
-    public var sample: Sample? = nil                      // nil except at the root node
-    public var graphDef = ChartDef()              // how this population wants to be shown
+    public var description: String { name }
+    public var sampleID: Sample.ID? = nil                      // nil except at the root node
+    public var chartDef = ChartDef()              // how this population wants to be shown
     public var statistics =  [String : Double]()         // cache of stats with values
     public private(set) var children: [AnalysisNode] = []        // subpopulations dependent on us
+    public var extraAttributes = AttributeStore()              // how this population wants to be shown
+    
+        // TODO parent should not be encoded/decoded. Value is set when parent decodes its children
+    @CodableIgnored
+    @ObservationIgnored
     private var _parent: AnalysisNode?
     public var parent: AnalysisNode? {
         get { _parent }
@@ -34,19 +42,17 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable, Custo
         }
     }
         //  these fields are only applicable to populations
-    @ObservationIgnored
-    @CodableIgnored
     public var gate: AnyGate? = nil                      // the predicate to filter ones parent
-//    @ObservationIgnored
-//    @CodableIgnored
-//    public var parentImage: NSImage? = nil            // a picture of parent pop showing our gate
+                                                         //    @ObservationIgnored
+                                                         //    @CodableIgnored
+                                                         //    public var parentImage: NSImage? = nil            // a picture of parent pop showing our gate
     @ObservationIgnored
     @CodableIgnored
     public var color: Color? = nil
     public var opacity: Double = 1.0
     public var labelOffset: CGPoint = .zero
     public var invert: Bool = false
-//    public var isExpanded: Bool = true
+        //    public var isExpanded: Bool = true
     
     
         //--------------------------------------------------------
@@ -58,20 +64,34 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable, Custo
         //--------------------------------------------------------
     public init() {    }
     
+    public func encode(to encoder: any Encoder) throws {
+        var container = encoder.container(keyedBy: Self.CodingKeys.self)
+        try container.encode(_id, forKey: .id)
+        try container.encode(_name, forKey: .name)
+        try container.encode(_sampleID, forKey: .sampleID)
+        try container.encode(_chartDef, forKey: .chartDef)
+//        try container.encode(_statistics, forKey: .id)
+//        try container.encode(_children, forKey: .id)
+    }
+    
     public required init(from decoder: any Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        self._id = try container.decode(UUID.self, forKey: ._id)
-        self._name = try container.decode(String.self, forKey: ._name)
-        self._sample = try container.decodeIfPresent(Sample.self, forKey: ._sample)
-        self._graphDef = try container.decode(ChartDef.self, forKey: ._graphDef)
-        self._statistics = try container.decode([String : Double].self, forKey: ._statistics)
-        self._children = try container.decode([AnalysisNode].self, forKey: ._children)
-        self.__parent = try container.decodeIfPresent(AnalysisNode.self, forKey: .__parent)
-        self._gate = try container.decode(CodableIgnored<AnyGate>.self, forKey: .gate)
-        self._color = try container.decode(CodableIgnored<Color>.self, forKey: .color)
-        self._opacity = try container.decode(Double.self, forKey: ._opacity)
-        self._labelOffset = try container.decode(CGPoint.self, forKey: ._labelOffset)
-        self._invert = try container.decode(Bool.self, forKey: ._invert)
+        let container = try decoder.container(keyedBy: Self.CodingKeys.self)
+        self._id = try container.decode(UUID.self, forKey: .id)
+        self._name = try container.decode(String.self, forKey: .name)
+        self._sampleID = try container.decodeIfPresent(Sample.ID.self, forKey: .sampleID)
+        self._chartDef = try container.decode(ChartDef.self, forKey: .chartDef)
+//        self._statistics = try container.decode([String : Double].self, forKey: ._statistics)
+//        self._children = try container.decode([AnalysisNode].self, forKey: ._children)
+//            //        self.__parent = try container.decodeIfPresent(AnalysisNode.self, forKey: .__parent)
+//            //        self._gate = try container.decode(CodableIgnored<AnyGate>.self, forKey: .gate)
+//        self._color = try container.decode(CodableIgnored<Color>.self, forKey: .color)
+//        self._opacity = try container.decode(Double.self, forKey: ._opacity)
+//        self._labelOffset = try container.decode(CGPoint.self, forKey: ._labelOffset)
+//        self._invert = try container.decode(Bool.self, forKey: ._invert)
+    }
+    
+    enum CodingKeys : CodingKey {
+        case id, name, sampleID, chartDef
     }
     
     public init(children: [AnalysisNode]? = nil)  {
@@ -79,7 +99,7 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable, Custo
     }
     
     public init(sample: Sample)  {
-        self.sample  = sample
+        self.sampleID  = sample.id
     }
     
     public init(gate: AnyGate? = nil, invert: Bool = false, color: Color? = nil, opacity: Double = 0.2) {
@@ -91,9 +111,9 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable, Custo
     
     public init(_ original:  AnalysisNode ) {
         self.gate = original.gate
-        self.description = original.description
-        self.sample = original.sample
-        self.graphDef = original.graphDef
+//        self.description = original.description
+        self.sampleID = original.sampleID
+        self.chartDef = original.chartDef
         self.statistics = [:]
         self.children = []
         self.parent = nil
@@ -102,21 +122,62 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable, Custo
         self.color = original.color ?? .green
         self.opacity = original.opacity
    }
+    
+    
+    public func xml() -> String {
+        let attributes = attributes()
+        let head = "<Population " + attributes + ">\n"
+        let graph = chartDef.xml()
+        let gate = gate?.xml() ?? ""
+        var kids = "<Subpopulations>\n"
+        for child in children {   kids.append(child.xml())    }
+        let tail = "</Subpopulations>\n</Population>\n"
+        return head + graph + gate + kids + tail
+    }
+    
+    public func attributes() -> String {
+        let inv = invert ? "true" : "false"
+        return "inverted=\(inv)"
+    }
+    
 
+    convenience init(fjxml: TreeNode)
+    {
+        self.init()
+
+        extraAttributes.dictionary.merge(fjxml.attrib.dictionary, uniquingKeysWith: +)
+        if let gs = fjxml.findChild(value: "Graph")   {
+            chartDef = ChartDef(fjxml:gs)
+        }
+        if let g = fjxml.findChild(value: "Gate")  {
+//            gate = Gate(fjxml: g)
+        }
+        for stat in fjxml.children where (stat.value == "Statistic")  {
+//            statistics.append( Statistic(fjxml: stat))
+        }
+        if let kids = fjxml.findChild(value: "Subpopulations")  {
+            addChild(AnalysisNode(fjxml:kids))
+        }
+    }
 
         //--------------------------------------------------------
-    public func getSample() -> Sample? 
-    { 
-        let s: Sample? = sample ?? parent?.getSample()
-        
-        if s != nil {
-            print("AnalysisNode.getSample() => \(s!.tubeName)")
-        }
-        else { print("null sample")}
-        return s
-        
+    public func getSampleID() -> Sample.ID?
+    {
+        return sampleID ?? parent?.getSampleID()
     }       //AT?
-    public func getSampleMeta() -> FCSMetadata? { getSample()?.meta }
+    
+    public func getSample(_ ctx:BatchContext) -> Sample? {
+        guard let sampleID = getSampleID() else {  return nil   }
+        
+        if let s = ctx.getSample(sampleID) {
+//            print("getSample(): \(s.tubeName), ref: \(s.ref?.url ?? URL.applicationDirectory )")
+            return s
+        }
+        print("null sample")
+        return nil
+    }
+    
+    public func getSampleMeta(_ ctx:BatchContext) -> FCSMetadata? { getSample(ctx)?.meta }
     
 
     
@@ -215,19 +276,17 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable, Custo
     public func mergeTree(_ clone: AnalysisNode)
     {
         print ("mergeTree")
-        if name != clone.name {
-            addChild(clone)
-        }
+        if name != clone.name {  addChild(clone)  }
         else {  children.append(contentsOf: clone.children) }
     }
 
 //--------------------------------------------------------
-    public func createRequest() throws -> PopulationRequest {
+    public func createRequest(_ ctx:BatchContext) throws -> PopulationRequest {
         // AM could lead to undefined behavior if sample/gate are not set as expected
         if let gate, let parent {
-            return .gated(try parent.createRequest(), gate: gate, invert: invert, name: name)
+            return .gated(try parent.createRequest(ctx), gate: gate, invert: invert, name: name)
         }
-        if let sample = getSample(),
+        if let sample = getSample(ctx),
            let sampleRef = sample.ref {
             return .sample(sampleRef)
         }
@@ -249,16 +308,16 @@ public class AnalysisNode : Codable, Transferable, Identifiable, Hashable, Custo
         )
     }
  
-    public func visibleChildren(_ chartDef:ChartDef) -> [ChartAnnotation] {
-        let dims = getChartDimensions(chartDef)
+    public func visibleChildren(_ ctx:BatchContext, _ chartDef:ChartDef) -> [ChartAnnotation] {
+        let dims = getChartDimensions(ctx, chartDef)
         let result = children.compactMap { child in
             child.chartAnnotation(chart: chartDef, dims:dims)
         }
         return result
     }
    
-    public func getChartDimensions(_ chartDef:ChartDef?) -> Tuple2<CDimension?> {
-        guard let chartDef, let sampleMeta = getSampleMeta() else {
+    public func getChartDimensions(_ ctx: BatchContext, _ chartDef:ChartDef?) -> Tuple2<CDimension?> {
+        guard let chartDef, let sampleMeta = getSampleMeta(ctx) else {
             return .init(nil, nil)
         }
         
