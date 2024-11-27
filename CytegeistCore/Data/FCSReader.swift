@@ -471,7 +471,7 @@ public class FCSReader {
     
     private func createParameterNormalizer(max:Double, displayInfo:String) -> AxisNormalizer {
         if displayInfo == "LOG" && max > 1 {
-            return .log(min: 1, max: max)
+            return .log(minVal: 1, maxVal: max)
         }
         
         return .linear(min: 0, max: max)

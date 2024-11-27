@@ -18,15 +18,10 @@ public struct AxisNormalizer: Hashable, Codable {
     public static let none = AxisNormalizer(0, 1, .linear, { $0 }, { $0 }, { _ in [] })
     
     public static func linear(min:Double, max:Double) -> AxisNormalizer {
+
         let span = max - min
-        
-        func normalize(_ value: Double) -> Double {
-            clamp01((value - min) / span)
-        }
-        
-        func unnormalize(_ value: Double) -> Double {
-            clamp01(value) * span + min
-        }
+        func normalize(_ value: Double) -> Double {    clamp01((value - min) / span)    }
+        func unnormalize(_ value: Double) -> Double {  clamp01(value) * span + min     }
 
         func calculateTickMarks(desiredTicks: Int) -> [MajorAxisTick] {
             let range = max - min
@@ -55,7 +50,7 @@ public struct AxisNormalizer: Hashable, Codable {
 
                 return .init(
                     normalizedValue: Float(normalize(value)),
-                    label: String(value),
+                    label: String(format:"%.0fK", value / 1000.0),
                     minorTicks: minorTicks)
             }
         }
@@ -67,14 +62,14 @@ public struct AxisNormalizer: Hashable, Codable {
         )
     }
     
-    public static func log(min:Double, max:Double, base:Double = 10) -> AxisNormalizer {
+    public static func log(minVal:Double, maxVal:Double, base:Double = 10) -> AxisNormalizer {
         let logBase = Darwin.log(base)
-        let logMin = Darwin.log(min) / logBase
-        let logMax = Darwin.log(max) / logBase
+        let logMin = Darwin.log(minVal) / logBase
+        let logMax = Darwin.log(maxVal) / logBase
         let logSpan = logMax - logMin
         
         func normalize(_ value: Double) -> Double {
-            let clamped = clamp(value, min:min, max:max)
+            let clamped = clamp(value, min:minVal, max:maxVal)
             let normalized = (Darwin.log(clamped) / logBase - logMin) / logSpan
             return normalized
         }
@@ -85,12 +80,40 @@ public struct AxisNormalizer: Hashable, Codable {
             return pow(base, logValue)
         }
         
-        func calculateTickMarks(_ desiredCount: Int) -> [MajorAxisTick] {
-            []
+        func calculateTickMarks(desiredTicks: Int) -> [MajorAxisTick] {
+//            let range = max - min
+//            let roughTickInterval = range / Double(desiredTicks - 1)
+//            let (tickInterval, minorTickCount) = niceNumber(roughTickInterval, round: false)
+            
+//            let minTick = max(logMin, 1.0)
+//            let maxTick = logMax
+            
+        
+            var ticks: [Double] = [1, 10, 100, 1000, 10000, 100000]
+//            var tick = minTick
+//            while tick <= maxTick {
+//                ticks.append(tick)
+//                tick += 1
+//            }
+            
+            return ticks.map { value in
+                let minorTickInterval = base
+                let minorTicks = (2...9).compactMap { i in
+                    let tickValue = value * Double(i) * minorTickInterval
+                    if tickValue >= minVal && tickValue <= maxVal {
+                        return Float(normalize(tickValue))
+                    }
+                    return nil
+                }
+                
+                return .init(
+                    normalizedValue: Float(normalize(value)),
+                    label: String(format:"10^%.0f", Darwin.log(value) / logBase),
+                    minorTicks: minorTicks)
+            }
         }
-
         return .init(
-            min, max, .log(base:base),
+            minVal, maxVal, .log(base:base),
             normalize, unnormalize,
             calculateTickMarks
         )
@@ -111,32 +134,32 @@ public struct AxisNormalizer: Hashable, Codable {
     }
     
     public static func == (lhs: AxisNormalizer, rhs: AxisNormalizer) -> Bool {
-        lhs.min == rhs.min && lhs.max == rhs.max && lhs.type == rhs.type
+        lhs.minVal == rhs.minVal && lhs.maxVal == rhs.maxVal && lhs.type == rhs.type
     }
     
     public func hash(into hasher: inout Hasher) {
-        hasher.combine(min)
-        hasher.combine(max)
+        hasher.combine(minVal)
+        hasher.combine(maxVal)
         hasher.combine(type)
     }
     
-    public let min: Double
-    public let max: Double
+    public let minVal: Double
+    public let maxVal: Double
     
     public let type:AxisScaleType
-    public var span: Double { max - min }
+    public var span: Double { maxVal - minVal }
     
     public let normalize:(_ x:Double) -> Double
     public let unnormalize:(_ x:Double) -> Double
     public let tickMarks:(_ desiredCount: Int) -> [MajorAxisTick]
     
-    fileprivate init(_ min: Double, _ max: Double, _ type: AxisScaleType,
+    fileprivate init(_ minVal: Double, _ maxVal: Double, _ type: AxisScaleType,
                      _ normalize: @escaping (Double) -> Double,
                      _ unnormalize: @escaping (Double) -> Double,
                      _ ticks: @escaping (_ count: Int) -> [MajorAxisTick]
     ) {
-        self.min = min
-        self.max = max
+        self.minVal = minVal
+        self.maxVal = maxVal
         self.type = type
         self.normalize = normalize
         self.unnormalize = unnormalize

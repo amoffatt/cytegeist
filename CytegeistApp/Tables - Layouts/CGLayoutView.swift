@@ -139,6 +139,7 @@ struct CGLayoutView: View {
     var columns: [GridItem] {
         [GridItem(.adaptive(minimum: 400.0, maximum: 400.0), spacing: 0)]
     }
+    
     struct LayoutCellView: View {
         let cell: LayoutCell
         
@@ -160,11 +161,14 @@ struct CGLayoutView: View {
   
                 ForEach(cell.items) { item in
                     ZStack() {
-                        Rectangle()
-                            .stroke(.gray.opacity(0.8), lineWidth: 2)
-                         Placeholder().stroke(.gray.opacity(0.8), lineWidth: 2)
+                        Rectangle().stroke(.gray.opacity(0.8), lineWidth: 2)
+                        Placeholder().stroke(.gray.opacity(0.8), lineWidth: 2)
                         VStack {
                             Text(item.type.xml()).frame(alignment: .top)
+                            let tubeName = cell.sample.tubeName
+                            if !tubeName.isEmpty {
+                                Text(tubeName).frame(alignment: .top)
+                            }
                             Spacer()
                             Text(item.getRect().toString()).fontWeight(.light).font(.system(size: 8))
                         }
@@ -225,7 +229,7 @@ struct CGLayoutView: View {
             ZStack {}
                 .fillAvailableSpace()
                 .contentShape(Rectangle())
-                .gesture(selectionDrag)            //   SELECTION DRAG
+                .gesture(selectionDrag)            //   commandKey() ? translationDrag : SELECTION DRAG   
                 .onHover(perform: { hovering in isMouseHoveringBackdrop = true  })
                 .onContinuousHover { phase in
                     switch phase {
@@ -255,6 +259,7 @@ struct CGLayoutView: View {
         let layoutItem = LayoutItem(.chart(nil), node:node, position:position)
         layoutModel.addItem(layoutItem)
     }
+    
     func doBatch()
     {
              print("doBatch")
@@ -267,9 +272,7 @@ struct CGLayoutView: View {
                 }
                 selectedLayout = experiment.addLayout(layout: layoutModel, cells: cells)
             }
-            
       }
-    
    //------------------------------------------------------
     struct ItemSizeSlider: View {
         @Binding var size: CGFloat
@@ -328,10 +331,23 @@ struct CGLayoutView: View {
     var selectionDrag: some Gesture {
         DragGesture()
             .onChanged { value in dragValue = value
-                layoutModel.selectRect(marquee: pts2Rect(value.startLocation, value.location))
+                if anyModifiers()  {
+                    layoutModel.moveSelection(offset: value.translation.asPoint)
+             }
+                else {
+                    layoutModel.selectRect(marquee: pts2Rect(value.startLocation, value.location))          
+                }
             }
             .onEnded { value in dragValue = nil }
-    }
+    }   
+    
+//    var translationDrag: some Gesture {
+//        DragGesture()
+//            .onChanged { value in dragValue = value
+////                (marquee: pts2Rect(value.startLocation, value.location))
+//            }
+//            .onEnded { value in dragValue = nil }
+//    }
 }
 
 

@@ -227,6 +227,7 @@ public struct KeywordsTable: View {
                     //            TableColumn("Bits", value:\.displayInfo)
                     //            TableColumn("Type") { e in Text(String(e.type)) }
                 TableColumn("Bits") { e in Text(String(format: "%d", e.bits)) }
+                TableColumn("Transform") { e in Text(e.displayInfo) }
                 TableColumn("Range") { e in Text(String(format: "%.0f", e.range)) }
             }
         }

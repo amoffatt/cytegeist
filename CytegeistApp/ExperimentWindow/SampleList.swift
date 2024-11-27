@@ -6,10 +6,10 @@
 //
 
 import Foundation
-import SwiftUI
 import UniformTypeIdentifiers
 import CytegeistCore
 import CytegeistLibrary
+import SwiftUI
 
     // The sample table view for an experiment.
 extension SampleList
@@ -280,7 +280,6 @@ struct SampleList: View {
     
 //--------------------------------------------------------
 // accept files dropped from the Finder
-    
    struct CDropDelegate: DropDelegate {
         @Binding var fileInfo: [String]
        
@@ -289,24 +288,24 @@ struct SampleList: View {
         }
       
         func performDrop(info: DropInfo) -> Bool {
-            fileInfo = []
+//            fileInfo = []
             var gotFile = false
             
-//            for itemProvider in info.itemProviders(for: ["public.file-url"]) {
-//                itemProvider.loadItem(forTypeIdentifier: "public.file-url", options: nil) { (item, error) in
-//                    if let data = item as? Data {
-//                        if let url = URL(dataRepresentation: data, relativeTo: nil) {
+            for itemProvider in info.itemProviders(for: ["public.file-url"]) {
+                itemProvider.loadItem(forTypeIdentifier: "public.file-url", options: nil) { (item, error) in
+                    if let data = item as? Data {
+                        if let url = URL(dataRepresentation: data, relativeTo: nil) {
 //                            let theInfo = "File: \(url.lastPathComponent) \nPath: \(url.path)\n"
 //                            let theSizes = FileInfo.reportSizes(url: url)
-//                            DispatchQueue.main.async {
-//                                fileInfo.append(theInfo  + theSizes)        //
-//                                process(url)
-//                                gotFile = true
-//                            }
-//                        }
-//                    }
-//                }
-//            }
+                            DispatchQueue.main.async {
+//                                fileInfo.append(theInfo + theSizes)        // 
+                                process(url)
+                                gotFile = true
+                            }
+                        }
+                    }
+                }
+            }
             return gotFile
         }
  

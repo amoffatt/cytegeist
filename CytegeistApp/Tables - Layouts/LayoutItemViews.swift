@@ -93,8 +93,10 @@ struct CTextView : View {
         
         VStack {
             if editing {
-                TextField("Test Field", text: bindableText) .foregroundColor(.black)       //, selection: $selection
-                    .font(.headline).background(.black.opacity(0.8  )).frame(width: 120)
+                TextEditor(text: bindableText)
+                   .foregroundColor(.black)       //, selection: $selection
+                   .font(.body)
+                   .multilineTextAlignment(.leading)
             } else {
                 Text(bindableText.wrappedValue)
             }

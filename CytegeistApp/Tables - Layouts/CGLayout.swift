@@ -22,7 +22,7 @@ public struct LayoutCell : Codable, Hashable, Identifiable
     {
         self.sample =  sample
         self.items = items
-        self.iteratorValue = val
+        iteratorValue = val
 
         var xMin  =  10000.0, xMax = 0.0, yMin = 10000.0, yMax = 0.0
         for item in items {
@@ -34,6 +34,7 @@ public struct LayoutCell : Codable, Hashable, Identifiable
         }
         rect =  CGRect(x: xMin, y: yMin, width: xMax - xMin, height: yMax - yMin)
         items.forEach { $0.position = $0.position - rect.origin }
+        items.forEach { $0.inject(sample: sample, iterator: iteratorValue) }
     }
     func width() -> CGFloat    {   rect.width    }
     
@@ -233,7 +234,7 @@ public class LayoutItem: Codable, Identifiable, Equatable
         //    var xAxis: AxisNormalizer?          //Chart
         //    var yAxis: AxisNormalizer?
         //    var data: Data?                     //Table
-    
+        //      var items: [LayoutItem]             // Group
         // save scale, rotation, background, stroke, etc
     
     var selected:Bool = false
@@ -280,6 +281,11 @@ public class LayoutItem: Codable, Identifiable, Equatable
     public func clone() -> LayoutItem
     {
         LayoutItem(self.type, node: self.node, position: self.position, size: self.size)
+    }
+    
+    public func inject(sample: Sample, iterator: String)
+    {
+        self.node = node
     }
     
     public func getRect() -> CGRect {
