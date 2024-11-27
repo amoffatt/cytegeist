@@ -17,19 +17,19 @@ public enum AxisScaleType: Hashable {
 public struct AxisNormalizer: Hashable, Codable {
     public static let none = AxisNormalizer(0, 1, .linear, { $0 }, { $0 }, { _ in [] })
     
-    public static func linear(min:Double, max:Double) -> AxisNormalizer {
+    public static func linear(minVal:Double, maxVal:Double) -> AxisNormalizer {
 
-        let span = max - min
-        func normalize(_ value: Double) -> Double {    clamp01((value - min) / span)    }
-        func unnormalize(_ value: Double) -> Double {  clamp01(value) * span + min     }
+        let span = maxVal - minVal
+        func normalize(_ value: Double) -> Double {    clamp01((value - minVal) / span)    }
+        func unnormalize(_ value: Double) -> Double {  clamp01(value) * span + minVal     }
 
         func calculateTickMarks(desiredTicks: Int) -> [MajorAxisTick] {
-            let range = max - min
+            let range = maxVal - minVal
             let roughTickInterval = range / Double(desiredTicks - 1)
             let (tickInterval, minorTickCount) = niceNumber(roughTickInterval, round: false)
             
-            let minTick = floor(min / tickInterval) * tickInterval
-            let maxTick = floor(max / tickInterval) * tickInterval      // AT - was ceil
+            let minTick = floor(minVal / tickInterval) * tickInterval
+            let maxTick = floor(minVal / tickInterval) * tickInterval      // AT - was ceil
             
             var ticks: [Double] = []
             var tick = minTick
@@ -42,7 +42,7 @@ public struct AxisNormalizer: Hashable, Codable {
                 let minorTickInterval = tickInterval / Double(minorTickCount + 1)
                 let minorTicks = (1...minorTickCount).compactMap { i in
                     let tickValue = value + Double(i) * minorTickInterval
-                    if tickValue >= min && tickValue <= max {
+                    if tickValue >= minVal && tickValue <= maxVal {
                         return Float(normalize(tickValue))
                     }
                     return nil
@@ -56,7 +56,7 @@ public struct AxisNormalizer: Hashable, Codable {
         }
 
         return .init(
-            min, max, .linear,
+            minVal, maxVal, .linear,
             normalize, unnormalize,
             calculateTickMarks
         )
@@ -81,21 +81,8 @@ public struct AxisNormalizer: Hashable, Codable {
         }
         
         func calculateTickMarks(desiredTicks: Int) -> [MajorAxisTick] {
-//            let range = max - min
-//            let roughTickInterval = range / Double(desiredTicks - 1)
-//            let (tickInterval, minorTickCount) = niceNumber(roughTickInterval, round: false)
-            
-//            let minTick = max(logMin, 1.0)
-//            let maxTick = logMax
-            
-        
-            var ticks: [Double] = [1, 10, 100, 1000, 10000, 100000]
-//            var tick = minTick
-//            while tick <= maxTick {
-//                ticks.append(tick)
-//                tick += 1
-//            }
-            
+
+            let ticks: [Double] = [1, 10, 100, 1000, 10000, 100000]
             return ticks.map { value in
                 let minorTickInterval = base
                 let minorTicks = (2...9).compactMap { i in
@@ -118,19 +105,53 @@ public struct AxisNormalizer: Hashable, Codable {
             calculateTickMarks
         )
     }
+    // TODO --- doesn't use the logicle function.  Currently is hacked copy of log
+    // see MathUtil
     
-    public static func logicle(min:Double, max:Double) -> AxisNormalizer {
+    public static func logicle(minVal:Double, maxVal:Double) -> AxisNormalizer {
         let transform = Logicle(T:0, w:0, m:0)
+        let base:Double = 10
+        let logBase = Darwin.log(base)
+        let logMin = Darwin.log(minVal) / logBase
+        let logMax = Darwin.log(maxVal) / logBase
+        let logSpan = logMax - logMin
         
-        func calculateTickMarks(desiredTicks: Int) -> [MajorAxisTick] {
-            []
+        func normalize(_ value: Double) -> Double {
+            let clamped = clamp(value, min:minVal, max:maxVal)
+            let normalized = (Darwin.log(clamped) / logBase - logMin) / logSpan
+            return normalized
         }
         
+        func unnormalize(_ value: Double) -> Double {
+            let clamped = clamp01(value)
+            let logValue = (clamped * logSpan) + logMin
+            return pow(base, logValue)
+        }
+        
+        func calculateTickMarks(desiredTicks: Int) -> [MajorAxisTick] {
+ 
+            let ticks: [Double] = [0, 100, 1000, 10000, 100000]
+            return ticks.map { value in
+                let minorTickInterval = 10.0
+                let minorTicks = (2...9).compactMap { i in
+                    let tickValue = value * Double(i) * minorTickInterval
+                    if tickValue >= minVal && tickValue <= maxVal {
+                        return Float(normalize(tickValue))
+                    }
+                    return nil
+                }
+                let labelStr = (value == 0) ? "0" : String(format:"10^%.0f", Darwin.log(value) / logBase)
+                return .init(
+                    normalizedValue: Float(normalize(value)),
+                    label: labelStr,
+                    minorTicks: minorTicks)
+            }
+        }
         return .init(
-            min, max, .biex(transform),
-            transform.logicle,
-            transform.unnormalize,
-            calculateTickMarks)
+            minVal, maxVal, .log(base:base),
+            normalize, unnormalize,
+            calculateTickMarks
+        )
     }
     
     public static func == (lhs: AxisNormalizer, rhs: AxisNormalizer) -> Bool {
@@ -186,8 +207,8 @@ public struct MajorAxisTick: Identifiable {
     public var minorTicks:[Float]
 }
 
-public class LinearAxis {
-}
+//public class LinearAxis {
+//}
 //---------------------------------------------------------------------------
 func niceNumber(_ x: Double, round: Bool) -> (interval:Double, minorTicks:Int) {
     let exp = floor(log10(x))

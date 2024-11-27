@@ -474,7 +474,7 @@ public class FCSReader {
             return .log(minVal: 1, maxVal: max)
         }
         
-        return .linear(min: 0, max: max)
+        return .linear(minVal: 0, maxVal: max)
     }
     
     private func createParameterValueReader(dataType:FCSDataType, bits:Int) throws -> FCSParameterValueReader {

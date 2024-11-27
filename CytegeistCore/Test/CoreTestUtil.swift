@@ -39,7 +39,7 @@ public class TestUtil {
                         HistogramData(
                             bins: bins,
                             size: .init(bins.count),
-                            axes: .init(.linear(min: 0, max: 200))),
+                            axes: .init(.linear(minVal: 0, maxVal: 200))),
                         nil,
                         view: nil
                     )

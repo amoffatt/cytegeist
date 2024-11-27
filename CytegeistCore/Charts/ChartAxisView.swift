@@ -88,19 +88,29 @@ public struct ChartAxisView: View {
         let maxLabelWidth:CGFloat = width / CGFloat(majorTicks.count + 1)
 
         func axisTickLabel(_ x:CGFloat, _ label:String, _ alignment:Alignment) -> some View {
-//            let halfWidth = maxLabelWidth / 2
-//            let x = clamp(x, min:halfWidth, max:width - halfWidth)
+//            if label.starts(with: "10^")
+//            {
+//                return HStack {
+//                    Text("10").baselineOffset(-5.0)
+//                    VStack {
+//                        Text(label.substring(offset: 3, length: 1))
+//                            .font(.system(size: 8))
+//                    }
+//                    Spacer()
+//                }
+//            }
+//            else {
+                Text(label)
+                    // .multilineTextAlignment(alignment)
+                    .scaledToFit()
+                    .minimumScaleFactor(0.3)
+                    .font(.body)
+                    .frame(width: maxLabelWidth, height: Self.tickLabelsHeight, alignment: alignment)
+                    .position(x:x)
+                    //                .border(.blue)
             
-            return Text(label)
-            // .multilineTextAlignment(alignment)
-                .scaledToFit()
-                .minimumScaleFactor(0.3)
-                .font(.body)
-                .frame(width: maxLabelWidth, height: Self.tickLabelsHeight, alignment: alignment)
-                .position(x:x)
-//                .border(.blue)
-        }
-
+            }
+//        }
         return VStack {
             if let def = def {
                 if def.showTicks {

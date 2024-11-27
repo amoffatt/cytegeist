@@ -403,7 +403,7 @@ public struct HistogramData<D:Dimensions> {
 
 fileprivate func defaultCountAxis(mode:Double?) -> AxisNormalizer {
     let upper = max(1, mode ?? 0)
-    return .linear(min: 0, max: upper)
+    return .linear(minVal: 0, maxVal: upper)
 }
 
 
