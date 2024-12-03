@@ -185,24 +185,24 @@ struct SampleList: View {
 //            }
 //
 //        }
-        .fileImporter( isPresented: $showFCSImporter,
+        .fileImporter( isPresented: $showFCSImporter,           // || $showWSPImporter
                        allowedContentTypes: [.item,  .directory],
                        allowsMultipleSelection: true)
         { result in
             switch result {
-                case .success:  onFCSPicked(_result: result)       // gain access to the directory
+                case .success:   onFCSPicked(_result: result)      // gain access to the directory
                 case .failure(let error):  print(error)         // handle error
             }
         }
-        .fileImporter( isPresented: $showWSPImporter,
-                               allowedContentTypes: [.item,  .directory],
-                               allowsMultipleSelection: true)
-        { result in
-            switch result {
-                case .success:  onWSPPicked(_result: result)       // gain access to the directory
-                case .failure(let error):  print(error)         // handle error
-            }
-        }
+//        .fileImporter( isPresented: $showWSPImporter,
+//                               allowedContentTypes: [.item,  .directory],
+//                               allowsMultipleSelection: true)
+//        { result in
+//            switch result {
+//                case .success:  onWSPPicked(_result: result)       // gain access to the directory
+//                case .failure(let error):  print(error)         // handle error
+//            }
+//        }
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 HStack {
