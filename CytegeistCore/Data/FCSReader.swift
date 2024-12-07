@@ -452,7 +452,10 @@ public class FCSReader {
         let bits = Int(metadata["$P\(n)B"]!)!
         let range = Double(metadata["$P\(n)R"]!)!
         let filter = metadata["$P\(n)F"].nonNil
-        let displayInfo = metadata["P\(n)DISPLAY"].nonNil
+        var displayInfo = metadata["P\(n)DISPLAY"].nonNil
+        if displayInfo.isEmpty {
+            displayInfo = metadata["$P\(n)D"].nonNil
+        }
         let displayName = CDimension.displayName(name, stain)
         let normalizer = createParameterNormalizer(max: range, displayInfo: displayInfo)
         let valueReader = try createParameterValueReader(dataType: dataType, bits: bits)
@@ -470,9 +473,24 @@ public class FCSReader {
     }
     
     private func createParameterNormalizer(max:Double, displayInfo:String) -> AxisNormalizer {
-        if displayInfo == "LOG" && max > 1 {
-            return .log(minVal: 1, maxVal: max)
+//        if displayinfo == "log" && max > 1 {
+//            return .log(minval: 1, maxval: max)
+//        }
+        let split = displayInfo.split(separator: ",").map { String($0)}
+        let type = split.first.nonNil.lowercased()
+        
+        if type.starts(with: "log") && max > 1 {
+            var minVal = 1.0
+            var maxVal = max
+            if split.count == 3 {
+                minVal = Double(split[2]) ?? minVal
+                if let decades = Double(split[1]) {
+                    maxVal = minVal * pow(10, decades)
+                }
+            }
+            return .log(minVal: minVal, maxVal: maxVal)
         }
+
         
         return .linear(minVal: 0, maxVal: max)
     }

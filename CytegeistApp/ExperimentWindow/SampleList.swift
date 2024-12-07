@@ -49,6 +49,10 @@ public class FCSKeys {
     setup = "SETUP", creator = "$Creator"
 }
 
+enum ImportFileType {
+    case Sample, Workspace
+}
+
 struct SampleList: View {
     var experiment: Experiment
     @State var columnCustomization = TableColumnCustomization<Sample>()
@@ -65,8 +69,9 @@ struct SampleList: View {
     @State var searchText: String = ""
     @State var sortOrder: [KeyPathComparator<Sample>] = [    .init(\.id, order: SortOrder.forward) ]
     @State private var draggedItem: String?
-    @State private var showFCSImporter = false
-    @State private var showWSPImporter = false
+//    @State private var showFCSImporter = false
+//    @State private var showWSPImporter = false
+    @State private var fileImporterInfo:(type:ImportFileType, contentTypes:[UTType], multiselect:Bool)? = nil
     @State private var isDragging = false
     @State private var isDropTargeted = false
     @State private var fileInfo: [String] = []
@@ -150,6 +155,11 @@ struct SampleList: View {
     {
         @Bindable var experiment = experiment
         let dropDelegate = CDropDelegate(fileInfo: $fileInfo)
+        let showImporter = Binding(get: {
+            fileImporterInfo != nil
+        }, set: {
+            fileImporterInfo = nil
+        })
 //        let expName: String = experiment.name
         VStack(spacing: 0) {
             header
@@ -185,30 +195,32 @@ struct SampleList: View {
 //            }
 //
 //        }
-        .fileImporter( isPresented: $showFCSImporter,           // || $showWSPImporter
-                       allowedContentTypes: [.item,  .directory],
-                       allowsMultipleSelection: true)
-        { result in
-            switch result {
-                case .success:   onFCSPicked(_result: result)      // gain access to the directory
-                case .failure(let error):  print(error)         // handle error
-            }
-        }
-//        .fileImporter( isPresented: $showWSPImporter,
-//                               allowedContentTypes: [.item,  .directory],
-//                               allowsMultipleSelection: true)
+//        .fileImporter( isPresented: fileImporterInfo?.showImporter,           // || $showWSPImporter
+//                       allowedContentTypes: fileImporterInfo?.types ?? [],
+//                       allowsMultipleSelection: fileImporterInfo?.multiselect ?? false)
 //        { result in
-//            switch result {
-//                case .success:  onWSPPicked(_result: result)       // gain access to the directory
-//                case .failure(let error):  print(error)         // handle error
+//            switch fileImporterInfo.type {
+//                case Sample:
+//                    switch result {
+//                        case .success:   onFCSPicked(_result: result)      // gain access to the directory
+//                        case .failure(let error):  print(error)         // handle error
+//                    }
+//                case Workspace:
+//                    switch result {
+//                        case .success:  onWSPPicked(_result: result)       // gain access to the directory
+//                        case .failure(let error):  print(error)         // handle error
+//                    }
+//                default: print (":")
+//                }
+//                    
 //            }
-//        }
+
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 HStack {
-                    Buttons.toolbar("Open FCS Files", .add) { showFCSImporter = true }
+                    Buttons.toolbar("Open FCS Files", .add) { fileImporterInfo?.type = .Sample }
 //                    Buttons.toolbar("Dictionary", Icon("pencil")) {      experiment.buildVaribleKeyDictionary()    }
-                    Buttons.toolbar("Dictionary", Icon("pencil")) {      showWSPImporter = true    }
+                    Buttons.toolbar("Dictionary", Icon("pencil")) {   fileImporterInfo?.type = .Workspace   }
 //                    Buttons.toolbar("Clear", Icon("delete.left")) { doClear() }
                   Buttons.toolbar("XML", Icon("cloud")) {
                         print(experiment.xml())

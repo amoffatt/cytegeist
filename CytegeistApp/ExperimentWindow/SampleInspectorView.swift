@@ -223,7 +223,7 @@ public struct KeywordsTable: View {
             Table(parms) {
                 TableColumn("Name", value:\.name)
                 TableColumn("Stain", value:\.stain)
-                TableColumn("Display", value:\.displayName)
+//                TableColumn("Display", value:\.displayName)
                     //            TableColumn("Bits", value:\.displayInfo)
                     //            TableColumn("Type") { e in Text(String(e.type)) }
                 TableColumn("Bits") { e in Text(String(format: "%d", e.bits)) }

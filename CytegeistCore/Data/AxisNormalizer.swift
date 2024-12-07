@@ -29,7 +29,7 @@ public struct AxisNormalizer: Hashable, Codable {
             let (tickInterval, minorTickCount) = niceNumber(roughTickInterval, round: false)
             
             let minTick = floor(minVal / tickInterval) * tickInterval
-            let maxTick = floor(minVal / tickInterval) * tickInterval      // AT - was ceil
+            let maxTick = floor(maxVal / tickInterval) * tickInterval      // AT - was ceil
             
             var ticks: [Double] = []
             var tick = minTick
@@ -81,12 +81,12 @@ public struct AxisNormalizer: Hashable, Codable {
         }
         
         func calculateTickMarks(desiredTicks: Int) -> [MajorAxisTick] {
-
-            let ticks: [Double] = [1, 10, 100, 1000, 10000, 100000]
+            
+            let ticks: [Double] = [1, 10, 100, 1000, 10000]//, 100000]
             return ticks.map { value in
                 let minorTickInterval = base
                 let minorTicks = (2...9).compactMap { i in
-                    let tickValue = value * Double(i) * minorTickInterval
+                    let tickValue = value * Double(i)// * minorTickInterval
                     if tickValue >= minVal && tickValue <= maxVal {
                         return Float(normalize(tickValue))
                     }
@@ -99,6 +99,7 @@ public struct AxisNormalizer: Hashable, Codable {
                     minorTicks: minorTicks)
             }
         }
+        
         return .init(
             minVal, maxVal, .log(base:base),
             normalize, unnormalize,

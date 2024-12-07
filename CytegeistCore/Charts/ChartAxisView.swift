@@ -121,11 +121,13 @@ public struct ChartAxisView: View {
                                 .frame(width: 2, height: Self.ticksHeight)
                                 .position(x: x, y: Self.ticksHeight / 2)
                             
-                            ForEach(majorTick.minorTicks, id:\.self) { minorTick in
+                            ForEach(0..<majorTick.minorTicks.count, id:\.self) { i in
+                                let minorTick = majorTick.minorTicks[i]
                                 let minorX = width * CGFloat(minorTick)
+                                var length = CGFloat(Self.ticksHeight / (i == 3 ? 1.5 : 2))
                                 Rectangle()
-                                    .frame(width: 1, height: Self.ticksHeight / 2)
-                                    .position(x: minorX, y: Self.ticksHeight / 4)
+                                    .frame(width: 1, height: length)
+                                    .position(x: minorX, y: length / 2)
                             }
                         }
                     }

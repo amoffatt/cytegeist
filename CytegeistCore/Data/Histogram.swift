@@ -42,6 +42,9 @@ Data:Tuple<[ValueType]>
     static func value(in data:Data, at index:Int) -> FloatCoord
 }
 
+func normalizedToArrayIndex(_ value:ValueType, arraySize:Int) -> Int {
+    min(arraySize - 1, Int(value * ValueType(arraySize)))
+}
 
 
 public struct X : Dimensions {
@@ -69,8 +72,8 @@ public struct X : Dimensions {
     }
     
     public static func pointToNDIndex(point: FloatCoord, axes:Axes, arraySize:IntCoord) -> Tuple1<Int> {
-        let bin = axes.x.normalize(Double(point.x)) * Double(arraySize.x)
-        return .init(Int(bin))
+        let normalized = axes.x.normalize(Double(point.x))
+        return .init(normalizedToArrayIndex(normalized, arraySize: arraySize.x))
     }
     
     public static func inlineArrayToCoord(index: Int, axes:Axes, arraySize:IntCoord) -> FloatCoord {
@@ -117,9 +120,10 @@ public struct XY : Dimensions {
     }
     
     public static func pointToNDIndex(point: FloatCoord, axes: Tuple2<AxisNormalizer>, arraySize:Tuple2<Int>) -> Tuple2<Int> {
-        let binX = axes.x.normalize(Double(point.x)) * Double(arraySize.x)
-        let binY = axes.y.normalize(Double(point.y)) * Double(arraySize.y)
-        return .init(Int(binX), Int(binY))
+        let x = axes.x.normalize(Double(point.x))
+        let y = axes.y.normalize(Double(point.y))
+        return .init(normalizedToArrayIndex(x, arraySize: arraySize.x),
+                     normalizedToArrayIndex(y, arraySize: arraySize.y))
     }
 }
 
