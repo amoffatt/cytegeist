@@ -61,23 +61,22 @@ public actor ComputeCache<Request:Hashable, Data> : Identifiable {
 
         if handle == nil {
             handle = ComputeHandle<Request, Data>(request,
-                Task {  // Note: don't use Task.detached, otherwise cancellation will not be passed through
-                    do {
-                        try Task.checkCancellation()
-                        print ("Request beginning compute: \(request)")
-                        let result = try await self._compute(request)
-                        print ("  ==> Request finished compute: \(request)")
-                        
-                        await self.handleSuccess(request, data:result)
-                    } catch {
-                        await self.handleError(request, error:error)
-                    }
+                                                  Task {  // Note: don't use Task.detached, otherwise cancellation will not be passed through
+                do {
+                    try Task.checkCancellation()
+                    print ("Request beginning compute: \(request)")
+                    let result = try await self._compute(request)
+                    print ("  ==> Request finished compute: \(request)")
+                    
+                    await self.handleSuccess(request, data:result)
+                } catch {
+                    await self.handleError(request, error:error)
                 }
+            }
             )
             
-            
-            _cache[request] = handle
-            pruneOldHandles()
+         _cache[request] = handle            // FatalError:  duplicate keys  of type 'HistogramRequest<XY>' found here
+        pruneOldHandles()
         }
         
         return try await awaiter(handle!)

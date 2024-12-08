@@ -69,7 +69,7 @@ struct SampleList: View {
     @State var searchText: String = ""
     @State var sortOrder: [KeyPathComparator<Sample>] = [    .init(\.id, order: SortOrder.forward) ]
     @State private var draggedItem: String?
-//    @State private var showFCSImporter = false
+    @State private var showFCSImporter = false
 //    @State private var showWSPImporter = false
     @State private var fileImporterInfo:(type:ImportFileType, contentTypes:[UTType], multiselect:Bool)? = nil
     @State private var isDragging = false
@@ -195,30 +195,41 @@ struct SampleList: View {
 //            }
 //
 //        }
-//        .fileImporter( isPresented: fileImporterInfo?.showImporter,           // || $showWSPImporter
-//                       allowedContentTypes: fileImporterInfo?.types ?? [],
-//                       allowsMultipleSelection: fileImporterInfo?.multiselect ?? false)
-//        { result in
-//            switch fileImporterInfo.type {
-//                case Sample:
-//                    switch result {
-//                        case .success:   onFCSPicked(_result: result)      // gain access to the directory
-//                        case .failure(let error):  print(error)         // handle error
-//                    }
-//                case Workspace:
-//                    switch result {
-//                        case .success:  onWSPPicked(_result: result)       // gain access to the directory
-//                        case .failure(let error):  print(error)         // handle error
-//                    }
-//                default: print (":")
-//                }
-//                    
-//            }
+        .fileImporter( isPresented: $showFCSImporter,
+                       allowedContentTypes: [.item,  .directory],
+                       allowsMultipleSelection: true)
+        { result in
+            switch result {
+                case .success:  onFCSPicked(_result: result)       // gain access to the directory
+                case .failure(let error):  print(error)         // handle error
+            }
+        }
 
+/*
+        .fileImporter( isPresented: fileImporterInfo?.showImporter,           // || $showWSPImporter
+                       allowedContentTypes: fileImporterInfo?.types ?? [],
+                       allowsMultipleSelection: fileImporterInfo?.multiselect ?? false)
+        { result in
+            switch fileImporterInfo.type {
+                case Sample:
+                    switch result {
+                        case .success:   onFCSPicked(_result: result)      // gain access to the directory
+                        case .failure(let error):  print(error)         // handle error
+                    }
+                case Workspace:
+                    switch result {
+                        case .success:  onWSPPicked(_result: result)       // gain access to the directory
+                        case .failure(let error):  print(error)         // handle error
+                    }
+                default: print (":")
+                }
+                    
+            }
+*/
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 HStack {
-                    Buttons.toolbar("Open FCS Files", .add) { fileImporterInfo?.type = .Sample }
+                    Buttons.toolbar("Open FCS Files", .add) { showFCSImporter = true }//{ fileImporterInfo?.type = .Sample }
 //                    Buttons.toolbar("Dictionary", Icon("pencil")) {      experiment.buildVaribleKeyDictionary()    }
                     Buttons.toolbar("Dictionary", Icon("pencil")) {   fileImporterInfo?.type = .Workspace   }
 //                    Buttons.toolbar("Clear", Icon("delete.left")) { doClear() }
