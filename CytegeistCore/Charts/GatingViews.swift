@@ -388,6 +388,7 @@ extension RectGateDef : ViewableGate {
         let viewRectOppositeOrigin = v.data2View(rect[.topTrailing])
         let viewRect = CGRect(origin: viewRectOrigin, size: (viewRectOppositeOrigin - viewRectOrigin).asSize)
         viewCenter = viewRect[.center]
+        let viewCenter = viewCenter
         
         
         return Group {
@@ -398,7 +399,10 @@ extension RectGateDef : ViewableGate {
                               color: v.fillColor,
                               solid: true
             ) { (p, _) in
-                v.gate.wrappedValue?.rect[.center] = v.view2Data(p)
+                // To properly handle non-linear axes, movement delta must be applied in view space to the rectangle vs just updating the center position
+                let delta = p - viewCenter
+                v.gate.wrappedValue?.rect[.bottomLeading] = v.view2Data(viewRectOrigin + delta)
+                v.gate.wrappedValue?.rect[.topTrailing] = v.view2Data(viewRectOppositeOrigin + delta)
             }
             
 //            ForEach(handles, id:\.id) { h in
