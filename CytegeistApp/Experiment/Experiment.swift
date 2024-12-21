@@ -142,7 +142,55 @@ public class Experiment : Usable
         let len = s.count
         return "\(s.substring(offset: 0, length: 12))...\(s.substring(offset: len-12, length: 12))"
     }
- 
+//    struct Petitions: Codable {
+//        var results: [Petition]
+//    }
+//    struct Petition: Codable {
+//        var title: String
+//        var body: String
+//        var signatureCount: Int
+//    }
+    // this is protoype code to read a file from the bundle with all of the PBMC populations, and their gates
+//    func parse(json: Data) {
+//        let decoder = JSONDecoder()
+//        
+//        if let jsonPetitions = try? decoder.decode(Petitions.self, from: json) {
+//            let petitions = jsonPetitions.results
+//        }
+//    }
+    func readLymphs()
+    {
+//        let urlString = "https://www.hackingwithswift.com/samples/petitions-1.json"
+//        
+//        if let url = URL(string: urlString) {
+//            if let sdata = try? Data(contentsOf: url) {
+//                    // we're OK to parse!
+//                parse(json: sdata)
+//            }
+//        }
+        
+        if let data = FileLoader.readLocalFile("small_lymphs")
+        {
+            print("in Experiment.readLymphs, lymphs = \(data)")
+            if let s = String(data: data, encoding: .utf8) {
+                print (s)
+            }
+            
+            let decoder = JSONDecoder()
+            do {
+                if let pop = try? decoder.decode(Population.self, from: data) {
+                    FileLoader.showElements(pop: pop)
+                }
+            }
+//                catch  {
+//                    print(error)
+//                }
+            }
+
+        
+        }
+    
+
   //--------------------------------------------------------------------------------
   // streaming
     
@@ -170,7 +218,7 @@ public class Experiment : Usable
     }
         // TODO
    public func populationNames() -> [String] {
-        return ["<All>", "All Cells", "Single", "Lymphocytes", "Monocytes", "T Cells", "CD3+", "CD4+", "CD8+"]
+        return ["<All>", "All Cells", "Single", "Lymphocytes", "Monocytes", "B Cells", "T Cells", "CD3+", "CD4+", "CD8+"]
     }
     
         // TODO

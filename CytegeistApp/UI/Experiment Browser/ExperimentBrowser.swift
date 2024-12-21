@@ -112,11 +112,11 @@ struct ExperimentBrowser : View {
 //            
 //        } catch () {}
 //        
-        
+
  
         let fileUrl = DemoData.testDataRoot?.appendingPathComponent("flowrepo.csv")
         do {
-            let csvData = try String(contentsOf: fileUrl!)
+            let csvData = try String(contentsOf: fileUrl!, encoding: .utf8)
             parseCSV(csvData)
         } catch {
             print("Error reading FlowRepo CSV data: \(error)")
@@ -154,11 +154,11 @@ struct ExperimentBrowser : View {
     let debug = false
     var filteredExperiments: [FRExperiment] {
         
-        var   experiments = experimentDB.filter {
+        let   experiments = experimentDB.filter {
                
             if (!debug && $0.RepID.prefix(6) != "FR-FCM") {  return false  }
-            if (hasWorkspace && $0.hasWSP.isEmpty) {  return false  }
-            if (useCytof && ($0.cytof != cytof)) {  return false  }
+            if (hasWorkspace && $0.hasWSP.isEmpty)      {  return false  }
+            if (useCytof && ($0.cytof != cytof))        {  return false  }
             if (firstManuscript && !$0.firstManuscript) {  return false  }
             if (searchText.count > 2 && !$0.fulltext.containsIgnoringCase(searchText))  {  return false  }
             return true

@@ -61,41 +61,41 @@ struct AnalysisList: View {
         @State var isExpanded: Bool = true
         
         var body: some View {
-            if let anode = node as? AnalysisNode {
-                if node[keyPath: childKeyPath] != nil {
-                    DisclosureGroup(
-                        isExpanded: $isExpanded,
-                        content: {
-                            if isExpanded {
-                                ForEach(node[keyPath: childKeyPath]!) { childNode in
-                                    NodeOutlineGroup(node: childNode, childKeyPath: childKeyPath, isExpanded: isExpanded)
+                if let anode = node as? AnalysisNode {
+                    if node[keyPath: childKeyPath] != nil {
+                        DisclosureGroup(
+                            isExpanded: $isExpanded,
+                            content: {
+                                if isExpanded {
+                                    ForEach(node[keyPath: childKeyPath]!) { childNode in
+                                        NodeOutlineGroup(node: childNode, childKeyPath: childKeyPath, isExpanded: isExpanded)
+                                    }
                                 }
+                            },
+                            label:  {
+                                AnalysisNodeView(node: anode)
+                                    .frame(width: 350, height: 30)
+                                    .draggable(anode) {
+                                        Label(anode.name, systemImage: "lightbulb")      // this is the drag image
+                                            .bold().offset(x: -100)
+                                            .foregroundStyle(.orange)
+                                            .frame(minWidth: 350, minHeight: 30)
+                                    }
+                                .tag(anode) }
+                        )
+                    } else {
+                        AnalysisNodeView(node: anode)
+                            .frame(width: 350, height: 30)
+                            .draggable(anode) {
+                                Label(anode.name, systemImage: "lightbulb")      // this is the drag image
+                                    .bold().offset(x: -100)
+                                    .foregroundStyle(.orange)
+                                    .frame(minWidth: 350, minHeight: 30)
                             }
-                        },
-                        label:  {
-                            AnalysisNodeView(node: anode)
-                                .frame(width: 350, height: 30)
-                                .draggable(anode) {
-                                    Label(anode.name, systemImage: "lightbulb")      // this is the drag image
-                                        .bold().offset(x: -100)
-                                        .foregroundStyle(.orange)
-                                        .frame(minWidth: 350, minHeight: 30)
-                                }
-                            .tag(anode) }
-                    )
-                } else {
-                    AnalysisNodeView(node: anode)
-                        .frame(width: 350, height: 30)
-                        .draggable(anode) {
-                                    Label(anode.name, systemImage: "lightbulb")      // this is the drag image
-                                        .bold().offset(x: -100)
-                                        .foregroundStyle(.orange)
-                                        .frame(minWidth: 350, minHeight: 30)
-                                }
-                                .tag(anode)
-                        }
-            }  //vstack
-        }  // list
+                            .tag(anode)
+                    }
+                }
+            }  // body
     }
 
     

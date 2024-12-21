@@ -31,7 +31,9 @@ struct Sidebar : View {
     @State var keyword = "$PATIENT"
     @State var value = "MOUSE 1"
     @State var  groupColor = Color.brown
-    
+    @State var groupselection: SidebarGroupSelection? = nil
+    @State var panelselection: SidebarPanelSelection? = nil
+
     
     var body: some View {
         
@@ -73,7 +75,6 @@ struct Sidebar : View {
                 VStack {
 //                    VSplitView {
 //                        VStack {
-                            @State var panelselection: SidebarPanelSelection? = nil
                             List(selection: $panelselection) {
                                 if  let exp = app.getSelectedExperiment()  {
                                     DisclosureGroup("Panels", isExpanded: $expansionState1[-1]) {
@@ -117,7 +118,6 @@ struct Sidebar : View {
                     .frame(maxWidth: .infinity, minHeight: 80, maxHeight: 80)
                     .border(.black.opacity(0.66))
  
-                @State var groupselection: SidebarGroupSelection? = nil
                 List(selection: $groupselection) {
                     if  let exp = app.getSelectedExperiment() {
                         DisclosureGroup("Groups", isExpanded: $expansionState2[-1]) {

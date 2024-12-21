@@ -90,7 +90,7 @@ public struct ChartAxisView: View {
         func axisTickLabel(_ x:CGFloat, _ label:String, _ alignment:Alignment) -> some View {
 //            if label.starts(with: "10^")
 //            {
-//                return HStack {
+//                 return HStack {
 //                    Text("10").baselineOffset(-5.0)
 //                    VStack {
 //                        Text(label.substring(offset: 3, length: 1))
@@ -99,7 +99,7 @@ public struct ChartAxisView: View {
 //                    Spacer()
 //                }
 //            }
-//            else {
+//            else  {  return
                 Text(label)
                     // .multilineTextAlignment(alignment)
                     .scaledToFit()

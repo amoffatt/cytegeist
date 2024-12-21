@@ -1,0 +1,147 @@
+{ "name": "Lymphocyte", "gate": "CD45+", "children": [
+    {  "name": "B", "gate": "CD3-CD14-CD33-CD34-", "children": [
+        {    "name": "B cell" ,  "gate":  "CD19+CD20+CD56-", "children": [
+            { "name": "Transitional", "gate":   "CD27-CD5+", "children": [
+                { "name": "CD10+CD38+CD24+","gate":  "CD10+CD38+CD24+", "children": [
+                    { "name": "T1" ,"gate": "IgM+IgD-", "children": [] },
+                    { "name": "T2", "gate":  "IgM+IgD+", "children": []},
+                    { "name": "T3", "gate":  "IgM-IgD+", "children": []}
+                ]},
+                { "name": "Naive mature resting" ,"gate":  "CD27-CD38-CD5-CD24-" , "children": []},
+                { "name": "Memory", "gate": " CD27+CD38-CD24+" , "children": [
+                    { "name": "IgD+ only unswitched" ,"gate": "IgD+IgM-", "children": []},
+                    { "name": "unswitched", "gate": "IgD+IgM+", "children": []},
+                    { "name": "IgA memory", "gate": "IgD-IgM-IgA+", "children": []},
+                    { "name": "IgG memory", "gate": "IgD-IgM-IgG+", "children": []}
+                ] },
+                
+                { "name":"(B-1)", "gate": "", "children": []},
+                { "name":"(B-2)", "gate": "", "children": []},
+                { "name":"Atypical/DN Memory", "gate": "CD27-CD38-", "children": [
+                    { "name":"DN1", "gate": "CD21+CXCR5+", "children": [
+                        
+                    ] },
+                    { "name":"DN2", "gate": "CD21-CXCR5-", "children": [] },
+                ]},
+                { "name":"Regulatory", "gate": "CD27+CD38-IgD+IgM+", "children": []}
+                
+            ]},
+            { "name":"Non-B/T", "gate": "CD19-CD20-CD56+", "children": []},
+            { "name":"ASC", "gate": "CD19+CD20-CD56-", "children": []}
+        ]}
+        
+    ]},
+    
+    { "name":"NK" , "gate": "CD16+", "children": [
+        { "name":"CD56 bright" , "gate": "CD16+CD56+", "children": []},
+        { "name":"CD56 dim",  "gate": "CD16+CD56-", "children": []},
+        { "name":"Conventional",  "gate": "CD94+CD161+", "children": []},
+        { "name":"CD94-CD161-", "gate": "CD94-CD161-", "children": []},
+        { "name":"CD94+CD161-", "gate": "CD94+CD161-", "children": []},
+        { "name":"CD94-CD161+", "gate": "CD94-CD161+", "children": []}
+    ]},
+    
+    { "name":"NKT","gate": "CD19-CD20-CD56+TCRgd-", "children": [
+        { "name":"CD4+CD8-",   "gate":  "CD4+CD8-" , "children": []},
+        { "name":"CD4+CD8+",    "gate": "CD4+CD8+", "children": []},
+        { "name":"CD4-CD8+",    "gate": "CD4-CD8+", "children": []},
+        { "name":"CD4-CD8-",   "gate":  "CD4-CD8-", "children": []},
+        { "name":"Type 1",      "gate":   "TCRVa24-Ja18+", "children": [
+            { "name":"CD94+" ,   "gate":   "CD94+", "children": []},
+            { "name":"CD94-",    "gate":   "CD94-", "children": []},
+            { "name":"Helper",  "gate":  "", "children": []}
+        ]},
+        { "name":"Type 2",  "gate": " TCRVa24-Ja18-" , "children": [
+            {   "name":"CD94+",   "gate":    "CD94+", "children": []},
+            {   "name":"CD94-",   "gate":    "CD94-", "children": []},
+        {  "name":"Helper" ,     "gate":   "", "children": []} ]}
+    ]},
+    { "name":"T",   "gate": "CD34-CD45+CD3+CD14-CD33-",  "children": [
+        { "name":"CD4", "gate":  "CD4+",  "children": [
+            { "name":"ICOS?PD-1",  "gate":  "ICOS?PD-1", "children": [
+                {  "name":"HLADR+CD38+", "gate":  "HLADR+CD38+", "children": []},
+                {  "name":"HLADR-CD38+",   "gate": "HLADR-CD38+", "children": []},
+                {  "name":"HLADR+CD38-",  "gate":  "HLADR+CD38-", "children": []},
+                {  "name":"HLADR-CD38-" , "gate":  "HLADR-CD38-", "children": []}
+            ] },
+            
+            {  "name":"naive memory",  "gate":  "CD197+CD45RA+", "children": [
+                {  "name":"early" ,     "gate":    "CD28+CD27+", "children": [] },
+                {  "name":"early-like",  "gate":   "CD28+CD27-", "children": [] },
+                {  "name":"intermediate", "gate":  "CD28-CD27+", "children": [] },
+                {  "name":"terminal",    "gate":   "CD28-CD27-", "children": []}
+            ] },
+            
+            {  "name":"central memory", "gate":   "CD197+CD45RA-", "children": [
+                { "name": "early" ,     "gate":    "CD28+CD27+", "children": [] },
+                {  "name":"early-like",    "gate": "CD28+CD27-", "children": [] },
+                {  "name":"intermediate", "gate":  "CD28-CD27+", "children": [] },
+                {  "name":"terminal",      "gate": "CD28-CD27-", "children": []}
+            ] },
+            
+            {  "name":"effector memory",   "gate": "CD197-CD45RA-", "children": [
+                {  "name":"early" ,        "gate": "CD28+CD27+", "children": [] },
+                {  "name":"early-like",    "gate": "CD28+CD27-", "children": [] },
+                {  "name":"intermediate",  "gate": "CD28-CD27+", "children": [] },
+                {  "name":"terminal",      "gate": "CD28-CD27-", "children": []}
+            ] },
+            
+            { "name":"Effector",  "gate": "CD197-CD45RA+", "children": []  },
+            { "name":"RA-terminal", "gate": "CD28-CD27-", "children": []   },
+            { "name":"CD161+", "gate": "CD161+", "children": [] },
+            { "name":"CD161-", "gate": "CD161-", "children": [] },
+            { "name":"CD57+", "gate": "CD57+", "children": [] },
+            { "name":"CD57-", "gate": "CD57-", "children": [] },
+            { "name":"CD85j+", "gate": "CD85j+", "children": [] },
+            { "name":"CD85j-", "gate": "CD85j-", "children": [] },
+            { "name":"Tfh+", "gate": "Tfh+", "children": []  },
+            { "name":"Tfr+ ", "gate": "Tfr+", "children": []  },
+            { "name":"Th1+", "gate": "Th1+", "children": []  },
+            { "name":"Th2+", "gate": "Th2+", "children": []  },
+            { "name":"Th9+", "gate": "Th9+" , "children": [] },
+            { "name":"Th17+", "gate": "Th17+", "children": [] },
+            { "name":"Th22+", "gate": "Th22+", "children": [] },
+            { "name":"Treg",  "gate": "CD39+", "children": [
+                {  "name":"CD161+CD45RA+",     "gate": "CD161+CD45RA+", "children": []},
+                {  "name":"CD161+CD45RA-",     "gate": "CD161+CD45RA-", "children": [] },
+                {  "name":"CD161-CD45RA+",     "gate": "CD161-CD45RA+", "children": [] },
+                {  "name":"CD161-CD45RA-",     "gate": "CD161-CD45RA-", "children": [] }
+            ] }
+        ] },
+        { "name":"CD8", "gate": "CD8+", "children": [
+            { "name":"ICOS?PD-1",   "gate": "ICOS?PD-1", "children": [
+                {  "name":"HLADR+CD38+",  "gate": "HLADR+CD38+", "children": []},
+                {  "name":"HLADR-CD38+",   "gate": "HLADR-CD38+", "children": []},
+                { "name": "HLADR+CD38-",   "gate": "HLADR+CD38-", "children": []},
+                {  "name":"HLADR-CD38-",  "gate": "HLADR-CD38-", "children": []}
+            ] },
+            
+            {  "name":"naive memory",   "gate": "CD197+CD45RA+", "children": [
+                {  "name":"early" ,        "gate": "CD28+CD27+", "children": [] },
+                {  "name":"early-like",    "gate": "CD28+CD27-", "children": [] },
+                {  "name":"intermediate",  "gate": "CD28-CD27+", "children": [] },
+                {  "name":"terminal",      "gate": "CD28-CD27-", "children": []}
+            ] },
+            
+            {  "name":"central memory",   "gate": "CD197+CD45RA-", "children": [
+                { "name": "early" ,        "gate": "CD28+CD27+" , "children": []},
+                {  "name":"early-like",    "gate": "CD28+CD27-", "children": [] },
+                {  "name":"intermediate",  "gate": "CD28-CD27+", "children": [] },
+                {  "name":"terminal",      "gate": "CD28-CD27-", "children": []}
+            ] },
+            
+            {  "name":"effector memory",   "gate": "CD197-CD45RA-", "children": [
+                {  "name":"early" ,        "gate": "CD28+CD27+" , "children": []},
+                {  "name":"early-like",    "gate": "CD28+CD27-", "children": [] },
+                {  "name":"intermediate",  "gate": "CD28-CD27+", "children": [] },
+                {  "name":"terminal",      "gate": "CD28-CD27-", "children": []}
+            ] },
+            
+            {  "name":"Effector",  "gate": "CD197-CD45RA+", "children": []  },
+            {  "name":"RA-terminal", "gate": "CD28-CD27-", "children": []   }
+        ] }
+    ] }
+] }
+
+
+

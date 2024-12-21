@@ -218,7 +218,7 @@ public struct ChartView<Overlay>: View where Overlay:View {
                 if xDim == nil {        errorMessage = "X axis dimension not in dataset"  }
                else if yDim == nil {    errorMessage = "Y axis dimension not in dataset"  }
                else {
-                    print("Creating chart for \(population.name)")
+                    debug("Creating chart for \(population.name)")
                     chartQuery = .histogram2D(core.histogram2D(
                         HistogramRequest(populationRequest, .init(xAxis.dim, yAxis.dim), chartDef: config)))
                     chartDims = .init(xDim, yDim)
