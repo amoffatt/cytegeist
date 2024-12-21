@@ -233,9 +233,8 @@ struct SampleList: View {
 //                    Buttons.toolbar("Dictionary", Icon("pencil")) {      experiment.buildVaribleKeyDictionary()    }
                     Buttons.toolbar("Dictionary", Icon("pencil")) {   fileImporterInfo?.type = .Workspace   }
 //                    Buttons.toolbar("Clear", Icon("delete.left")) { doClear() }
-                  Buttons.toolbar("XML", Icon("cloud")) {
-                        print(experiment.xml())
-                    }
+                    Buttons.toolbar("XML", Icon("cloud")) {        print(experiment.xml())   }
+                    Buttons.toolbar("Lymphs", Icon("triangle.fill")) {    print(experiment.readLymphs())   }
                 } }
 
         }
