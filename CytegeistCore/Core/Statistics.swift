@@ -25,8 +25,3 @@ public extension HistogramData<X> {
     
     
 }
-public extension URL {
-    var isDirectory: Bool {
-        (try? resourceValues(forKeys: [.isDirectoryKey]))?.isDirectory == true
-    }
-    }

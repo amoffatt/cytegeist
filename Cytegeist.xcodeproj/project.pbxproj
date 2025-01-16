@@ -28,6 +28,11 @@
 		B65D82AF2C44BE7100E4F0A2 /* ImmersiveView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B65D82AE2C44BE7100E4F0A2 /* ImmersiveView.swift */; };
 		B65D82B12C44BE7200E4F0A2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B65D82B02C44BE7200E4F0A2 /* Assets.xcassets */; };
 		B65D82B42C44BE7200E4F0A2 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B65D82B32C44BE7200E4F0A2 /* Preview Assets.xcassets */; };
+		B6628C192D38838A00FFA38A /* Lymphocytes.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6628C182D38838A00FFA38A /* Lymphocytes.swift */; };
+		B66FBA492D0ABD8E008D797E /* AttributeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B66FBA472D0ABD8E008D797E /* AttributeStore.swift */; };
+		B66FBA4A2D0ABD8E008D797E /* TreeNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = B66FBA482D0ABD8E008D797E /* TreeNode.swift */; };
+		B66FBA4D2D0ABE9F008D797E /* CGTableDef.swift in Sources */ = {isa = PBXBuildFile; fileRef = B66FBA4B2D0ABE9F008D797E /* CGTableDef.swift */; };
+		B66FBA4E2D0ABE9F008D797E /* TableBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = B66FBA4C2D0ABE9F008D797E /* TableBuilder.swift */; };
 		B68529692C74DBB500EF9EF4 /* ComputeCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = B68529682C74DBB500EF9EF4 /* ComputeCache.swift */; };
 		B6902A1B2CA4BDC4004DBE33 /* AncestryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6902A1A2CA4BDC4004DBE33 /* AncestryView.swift */; };
 		B691FCE42CA2913000B0CFC9 /* Chart3DView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B691FCDC2CA28B1B00B0CFC9 /* Chart3DView.swift */; };
@@ -86,20 +91,16 @@
 		B6C9A4A52C7680EA00DB6786 /* Cytometer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4722C75D04900DB6786 /* Cytometer.swift */; };
 		B6C9A4AB2C7689A000DB6786 /* FileInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4AA2C7689A000DB6786 /* FileInfo.swift */; };
 		B6C9A4AE2C76A77800DB6786 /* DateUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4AD2C76A77800DB6786 /* DateUtil.swift */; };
-		B6C9A4B02C76E2CD00DB6786 /* FCS.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4AF2C76E2CD00DB6786 /* FCS.swift */; };
 		B6C9A4B22C76F13A00DB6786 /* TableUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4B12C76F13A00DB6786 /* TableUtil.swift */; };
 		B6C9A4B42C77CA5400DB6786 /* ChartDefs.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4B32C77CA5400DB6786 /* ChartDefs.swift */; };
-		B6C9A4B62C77D57500DB6786 /* FJGatingExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4B52C77D57500DB6786 /* FJGatingExtensions.swift */; };
 		B6C9A4B82C77D9AA00DB6786 /* ChartAxisView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4B72C77D9AA00DB6786 /* ChartAxisView.swift */; };
 		B6C9A4BA2C77DB3700DB6786 /* AxisNormalizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4B92C77DB3700DB6786 /* AxisNormalizer.swift */; };
 		DC05A3D12C798EC900C08BBF /* Smoothing.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC05A3D02C798EC900C08BBF /* Smoothing.swift */; };
 		DC23F02F2C7D3C0B002FCDC0 /* Gate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A4692C75D04800DB6786 /* Gate.swift */; };
 		DC2473682C9A743A00D2DCA0 /* Statistic.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC2473662C9A72A700D2DCA0 /* Statistic.swift */; };
-		DC2473722C9A7CDD00D2DCA0 /* TreeNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6C9A48D2C75D24B00DB6786 /* TreeNode.swift */; };
 		DC2473752C9B81E000D2DCA0 /* PairCharts.swift in Sources */ = {isa = PBXBuildFile; fileRef = B68529702C74DC1100EF9EF4 /* PairCharts.swift */; };
 		DC2473772C9CB6CE00D2DCA0 /* Statistics.swift in Sources */ = {isa = PBXBuildFile; fileRef = B69001CE2C88CED50083C743 /* Statistics.swift */; };
 		DC6F42FB2C83F7BD00288EB8 /* TabBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC6F42FA2C83F7BD00288EB8 /* TabBar.swift */; };
-		DC861C7C2C8632F000D7C3FB /* CGTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC861C7B2C8632F000D7C3FB /* CGTableView.swift */; };
 		DC861C822C868D8700D7C3FB /* ModelList.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC861C812C868D8700D7C3FB /* ModelList.swift */; };
 		DC87EDCC2CCD91EC00C1D782 /* Batching.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC87EDCB2CCD91EC00C1D782 /* Batching.swift */; };
 		DC87EDD02CD02C5D00C1D782 /* FRExperiment.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC87EDCF2CD02C5D00C1D782 /* FRExperiment.swift */; };
@@ -255,6 +256,11 @@
 		B65D82B02C44BE7200E4F0A2 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B65D82B32C44BE7200E4F0A2 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		B65D82B52C44BE7200E4F0A2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		B6628C182D38838A00FFA38A /* Lymphocytes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Lymphocytes.swift; sourceTree = "<group>"; };
+		B66FBA472D0ABD8E008D797E /* AttributeStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttributeStore.swift; sourceTree = "<group>"; };
+		B66FBA482D0ABD8E008D797E /* TreeNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TreeNode.swift; sourceTree = "<group>"; };
+		B66FBA4B2D0ABE9F008D797E /* CGTableDef.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGTableDef.swift; sourceTree = "<group>"; };
+		B66FBA4C2D0ABE9F008D797E /* TableBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableBuilder.swift; sourceTree = "<group>"; };
 		B68529682C74DBB500EF9EF4 /* ComputeCache.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ComputeCache.swift; sourceTree = "<group>"; };
 		B685296A2C74DBD700EF9EF4 /* Colormaps.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Colormaps.swift; sourceTree = "<group>"; };
 		B685296B2C74DBD700EF9EF4 /* GraphicsUtil.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GraphicsUtil.swift; sourceTree = "<group>"; };
@@ -303,7 +309,6 @@
 		B6C9A4722C75D04900DB6786 /* Cytometer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Cytometer.swift; sourceTree = "<group>"; };
 		B6C9A4842C75D09A00DB6786 /* SettingsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		B6C9A4852C75D09A00DB6786 /* ProtoStartupScreen.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProtoStartupScreen.swift; sourceTree = "<group>"; };
-		B6C9A48D2C75D24B00DB6786 /* TreeNode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TreeNode.swift; sourceTree = "<group>"; };
 		B6C9A4902C76723500DB6786 /* CodableUtil.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodableUtil.swift; sourceTree = "<group>"; };
 		B6C9A4922C76729000DB6786 /* InputUtil.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputUtil.swift; sourceTree = "<group>"; };
 		B6C9A4942C76736100DB6786 /* FormattingUtil.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormattingUtil.swift; sourceTree = "<group>"; };
@@ -311,16 +316,13 @@
 		B6C9A4A62C76814F00DB6786 /* SaveOpenView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SaveOpenView.swift; sourceTree = "<group>"; };
 		B6C9A4AA2C7689A000DB6786 /* FileInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileInfo.swift; sourceTree = "<group>"; };
 		B6C9A4AD2C76A77800DB6786 /* DateUtil.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateUtil.swift; sourceTree = "<group>"; };
-		B6C9A4AF2C76E2CD00DB6786 /* FCS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FCS.swift; sourceTree = "<group>"; };
 		B6C9A4B12C76F13A00DB6786 /* TableUtil.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableUtil.swift; sourceTree = "<group>"; };
 		B6C9A4B32C77CA5400DB6786 /* ChartDefs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartDefs.swift; sourceTree = "<group>"; };
-		B6C9A4B52C77D57500DB6786 /* FJGatingExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FJGatingExtensions.swift; sourceTree = "<group>"; };
 		B6C9A4B72C77D9AA00DB6786 /* ChartAxisView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartAxisView.swift; sourceTree = "<group>"; };
 		B6C9A4B92C77DB3700DB6786 /* AxisNormalizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AxisNormalizer.swift; sourceTree = "<group>"; };
 		DC05A3D02C798EC900C08BBF /* Smoothing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Smoothing.swift; sourceTree = "<group>"; };
 		DC2473662C9A72A700D2DCA0 /* Statistic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Statistic.swift; sourceTree = "<group>"; };
 		DC6F42FA2C83F7BD00288EB8 /* TabBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabBar.swift; sourceTree = "<group>"; };
-		DC861C7B2C8632F000D7C3FB /* CGTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGTableView.swift; sourceTree = "<group>"; };
 		DC861C812C868D8700D7C3FB /* ModelList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelList.swift; sourceTree = "<group>"; };
 		DC87EDCB2CCD91EC00C1D782 /* Batching.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Batching.swift; sourceTree = "<group>"; };
 		DC87EDCF2CD02C5D00C1D782 /* FRExperiment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FRExperiment.swift; sourceTree = "<group>"; };
@@ -403,7 +405,6 @@
 				B610A5792C542BB50081C517 /* DataBufferReader.swift */,
 				B63EEE912C569CB300E465C9 /* SampleRef.swift */,
 				B63EEE932C569D7300E465C9 /* Histogram.swift */,
-				B6C9A4AF2C76E2CD00DB6786 /* FCS.swift */,
 				B6C9A4B92C77DB3700DB6786 /* AxisNormalizer.swift */,
 			);
 			path = Data;
@@ -412,6 +413,8 @@
 		B610A5732C54269A0081C517 /* Util */ = {
 			isa = PBXGroup;
 			children = (
+				B66FBA472D0ABD8E008D797E /* AttributeStore.swift */,
+				B66FBA482D0ABD8E008D797E /* TreeNode.swift */,
 				B691FCE72CA29F4E00B0CFC9 /* RealityKitUtil.swift */,
 				B6C9A4AA2C7689A000DB6786 /* FileInfo.swift */,
 				B685296A2C74DBD700EF9EF4 /* Colormaps.swift */,
@@ -541,6 +544,7 @@
 				B65D82B02C44BE7200E4F0A2 /* Assets.xcassets */,
 				B65D82B52C44BE7200E4F0A2 /* Info.plist */,
 				B65D82B22C44BE7200E4F0A2 /* Preview Content */,
+				B6628C182D38838A00FFA38A /* Lymphocytes.swift */,
 			);
 			path = CytegeistApp;
 			sourceTree = "<group>";
@@ -637,7 +641,8 @@
 		B6C9A44F2C75D01300DB6786 /* Tables - Layouts */ = {
 			isa = PBXGroup;
 			children = (
-				DC861C7B2C8632F000D7C3FB /* CGTableView.swift */,
+				B66FBA4B2D0ABE9F008D797E /* CGTableDef.swift */,
+				B66FBA4C2D0ABE9F008D797E /* TableBuilder.swift */,
 				B6C9A44D2C75D01300DB6786 /* CGLayoutView.swift */,
 				B6C9A49A2C767FAF00DB6786 /* CGLayout.swift */,
 				B6C9A44E2C75D01300DB6786 /* LayoutItemViews.swift */,
@@ -667,11 +672,9 @@
 			isa = PBXGroup;
 			children = (
 				B6C9A4722C75D04900DB6786 /* Cytometer.swift */,
-				B6C9A48D2C75D24B00DB6786 /* TreeNode.swift */,
 				B6C9A46E2C75D04800DB6786 /* Matrix.swift */,
 				B6C9A4682C75D04800DB6786 /* FJWorkspaceReader.swift */,
 				B6C9A46C2C75D04800DB6786 /* FJChartDefExtensions.swift */,
-				B6C9A4B52C77D57500DB6786 /* FJGatingExtensions.swift */,
 			);
 			path = FJWorkspaces;
 			sourceTree = "<group>";
@@ -1019,7 +1022,6 @@
 				B63EEE8D2C5624C000E465C9 /* ChartView.swift in Sources */,
 				B63EEE922C569CB300E465C9 /* SampleRef.swift in Sources */,
 				DCA66B752C81047200F51C70 /* GatingViews.swift in Sources */,
-				B6C9A4B02C76E2CD00DB6786 /* FCS.swift in Sources */,
 				DC2473772C9CB6CE00D2DCA0 /* Statistics.swift in Sources */,
 				B64173922C58A89A001AA2F4 /* CoreTestUtil.swift in Sources */,
 				DC2473682C9A743A00D2DCA0 /* Statistic.swift in Sources */,
@@ -1052,17 +1054,18 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DC861C7C2C8632F000D7C3FB /* CGTableView.swift in Sources */,
 				B6C9A49B2C767FAF00DB6786 /* CGLayout.swift in Sources */,
 				B6C9A4622C75D01300DB6786 /* ExperimentView.swift in Sources */,
 				DC87EDD02CD02C5D00C1D782 /* FRExperiment.swift in Sources */,
 				B6C9A45C2C75D01300DB6786 /* LayoutItemViews.swift in Sources */,
+				B66FBA4D2D0ABE9F008D797E /* CGTableDef.swift in Sources */,
+				B66FBA4E2D0ABE9F008D797E /* TableBuilder.swift in Sources */,
 				B6C9A45B2C75D01300DB6786 /* CGLayoutView.swift in Sources */,
 				B6C9A49C2C7680EA00DB6786 /* FocusedValues+Experiment.swift in Sources */,
 				B6C9A49E2C7680EA00DB6786 /* Experiment.swift in Sources */,
 				B6C9A4A12C7680EA00DB6786 /* FJChartDefExtensions.swift in Sources */,
 				DC8D99692CB88A12009F1D07 /* SampleInspectorView.swift in Sources */,
-				B6C9A4B62C77D57500DB6786 /* FJGatingExtensions.swift in Sources */,
+				B6628C192D38838A00FFA38A /* Lymphocytes.swift in Sources */,
 				B6C9A4A32C7680EA00DB6786 /* Matrix.swift in Sources */,
 				B6C9A4A52C7680EA00DB6786 /* Cytometer.swift in Sources */,
 				B6C9A4972C7679BF00DB6786 /* FJWorkspaceReader.swift in Sources */,
@@ -1072,7 +1075,6 @@
 				B6C9A4602C75D01300DB6786 /* ExperimentHistoryOutline.swift in Sources */,
 				B65D82AB2C44BE7100E4F0A2 /* CytegeistApp.swift in Sources */,
 				B6C9A4652C75D01300DB6786 /* SampleList.swift in Sources */,
-				DC2473722C9A7CDD00D2DCA0 /* TreeNode.swift in Sources */,
 				B6C9A4632C75D01300DB6786 /* ReportModePicker.swift in Sources */,
 				B6C9A45E2C75D01300DB6786 /* SampleListModePicker.swift in Sources */,
 				DCEE32122CD8105000A2BEAE /* Groups.swift in Sources */,
@@ -1109,6 +1111,8 @@
 				DC6F42FB2C83F7BD00288EB8 /* TabBar.swift in Sources */,
 				B6C9A4AE2C76A77800DB6786 /* DateUtil.swift in Sources */,
 				B6C9A4082C75A46800DB6786 /* StringUtil.swift in Sources */,
+				B66FBA492D0ABD8E008D797E /* AttributeStore.swift in Sources */,
+				B66FBA4A2D0ABD8E008D797E /* TreeNode.swift in Sources */,
 				B6C9A4092C75A46800DB6786 /* ThreadUtil.swift in Sources */,
 				B6C9A4932C76729000DB6786 /* InputUtil.swift in Sources */,
 				B6C9A40A2C75A46800DB6786 /* MathUtil.swift in Sources */,
